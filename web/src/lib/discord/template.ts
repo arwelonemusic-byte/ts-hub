@@ -32,6 +32,8 @@ export interface PostGame {
     tags: string[];
     /** «За кого» / «Против кого» from the briefing. */
     sides: { for?: string; against?: string } | null;
+    /** The briefing's sections, as authored (plain text: blank lines split paragraphs, "- " lines are list items). */
+    briefing: { title: string; body: string }[];
     /** The cover (title printed on it), null when the mission has none. */
     coverUrl: string | null;
     workshopUrl: string;
@@ -65,15 +67,47 @@ const GREY = 0x2e3439;
  * @everyone, @here and All Roles» in #анонсы.
  */
 
-/** The message text: what and when, the sides, the pings. */
+/** Text from the catalogue shown as typed: Discord's markdown characters escaped. */
+const plain = (s: string) => s.replace(/([\\*_~`|<>[\]])/g, "\\$1").replace(/^([#>-])/, "\\$1");
+
+/** About as much briefing as the teaser shows; a longer first paragraph is cut at a word. */
+const TEASER_MAX = 600;
+
+/**
+ * The briefing's first paragraph (usually the start of «Ситуация»), ending in «…» to lead to the full briefing.
+ * List items don't count as a paragraph. null when the briefing has no text.
+ */
+function teaser(sections: PostGame["mission"]["briefing"]): string | null {
+  for (const s of sections) {
+    for (const para of s.body.split(/\n\s*\n/)) {
+      const lines = para.split("\n").map((l) => l.trim()).filter(Boolean);
+      if (!lines.length || lines.every((l) => l.startsWith("- "))) continue;
+      let text = lines.filter((l) => !l.startsWith("- ")).join(" ").replace(/\s+/g, " ");
+      if (text.length > TEASER_MAX) text = text.slice(0, text.lastIndexOf(" ", TEASER_MAX) > 0 ? text.lastIndexOf(" ", TEASER_MAX) : TEASER_MAX);
+      return `${text.replace(/[\s.,;:!?…—-]+$/, "")}…`;
+    }
+  }
+  return null;
+}
+
+/**
+ * The message text: what and when, the sides, the briefing's start with a link to the rest, the pings. It ends with
+ * an invisible line (Discord drops trailing blank lines) so the cover sits a little below the text.
+ */
 function header(g: PostGame, unix: number): string {
   const sides = g.mission.sides;
-  const sideLines = [sides?.for && `**За кого:** ${sides.for}`, sides?.against && `**Против кого:** ${sides.against}`].filter(Boolean);
+  const forSide = sides?.for?.trim();
+  const against = sides?.against?.trim();
+  const sideLines = [forSide && `**За кого:** ${plain(forSide)}`, against && `**Против кого:** ${plain(against)}`].filter(Boolean);
+  const intro = teaser(g.mission.briefing);
   return [
-    `# Что | Operation ${g.mission.name}`,
+    `# Что | Operation ${plain(g.mission.name)}`,
     `# Когда | <t:${unix}:F>`,
     ...(sideLines.length ? ["", ...sideLines] : []),
+    // <url> in a masked link keeps Discord from adding its own preview card for the hub page.
+    ...(intro ? ["", plain(intro), `[Полный брифинг](<${g.url}#briefing>)`] : []),
     ...(g.pingRoles.length ? ["", g.pingRoles.map((id) => `<@&${id}>`).join(" ")] : []),
+    "\u200b",
   ].join("\n");
 }
 

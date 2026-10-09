@@ -48,6 +48,7 @@ function missionOf(m: Mission): PostGame["mission"] {
     authors: m.authors,
     tags: m.tags,
     sides: m.briefing?.sides ?? null,
+    briefing: m.briefing?.sections ?? [],
     coverUrl: absolute(m.coverUrl),
     workshopUrl: workshopUrl(m),
   };

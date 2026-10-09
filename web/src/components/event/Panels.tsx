@@ -141,7 +141,8 @@ function briefingText(b: Briefing, t: T): string {
 
 export function BriefingPanel({ b, t }: { b: Briefing; t: T }) {
   return (
-    <section className="flex flex-col gap-7 rounded-xl bg-surface p-6 md:p-8">
+    // id: the Discord announcement's «Полный брифинг» links here (lib/discord/template.ts).
+    <section id="briefing" className="flex scroll-mt-24 flex-col gap-7 rounded-xl bg-surface p-6 md:p-8 lg:scroll-mt-[72px]">
       <div className="flex items-baseline justify-between">
         <h2 className="type-heading-l text-fg">{t("briefing.title")}</h2>
         <CopyButton text={briefingText(b, t)} label={t("briefing.copy")} copiedLabel={t("briefing.copied")} />
