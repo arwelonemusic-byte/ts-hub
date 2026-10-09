@@ -42,10 +42,10 @@ function fromRow(r: Record<string, unknown>): PlanRecord {
   };
 }
 
-/** A mission's hub plans. */
+/** A mission's hub plans, without the ones an admin hid. */
 export async function listPlanRecords(where: { missionId: string }): Promise<PlanRecord[]> {
   const db = await getDb();
-  return (await db.query("SELECT * FROM plans WHERE mission_id = $1 ORDER BY created_at", [where.missionId])).map(fromRow);
+  return (await db.query("SELECT * FROM plans WHERE mission_id = $1 AND hidden_at IS NULL ORDER BY created_at", [where.missionId])).map(fromRow);
 }
 
 export async function getPlanRecord(id: string): Promise<PlanRecord | null> {
@@ -73,4 +73,9 @@ export async function insertPlanRecord(r: PlanRecord): Promise<PlanRecord> {
      r.seed?.code ?? null, r.seed?.author ?? null, r.seed?.createdAt ?? null, r.createdAt],
   );
   return r;
+}
+
+/** Hides a hub plan from its mission page; the row (and its versions in the planner) stay. */
+export async function hidePlanRecord(id: string, by: string | null): Promise<void> {
+  await (await getDb()).query("UPDATE plans SET hidden_at = NOW(), hidden_by = $2 WHERE id = $1", [id, by]);
 }

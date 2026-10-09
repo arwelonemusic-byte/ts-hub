@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { BriefingPanel, isOwnPlan, MissionPanel, PlanRow } from "@/components/event/Panels";
+import { DeletePlanButton } from "@/components/event/DeletePlanButton";
 import { MissionMenu } from "@/components/mission/MissionActions";
 import { MissionSlotsPanel } from "@/components/mission/MissionSlotsPanel";
 import { ScheduleButton } from "@/components/schedule/Schedule";
@@ -54,7 +55,7 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
           <div className="flex min-w-0 flex-1 flex-col gap-4">
             {mission.briefing && <BriefingPanel b={mission.briefing} t={t} />}
             <Games games={games} locale={locale} t={t} />
-            <Plans missionId={mission.id} history={history} viewerId={viewer?.discordId} t={t} />
+            <Plans missionId={mission.id} history={history} viewerId={viewer?.discordId} isAdmin={isAdmin} t={t} />
           </div>
           <aside className="flex shrink-0 flex-col gap-4 lg:w-[360px]">
             <MissionPanel mission={mission} history={history} locale={locale} t={t} onMissionPage />
@@ -244,15 +245,22 @@ function PlayedRow({ ev, locale, t }: { ev: PastEvent; locale: Locale; t: T }) {
   );
 }
 
-/** Everyone's plans for the mission, the ones drawn for its games included. The viewer continues their own from here. */
-function Plans({ missionId, history, viewerId, t }: { missionId: string; history: MissionHistory; viewerId?: string; t: T }) {
+/**
+ * Everyone's plans for the mission, the ones drawn for its games included. The viewer continues their own from
+ * here; an admin can delete a drawn plan (a played game's plan stays: it's what the game used).
+ */
+function Plans({ missionId, history, viewerId, isAdmin, t }: { missionId: string; history: MissionHistory; viewerId?: string; isAdmin: boolean; t: T }) {
   return (
     <section className="flex flex-col gap-4 rounded-xl bg-surface p-6">
       <h2 className="type-heading-m text-fg">{t("missionPage.plans")}</h2>
       {history.plans.length ? (
         <div className="flex flex-col gap-2.5">
           {history.plans.map((p) => (
-            <PlanRow key={p.id ?? p.code} plan={p} missionId={missionId} t={t} own={isOwnPlan(p, viewerId)} />
+            <PlanRow key={p.id ?? p.code} plan={p} missionId={missionId} t={t} own={isOwnPlan(p, viewerId)}>
+              {isAdmin && p.id && (
+                <DeletePlanButton planId={p.id} label={t("plan.delete")} confirmText={t("plan.deleteConfirm", { code: p.code, author: p.author })} />
+              )}
+            </PlanRow>
           ))}
         </div>
       ) : (

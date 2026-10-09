@@ -7,6 +7,7 @@ import { playerIdOf } from "../players";
 import { getViewer } from "../viewer";
 import { canAttachPlan, canDetachPlan } from "./index";
 import { fetchPlan } from "./planner";
+import { getPlanRecord, hidePlanRecord } from "./store";
 
 export type AttachState = { error: "invalid" | "notFound" | "wrongMap" | "forbidden" | "taken"; code?: string } | null;
 
@@ -48,4 +49,17 @@ export async function detachPlan(form: FormData): Promise<void> {
     [ev.id],
   );
   revalidatePath(`/events/${ev.id}`);
+}
+
+/**
+ * «Удалить план» (admin) on a mission page: a plan drawn from it (junk, vandalism) leaves the page. Only
+ * hidden (`plans.hidden_at`): the row stays in the database (user decision 2026-10-09). Plans of played
+ * games aren't hub records and stay: they're what the game used.
+ */
+export async function deleteMissionPlan(form: FormData): Promise<void> {
+  const viewer = await getViewer();
+  const plan = await getPlanRecord(String(form.get("plan") ?? ""));
+  if (!viewer?.isAdmin || !plan) return;
+  await hidePlanRecord(plan.id, await playerIdOf(viewer));
+  revalidatePath(`/missions/${plan.missionId}`);
 }
