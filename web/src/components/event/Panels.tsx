@@ -223,12 +223,15 @@ export function PlanRow({
  */
 export function PlanPanel({
   ev,
+  embedUrl,
   signedIn,
   canAttach,
   canDetach,
   t,
 }: {
   ev: UpcomingEvent;
+  /** The attached plan in the planner's read-only map (planner app/embed). */
+  embedUrl: string | null;
   signedIn: boolean;
   /** The game has no plan yet, or the viewer attached it. */
   canAttach: boolean;
@@ -254,6 +257,16 @@ export function PlanPanel({
         <PlanRow plan={{ ...attached, author: t("plan.attachedBy", { name: attached.author }) }} missionId={ev.mission.id} t={t} showGame={false}>
           {canDetach && <DetachButton eventId={ev.id} label={t("plan.detach")} confirmText={t("plan.detachConfirm")} />}
         </PlanRow>
+      )}
+      {attached && embedUrl && (
+        <iframe
+          // Keyed by code: a replaced plan reloads the map.
+          key={attached.code}
+          src={embedUrl}
+          title={t("plan.mapTitle", { code: attached.code })}
+          loading="lazy"
+          className="aspect-[16/10] w-full rounded-lg bg-inset"
+        />
       )}
       {(!attached || own || !signedIn) && (
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:gap-6">

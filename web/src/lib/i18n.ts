@@ -239,6 +239,7 @@ const RU: Dict = {
   "plan.replace": "Заменить план",
   "plan.replaceConfirm": "Заменить прикреплённый план новым?",
   "plan.attachedBy": "прикрепил {name}",
+  "plan.mapTitle": "План {code} на карте",
   "plan.detach": "Открепить",
   "plan.detachConfirm": "Открепить план от этой игры?",
   "plan.error.invalid": "Код плана — 6 букв и цифр",

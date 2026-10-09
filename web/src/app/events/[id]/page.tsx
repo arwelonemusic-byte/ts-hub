@@ -21,6 +21,7 @@ import type { Locale, T } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
 import { replayUrl, workshopUrl } from "@/lib/links";
 import { canAttachPlan, canDetachPlan } from "@/lib/plans";
+import { plannerEmbedUrl } from "@/lib/plans/planner";
 import type { MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
 
@@ -96,7 +97,14 @@ function Upcoming({ ev, history, viewer, locale, t }: { ev: UpcomingEvent; histo
         content={
           <>
             {ev.mission.briefing && <BriefingPanel b={ev.mission.briefing} t={t} />}
-            <PlanPanel ev={ev} signedIn={!!viewer} canAttach={canAttachPlan(viewer, ev)} canDetach={canDetachPlan(viewer, ev)} t={t} />
+            <PlanPanel
+              ev={ev}
+              embedUrl={ev.plan ? plannerEmbedUrl({ missionId: ev.mission.id, mapKey: ev.mission.mapKey, code: ev.plan.code }) : null}
+              signedIn={!!viewer}
+              canAttach={canAttachPlan(viewer, ev)}
+              canDetach={canDetachPlan(viewer, ev)}
+              t={t}
+            />
           </>
         }
         aside={

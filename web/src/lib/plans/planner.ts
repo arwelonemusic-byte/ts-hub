@@ -53,6 +53,12 @@ export async function fetchPlan(code: string): Promise<{ mapKey?: string } | nul
   }
 }
 
+/** The planner's read-only view of a plan (planner app/embed): the plan over the mission's Markers.layer, pan and zoom only. */
+export function plannerEmbedUrl(p: { missionId: string; mapKey: string; code: string }): string {
+  const q = new URLSearchParams({ plan: p.code, map: p.mapKey, mission: p.missionId });
+  return `${PLANS_PLANNER_URL}/embed?${q.toString()}`;
+}
+
 /** Planner hand-off link (planner lib/hubLink.ts). Without `key` it opens view-only. */
 export function plannerLink(p: { missionId: string; code?: string | null; key?: string | null; eventId?: string | null }): string {
   const q = new URLSearchParams({ mission: p.missionId });

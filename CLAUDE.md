@@ -119,7 +119,8 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
     «Прикрепить план». Anyone signed in can attach when the game has none; whoever attached it can paste a newer code
     («Заменить план»); an admin can «Открепить» it. It's stored on the event (`plan_code`, `plan_attached_by`,
     `plan_attached_at`; `lib/plans/actions.ts`). A pushed plan carries `mapKey`, and one drawn on another map is
-    refused. The game page shows only that plan; the mission's other plans are on the mission page. It's for people
+    refused. The game page shows only that plan, with the planner's read-only map of it below the row (an iframe of
+    `<planner>/embed`, `plannerEmbedUrl`); the mission's other plans are on the mission page. It's for people
     to look at: what the game really used comes from the replay's /syncplan stamp (`meta.planCode`), and a played
     game's `plan_code` is that.
   - **A mission plan** is started from a mission page («Нарисовать план», a form POST to `app/plan/open`): always a
