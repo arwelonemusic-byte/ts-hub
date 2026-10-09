@@ -99,6 +99,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   it, any time. Role names compare without case or spaces ("MachineGunner" = "Machine Gunner"). No progressive locks
   (the bot has none) and no reserving slots for friends (parked). Roles come from the session, so a new Discord role
   counts after the next login.
+- **Scheduled game pages stay live** (`components/event/LiveRefresh.tsx`): while the tab is visible it polls
+  `/api/events/<id>/version` every 5 s (an md5 of who's in which slot plus the attached plan, `getEventVersion`) and calls
+  `router.refresh()` when it changed. Taking a slot someone just took is refused anyway («Слот уже заняли»).
 - **Played games** (Sep 2026 on) come from `db/seed/played-events.json`: `py data/events/build_past_events.py <reports>`
   builds it from the replay-stats reports in ts-wrapped (numbers, roster, rankings, achievements) plus its `OPS` table
   (mission, scheduled time, plan, PL; one row per op), and `npm run db:seed -- --update` loads it. Add a row and re-run after

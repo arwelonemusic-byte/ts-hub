@@ -24,6 +24,7 @@ import { canAttachPlan, canDetachPlan } from "@/lib/plans";
 import { plannerEmbedUrl } from "@/lib/plans/planner";
 import { playerNames, slottingOpen, viewerSlot } from "@/lib/slots";
 import { LeaveSlotButton } from "@/components/event/SlotForms";
+import { LiveRefresh } from "@/components/event/LiveRefresh";
 import type { MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
 
@@ -33,10 +34,11 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
   const data = getHubData();
   const [ev, { locale, t }, viewer] = await Promise.all([data.getEvent(id, new Date()), getT(), getViewer()]);
   if (!ev) notFound();
-  const [history, players] = await Promise.all([
+  const [history, players, version] = await Promise.all([
     data.getMissionHistory(ev.mission.id),
     // Names for an admin's «Посадить» picker.
     ev.status === "upcoming" && viewer?.isAdmin ? playerNames() : null,
+    ev.status === "upcoming" ? data.getEventVersion(ev.id) : null,
   ]);
 
   return (
@@ -44,6 +46,7 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
       <AppHeader active="events" />
       <main className="relative flex flex-col items-center gap-6 overflow-clip px-4 pb-16 pt-6 md:px-8">
         <Backdrop coverUrl={ev.mission.coverUrl} />
+        {ev.status === "upcoming" && version && <LiveRefresh eventId={ev.id} version={version} />}
         {ev.status === "upcoming" ? (
           <Upcoming ev={ev} history={history} viewer={viewer} players={players} locale={locale} t={t} />
         ) : (

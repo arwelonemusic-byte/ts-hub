@@ -175,6 +175,17 @@ export const gamesData: HubData = {
     void now;
     return (await loadGames()).find((e) => e.id === id) ?? null;
   },
+  async getEventVersion(id) {
+    const db = await getDb();
+    const [row] = await db.query(
+      `SELECT md5(coalesce(e.plan_code, '') || '|' || coalesce(
+                (SELECT string_agg(s.position || ':' || coalesce(s.player_id::text, s.player_name, ''), ',' ORDER BY s.position)
+                 FROM event_slots s WHERE s.event_id = e.id), '')) AS v
+       FROM events e WHERE e.id = $1`,
+      [id],
+    );
+    return (row?.v as string | undefined) ?? null;
+  },
   async listBetween(from, to, now) {
     return listed(await loadGames(), now).filter((e) => {
       const t = new Date(e.startsAt).getTime();

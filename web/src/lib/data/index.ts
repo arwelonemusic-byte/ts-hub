@@ -12,6 +12,8 @@ export interface HubData {
   /** Played events, newest first. */
   listPast(): Promise<PastEvent[]>;
   getEvent(id: string, now: Date): Promise<HubEvent | null>;
+  /** A fingerprint of what changes on a game's page while people look at it (slots, attached plan); null = no such game. */
+  getEventVersion(id: string): Promise<string | null>;
   /** Every event (played or scheduled) starting in [from, to), soonest first. */
   listBetween(from: Date, to: Date, now: Date): Promise<HubEvent[]>;
   /** Start of the earliest and latest event on record — the feed's scroll limits. */
