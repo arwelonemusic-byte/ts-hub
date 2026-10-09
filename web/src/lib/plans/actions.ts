@@ -15,7 +15,8 @@ export async function attachPlan(_prev: AttachState, form: FormData): Promise<At
   const [viewer, ev] = await Promise.all([getViewer(), getHubData().getEvent(String(form.get("event") ?? ""), new Date())]);
   if (!viewer || !ev || ev.status !== "upcoming" || !canAttachPlan(viewer, ev)) return { error: "forbidden" };
 
-  const code = String(form.get("code") ?? "").trim().toUpperCase();
+  // The code alone, or the "/syncplan ABCDEF" line the planner copies after a push.
+  const code = String(form.get("code") ?? "").trim().replace(/^\/?syncplan\s+/i, "").toUpperCase();
   if (!/^[A-Z0-9]{6}$/.test(code)) return { error: "invalid", code };
   const plan = await fetchPlan(code);
   if (!plan) return { error: "notFound", code };

@@ -18,6 +18,13 @@ function errorText(state: AttachState, errors: AttachErrors): string | null {
   return state ? errors[state.error].replace("{code}", state.code ?? "") : null;
 }
 
+/** What the planner puts on the clipboard after a push is "/syncplan ABCDEF"; keep just the code. */
+const codeOnly = (text: string) =>
+  text
+    .replace(/^\s*\/?syncplan\s*/i, "")
+    .replace(/[^A-Za-z0-9]/g, "")
+    .slice(0, 6);
+
 /** Replacing or detaching the game's plan asks first. */
 function confirmFirst(text: string | undefined) {
   return (e: FormEvent) => {
@@ -47,7 +54,11 @@ export function AttachCodeForm({
         <input type="hidden" name="event" value={eventId} />
         <input
           name="code"
-          maxLength={6}
+          // No maxLength: it would cut a pasted "/syncplan ABCDEF" to "/SYNCP" before onChange sees it.
+          onChange={(e) => {
+            const v = codeOnly(e.currentTarget.value);
+            if (v !== e.currentTarget.value) e.currentTarget.value = v;
+          }}
           required
           // Checked before submit, so a malformed code never reaches the replace confirm.
           pattern="[A-Za-z0-9]{6}"
