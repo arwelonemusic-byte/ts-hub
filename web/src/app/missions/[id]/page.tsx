@@ -132,21 +132,22 @@ function Hero({
             <StatBox label={t("missionPage.players")} value={avgPlayers ?? "—"} />
             <StatBox label={t("missionPage.duration")} value={avgMin === null ? "—" : `${n > 1 ? "~" : ""}${duration(avgMin, locale)}`} />
           </div>
+          {/* For an admin, scheduling is the page's main action; for everyone else, the Workshop. */}
           <div className="flex flex-wrap gap-2">
-            <ButtonLink href={workshopUrl(mission)} external variant="primary" className="flex-1">
-              {t("missionPage.workshop")}
-              <Icon name="external-dark" />
-            </ButtonLink>
-            {/* Starts a new plan of the viewer's own (app/plan/open). A POST, so only a click creates one. */}
             {canSchedule && (
               <ScheduleButton
                 missions={[{ id: mission.id, name: mission.name, mapLabel: mission.mapLabel, coverUrl: mission.coverUrl }]}
                 initial={{ missionId: mission.id }}
                 locale={locale}
                 label={t("schedule.button")}
-                className={buttonClass("secondary", "m")}
+                className={`${buttonClass("primary", "m")} flex-1`}
               />
             )}
+            <ButtonLink href={workshopUrl(mission)} external variant={canSchedule ? "secondary" : "primary"} className={canSchedule ? "" : "flex-1"}>
+              {t("missionPage.workshop")}
+              <Icon name={canSchedule ? "external" : "external-dark"} />
+            </ButtonLink>
+            {/* Starts a new plan of the viewer's own (app/plan/open). A POST, so only a click creates one. */}
             {mission.planning !== false && (
               <form action="/plan/open" method="post" target="_blank">
                 <input type="hidden" name="mission" value={mission.id} />
