@@ -99,7 +99,7 @@ function Hero({ mission, games, canSchedule, locale, t }: { mission: Mission; ga
             {/* Starts a new plan of the viewer's own (app/plan/open). A POST, so only a click creates one. */}
             {canSchedule && (
               <ScheduleButton
-                missions={[{ id: mission.id, name: mission.name, mapLabel: mission.mapLabel }]}
+                missions={[{ id: mission.id, name: mission.name, mapLabel: mission.mapLabel, coverUrl: mission.coverUrl }]}
                 initial={{ missionId: mission.id }}
                 locale={locale}
                 label={t("schedule.button")}

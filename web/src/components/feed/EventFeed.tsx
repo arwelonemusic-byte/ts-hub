@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
 import type { FeedItem, FeedMeta, FeedMonth } from "@/lib/feed";
-import { dayRange, monthYear } from "@/lib/format";
+import { skipOpenSlot } from "@/lib/events/actions";
+import { dayRange, eventDay, monthYear, time } from "@/lib/format";
 import { makeT, plural, type Locale, type T } from "@/lib/i18n";
 import { addMonths, daysInMonth, monthOf, monthStart, mskDayKey, mskParts, weekStart, type MonthKey } from "@/lib/schedule";
 import { fieldsFor, ScheduleDialog, type MissionOption, type ScheduleInitial } from "../schedule/Schedule";
@@ -275,6 +276,16 @@ export function EventFeed({
     return map;
   }, [months]);
 
+  // An admin calls off an open slot: gone from the feed (and calendar) at once.
+  const skipSlot = useCallback(
+    async (iso: string) => {
+      if (!confirm(t("feed.open.skipConfirm", { when: `${eventDay(iso, locale)} · ${time(iso)}` }))) return;
+      if (!(await skipOpenSlot(iso))) return;
+      setMonths((ms) => ms.map((m) => ({ ...m, items: m.items.filter((i) => !(i.kind === "open" && i.startsAt === iso)) })));
+    },
+    [t, locale],
+  );
+
   const retryPrev = useCallback(() => void load("prev", undefined, true), [load]);
   const retryNext = useCallback(() => void load("next", undefined, true), [load]);
 
@@ -301,6 +312,7 @@ export function EventFeed({
                         locale={locale}
                         t={t}
                         onOpenSlot={missions ? (iso) => setScheduling(fieldsFor(iso)) : undefined}
+                        onSkipSlot={missions ? skipSlot : undefined}
                       />
                     </div>
                   ))}

@@ -16,6 +16,8 @@ export interface HubData {
   getEventVersion(id: string): Promise<string | null>;
   /** Every event (played or scheduled) starting in [from, to), soonest first. */
   listBetween(from: Date, to: Date, now: Date): Promise<HubEvent[]>;
+  /** Usual slots in [from, to) an admin called off (ISO starts), which the feed doesn't offer. */
+  listSkippedSlots(from: Date, to: Date): Promise<string[]>;
   /** Start of the earliest and latest event on record — the feed's scroll limits. */
   getRange(now: Date): Promise<{ first: Date; last: Date } | null>;
   /** The whole mission catalogue, in no particular order. */

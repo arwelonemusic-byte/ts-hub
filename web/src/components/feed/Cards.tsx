@@ -154,22 +154,25 @@ export function PlayedRow({ ev, locale, t }: { ev: Played; locale: Locale; t: T 
 }
 
 /**
- * Figma "Open slot" (13:347): a usual slot with no mission picked yet. An admin gets «Создать игру»
- * on the right on hover (always shown where there's no hover), which opens the schedule dialog.
+ * Figma "Open slot" (13:347): a usual slot with no mission picked yet. An admin gets «Отменить» (no
+ * game that day) and «Создать игру» (the schedule dialog) on the right on hover, always where there's
+ * no hover.
  */
-export function OpenSlot({ t, onSchedule }: { t: T; onSchedule?: () => void }) {
+export function OpenSlot({ t, onSchedule, onSkip }: { t: T; onSchedule?: () => void; onSkip?: () => void }) {
+  const reveal = "opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100";
   return (
     <div className="group flex h-[76px] min-w-0 flex-1 items-center gap-4 rounded-xl border border-dashed border-line-strong px-5 py-4">
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="type-label-m text-fg-label">{t("feed.open.title")}</span>
         <span className="truncate type-caption text-fg-tertiary">{t("feed.open.detail")}</span>
       </div>
+      {onSkip && (
+        <button type="button" onClick={onSkip} className={`${buttonClass("secondary", "s")} ${reveal}`}>
+          {t("feed.open.skip")}
+        </button>
+      )}
       {onSchedule && (
-        <button
-          type="button"
-          onClick={onSchedule}
-          className={`${buttonClass("primary", "s")} opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100`}
-        >
+        <button type="button" onClick={onSchedule} className={`${buttonClass("primary", "s")} ${reveal}`}>
           {t("feed.open.create")}
         </button>
       )}
@@ -177,23 +180,33 @@ export function OpenSlot({ t, onSchedule }: { t: T; onSchedule?: () => void }) {
   );
 }
 
-/** One feed row: date block + the card for its kind. `onOpenSlot` (admins) schedules into an open slot. */
+/** One feed row: date block + the card for its kind. Admins schedule into an open slot (`onOpenSlot`) or call it off (`onSkipSlot`). */
 export function FeedRow({
   item,
   nextId,
   locale,
   t,
   onOpenSlot,
+  onSkipSlot,
 }: {
   item: FeedItem;
   nextId: string | null;
   locale: Locale;
   t: T;
   onOpenSlot?: (startsAt: string) => void;
+  onSkipSlot?: (startsAt: string) => void;
 }) {
   const featured = item.kind === "upcoming" && item.id === nextId;
   let body: ReactNode;
-  if (item.kind === "open") body = <OpenSlot t={t} onSchedule={onOpenSlot && (() => onOpenSlot(item.startsAt))} />;
+  if (item.kind === "open") {
+    body = (
+      <OpenSlot
+        t={t}
+        onSchedule={onOpenSlot && (() => onOpenSlot(item.startsAt))}
+        onSkip={onSkipSlot && (() => onSkipSlot(item.startsAt))}
+      />
+    );
+  }
   else if (item.kind === "played") body = <PlayedRow ev={item} locale={locale} t={t} />;
   else body = featured ? <FeaturedCard ev={item} locale={locale} t={t} /> : <UpcomingCard ev={item} locale={locale} t={t} />;
   return (

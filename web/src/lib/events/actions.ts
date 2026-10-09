@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getHubData } from "../data";
 import { getDb } from "../db";
+import { playerIdOf } from "../players";
 import { fromMskFields, isUsualSlot, mskDayKey } from "../schedule";
 import { getViewer } from "../viewer";
 
@@ -44,6 +45,21 @@ export async function scheduleGame(_prev: ScheduleState, form: FormData): Promis
   revalidatePath("/events");
   revalidatePath(`/missions/${mission.id}`);
   redirect(`/events/${id}`);
+}
+
+/** «Отменить» on an open usual slot: no game then, so the feed stops offering it. True when done. */
+export async function skipOpenSlot(startsAt: string): Promise<boolean> {
+  const viewer = await getViewer();
+  if (!viewer?.isAdmin) return false;
+  const at = new Date(startsAt);
+  if (Number.isNaN(at.getTime()) || !isUsualSlot(at) || at.getTime() <= Date.now()) return false;
+  const player = await playerIdOf(viewer);
+  await (await getDb()).query(
+    "INSERT INTO skipped_slots (starts_at, skipped_by) VALUES ($1, $2) ON CONFLICT (starts_at) DO NOTHING",
+    [at.toISOString(), player],
+  );
+  revalidatePath("/events");
+  return true;
 }
 
 /** «Изменить время»: same game, same mission and slots, a new start. */

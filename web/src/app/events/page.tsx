@@ -22,7 +22,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
   // Admins schedule games from the feed: the missions for the dialog's picker.
   const missions = viewer?.isAdmin
     ? (await getHubData().listMissions())
-        .map((m) => ({ id: m.id, name: m.name, mapLabel: m.mapLabel }))
+        .map((m) => ({ id: m.id, name: m.name, mapLabel: m.mapLabel, coverUrl: m.coverUrl }))
         .sort((a, b) => a.name.localeCompare(b.name))
     : null;
 

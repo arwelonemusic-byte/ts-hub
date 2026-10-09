@@ -76,7 +76,10 @@ export async function getFeedMonths(from: MonthKey, to: MonthKey, meta: FeedMeta
   const now = new Date(meta.now);
   const start = monthStart(from);
   const end = monthStart(addMonths(to, 1));
-  const events = await getHubData().listBetween(start, end, now);
+  const [events, skipped] = await Promise.all([
+    getHubData().listBetween(start, end, now),
+    getHubData().listSkippedSlots(start, end).then((list) => new Set(list)),
+  ]);
 
   const items: FeedItem[] = events.map((e) =>
     e.status === "upcoming"
@@ -100,14 +103,14 @@ export async function getFeedMonths(from: MonthKey, to: MonthKey, meta: FeedMeta
         },
   );
 
-  // Future usual slots with nothing on that day, up to the feed's last month.
+  // Future usual slots with nothing on that day and not called off, up to the feed's last month.
   const taken = new Set(events.map((e) => mskDayKey(e.startsAt)));
   const openUntil = monthStart(addMonths(meta.last, 1));
   const openFrom = now > start ? now : start;
   const weeks = Math.ceil((Math.min(end.getTime(), openUntil.getTime()) - openFrom.getTime()) / (7 * 86_400_000)) + 1;
   if (weeks > 0) {
     for (const d of usualSlotsFrom(openFrom, weeks)) {
-      if (d >= end || d >= openUntil || taken.has(mskDayKey(d))) continue;
+      if (d >= end || d >= openUntil || taken.has(mskDayKey(d)) || skipped.has(d.toISOString())) continue;
       items.push({ kind: "open", startsAt: d.toISOString() });
     }
   }

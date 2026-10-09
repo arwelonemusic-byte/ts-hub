@@ -192,6 +192,14 @@ export const gamesData: HubData = {
       return t >= from.getTime() && t < to.getTime();
     });
   },
+  async listSkippedSlots(from, to) {
+    const db = await getDb();
+    const rows = (await db.query("SELECT starts_at FROM skipped_slots WHERE starts_at >= $1 AND starts_at < $2", [
+      from.toISOString(),
+      to.toISOString(),
+    ])) as { starts_at: Date | string }[];
+    return rows.map((r) => iso(r.starts_at));
+  },
   async getRange(now) {
     const times = listed(await loadGames(), now).map((e) => new Date(e.startsAt).getTime());
     if (!times.length) return null;

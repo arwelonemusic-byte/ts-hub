@@ -5,13 +5,14 @@ import { cancelGame, rescheduleGame, scheduleGame, type ScheduleState } from "@/
 import { time } from "@/lib/format";
 import { makeT, type Locale, type T } from "@/lib/i18n";
 import { mskDayKey } from "@/lib/schedule";
-import { buttonClass } from "../ui";
+import { buttonClass, Cover, Icon } from "../ui";
 
 /** A mission in the schedule dialog's picker. */
 export interface MissionOption {
   id: string;
   name: string;
   mapLabel: string;
+  coverUrl: string | null;
 }
 
 /** Prefill for the dialog: a mission, and/or an MSK date + time. */
@@ -27,7 +28,7 @@ export const fieldsFor = (iso: string): ScheduleInitial => ({ date: mskDayKey(is
 const FIELD =
   "h-11 w-full rounded-lg border border-line bg-page px-3 type-body-m text-fg outline-none [color-scheme:dark] focus:border-line-strong";
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+function Modal({ title, onClose, wide = false, children }: { title: string; onClose: () => void; wide?: boolean; children: ReactNode }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
@@ -38,7 +39,12 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div role="dialog" aria-modal="true" aria-label={title} className="flex w-full max-w-md flex-col gap-5 rounded-xl bg-surface p-6 shadow-floating ring-1 ring-line-strong">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className={`flex max-h-[92vh] w-full flex-col gap-5 rounded-xl bg-surface p-6 shadow-floating ring-1 ring-line-strong ${wide ? "max-w-3xl" : "max-w-md"}`}
+      >
         <h2 className="type-heading-m text-fg">{title}</h2>
         {children}
       </div>
@@ -68,7 +74,21 @@ function DateTime({ initial, t }: { initial: ScheduleInitial; t: T }) {
   );
 }
 
-function Actions({ submit, pending, onClose, state, t }: { submit: string; pending: boolean; onClose: () => void; state: ScheduleState; t: T }) {
+function Actions({
+  submit,
+  pending,
+  disabled = false,
+  onClose,
+  state,
+  t,
+}: {
+  submit: string;
+  pending: boolean;
+  disabled?: boolean;
+  onClose: () => void;
+  state: ScheduleState;
+  t: T;
+}) {
   return (
     <>
       {state && <p className="type-caption text-fg-danger">{t(`schedule.error.${state.error}`)}</p>}
@@ -76,7 +96,7 @@ function Actions({ submit, pending, onClose, state, t }: { submit: string; pendi
         <button type="button" onClick={onClose} className={buttonClass("secondary", "m")}>
           {t("schedule.cancel")}
         </button>
-        <button type="submit" disabled={pending} className={buttonClass("primary", "m")}>
+        <button type="submit" disabled={pending || disabled} className={buttonClass("primary", "m")}>
           {submit}
         </button>
       </div>
@@ -84,7 +104,10 @@ function Actions({ submit, pending, onClose, state, t }: { submit: string; pendi
   );
 }
 
-/** «Новая игра»: mission + MSK date and time. On success the action opens the new game's page. */
+/**
+ * «Новая игра»: MSK date and time, then the mission from a searchable grid of covers. On success
+ * the action opens the new game's page.
+ */
 export function ScheduleDialog({
   missions,
   initial,
@@ -98,23 +121,53 @@ export function ScheduleDialog({
 }) {
   const t = useMemo(() => makeT(locale), [locale]);
   const [state, action, pending] = useActionState(scheduleGame, null);
+  const [picked, setPicked] = useState(initial.missionId ?? "");
+  const [q, setQ] = useState("");
+  const shown = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    return s ? missions.filter((m) => `${m.name} ${m.mapLabel}`.toLowerCase().includes(s)) : missions;
+  }, [q, missions]);
   return (
-    <Modal title={t("schedule.title")} onClose={onClose}>
-      <form action={action} className="flex flex-col gap-4">
-        <Field label={t("schedule.mission")}>
-          <select name="mission" required defaultValue={initial.missionId ?? ""} className={FIELD}>
-            <option value="" disabled>
-              {t("schedule.missionPick")}
-            </option>
-            {missions.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name} · {m.mapLabel}
-              </option>
-            ))}
-          </select>
-        </Field>
+    <Modal title={t("schedule.title")} onClose={onClose} wide>
+      <form action={action} className="flex min-h-0 flex-col gap-4">
+        <input type="hidden" name="mission" value={picked} />
         <DateTime initial={initial} t={t} />
-        <Actions submit={t("schedule.submit")} pending={pending} onClose={onClose} state={state} t={t} />
+        {missions.length > 1 && (
+          <span className="relative flex items-center">
+            <Icon name="search" className="pointer-events-none absolute left-3" />
+            <input
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={t("schedule.search")}
+              aria-label={t("schedule.search")}
+              className="h-11 w-full rounded-lg border border-line bg-page pr-3 pl-9 type-body-m text-fg outline-none placeholder:text-fg-faint focus:border-line-strong"
+            />
+          </span>
+        )}
+        <div role="radiogroup" aria-label={t("schedule.mission")} className="grid min-h-0 grid-cols-2 content-start gap-3 overflow-y-auto p-0.5 sm:grid-cols-3">
+          {shown.map((m) => {
+            const on = picked === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => setPicked(m.id)}
+                className={`flex min-w-0 flex-col gap-2 rounded-lg p-2 text-left ${on ? "bg-accent-subtle ring-2 ring-accent" : "ring-1 ring-line hover:ring-line-strong"}`}
+              >
+                <Cover mission={m} sizes="240px" noCoverLabel={t("past.noCover")} rounded="rounded-md" />
+                <span className="flex min-w-0 flex-col px-0.5">
+                  <span className={`truncate type-label-s ${on ? "text-fg-accent" : "text-fg"}`}>{m.name}</span>
+                  <span className="truncate type-caption text-fg-tertiary">{m.mapLabel}</span>
+                </span>
+              </button>
+            );
+          })}
+          {shown.length === 0 && <p className="col-span-full py-6 text-center type-body-s text-fg-tertiary">{t("schedule.noMatch")}</p>}
+        </div>
+        <Actions submit={t("schedule.submit")} pending={pending} disabled={!picked} onClose={onClose} state={state} t={t} />
       </form>
     </Modal>
   );
