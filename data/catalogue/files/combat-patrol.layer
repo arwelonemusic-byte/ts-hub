@@ -1,0 +1,73 @@
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 4976.85 38.294 3334.3
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "COP ALFRED"
+         m_eMapMarkerIcon OBSERVATION_POST
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords -181.35 0.415 -133.6
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "1 PLT"
+        }
+       }
+      }
+      coords -175.35 -9.758 -31.4
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "2 PLT"
+        }
+       }
+      }
+      coords -813.45 2.59 -119.8
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "3 PLT"
+        }
+       }
+      }
+      coords 1170.15 6.752 284.8
+     }
+    }
+   }
+  }
+ }
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 4950 26.238 2324
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 1051.3 0 1277.1
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 1051.3 0 -1277.1
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -1051.3 0 -1277.1
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -1051.3 0 1277.1
+   }
+  }
+ }
+}

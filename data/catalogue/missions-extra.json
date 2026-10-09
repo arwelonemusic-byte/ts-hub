@@ -1,0 +1,15 @@
+[
+ {
+  "id": "metal-gambit",
+  "name": "Metal Gambit",
+  "mapKey": "merak",
+  "mapLabel": "Merak",
+  "coverUrl": "/covers/metal-gambit.jpg",
+  "authors": [{ "name": "VonScheer", "discordId": "228193670371868672" }],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AB7841BEEEDF4D1-MetalGambit",
+  "addonGuid": "6AB7841BEEEDF4D1",
+  "scenarioId": "{6AB7841BFB1DAE63}Missions/Metal_Gambit.conf",
+  "tags": [],
+  "markersLayer": "files/metal-gambit.layer"
+ }
+]

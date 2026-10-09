@@ -1,0 +1,154 @@
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 6720.825 144.143 8827.825
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Obj. Hornet"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 316.175 4.318 125.475
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Obj. Honeybee"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -940.225 -21.811 286.675
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Obj. Wasp"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -988.525 -39.546 650.675
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Start"
+        }
+       }
+      }
+      coords 1612.575 57.041 -1062.825
+     }
+    }
+   }
+  }
+ }
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 6512.2 148.875 8820
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 2230.9 0 1211.95
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 2230.9 0 -1211.95
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -2230.9 0 -1211.95
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -2230.9 0 1211.95
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 6865.6 147.281 8922.5
+  angles 0 17 0
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 155.2 0 79.9
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 155.2 0 -79.9
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -155.2 0 -79.9
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -155.2 0 79.9
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 5705.5 108.213 8969.5
+  angles 0 340 0
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 121 0 111.5
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 121 0 -111.5
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -121 0 -111.5
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -121 0 111.5
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 5642.8 104.469 9396.3
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 89.75 0 82.25
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 89.75 0 -82.25
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -89.75 0 -82.25
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -89.75 0 82.25
+   }
+  }
+ }
+}

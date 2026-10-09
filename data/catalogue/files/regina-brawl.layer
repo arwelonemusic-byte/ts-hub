@@ -1,0 +1,102 @@
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 7274.35 120.772 2547.55
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Зачистить лесопилку"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 31.95 18.259 -52.05
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Найти КШМ"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -103.45 16.455 -154.95
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Доставить КШМ"
+         m_eMapMarkerIcon OBJECTIVE_MARKER2
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords 301.55 -7.189 -473.75
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "1st Platoon"
+        }
+       }
+      }
+      coords -230.05 -27.524 680.75
+     }
+    }
+   }
+  }
+ }
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 7302.2 152.305 2656.2
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 375.1 0 671.95
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 375.1 0 -671.95
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -375.1 0 -671.95
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -375.1 0 671.95
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 7181.1 137.125 2377
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 68.15 0 47.75
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 68.15 0 -47.75
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -68.15 0 -47.75
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -68.15 0 47.75
+   }
+  }
+ }
+}

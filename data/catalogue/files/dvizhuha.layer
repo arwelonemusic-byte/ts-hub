@@ -1,0 +1,123 @@
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 5471.817 156.826 4173.583
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords -245.617 3.803 233.617
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 363.183 2.58 484.917
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier MOTORIZED
+         m_eMapMarkerType2Modifier MOTORIZED
+        }
+       }
+      }
+      coords 45.283 2.58 533.017
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "HOSPITAL"
+         m_eMapMarkerIcon DESTROY
+        }
+       }
+      }
+      coords 64.583 2.58 368.517
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "LEBOWSKI"
+         m_eMapMarkerIcon OBSERVATION_POST
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords 578.383 -9.736 -1134.483
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "BIG"
+         m_eMapMarkerIcon OBSERVATION_POST
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords -805.817 -1.807 -485.583
+     }
+    }
+   }
+  }
+ }
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 5495.6 172.582 3817.1
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 690.15 0 1097.45
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 690.15 0 -1097.45
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -690.15 0 -1097.45
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -690.15 0 1097.45
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 5534.4 159.406 4542.6
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 62.2 0 50.85
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 62.2 0 -50.85
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -62.2 0 -50.85
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -62.2 0 50.85
+   }
+  }
+ }
+}

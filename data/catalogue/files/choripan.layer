@@ -1,0 +1,240 @@
+$grp PolylineShapeEntity {
+ {
+  components {
+   TS_MapOverlayComponent "{69A6E65A13B1D20D}" {
+    m_FillColor 0.624 0.157 0.157 0.094
+    m_OutlineColor 0.624 0.157 0.157 1
+   }
+   RplComponent "{69A6E65A12309838}" {
+   }
+  }
+  coords 3715.541 11.237 8718.521
+  Points {
+   ShapePoint "{69A6E65ACE251F74}" {
+    Position 9.256 -0.042 4.116
+   }
+   ShapePoint "{69A6E65ACCCA80C8}" {
+    Position -168.453 0 -167.758
+   }
+   ShapePoint "{69A6E65AF2FCB6A5}" {
+    Position -69.018 0 -340.076
+   }
+   ShapePoint "{69A6E65AF2037341}" {
+    Position 78.979 0 -461.921
+   }
+   ShapePoint "{69A6E65AF7FAC5B4}" {
+    Position 502.65 0 -507.778
+   }
+   ShapePoint "{69A6E65AF69CB371}" {
+    Position 617.503 0 -287.562
+   }
+   ShapePoint "{69A6E65AF5B268C4}" {
+    Position 495.516 0 -249.27
+   }
+   ShapePoint "{69A6E65AFADE0F47}" {
+    Position 314.543 0 -91.095
+   }
+   ShapePoint "{69A6E65AFA4FCE69}" {
+    Position 229.332 0 -167.756
+   }
+   ShapePoint "{69A6E65AF99C7271}" {
+    Position 174.033 0 -163.1
+   }
+   ShapePoint "{69A6E65AF8D56178}" {
+    Position 135.533 0 -109.101
+   }
+  }
+  IsClosed 1
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{69A6E65C86C48DE9}" {
+    m_FillColor 0.157 0.275 0.624 0.094
+    m_OutlineColor 0.157 0.275 0.624 1
+   }
+   RplComponent "{69A6E65C85615CBC}" {
+   }
+  }
+  coords 5043.561 13.649 9588.243
+  Points {
+   ShapePoint "{69A6E65C9234B59B}" {
+    Position 0 0 0
+   }
+   ShapePoint "{69A6E65C91736EB1}" {
+    Position 33.38 0 33.403
+   }
+   ShapePoint "{69A6E65C903BF9F9}" {
+    Position -60.229 0 111.01
+   }
+   ShapePoint "{69A6E65C97B62E0E}" {
+    Position -80.855 0 96.238
+   }
+   ShapePoint "{69A6E65C962F509B}" {
+    Position -41.528 0 38.073
+   }
+  }
+  IsClosed 1
+ }
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 4417.789 5.569 8578.87
+  angles 0 34.314 0
+  scale 53.977
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 22.814 -1.02 29.408
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 22.814 -1.107 -13.352
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -19.25 0.888 -13.352
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -19.25 0.749 29.408
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0.094
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_FillOutside 0
+   }
+  }
+  coords 4208.742 14.462 9040.886
+  angles 0 24.173 0
+  scale 3.49
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0.094
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_FillOutside 0
+   }
+  }
+  coords 4681.411 4.906 8698.152
+  angles 0 -51.807 0
+  scale 4.41
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 16.152 -0.746 16
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 16.152 -0.807 -16
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -15.736 0.458 -16
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -15.736 0.293 16
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0.094
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_FillOutside 0
+   }
+  }
+  coords 5160.031 5.45 8551.504
+  angles 0 -37.993 0
+  scale 4.91
+  Points {
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -41.291 0.727 -16
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -41.291 0.562 16
+   }
+  }
+ }
+}
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 4609.608 8.027 9344.776
+ {
+  GenericEntity Layer6 : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69A6E65A0D3E0362}" {
+         m_sMapMarkerText "Тайник"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor INDEPENDENT
+        }
+       }
+      }
+      coords 407.218 3.549 286.507
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69A6E65A0D3E0362}" {
+         m_sMapMarkerText "Obj. Mulligan"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords -368.465 0.189 -279.666
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69A6E65A0D3E0362}" {
+         m_sMapMarkerText "Obj. Fenby"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords 114.828 -2.215 -639.583
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69A6E65A0D3E0362}" {
+         m_sMapMarkerText "Obj. Woodside"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords 589.268 0.705 -746.633
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69A6E65A0D3E0362}" {
+         m_sMapMarkerText "Obj. Union"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords -642.981 -4.122 -982.515
+     }
+     SlotMarker8 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69A6E65A735E681D}" {
+         m_sMapMarkerText "Старт"
+         m_eMapMarkerFactionIcon INDFOR
+        }
+       }
+      }
+      coords 2239.808 -7.969 -1986.207
+     }
+    }
+   }
+  }
+ }
+}

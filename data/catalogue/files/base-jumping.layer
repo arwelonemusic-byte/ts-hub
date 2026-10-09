@@ -1,0 +1,213 @@
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 5241.4 83.519 3526.3
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 1664 0 943.35
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 1664 0 -943.35
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -1664 0 -943.35
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -1664 0 943.35
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.156 0.156 0.094
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 4359 55.17 3221.3
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 106.95 0 136.25
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 106.95 0 -136.25
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -106.95 0 -136.25
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -106.95 0 136.25
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.156 0.156 0.094
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 5378.3 64.775 3390.8
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 116.65 0 112.8
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 116.65 0 -112.8
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -116.65 0 -112.8
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -116.65 0 112.8
+   }
+  }
+ }
+}
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 4695.515 48.251 3618.577
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Старт"
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 2053.785 -45.253 -51.777
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Район Анна"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 791.585 15.847 -128.477
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Район Борис"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -249.115 -2.357 -279.677
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Выход Ольга"
+         m_eMapMarkerIcon ARROW_MEDIUM
+         m_eMapMarkerColor OPFOR
+         m_iMapMarkerRotation -137
+        }
+       }
+      }
+      coords -1027.515 -20.785 576.423
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Выход Ульяна"
+         m_eMapMarkerIcon ARROW_MEDIUM
+         m_eMapMarkerColor OPFOR
+         m_iMapMarkerRotation -134
+        }
+       }
+      }
+      coords -786.515 41.687 773.423
+     }
+     SlotMarker7 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Патруль"
+        }
+       }
+      }
+      coords 228.785 89.98 336.723
+     }
+     SlotMarker8 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Патруль"
+        }
+       }
+      }
+      coords 375.085 -44.588 -679.077
+     }
+     SlotMarker9 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerType1Modifier ARMOR
+         m_eMapMarkerType2Modifier ARMOR
+        }
+       }
+      }
+      coords 711.485 17.336 -159.577
+     }
+     SlotMarker10 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+        }
+       }
+      }
+      coords -153.015 -7.037 -78.677
+     }
+     SlotMarker11 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Миномет"
+         m_eMapMarkerType1Modifier MORTAR
+         m_eMapMarkerType2Modifier MORTAR
+        }
+       }
+      }
+      coords -334.815 8.705 -461.477
+     }
+     SlotMarker12 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+        }
+       }
+      }
+      coords -418.715 -7.936 -37.477
+     }
+     SlotMarker13 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "?"
+        }
+       }
+      }
+      coords -827.015 -38.598 172.223
+     }
+    }
+   }
+  }
+ }
+}

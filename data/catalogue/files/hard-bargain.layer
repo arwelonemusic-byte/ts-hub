@@ -1,0 +1,86 @@
+PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ coords 5766.666 396.933 5937.974
+ angles 0 -41.936 0
+ scale 51.885
+ Points {
+  ShapePoint "{68568A2CAE54701B}" {
+   Position 61.899 -2.488 18.235
+  }
+  ShapePoint "{68568A2CAE545584}" {
+   Position 61.899 -2.555 -7.761
+  }
+  ShapePoint "{68568A2CAE545D3E}" {
+   Position -22.93 0.727 -7.761
+  }
+  ShapePoint "{68568A2CAE5446CE}" {
+   Position -22.93 0.568 18.235
+  }
+ }
+}
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 6412.372 470.417 6575.32
+ {
+  GenericEntity Layer2 : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_iDynamicDespawnRange 10000
+        m_bExcludeFromDynamicDespawn 1
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69291529D9B758AF}" {
+         m_sMapMarkerText "Радиовышка"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords 106.006 23.048 53.482
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_iDynamicDespawnRange 10000
+        m_bExcludeFromDynamicDespawn 1
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69291529D9B758AF}" {
+         m_sMapMarkerText "Бовемонт"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords -332.271 -51.763 -340.867
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_iDynamicDespawnRange 10000
+        m_bExcludeFromDynamicDespawn 1
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69291529D9B758AF}" {
+         m_sMapMarkerText "Соумонт"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords -1325.237 -56.014 -1247.892
+     }
+     SlotMarker10 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_iDynamicDespawnRange 10000
+        m_bExcludeFromDynamicDespawn 1
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{6929226BE70059D8}" {
+         m_sMapMarkerText "Старт"
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 1336.249 -157.156 1560.891
+     }
+    }
+   }
+  }
+ }
+}

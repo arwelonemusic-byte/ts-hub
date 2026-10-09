@@ -1,0 +1,19 @@
+{
+  "_comment": "Slot name -> Discord role a player needs (user's rules, 2026-10-09). Match the slot name without its fireteam prefix (\"RED - \") and trailing number, case-insensitive, ё = е; a name followed by a qualifier (\"Снайпер СВД\", \"Старший стрелок (РПК)\") matches too. Longest name wins. \"always\" are the user's fixed rules; \"decided\" are case-by-case answers for slots found in old slotting posts.",
+  "always": {
+    "PL": ["PL", "Platoon Leader", "Ком. взвода"],
+    "SL": ["SL", "Squad Leader", "Ком. отделения"],
+    "FTL": ["FTL", "Fireteam Leader", "Старший стрелок"],
+    "Grenadier": ["Grenadier", "Стрелок ГП"],
+    "Machine Gunner": ["Automatic Rifleman", "Machine Gunner", "Пулеметчик"],
+    "Rifleman": ["Rifleman", "Medic", "Медик", "Стрелок", "Стрелок ПТ", "ПТ Стрелок", "Снайпер", "Sniper", "Помощник гранатометчика", "Санитар", "Сапер"]
+  },
+  "decided": {
+    "SL": ["Зам. ком. взвода", "RTO", "Logistics Officer", "Ком. расчета"],
+    "FTL": ["Ком. группы", "Breach Team Leader"],
+    "Grenadier": ["Гранатометчик", "HMG Gunner"],
+    "Rifleman": ["Gunner", "Crew", "Driver", "Водитель", "Breacher", "Corpsman", "HMG Assistant", "Marksman", "Spotter", "Споттер", "Механик-водитель", "Наводчик-оператор", "Подрывник", "Помощник стрелка ПТ", "Шуфутинский"],
+    "Armoured Crew": ["Commander", "Командир экипажа-Стрелок"],
+    "Aircraft Vehicle": ["Pilot", "Co-pilot"]
+  }
+}

@@ -1,0 +1,136 @@
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 2750.958 43.755 5497.853
+  angles 0 -63.416 0
+  scale 35.112
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 56.096 -2.246 29.876
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 56.096 -2.333 -16
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -24 0.588 29.876
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0.188
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_FillOutside 0
+   }
+  }
+  coords 2986.605 17.882 5334.937
+  angles 0 -86.006 0
+  scale 6.44
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 66.757 -0.996 42.713
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 24.903 -0.196 -19.311
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -21.571 0.582 7.954
+   }
+   ShapePoint "{6965207D57749170}" {
+    Position -3.737 0.144 38.482
+   }
+  }
+ }
+ TS_MapOverlay1 {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0.188
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_FillOutside 0
+   }
+  }
+  coords 2047.005 17.717 5270.021
+  angles 0 -134.717 0
+  scale 6.44
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 84.264 -1.081 32.218
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 25.202 -0.051 -29.244
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -24 0.623 31.737
+   }
+  }
+ }
+}
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 5409.441 23.523 6914.209
+ {
+  GenericEntity Layer1 : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69627873380BB491}" {
+         m_sMapMarkerText "Insertion"
+        }
+       }
+      }
+      coords -1582.508 -5.678 35.487
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{6965206EBC240CE9}" {
+         m_sMapMarkerText "Obj. Oscar"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords -2625.468 -4.562 -1539.522
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{6965206EBC240CE9}" {
+         m_sMapMarkerText "Obj. Quebec"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords -2622.541 29.416 -1982.936
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{6965206EBC240CE9}" {
+         m_sMapMarkerText "Obj. Romeo"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords -3267.211 -5.676 -1705.969
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69627873380BB491}" {
+         m_sMapMarkerText "FARP"
+         m_eMapMarkerType1Modifier MAINTENANCE
+        }
+       }
+      }
+      coords -1566.432 -5.677 95.959
+     }
+    }
+   }
+  }
+ }
+}

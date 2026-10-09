@@ -1,0 +1,354 @@
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 1891.856 76.649 1944.688
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_eMapMarkerIcon CROSS2
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -139.356 9.203 440.312
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_eMapMarkerIcon CROSS2
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 84.644 -0.65 211.412
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 60.444 13.289 813.112
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_eMapMarkerIcon CROSS2
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -98.956 7.939 68.012
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords -180.256 8.899 278.512
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier MORTAR
+         m_eMapMarkerType2Modifier MORTAR
+        }
+       }
+      }
+      coords 356.744 -5.267 243.212
+     }
+     SlotMarker7 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier MORTAR
+         m_eMapMarkerType2Modifier MORTAR
+        }
+       }
+      }
+      coords 357.044 -6.196 201.312
+     }
+     SlotMarker8 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 393.144 -34.493 -874.188
+     }
+     SlotMarker9 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 559.344 -34.493 -893.288
+     }
+     SlotMarker10 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier SUPPLY
+         m_eMapMarkerType2Modifier SUPPLY
+        }
+       }
+      }
+      coords 520.044 -34.48 -887.288
+     }
+     SlotMarker11 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier MAINTENANCE
+         m_eMapMarkerType2Modifier MAINTENANCE
+        }
+       }
+      }
+      coords 482.444 -34.493 -954.588
+     }
+     SlotMarker12 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 456.444 -34.493 -874.988
+     }
+     SlotMarker13 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Браво 1"
+        }
+       }
+      }
+      coords -1085.556 58.46 1041.512
+     }
+     SlotMarker14 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Браво 2"
+        }
+       }
+      }
+      coords -1103.156 59.943 1043.612
+     }
+     SlotMarker15 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Крёстный отец"
+        }
+       }
+      }
+      coords -1114.756 61.324 1049.212
+     }
+     SlotMarker16 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Evac LZ"
+         m_eMapMarkerIcon PICK_UP2
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords 451.744 -34.493 -905.888
+     }
+    }
+   }
+  }
+ }
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 2038.3 94.253 1826.1
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 627.95 0 1179.7
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 627.95 0 -1179.7
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -627.95 0 -1179.7
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -627.95 0 1179.7
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 1710.1 85.533 2229.2
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 25.6 0 19.35
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 25.6 0 -19.35
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -25.6 0 -19.35
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -25.6 0 19.35
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 2248.8 70.636 2163.5
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 7.15 0 27.85
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 7.15 0 -27.85
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -7.15 0 -27.85
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -7.15 0 27.85
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 1964.2 89.411 2758.8
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 21.35 0 23.25
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 21.35 0 -23.25
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -21.35 0 -23.25
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -21.35 0 23.25
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 2370.8 42.159 1060.5
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 107.9 0 26.8
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 107.9 0 -26.8
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -107.9 0 -26.8
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -107.9 0 26.8
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 2327.5 42.156 1000.1
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 57.8 0 33.65
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 57.8 0 -33.65
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -57.8 0 -33.65
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -57.8 0 33.65
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 2374.6 42.156 1151.6
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 10.65 0 10.8
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 10.65 0 -10.8
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -10.65 0 -10.8
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -10.65 0 10.8
+   }
+  }
+ }
+}

@@ -1,0 +1,7 @@
+03.10.2026, 19:00
+Arma Reforger:
+Operation Emerald Fields
+1'1 | SL [@SL] | RED - FTL [@FTL] | RED - Automatic Rifleman [@MachineGunner] | RED - Grenadier [@Grenadier] | RED - Rifleman [@Rifleman] | BLUE - FTL [@FTL] | BLUE - Automatic Rifleman [@MachineGunner] | BLUE - Grenadier [@Grenadier] | BLUE - Rifleman [@Rifleman]
+1'2 | SL [@SL] | RED - FTL [@FTL] | RED - Automatic Rifleman [@MachineGunner] | RED - Grenadier [@Grenadier] | RED - Rifleman [@Rifleman] | BLUE - FTL [@FTL] | BLUE - Automatic Rifleman [@MachineGunner] | BLUE - Grenadier [@Grenadier] | BLUE - Rifleman [@Rifleman]
+1'4 | SL [@SL] | HMG Gunner 1 [@Rifleman] | HMG Gunner 2 [@Rifleman] | HMG Gunner 3 [@Rifleman] | HMG Gunner 4 [@Rifleman]
+1'6 | PL [@PL] | RTO [@SL] | Corpsman [@Rifleman]

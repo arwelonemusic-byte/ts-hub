@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — mirrored 1:1 from the Figma file (TS-Hub, 0RmVKOte1DraFYjN1vY0m9).
+ * The --ts-* names are the variables' WEB code syntax in Figma, so a value copied
+ * from Dev Mode resolves here unchanged. Primitives → semantic aliases, same as Figma.
+ * Change a value in Figma first, then here.
+ */
+:root {
+  /* Primitives */
+  --ts-neutral-950: #0d0f11;
+  --ts-neutral-900: #14181a;
+  --ts-neutral-850: #202427;
+  --ts-neutral-850-a90: #202427e5;
+  --ts-neutral-800: #2e3439;
+  --ts-neutral-700: #3a4249;
+  --ts-white-100: #ffffff;
+  --ts-white-85: #ffffffd9;
+  --ts-white-80: #ffffffcc;
+  --ts-white-62: #ffffff9e;
+  --ts-white-50: #ffffff80;
+  --ts-white-40: #ffffff66;
+  --ts-white-30: #ffffff4d;
+  --ts-yellow-400: #f4db50;
+  --ts-yellow-300: #f9e278;
+  --ts-yellow-400-a14: #f4db5024;
+  --ts-green-400: #76e176;
+  --ts-coral-400: #f26f63;
+  --ts-coral-400-a12: #f26f631f;
+  --ts-coral-400-a35: #f26f6359;
+  --ts-red-400: #e25a55;
+  --ts-red-400-a14: #e25a5524;
+  --ts-blue-400: #5996dc;
+  --ts-brand-red: #e13446;
+
+  /* Color — semantic */
+  --ts-color-bg-page: var(--ts-neutral-950);
+  --ts-color-bg-surface: var(--ts-neutral-850);
+  --ts-color-bg-inset: var(--ts-neutral-900);
+  --ts-color-bg-raised: var(--ts-neutral-800);
+  --ts-color-bg-raised-hover: var(--ts-neutral-700);
+  --ts-color-bg-overlay: var(--ts-neutral-850-a90);
+  --ts-color-bg-accent: var(--ts-yellow-400);
+  --ts-color-bg-accent-hover: var(--ts-yellow-300);
+  --ts-color-bg-accent-subtle: var(--ts-yellow-400-a14);
+  --ts-color-bg-danger-subtle: var(--ts-coral-400-a12);
+  --ts-color-bg-success: var(--ts-green-400);
+  --ts-color-border-default: var(--ts-neutral-800);
+  --ts-color-border-strong: var(--ts-neutral-700);
+  --ts-color-border-outline: var(--ts-white-30);
+  --ts-color-border-accent: var(--ts-yellow-400);
+  --ts-color-border-danger: var(--ts-coral-400-a35);
+  --ts-color-text-primary: var(--ts-white-100);
+  --ts-color-text-body: var(--ts-white-85);
+  --ts-color-text-label: var(--ts-white-80);
+  --ts-color-text-secondary: var(--ts-white-62);
+  --ts-color-text-tertiary: var(--ts-white-50);
+  --ts-color-text-disabled: var(--ts-white-40);
+  --ts-color-text-faint: var(--ts-white-30);
+  --ts-color-text-accent: var(--ts-yellow-400);
+  --ts-color-text-on-accent: var(--ts-neutral-850);
+  --ts-color-text-success: var(--ts-green-400);
+  --ts-color-text-danger: var(--ts-coral-400);
+  --ts-color-icon-default: var(--ts-white-100);
+  --ts-color-icon-secondary: var(--ts-white-62);
+  --ts-color-icon-tertiary: var(--ts-white-50);
+  --ts-color-icon-accent: var(--ts-yellow-400);
+  --ts-color-icon-success: var(--ts-green-400);
+  --ts-color-icon-on-accent: var(--ts-neutral-850);
+  --ts-color-team-red: var(--ts-red-400);
+  --ts-color-team-blue: var(--ts-blue-400);
+  --ts-color-map-friendly: var(--ts-blue-400);
+  --ts-color-map-enemy: var(--ts-red-400);
+  --ts-color-map-enemy-area: var(--ts-red-400-a14);
+  --ts-color-map-phase-line: var(--ts-yellow-400);
+  --ts-color-dot-played: var(--ts-white-40);
+  --ts-color-dot-planned: var(--ts-yellow-400);
+  --ts-color-brand-red: var(--ts-brand-red);
+
+  /* Dimension — space/N maps to Tailwind's default scale as N/4 (space/24 → p-6). */
+  --ts-size-control-m: 44px;
+  --ts-size-control-s: 32px;
+  --ts-size-control-sx: 24px;
+  --ts-size-icon: 16px;
+}
+
+/*
+ * Tailwind theme. The default palette is wiped so only token colours exist:
+ *   bg-page / bg-surface / bg-inset / bg-raised …   (color/bg/*)
+ *   text-fg / text-fg-secondary / text-fg-accent …  (color/text/*)
+ *   border-line / border-line-strong …              (color/border/*)
+ *   text-icon-* / bg-team-red …                     (icon, team, map, dot, brand)
+ */
+@theme inline {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --color-page: var(--ts-color-bg-page);
+  --color-surface: var(--ts-color-bg-surface);
+  --color-inset: var(--ts-color-bg-inset);
+  --color-raised: var(--ts-color-bg-raised);
+  --color-raised-hover: var(--ts-color-bg-raised-hover);
+  --color-overlay: var(--ts-color-bg-overlay);
+  --color-accent: var(--ts-color-bg-accent);
+  --color-accent-hover: var(--ts-color-bg-accent-hover);
+  --color-accent-subtle: var(--ts-color-bg-accent-subtle);
+  --color-danger-subtle: var(--ts-color-bg-danger-subtle);
+  --color-success: var(--ts-color-bg-success);
+
+  --color-line: var(--ts-color-border-default);
+  --color-line-strong: var(--ts-color-border-strong);
+  --color-line-outline: var(--ts-color-border-outline);
+  --color-line-accent: var(--ts-color-border-accent);
+  --color-line-danger: var(--ts-color-border-danger);
+
+  --color-fg: var(--ts-color-text-primary);
+  --color-fg-body: var(--ts-color-text-body);
+  --color-fg-label: var(--ts-color-text-label);
+  --color-fg-secondary: var(--ts-color-text-secondary);
+  --color-fg-tertiary: var(--ts-color-text-tertiary);
+  --color-fg-disabled: var(--ts-color-text-disabled);
+  --color-fg-faint: var(--ts-color-text-faint);
+  --color-fg-accent: var(--ts-color-text-accent);
+  --color-fg-on-accent: var(--ts-color-text-on-accent);
+  --color-fg-success: var(--ts-color-text-success);
+  --color-fg-danger: var(--ts-color-text-danger);
+
+  --color-icon: var(--ts-color-icon-default);
+  --color-icon-secondary: var(--ts-color-icon-secondary);
+  --color-icon-tertiary: var(--ts-color-icon-tertiary);
+  --color-icon-accent: var(--ts-color-icon-accent);
+  --color-icon-success: var(--ts-color-icon-success);
+  --color-icon-on-accent: var(--ts-color-icon-on-accent);
+
+  --color-team-red: var(--ts-color-team-red);
+  --color-team-blue: var(--ts-color-team-blue);
+  --color-map-friendly: var(--ts-color-map-friendly);
+  --color-map-enemy: var(--ts-color-map-enemy);
+  --color-map-enemy-area: var(--ts-color-map-enemy-area);
+  --color-map-phase-line: var(--ts-color-map-phase-line);
+  --color-dot-played: var(--ts-color-dot-played);
+  --color-dot-planned: var(--ts-color-dot-planned);
+  --color-brand-red: var(--ts-color-brand-red);
+
+  /* radius/3 4 6 8 12 full */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  --shadow-floating: 0 16px 32px 0 #00000066;
+
+  --font-sans: var(--font-roboto), system-ui, sans-serif;
+  --font-slab: var(--font-roboto-slab), Georgia, serif;
+  --font-mono: var(--font-roboto-mono), ui-monospace, monospace;
+}
+
+/* Text styles — one utility per Figma text style, named after it (Heading/L → type-heading-l). */
+@utility type-display-page { font-family: var(--font-slab); font-weight: 500; font-size: 40px; line-height: 48px; }
+@utility type-display-event { font-family: var(--font-slab); font-weight: 500; font-size: 44px; line-height: 52px; }
+@utility type-display-kicker { font-family: var(--font-slab); font-weight: 300; font-size: 20px; line-height: 26px; }
+@utility type-heading-xl { font-family: var(--font-slab); font-weight: 500; font-size: 30px; line-height: 36px; }
+@utility type-heading-number { font-family: var(--font-slab); font-weight: 500; font-size: 28px; line-height: 34px; }
+@utility type-heading-l { font-family: var(--font-slab); font-weight: 500; font-size: 24px; line-height: 32px; }
+@utility type-heading-m { font-family: var(--font-slab); font-weight: 500; font-size: 22px; line-height: 28px; }
+@utility type-heading-s { font-family: var(--font-slab); font-weight: 500; font-size: 20px; line-height: 28px; }
+@utility type-heading-xs { font-family: var(--font-slab); font-weight: 500; font-size: 18px; line-height: 24px; }
+@utility type-heading-xxs { font-family: var(--font-slab); font-weight: 500; font-size: 16px; line-height: 24px; }
+@utility type-body-l { font-family: var(--font-sans); font-weight: 400; font-size: 15px; line-height: 24px; }
+@utility type-body-m { font-family: var(--font-sans); font-weight: 400; font-size: 14px; line-height: 20px; }
+@utility type-body-s { font-family: var(--font-sans); font-weight: 400; font-size: 13px; line-height: 20px; }
+@utility type-label-xl { font-family: var(--font-sans); font-weight: 500; font-size: 16px; line-height: 24px; }
+@utility type-label-l { font-family: var(--font-sans); font-weight: 500; font-size: 15px; line-height: 22px; }
+@utility type-label-m { font-family: var(--font-sans); font-weight: 500; font-size: 14px; line-height: 20px; }
+@utility type-label-s { font-family: var(--font-sans); font-weight: 500; font-size: 13px; line-height: 20px; }
+@utility type-caption { font-family: var(--font-sans); font-weight: 400; font-size: 12px; line-height: 16px; }
+@utility type-caption-strong { font-family: var(--font-sans); font-weight: 500; font-size: 12px; line-height: 16px; }
+@utility type-eyebrow { font-family: var(--font-sans); font-weight: 500; font-size: 11px; line-height: 16px; letter-spacing: 0.12em; text-transform: uppercase; }
+@utility type-tag { font-family: var(--font-sans); font-weight: 500; font-size: 11px; line-height: 16px; letter-spacing: 0.04em; }
+@utility type-chip { font-family: var(--font-sans); font-weight: 700; font-size: 11px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; }
+@utility type-code { font-family: var(--font-mono); font-weight: 400; font-size: 12px; line-height: 16px; letter-spacing: 0.08em; }
+@utility type-code-badge { font-family: var(--font-mono); font-weight: 700; font-size: 11px; line-height: 12px; letter-spacing: 0.08em; }
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background: var(--ts-color-bg-page);
+    color: var(--ts-color-text-body);
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

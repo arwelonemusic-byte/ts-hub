@@ -1,0 +1,166 @@
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 1536.114 47.421 1841.5
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Главная площадь"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 322.486 14.954 39.9
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Район Анна"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -1.914 -12.597 -32.8
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Старт"
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords -918.414 -27.858 209.4
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Школа"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 260.686 14.954 -3.6
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Церковь"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 382.586 14.954 -17.7
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Бассейн"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 339.486 14.954 110.6
+     }
+     SlotMarker7 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Коттедж"
+         m_eMapMarkerIcon POINT_OF_INTEREST
+         m_eMapMarkerColor DARK_BLUE
+        }
+       }
+      }
+      coords -384.914 -19.363 -305.8
+     }
+    }
+   }
+  }
+ }
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 1326.7 18.512 1800.8
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 847.35 0 360.75
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 847.35 0 -360.75
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -847.35 0 -360.75
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -847.35 0 360.75
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 1853.7 62.375 1880.9
+  angles 0 309 0
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 39.1 0 23.4
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 39.1 0 -23.4
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -39.1 0 -23.4
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -39.1 0 23.4
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 1525.4 33.044 1793.5
+  angles 0 48 0
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 83.45 0 26.85
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 83.45 0 -26.85
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -83.45 0 -26.85
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -83.45 0 26.85
+   }
+  }
+ }
+}

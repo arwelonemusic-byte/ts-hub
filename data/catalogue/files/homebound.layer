@@ -1,0 +1,140 @@
+PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ coords 2717.724 306.97 7845.784
+ angles 0 -28.057 0
+ scale 44.823
+ Points {
+  ShapePoint "{68568A2CAE54701B}" {
+   Position 48.245 -1.002 39.043
+  }
+  ShapePoint "{68568A2CAE545584}" {
+   Position 48.245 -1.107 -25.658
+  }
+  ShapePoint "{68568A2CAE545D3E}" {
+   Position -24 0.727 -25.658
+  }
+  ShapePoint "{68568A2CAE5446CE}" {
+   Position -24 0.606 39.043
+  }
+ }
+}
+GenericEntity Area2 : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ components {
+  SCR_ScenarioFrameworkArea "{59E8CDC50969206E}" {
+   m_iDynamicDespawnRange 10000
+  }
+ }
+ coords 1703.33 274.969 7779.191
+ {
+  GenericEntity Layer5 : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{6937117A57133051}" {
+         m_sMapMarkerText "Старт"
+        }
+       }
+      }
+      coords -57.76 -0.151 -7.709
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{6937117A57133051}" {
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier RECON
+         m_eMapMarkerType2Modifier RECON
+        }
+       }
+      }
+      coords 1358.796 17.267 142.343
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{6937117A57133051}" {
+         m_sMapMarkerText "Штаб ЧДКЗ"
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier SUPPLY
+         m_eMapMarkerType2Modifier SUPPLY
+        }
+       }
+      }
+      coords 2809.5 30.358 512.794
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{6937117A57133051}" {
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier ARMOR
+         m_eMapMarkerType2Modifier ARMOR
+        }
+       }
+      }
+      coords 2695.408 27.02 447.369
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{6937117A57133051}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 2103.388 24.154 1088.113
+     }
+     SlotMarker7 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{6937117BD4E84C74}" {
+         m_sMapMarkerText "Школа №2"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 2092.709 24.466 1147.347
+     }
+     SlotMarker8 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{6937117BD4E84C74}" {
+         m_sMapMarkerText "QRF"
+         m_eMapMarkerIcon ARROW_LARGE2
+         m_eMapMarkerColor OPFOR
+         m_iMapMarkerRotation 20
+        }
+       }
+      }
+      coords 1685.901 16.834 1344.918
+     }
+     SlotMarker9 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{6937117A57133051}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 1961.013 13.93 799.63
+     }
+     SlotMarker10 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{6937117B063F34A0}" {
+         m_sMapMarkerText "Отступить после выполнения задач"
+         m_eMapMarkerIcon POINT_OF_INTEREST2
+         m_eMapMarkerColor BLUFOR
+        }
+       }
+      }
+      coords 1322.539 22.956 95.061
+     }
+    }
+   }
+  }
+ }
+}

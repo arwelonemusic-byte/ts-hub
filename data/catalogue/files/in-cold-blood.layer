@@ -1,0 +1,118 @@
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 2874.5 256.256 9311.2
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "START"
+         m_eMapMarkerIcon ENTRY_POINT
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords 0 0 0
+     }
+    }
+   }
+  }
+ }
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 3390.4 296.493 9245.1
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 1095.25 0 951.35
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 1095.25 0 -951.35
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -1095.25 0 -951.35
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -1095.25 0 951.35
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 3800 299.438 8925.7
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 20.35 0 17.45
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 20.35 0 -17.45
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -20.35 0 -17.45
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -20.35 0 17.45
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 3856.7 299.581 8943.7
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 14.3 0 16.25
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 14.3 0 -16.25
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -14.3 0 -16.25
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -14.3 0 16.25
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 2884.1 260.969 9739.8
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 49.05 0 46.95
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 49.05 0 -46.95
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -49.05 0 -46.95
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -49.05 0 46.95
+   }
+  }
+ }
+}

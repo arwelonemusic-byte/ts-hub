@@ -1,0 +1,170 @@
+PolylineShapeEntity {
+ components {
+  TS_MapOverlayComponent "{69CACAC870BBD974}" {
+   m_FillColor 1 1 1 0
+   m_OutlineColor 0 0 0 1
+   m_OutlineWidth 5
+  }
+  RplComponent "{69CACAC8764440B6}" {
+  }
+ }
+ coords 1864.574 156.889 6769.726
+ Points {
+  ShapePoint "{69CACAC80D50DFB5}" {
+   Position 0 0 0
+  }
+  ShapePoint "{69CACAC80D5332AC}" {
+   Position 5 -0.032 0
+  }
+  ShapePoint "{69CACAC8328213C4}" {
+   Position 2472.75 0 34.402
+  }
+  ShapePoint "{69CACAC83110CD09}" {
+   Position 2510.454 0 -471.252
+  }
+  ShapePoint "{69CACAC83CBE76EF}" {
+   Position 2389.892 0 -1382.509
+  }
+  ShapePoint "{69CACAC8200EE4CC}" {
+   Position 2825.506 0 -1880.489
+  }
+  ShapePoint "{69CACAC8437865CD}" {
+   Position 2852.123 0 -3280.661
+  }
+  ShapePoint "{69CACAC841F704F9}" {
+   Position 2081.79 0 -3118.512
+  }
+  ShapePoint "{69CACAC8459C0868}" {
+   Position 1880.019 0 -1983.186
+  }
+  ShapePoint "{69CACAC8488C8F90}" {
+   Position -1.416 0 -1290.029
+  }
+ }
+ IsClosed 1
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0
+    m_OutlineColor 0.502 0 0 1
+    m_FillOutside 0
+   }
+  }
+  coords 3642.352 154.107 5909.646
+  scale 8.679
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 32.198 -1.045 15.726
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 25.448 -0.985 -34.859
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -24.736 0.791 -28.355
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0
+    m_OutlineColor 0.502 0 0 1
+    m_FillOutside 0
+   }
+  }
+  coords 2233.004 152.531 6353.733
+  angles 0 12.822 0
+  scale 7.937
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 32.897 -1.386 16
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 32.897 -1.447 -1.108
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -24 0.727 -1.108
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0
+    m_OutlineColor 0.502 0 0 1
+    m_FillOutside 0
+   }
+  }
+  coords 3768.399 131.543 5131.177
+  angles 0 -70.39 0
+  scale 3.12
+ }
+}
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ components {
+  SCR_ScenarioFrameworkArea "{59E8CDC50969206E}" {
+   m_iDynamicDespawnRange 5000
+   m_bExcludeFromDynamicDespawn 1
+  }
+ }
+ coords 3594.393 128.239 5311.925
+ {
+  GenericEntity Layer9 : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69CA83D1D176E8F7}" {
+         m_sMapMarkerText "Анна"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 170.025 2.357 -182.268
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69CA83D1D176E8F7}" {
+         m_sMapMarkerText "Борис"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 194.33 23.858 547.574
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69CA83D1D176E8F7}" {
+         m_sMapMarkerText "Владимир"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -1148.333 24.854 1085.088
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69CA83D1F2E0C37B}" {
+         m_sMapMarkerText "FARP"
+         m_eMapMarkerType1Modifier MAINTENANCE
+         m_eMapMarkerType2Modifier MAINTENANCE
+        }
+       }
+      }
+      coords 678.995 20.635 -1661.709
+     }
+    }
+   }
+  }
+ }
+}

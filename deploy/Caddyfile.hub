@@ -1,0 +1,39 @@
+# Append to /etc/caddy/Caddyfile, then `systemctl reload caddy`. Caddy gets the TLS
+# certificate itself once hub.tacticalshift.ru resolves to the box.
+hub.tacticalshift.ru {
+	header Strict-Transport-Security "max-age=31536000"
+	log {
+		output file /var/log/caddy/hub-access.log {
+			roll_size 20mb
+			roll_keep 3
+		}
+		format json
+	}
+
+	encode zstd gzip {
+		match {
+			header Content-Type text/*
+			header Content-Type application/json*
+			header Content-Type application/javascript*
+			header Content-Type image/svg+xml*
+		}
+	}
+
+	# Covers and icons straight from disk with a week's cache (Next would send max-age=0).
+	@static path /covers/* /icons/*
+	handle @static {
+		root * /opt/ts-web/ts-hub/web/public
+		header Cache-Control "public, max-age=604800"
+		file_server
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:3004
+	}
+
+	# Never let an error response be cached (see the tile 403 incident on the planner).
+	handle_errors {
+		header >Cache-Control "no-store"
+		respond "{err.status_code} {err.status_text}" {err.status_code}
+	}
+}

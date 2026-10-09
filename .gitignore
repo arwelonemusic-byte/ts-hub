@@ -1,0 +1,9 @@
+# Discord exports with member data (IDs, names, avatars, who slotted where, message text).
+# The repo is public; these stay on the machines that build the seed. See data/*/README.md.
+/data/players/discord-members.json
+/data/catalogue/discord-catalogue.json
+/data/catalogue/announcements-slotting.json
+
+# Icon-generation drafts (raw renders, option sheets); the picked icons sit one level up and in Figma.
+/design/*/raw/
+/design/*/options/

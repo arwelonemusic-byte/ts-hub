@@ -1,0 +1,224 @@
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 1379 329.364 3112.962
+  scale 56.448
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 17.364 -0.793 16
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 17.364 -0.868 -14.881
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -24 0.712 -14.881
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 1083.15 276.467 2701.215
+  angles 0 -125.33 0
+  scale 2.6
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 117.614 -5.11 16
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 117.614 -5.171 -16
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -136.896 0.727 -16
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -136.896 0.562 16
+   }
+  }
+ }
+ TS_MapOverlay1 {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 1481.566 206.6 2836.924
+  angles 0 -99.375 0
+  scale 2.6
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 117.614 -5.11 16
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 117.614 -5.171 -16
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -136.896 0.727 -16
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -136.896 0.562 16
+   }
+  }
+ }
+}
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 1197.108 106.324 2827.493
+ {
+  GenericEntity Layer4 : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     Marker_AA1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69DF1C021ACBEEA0}" {
+         m_sMapMarkerText "AA"
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier ANTITANK
+         m_eMapMarkerType2Modifier ANTITANK
+        }
+       }
+      }
+      coords 182.329 52.653 149.025
+     }
+     Marker_AA2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69DF1C021ACBEEA0}" {
+         m_sMapMarkerText "AA"
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier ANTITANK
+         m_eMapMarkerType2Modifier ANTITANK
+        }
+       }
+      }
+      coords -247.654 86.865 24.48
+     }
+     Marker_Camp {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69E4CE9E2B1A3508}" {
+         m_sMapMarkerText "Лагерь"
+         m_eMapMarkerIcon FLAG2
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 507.456 109.713 -400.286
+     }
+     Marker_Sniper {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69E4CE9E466E1857}" {
+         m_sMapMarkerText "Sniper deploy"
+         m_eMapMarkerType1Modifier SNIPER
+         m_eMapMarkerType2Modifier SNIPER
+        }
+       }
+      }
+      coords 10.97 -22.221 1032.039
+     }
+     Marker_main {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69E4CE9E466E1857}" {
+         m_sMapMarkerText "Main deploy"
+        }
+       }
+      }
+      coords -959.535 -66.186 352.983
+     }
+     Marker_Farp {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69E4CE9E466E1857}" {
+         m_sMapMarkerText "FARP"
+         m_eMapMarkerDimension INSTALLATION
+         m_eMapMarkerType1Modifier MAINTENANCE
+         m_eMapMarkerType2Modifier MAINTENANCE
+        }
+       }
+      }
+      coords -944.067 -66.268 322.775
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69E4CE9E2B1A3508}" {
+         m_sMapMarkerText "Khan Ridge"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 263.517 82.085 42.845
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69E4CE9E2B1A3508}" {
+         m_sMapMarkerText "Exfil"
+         m_eMapMarkerIcon WAYPOINT
+         m_eMapMarkerColor BLUFOR
+        }
+       }
+      }
+      coords 946.393 -86.322 192.234
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69DF1C021ACBEEA0}" {
+         m_sMapMarkerText "?"
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 839.673 -63.674 147.278
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69DF1C021ACBEEA0}" {
+         m_sMapMarkerText "?"
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 13.997 -19.222 57.69
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69E4CE9E2B1A3508}" {
+         m_sMapMarkerText "Eagle Ridge"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -89.714 96.647 -172.449
+     }
+     SlotMarker7 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69DF1C021ACBEEA0}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 256.017 215.074 -344.652
+     }
+    }
+   }
+  }
+ }
+}

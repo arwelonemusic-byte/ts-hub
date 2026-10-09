@@ -1,0 +1,155 @@
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 5022.78 50.572 5783.818
+  angles 0 21.6 0
+  scale 44.518
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 40.85 -1.688 17.65
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 40.85 -1.751 -13.217
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -21.137 0.727 -13.217
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -21.137 0.564 17.65
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0.188
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_FillOutside 0
+   }
+  }
+  coords 4543.958 50.711 6200.118
+  angles 0 -21.871 0
+  scale 3.555
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 56.23 -2.287 16
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 56.229 -2.348 -23.38
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -49.755 1.653 -23.38
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -49.754 1.488 16
+   }
+  }
+ }
+}
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 4916.783 67.602 6261.235
+ {
+  GenericEntity Layer9 : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Лагерь"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -233.065 -8.029 -1.829
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Гараж со снастями"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 357.003 -3.649 -939.612
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Цистерна"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -644.744 -5.087 -441.033
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon INDFOR
+        }
+       }
+      }
+      coords 354.43 7.721 44.854
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon INDFOR
+        }
+       }
+      }
+      coords 492.54 9.235 -633.779
+     }
+     SlotMarker7 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon INDFOR
+        }
+       }
+      }
+      coords 340.229 -8.36 -868.887
+     }
+     SlotMarker8 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon INDFOR
+        }
+       }
+      }
+      coords -250.984 -5.342 -661.67
+     }
+     SlotMarker9 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon INDFOR
+        }
+       }
+      }
+      coords -675.883 -2.949 -457.162
+     }
+     SlotMarker10 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_eMapMarkerFactionIcon INDFOR
+        }
+       }
+      }
+      coords -413.328 -11.755 -56.447
+     }
+    }
+   }
+  }
+ }
+}

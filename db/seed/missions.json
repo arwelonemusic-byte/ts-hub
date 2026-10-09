@@ -1,0 +1,4769 @@
+[
+ {
+  "id": "hard-bargain",
+  "name": "Hard Bargain",
+  "mapKey": "kolguyev",
+  "mapLabel": "Kolguyev",
+  "coverUrl": "/covers/hard-bargain.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/692725E6BB099ED3",
+  "addonGuid": "692725E6BB099ED3",
+  "scenarioId": "{0B9FB84AA11A96E2}Missions/hard-bargain-world.conf",
+  "tags": [
+   "east-gear"
+  ],
+  "markersLayer": "files/hard-bargain.layer",
+  "briefing": {
+   "sides": {
+    "for": "Разведывательное подразделение Вооружённых сил СССР",
+    "against": "Подразделения специального назначения ВС США"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Этой ночью, используя сложные метеоусловия, противник произвёл высадку десанта на южное побережье острова Колгуев. Высадка осуществлена с десантных катеров на воздушной подушке LCAC с кораблей амфибийно-десантной группы ВМС США, действующей в Баренцевом море. В составе высаженных сил — пехотные подразделения морской пехоты США, лёгкие бронированные машины LAV-25 и автомобили HMMWV.\n\nОсновной гарнизон острова, дислоцированный в южной части, блокирован противником в ходе первичной высадки. Связь с ним отсутствует. Наше подразделение на момент высадки находилось на плановых учениях в глубине острова и является единственной организованной боевой единицей, сохранившей боеспособность и связь со штабом флота.\n\nПо данным радиоперехвата и воздушной разведки, основной целью противника является радиовышка, входящая в систему связи Северного флота. Характер действий противника указывает на рейдовую операцию: удержание захваченных позиций на длительный срок не предполагается. После завершения работ на объекте ожидается отход к точке эвакуации на побережье.\n\nК настоящему моменту противник овладел радиовышкой и занял населённые пункты Сумон и Бувмон, расположенные на подходах к объекту. Работы технических специалистов противника на радиовышке на момент постановки задачи не завершены."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Радиовышка — группа до отделения. Передовой элемент с техническими специалистами. Оборонительные позиции не оборудованы, тяжёлая бронетехника отсутствует. Возможно присутствие лёгкого транспорта (HMMWV).\n\nСумон — до усиленного отделения пехоты с лёгкой бронетехникой. Занимает оборону в каменных руинах.\n\nБувмон — до взвода пехоты, усиленного LAV-25 и HMMWV. Основной опорный пункт противника на маршруте «побережье — радиовышка».\n\nВозможно наличие пеших патрулей вокруг населенных пунктов.\n\nОборонительные позиции минимальны или отсутствуют. Противник полагается на элемент неожиданности и окапываться не собирается."
+    },
+    {
+     "title": "Задачи",
+     "body": "Подразделению последовательно освободить захваченные объекты, не допустить выполнения противником поставленных задач.\n\n\n- Захватить радиовышку.\n- Вытеснить врага из населённого пункта Сумон.\n- Вытеснить врага из населённого пункта Бувмон."
+    },
+    {
+     "title": "Планы",
+     "body": "/syncplan ZBDMW2 - Galaxy\n/syncplan UCYSZR - Venom"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "PL",
+      "requiredRole": "PL"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Recon",
+    "name": "",
+    "slots": [
+     {
+      "role": "Crew 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Crew 2",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "homebound",
+  "name": "Homebound",
+  "mapKey": "chernarus",
+  "mapLabel": "Chernarus",
+  "coverUrl": "/covers/homebound.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6930EA140D1AACC6",
+  "addonGuid": "6930EA140D1AACC6",
+  "scenarioId": "{F183308E025E72A5}Missions/homebound.conf",
+  "tags": [
+   "east-gear"
+  ],
+  "markersLayer": "files/homebound.layer",
+  "briefing": {
+   "sides": {
+    "for": "Чернорусские Силы Обороны (ЧСО)",
+    "against": "Чернорусское Движение Красной Звезды (ЧДКЗ)"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Сентябрь 2009 года, Южная Загория. После сентябрьского переворота сепаратистские формирования ЧДКЗ продолжают удерживать значительную часть провинции. Силы ЧСО перешли в контрнаступление, и нашему подразделению поставлена задача провести контр-атаку в направлении Пустошка-Выбор, восстановив контроль над ключевой дорожной артерией региона.\n\nПо данным разведки, в Выборе сосредоточена крупная группировка боевиков. К юго-востоку от Выбора развёрнут полевой штаб противника: укреплённая позиция, в районе которой предположительно находится бронетехника. В Пустошке замечено передовое подразделение ЧДКЗ численностью до отделения.\n\nВ здании школы №2 города Выбор боевики удерживают мирных жителей. Их освобождение является приоритетной задачей.\n\nРайон операции активно патрулируется противником, как пешими, так и моторизованными группами. ЧДКЗ перебрасывает подкрепления и снаряжение по дорогам региона, готовясь к дальнейшему продвижению."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Уничтожить передовое подразделение ЧДКЗ в Пустошке\n- Захватить полевой штаб противника к юго-востоку от Выбора.\n- Выбрить противника из г. Выбор\n- Освободить заложников из выборской школы"
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "- Пустошка - до отделения пехоты\n- Штаб - пехота, уркпленные позиции и бронетехника\n- Выбор - до взвода пехоты, бронетехника.\n- Многочисленные моторизованные и пешие патрули в зоне операции\n- Транспортные грузовики и лёгкая техника, перевозящая личный состав"
+    },
+    {
+     "title": "Поддержка",
+     "body": "- БТР\n- БРДМ-2\n- Разношерстная лёгкая бронетехника\n- FARP"
+    }
+   ]
+  }
+ },
+ {
+  "id": "pinecone-jam",
+  "name": "Pinecone Jam",
+  "mapKey": "chernarus",
+  "mapLabel": "Chernarus",
+  "coverUrl": "/covers/pinecone-jam.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/694305E5A23B964C",
+  "addonGuid": "694305E5A23B964C",
+  "scenarioId": "{7B9FBE45A80A626F}Missions/recoil.conf",
+  "tags": [
+   "west-gear"
+  ],
+  "markersLayer": "files/pinecone-jam.layer",
+  "briefing": {
+   "sides": {
+    "for": "Силы специальных операций Корпуса морской пехоты США (MARSOC)",
+    "against": "Вооружённое формирование «Чёрное Знамя»"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Чернарусь, 17 сентября 2009 г.\n\nНаша группа находится в Ченаруси в рамках программы Foreign Internal Defense (FID), проводя боевую подготовку подразделений местных сил безопасности.\n\nЭтой ночью учебный лагерь был атакован превосходящими силами боевиков «Чёрного Знамени». Мы с боем сумели вырваться из окружения и перегруппировались на заброшенной стройке западнее н.п. Орловец. \n\nСвязь с эвакуационной группой «Crazy Horse» отсутствует - радиосеть подавляется средствами РЭБ противника. Нам нужно восстановить радиосвязь и получить координаты точки рандеву. По нашим данным, в зоне операции работает 4 станции подавления радиосвязи, нам нужно вывести из строя хотя бы 3 из них."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Обнаружить и уничтожить хотя бы 3 станции РЭБ противника (Возможные локации станций указаны на карте \"?\").\n- После восстановления связи выдвинуться в указанную точку эвакуации и осуществить рандеву с группой «Crazy Horse»."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "- Вооружённое формирование «Чёрное Знамя».\n- После того, как нам удалось выйти из окружения на учебном объекте, противник стянул в район многочисленные резервы. На нас объявлена настоящая охота.\n- Станции РЭБ охраняются группами в до отделения. Также, мы должны исходить из того, что населенные пункты заняты противником, дороги перекрыты блокпостами, а патрули противника прочесывают близлежащие лесные массивы.\n- Не исключено наличие у противника бронетехники (БТР-70, БРДМ-2)."
+    },
+    {
+     "title": "Поддержка",
+     "body": "- Отсутствует\n- При необходимости, для выполнения целей и задач операции, разрешается использовать трофейное вооружение, технику противника, а также гражданский транспорт."
+    }
+   ]
+  }
+ },
+ {
+  "id": "reichswald",
+  "name": "Reichswald",
+  "mapKey": "armenhof",
+  "mapLabel": "Armenhof",
+  "coverUrl": "/covers/reichswald.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6954B631B20A2C14",
+  "addonGuid": "6954B631B20A2C14",
+  "scenarioId": "{B1BF82A4AF40A2EC}Missions/sheppards.conf",
+  "tags": [
+   "west-gear"
+  ],
+  "markersLayer": "files/reichswald.layer",
+  "briefing": {
+   "sides": {
+    "for": "Взвод разведывательного батальона Бундесвера.",
+    "against": "Вооружённое формирование движения «Райхсбюргеров»"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "После серии терактов, организованных движением Райхсбюргеров в крупных городах Германии, федеральное правительство объявило Шпаннунгсфаль (Spannungsfall) - режим повышенной военной готовности. По его условиям Бундесвер привлечён к подавлению вооружённого восстания на территории страны.\n\nРазведка выявила опорный пункт одной из ячеек движения в районе деревни Визен. По данным разведки, ячейка контролирует три позиции:\n\n\n- ферму к югу от деревни (наблюдательный пункт)\n- укреплённую позицию в лесополосе на подступах к Визену\n- комплекс зданий внутри деревни, используемый как временный штаб\n\nНа территории штаба, предположительно, организован склад оружия. Захват склада имеет разведывательную ценность для последующих операций против сети Райхсбюргеров.\nГражданское население в зоне операции отсутствует - район заблаговременно эвакуирован полицией."
+    },
+    {
+     "title": "Задачи",
+     "body": "Зачистить три опорных пункта противника:\n\n\n- Obj. Sabine. Зачистить ферму к югу от Визена.\n- Obj. Greta. Зачистить укреплённую позицию противника в лесополосе.\n- Obj. Ingrid. Захватить комплекс штаба в Визене. Локализовать склад оружия в одном из амбаров комплекса.\n\nЗачищать всю деревню Визен не требуется. После уничтожения штаба остаточные силы противника утратят боеспособность."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Противник вооружен преимущественно техникой и оружием советского и российского производства, добытыми с разграбленных складов ННА ГДР в начале 90-х, а также через серые рынки Восточной Европы. Часть бронетехники находится в плохом техническом состоянии, но боеспособна.\n\n\n- Пешие патрули в радиусе действия ячейки. Оценочная численность сил противника в АО: до усиленного взвода.\n- Лёгкая техника: УАЗы с установленным вооружением (предположительно 2-3 единицы).\n- Бронетехника: 1-2 БТР-70."
+    },
+    {
+     "title": "Поддержка",
+     "body": "- 2x Fennek .50 cal\n- 1x транспортный грузовик"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "PL",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "RTO",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Medic",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Squad Leader",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Marksman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Marksman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Squad Leader",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Marksman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Marksman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "last-light",
+  "name": "Last Light",
+  "mapKey": "alhadra",
+  "mapLabel": "Al Hadra",
+  "coverUrl": "/covers/last-light.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/695EECAEDC6180B9",
+  "addonGuid": "695EECAEDC6180B9",
+  "scenarioId": "{46A841DCE7559B11}Missions/last-light.conf",
+  "tags": [
+   "west-gear"
+  ],
+  "markersLayer": "files/last-light.layer",
+  "briefing": {
+   "sides": {
+    "for": "Подразделение MARSOC, действующее в составе CJTF-OIR (Combined Joint Task Force – Operation Inherent Resolve).",
+    "against": "Ячейка «Вилайят аль-Фурат» регионального крыла «Исламского государства»."
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Восточная Сирия, конец 2020 года. CJTF-OIR проводит поэтапное сокращение присутствия в регионе: часть передовых баз свёрнута, ответственность за зоны патрулирования передаётся партнёрским силам (SDF). На фоне этого сокращения активизировались остаточные ячейки боевиков, ранее загнанные в подполье.\n\nОдна из таких ячеек, действующая в районе AL Hadra под руководством полевого командира с позывным «Абу Махмуд аль-Шами», в последние недели нанесла серию ударов: миномётный обстрел колонны снабжения SDF, обстрел из 57-мм зенитного орудия по вертолёту коалиции, казни местных жителей, сотрудничавших с коалицией.\n\nПо данным HUMINT-сети, ячейка опирается на три объекта в районе. До окончательного вывода передовых сил из района остаётся менее двух недель. Командование приняло решение ликвидировать ячейку, пока наше присутствие в регионе полностью не свернуто."
+    },
+    {
+     "title": "Задачи",
+     "body": "Зачистить три опорных пункта противника:\n\n\n- Захватить минометную позицию на Obj.Oscar\n- Зачистить особняк Obj.Quebec, используется командиром ячейки как штаб. Нейтрализовать «Абу Махмуда»\n- Найти у уничтожить зенитнуя установку АЗП-57 на Obj.Romeo\n- Эвакуироваться на точку старта."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "- Миномётный расчёт на Obj.Oscar\n- Лёгкое стрелковое вооружение.\n- Технички с ДШК или ПКМ.\n- Блокпосты и укрепления в районе операции"
+    },
+    {
+     "title": "Поддержка",
+     "body": "- 2× JLTV (M1278) CROWS M2 .50 cal.\n- 2× JLTV (M1278) невооруженные.\n- 1× M1126 Stryker CROWS M2 .50 cal."
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'3",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'4",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Saber-1_Stryker",
+    "name": "",
+    "slots": [
+     {
+      "role": "Crew 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Crew 2",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Saber-2_Stryker",
+    "name": "",
+    "slots": [
+     {
+      "role": "Crew 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Crew 2",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Взвода",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Зам. Ком. Взвода",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Медик",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "foxhound",
+  "name": "Foxhound",
+  "mapKey": "seitenbuch",
+  "mapLabel": "Seitenbuch",
+  "coverUrl": "/covers/foxhound.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/696D21F38B6E6826",
+  "addonGuid": "696D21F38B6E6826",
+  "scenarioId": "{17A895E39870FA68}Missions/foxhound.conf",
+  "tags": [],
+  "markersLayer": "files/foxhound.layer",
+  "briefing": {
+   "sides": {
+    "for": "Британские вооружённые силы, BAOR",
+    "against": "Вооружённые силы СССР"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Осень 1983 года. Советское наступление развивается стремительнее, чем ожидало командование НАТО. Наше подразделение отрезано в результате флангового манёвра противника - пути отхода перекрыты.\n\nНаша командная машина повреждена в ходе первого столкновения и находится на территории одной из ферм Зайтенбуха. Дальняя радиосвязь с основными силами невозможна. Задача - прорваться через занятую противником территорию и выйти к своим."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Уничтожить поврежденную командную машину на одной из ферм в окрестностях Зайтенбуха (Obj. Windsor). Она не должна попасть в руки противника\n- Обнаружить советский полевой командный пункт в центре Нойзеса (Obj. Stuart). Используя радиостанцию противника, выйти на связь и вызвать эвакуацию, после чего уничтожить оборудование.\n- Выдвинуться на точку эвакуации."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Зайтенбух:\n\n- Передовые элементы противника.\n- 1-2 единицы бронетехники.\n- Пешие патрули в окрестностях.\n\nНойзес:\n\n- В Нойзесе сосредоточены основные силы.\n- Укреплённые позиции.\n- Заграждения на дорогах.\n- 2-3 единицы бронетехники\n- Многочисленные патрули в городе, окрестностях и лесах.\n- Жилая застройка, вероятно, занята противником."
+    },
+    {
+     "title": "Поддержка",
+     "body": "- 3x невооруженный Land Rover\n- 2x GPMG Land Rover\n- 1x Transport Truck\n- 1x невооруженный Land Rover, в инвентаре которого есть два M2 с треногами для Weapons Squad."
+    },
+    {
+     "title": "Замечания",
+     "body": "- Ночная миссия.\n- Зачистка жилой застройки не является одной из задач."
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "PL",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Зам. Ком. Взвода",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Медик",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'3",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'4",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - HMG Gunner",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - HMG Assistant",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - HMG Gunner",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - HMG Assistant",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "crayfish-season",
+  "name": "Crayfish Season",
+  "mapKey": "everon",
+  "mapLabel": "Everon",
+  "coverUrl": "/covers/crayfish-season.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/697AC020AD87A739",
+  "addonGuid": "697AC020AD87A739",
+  "scenarioId": "{52580EB684538F73}Missions/ts-crayfish.conf",
+  "tags": [
+   "east-gear"
+  ],
+  "markersLayer": "files/crayfish-season.layer",
+  "briefing": {
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "За кого: Морская пехота СССР\nПротив кого: Группа организованных браконьеров, действующих под прикрытием повстанческой деятельности\n\nПостановлением Президиума Верховного Совета от 14 марта 1974 года речной рак Astacus erevanicus pinewoodus, обитающий в акватории озера Пайнвуд на острове Эверон, внесён в реестр охраняемых видов Советского Союза. Данное постановление было подписано в 14:47, в пятницу, за двадцать минут до конца рабочего дня. Никто не возражал.\n\nРазведка установила, что формирования FIA развернули незаконную промысловую операцию в районе озера Пайнвуд. По имеющимся данным, незаконный вылов ведётся с использованием промышленного оборудования. Для транспортировки улова задействован топливозаправщик, переоборудованный под перевозку отловленных раков.\n\nМинистерство природных ресурсов квалифицировало данную деятельность как Экологическое преступление 2-го класса. Это автоматически влечёт за собой обязательное военное реагирование согласно тому же постановлению."
+    },
+    {
+     "title": "Задачи",
+     "body": "Деревня Фигари:\nПроизвести досмотр гаражей в деревне Фигари. Обнаружить и взять под контроль рыболовное снаряжение. Данное оборудование является вещественным доказательством и подлежит документированию в соответствии с протоколом Министерства природных ресурсов СССР (форма МПР-07, в трёх экземплярах).\n\nСеверный берег озера Пайнвуд:\nУничтожить либо рассеять силы FIA, сосредоточенные в лагере на северном берегу озера. Лагерь является основным опорным пунктом браконьерской операции.\n\nРайон коттеджей на южном берегу:\nОбнаружить и взять под охрану топливозаправщик, использовавшийся для транспортировки незаконного улова. Транспортное средство является главным вещественным доказательством факта организованного браконьерства."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Силы FIA\n- Лёгкая пехота\n- Легкий Транспорт\n- Мотивированы экономически (Рак стоит дорого)\n- Отступать не намерены."
+    },
+    {
+     "title": "Поддержка",
+     "body": "- 3x УАЗ-452\n- 3x УАЗ-469 ПКМ\n- 1x УАЗ-469 Транспорт"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Взвода",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Зам. Ком. Взвода",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Медик",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Снайпер",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Снайпер",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'3",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Снайпер",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "hillsweepers",
+  "name": "HillSweepers",
+  "mapKey": "everon",
+  "mapLabel": "Everon",
+  "coverUrl": "/covers/hillsweepers.jpg",
+  "authors": [
+   {
+    "name": "Buzzil",
+    "discordId": "317330896778952709"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/698C600270FDCB74",
+  "addonGuid": "698C600270FDCB74",
+  "scenarioId": "{035AA1984402E46E}Missions/EdenMission.conf",
+  "tags": [
+   "west-gear"
+  ],
+  "markersLayer": "files/hillsweepers.layer",
+  "briefing": {
+   "sides": {
+    "for": "Какие-то Special Forces",
+    "against": "Какие-то партизаны"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Партизаны в край обнаглели и уже в течение пары недель набегают на наши логистические конвои на юге Эверона. За счет этого они отъелись и уже оформили самую настоящую \"No America Zone\", куда наши бравые GI боятся сунуть нос. Еще пару недель и они захватят порт и начнут независимую от доллара экономическую деятельность. Очень плохо!\n\nК сожалению силовая акция силами пехотной бригады генерала Букера закончилась не начавшись - солдаты разбежались под юбки местных дамочек, а пара грузовиков набитая пулеметами и минами попала в руки партизан. Местный комендант в шоке и целыми днями натирает наградной 1911 с мыслями об окончании карьеры.\n\nПришло время лучшим из лучших подняться в эти чертовы горы и показать аборигенам, что такое американское оружие! Стафф сержант Хоукай предложил мощный и действенный план - высаживаемся на вертушках на верхушке и лавиной сметаем жалкий сброд вместе с их чертовым лесом. В плен никого не брать! Собственность Армии США не ломать, не взрывать и не присваивать, а описать и сдать на склад!"
+    },
+    {
+     "title": "Задачи",
+     "body": "- Зачистить лес (красная зона на карте)\n- Найти схрон с похищенным оружием армии США"
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Гадкие подлые то ли коммунистические, то ли черт его знает какие засранцы сидят друг у друга на головах в этой узкой полоске леса у воды. Вряд ли стоит ждать организованной обороны, но наши умудрились \"подарить\" им кучу всякого добра - оружие, колючку, чертовы мины всех калибров.\n\nТочно известно, что дорога в занятую противником область заминирована в три слоя всеми видами мин (черт побери, я не удивлюсь если наши макаки притащили им даже пару морских мин)!\n\nВ остальном ожидается только легкая стрелковка и пулеметы."
+    },
+    {
+     "title": "Поддержка",
+     "body": "Комендант выделил нам 2 Ирокеза UH-1 и пару грузовиков."
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Взвода",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Зам. Ком. Взвода",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Медик",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'3",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "choripan",
+  "name": "Choripan",
+  "mapKey": "faircroft",
+  "mapLabel": "Faircroft Islands",
+  "coverUrl": "/covers/choripan.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/698729F8A23A6628",
+  "addonGuid": "698729F8A23A6628",
+  "scenarioId": "{28555ED78A8C62B1}Missions/ts-choripan.conf",
+  "tags": [
+   "west-gear"
+  ],
+  "markersLayer": "files/choripan.layer",
+  "briefing": {
+   "sides": {
+    "for": "Аргентинский отряд боевых пловцов Buzo Táctico",
+    "against": "Британский гарнизон островов Фэйркрофт."
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "1982 год. Аргентина начинает операцию по возвращению Мальвинских островов, которые считает своей территорией. Наши основные силы морской пехоты сосредоточены на западном берегу пролива и готовы перейти по мосту Union Bridge, чтобы развить наступление вглубь острова. Переправа заблокирована: британцы укрепились у моста и удерживают южные подступы, не давая нашим силам перейти на остров.\n\nНашему подразделению приказано провести высадку с лодок на северо-востоке острова, в тылу британской обороны, и \"разобрать\" её изнутри.\n\nНесколько дней назад передовая разведгруппа, высаженная с подводной лодки, заложила тайник с подрывными зарядами в районе Sandwick. После высадки нам необходимо отыскать тайник и забрать взрывчатку - она нам понадобится."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Провести высадку в районе Sandwick\n- Найти тайник со взрывчаткой.\n- Прочесать три тыловые позиции противника: Mulligan, Fenby и Woodside. \nа) Уничтожить машины снабжения противника;\nб) Найти и уничтожить миномётную позицию, которая ведёт огонь по нашим силам;\nв) Если обнаружите британский командный пункт, обыщите его и заберите документы с планами противника (опционально).\n- Зачистите Obj. Union - укреплённый узел обороны у моста: пехоту, технику, стационарное вооружение и укрепления."
+    },
+    {
+     "title": "Замечания",
+     "body": "Заходить в город Pendleworth запрещено. Зачистка города остаётся задачей основных сил после взятия моста."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Британская регулярная пехота. В тылу противник немногочислен: на каждой из ферм примерно по отделению, плюс отдельные пешие патрули и подвижные дозоры на вооружённых Land Rover, курсирующие между точками. На одной из ферм оборудована миномётная позиция, обстреливающая наши войска.\n\nОсновной узел обороны находится у моста Union. Здесь сосредоточена большая часть гарнизона и самые серьёзные укрепления."
+    },
+    {
+     "title": "Поддержка",
+     "body": "- 4x Лодка RHIB с пулеметом\n- 4x Лодка RHIB невооруженная\n- Для выполнения поставленных задач нам разрешено использовать захваченную технику противника."
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Взвода",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Зам. Ком. Взвода",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Медик",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'3",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'4",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "circuit-breaker",
+  "name": "Circuit Breaker",
+  "mapKey": "serhiivka",
+  "mapLabel": "Serhiivka",
+  "coverUrl": "/covers/circuit-breaker.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/69C47C65A80AA363",
+  "addonGuid": "69C47C65A80AA363",
+  "scenarioId": "{C214DAE9CDABAB2E}Missions/ts-raid.conf",
+  "tags": [
+   "2000+",
+   "east-gear"
+  ],
+  "markersLayer": "files/circuit-breaker.layer",
+  "briefing": {
+   "sides": {
+    "for": "ЧСО",
+    "against": "ЧДКЗ"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Октябрь 2009 года. Несмотря на официальные заявления о локализации конфликта в пределах Южной Загории, отдельные формирования ЧДКЗ пересекли границу и закрепились на территории соседнего государства, используя приграничные районы как тыловые базы. По согласованию с местными властями, командование ЧСО санкционировало ограниченную операцию по нейтрализации сепаратистских сил в районе села Сергеевка.\n\nВ районе операции выявлены три ключевых объекта. Мост через реку с электрической подстанцией контролируется передовым охранением ЧДКЗ. В окрестностях села расположен полевой штаб противника, точное местоположение которого установить не удалось - предполагаемый район обозначен на карте. Штабом командует майор Николай Резник, координирующий подготовку наступления.\n\nНаиболее серьёзная угроза - крупная электростанция на окраине села. По нашим данным, инженерная группа ЧДКЗ в настоящий момент минирует объект. При подрыве возможны массовые жертвы среди мирного населения окрестных сёл и полное уничтожение энергетической инфраструктуры района."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Зачистить мост и электрическую подстанцию от передового охранения ЧДКЗ (Объект Анна).\n- Обнаружить полевой штаб ЧДКЗ в обозначенном районе (Объект Борис). Зачистить объект. Ликвидировать майора Резника.\n- Выйти к электростанции (Объект Владимир). Нейтрализовать инженерную группу противника. Обезвредить установленные взрывные заряды."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Чернорусское Движение Красной Звезды.\n\n- Пехота\n- Бронетехника (БТР-70, БРДМ2)\n- Укрепы со станковым вооружением (ПКМ, ДШК, АГС-17)"
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "- 1'1  - Пехота + БТР-70\n- 1'2  - Пехота + БТР-70\n- 1'3  - Пехота + Урал\n- 1'4  - Пехота + Урал\n- Молот  - Минометный расчет\n- 1'6  - Ком. Взвода"
+    },
+    {
+     "title": "Поддержка",
+     "body": "Транспорт\n- 2х БТР-70\n- 2х Урал\n- 2х УАЗ-469\n\nМиномет 82мм\n- 60 HE\n- 40 SMK"
+    },
+    {
+     "title": "Замечания",
+     "body": "- Запрещено вызывать артиллерию по объектам инфраструктуры (мост, подстанция, электростанция)"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Ком. отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Гранатометчик",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Помощник гранатомётчика",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Старший стрелок",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "GREEN - Наводчик-оператор",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "GREEN - Механик-водитель",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Ком. отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Гранатометчик",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Помощник гранатомётчика",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Старший стрелок",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "GREEN - Наводчик-оператор",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "GREEN - Механик-водитель",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Молот",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. расчета",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Стрелок 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Стрелок 2",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. взвода",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Зам. ком. взвода",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Санитар",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "base-jumping",
+  "name": "Base Jumping",
+  "mapKey": "kolguyev",
+  "mapLabel": "Kolguyev",
+  "coverUrl": "/covers/base-jumping.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A51203AAEAC39B1",
+  "addonGuid": "6A51203AAEAC39B1",
+  "scenarioId": "{6A51203A908D8173}Missions/Operation_Base_Jumping.conf",
+  "tags": [
+   "east-gear",
+   "1980s"
+  ],
+  "markersLayer": "files/base-jumping.layer",
+  "briefing": {
+   "sides": {
+    "for": "СССР - морская пехота",
+    "against": "США"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Осень 1983 года. Пока основные силы Варшавского договора ведут наступление в Европе, гарнизон Колгуева сокращён до минимума — почти всё, что могло стрелять, ушло на запад. Этим воспользовался противник: две недели назад США высадили десант и практически без боя заняли военные городки в центральной части острова. Теперь наши собственные базы работают против нас: со складов снабжается американская группировка, а остров превращается в передовой плацдарм, угрожающий северным морским коммуникациям.\n\nКомандование не может снимать силы с главного направления, поэтому возвращать остров будем тем, что есть. Наше подразделение высажено в уцелевшем порту на восточном побережье. Задача - пройти цепочку захваченных объектов с востока на запад и вернуть их один за другим.\n\nРазведка докладывает: на Районе Борис противник развернул миномётную позицию и корректирует огонь по всему району операции. Пока позиция действует, наше передвижение будет встречено обстрелом - её захват критичен.\n\nПосле зачистки объектов - выход из района операции на северо-запад, через Выход Ольга или Выход Ульяна. Маршруты отхода разведаны слабо: западнее Владимира отмечены неустановленные силы противника."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Зачистить Район Анна  вернуть контроль над восточным военным городком.\n- Захватить Район Борис и обезвредить минометную позицию.\n- Выйти из района операции через Выход Ольга или Выход Ульяна."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "- Армейская пехота США, на объектах замечены группы «зелёных беретов».\n- LAV-25 и вооружённые дозорные машины (M151 c M2, M1025), курсирующие по дорогам между базами.\n- Гарнизоны в застройке; КПП, пулемётные гнёзда и наблюдательные вышки на подступах.\n- Миномётная позиция в Районе Борис ведет огонь по всему району операции до её захвата.\n- Пешие патрули севернее и южнее оси движения."
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "1'6 - Ком. взвода\n1'1 - Пехота\n1'2 - Пехота\nГром - экипаж БРДМ\nМолот - Минометный расчет"
+    },
+    {
+     "title": "Поддержка",
+     "body": "Техника\n- 1х БРДМ-2\n- 1х УАЗ-469\n- 1х УАЗ-452 Грузовой (с минометами)\n- 2х Урал (транспорт)\nАртиллерия 82мм\n- 2 орудия\n- 80х ОФ\n- 40х Дымовые\n- 40x Осветительные\nFARP развернут на точке старта"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Взвода",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Зам. Ком. Взвода",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Медик",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'3",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "GROM_BRDM-2",
+    "name": "",
+    "slots": [
+     {
+      "role": "Crew 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Crew 2",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "MOLOT_82mm",
+    "name": "",
+    "slots": [
+     {
+      "role": "Crew 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Crew 2",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "atomic-surfacing",
+  "name": "Atomic Surfacing",
+  "mapKey": "kolguyev",
+  "mapLabel": "Kolguyev",
+  "coverUrl": "/covers/atomic-surfacing.jpg",
+  "authors": [
+   {
+    "name": "Abrashka",
+    "discordId": "203269492543848449"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A4FF52A0E2CF5B1",
+  "addonGuid": "6A4FF52A0E2CF5B1",
+  "scenarioId": "{6A4FF52A806A1E43}Missions/Operation_Atomic_Surfacing.conf",
+  "tags": [
+   "east-gear"
+  ],
+  "markersLayer": "files/atomic-surfacing.layer",
+  "briefing": {
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "В разгар очередного витка холодной войны силы НАТО, воспользовавшись отдалённостью и слабым прикрытием советской береговой обороны в регионе, провели скрытную десантную операцию и установили фактический контроль над островом Калгуев. Официально Госдепартамент США заявляет о «миротворческом контингенте для защиты судоходства», однако разведка ГРУ установила истинную цель присутствия.\n\nПод прикрытием строительных батальонов американские инженерные части приступили к прокладке разветвлённой сети подземных тоннелей в горной части острова. Аэрофотосъёмка и данные радиоперехвата подтверждают: тоннели ведут к нескольким укреплённым камерам, оборудование в которых соответствует профилю шахтных пусковых установок тактического ядерного оружия. При завершении строительства остров превратится в передовой ядерный форпост НАТО в непосредственной близости от советских территориальных вод — это меняет стратегический баланс сил в регионе и создаёт недопустимую угрозу.\n\nОткрытая военная эскалация в планы Москвы не входит — доказательства присутствия шахт нельзя предъявить публично, не спровоцировав полномасштабный кризис. Решение принято на уровне Генштаба: ликвидировать угрозу силами одной группы, без объявления войны и без следов советского вмешательства.\"\n\nГруппе спецназа ГРУ поручена скрытная переброска на остров, разведка и уничтожение строящихся ядерных объектов, а также нейтрализация мобильной инфраструктуры связи противника, обеспечивающей координацию гарнизона. По завершении операции группа обязана эвакуироваться захваченным у противника воздушным транспортом — переброска штатными силами ВВС СССР исключена по соображениям секретности.\n\nFOB, обозначенный на карте, — точка десантирования и временная база группы, откуда ведётся планирование и координация всех последующих ударов."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Установить заряды №1 — заминировать бочки с ураном  и подорвать первую шахтную камеру.\n- Установить заряд №2 — заминировать бочки с ураном и подорвать вторую шахтную камеру.\n- Подорвать МС №1,2,3 и 4  — уничтожить мобильные станции связи (МС), обеспечивающие координацию гарнизона НАТО и оповещение вышестоящего командования об активности на острове.\n- Захватить вертолёт противника на площадке в аэропорту и использовать его как средство эвакуации группы по завершении операции."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Остров Калгуев находится под полным контролем американских вооружённых сил. Формально присутствие ограничено «инженерно-строительным контингентом», однако по факту гарнизон острова представляет собой полноценную боевую группировку, развёрнутую для охраны стройки и подавления любой попытки вмешательства.\n\nПо данным разведки ГРУ, оборона острова построена по принципу эшелонированных зон контроля, привязанных к ключевым объектам — шахтным площадкам, узлам связи и вертолётной площадке. Плотность патрулирования и постов высокая: остров прикрыт по всему периметру и вдоль внутренних дорог, что делает скрытное перемещение крупными силами практически невозможным — ставка сделана на малочисленную, хорошо подготовленную группу, действующую скрытно и избирательно."
+    }
+   ]
+  }
+ },
+ {
+  "id": "3-birds-1-stone",
+  "name": "3 Birds 1 Stone",
+  "mapKey": "everon",
+  "mapLabel": "Everon",
+  "coverUrl": "/covers/3-birds-1-stone.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A492D18E15A6C91",
+  "addonGuid": "6A492D18E15A6C91",
+  "scenarioId": "{6A492D184443FF03}Missions/Grasshoppers.conf",
+  "tags": [
+   "west-gear"
+  ],
+  "markersLayer": "files/3-birds-1-stone.layer",
+  "briefing": {
+   "sides": {
+    "for": "Delta Force",
+    "against": "USSR Naval Infantry, Spetsnaz"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "По данным разведки, три высокопоставленных офицера ВС СССР прибыли на остров Эверон для проведения закрытой встречи. Точное содержание переговоров неизвестно, однако сам факт присутствия трёх старших командиров в одном районе представляет для нас редкую возможность.\n\nЛиквидация целей непосредственно во время встречи признана нецелесообразной. Место проведения переговоров усиленно охраняется, уровень охранения превышает наши текущие возможности, а риск потерь при лобовом подходе неприемлем.\n\nНаша разведка установила места расквартирования офицеров, где они проведут эту ночь перед встречей. Все три места находятся в относительной глуши, на удалении от крупных городов - противник намеренно избегает привлечения внимания и не концентрирует силы в одном месте. Это делает ночь оптимальным временем для нанесения удара."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Obj. Idaho - ликвидировать полковника Григория Потапова.\n- Obj. Alaska - ликвидировать полковника Николая Лабутенко.\n- Obj. Virginia - ликвидировать генерал-майора Дмитрия Груздева.\n- Эвакуироваться за пределы острова."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Каждая точка охраняется силами в 1-2 отделения, бронетехники не замечено. Однако, затяжной огневой контакт или потеря скрытности на любом из объектов с высокой вероятностью приведёт к выдвижению подкреплений противника. Наших стредств недостаточно, чтобы вступать с ними в бой. В наших интереснах - действовать скрытно, или как минимум - быстро. \n\nВажно!\nРайон базы отдыха у озера Pinewood, где сейчас проходит подготовка в проведению встречи, оцеплен и усиленно охраняется, в том числе бронетехникой. Заход или пролеты вблизи этой зоны запрещены."
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "1'1 - 8 чел.\n1'2 - 8 чел.\n1'3 - 8 чел.\nVortex 1 (MH-6M) - 2 чел.\nVortex 2 (MH-6M) - 2 чел.\nVortex 3 (MH-6M) - 2 чел."
+    },
+    {
+     "title": "Поддержка",
+     "body": "- 4x MH-6M Little Bird"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Squad Leader",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Medic",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Rifleman1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Rifleman2",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Breach Team Leader",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Breacher 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Breacher 2",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Breacher 3",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Squad Leader",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Medic",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Rifleman1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Rifleman2",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Breach Team Leader",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Breacher 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Breacher 2",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Breacher 3",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'3",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Squad Leader",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Medic",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Rifleman1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Rifleman2",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Breach Team Leader",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Breacher 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Breacher 2",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Breacher 3",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Vortex-1",
+    "name": "",
+    "slots": [
+     {
+      "role": "Pilot",
+      "requiredRole": "Aircraft Vehicle"
+     },
+     {
+      "role": "Co-pilot",
+      "requiredRole": "Aircraft Vehicle"
+     }
+    ]
+   },
+   {
+    "groupId": "Vortex-2",
+    "name": "",
+    "slots": [
+     {
+      "role": "Pilot",
+      "requiredRole": "Aircraft Vehicle"
+     },
+     {
+      "role": "Co-pilot",
+      "requiredRole": "Aircraft Vehicle"
+     }
+    ]
+   },
+   {
+    "groupId": "Vortex-3",
+    "name": "",
+    "slots": [
+     {
+      "role": "Pilot",
+      "requiredRole": "Aircraft Vehicle"
+     },
+     {
+      "role": "Co-pilot",
+      "requiredRole": "Aircraft Vehicle"
+     }
+    ]
+   },
+   {
+    "groupId": "Vortex-6",
+    "name": "",
+    "slots": [
+     {
+      "role": "Pilot",
+      "requiredRole": "Aircraft Vehicle"
+     },
+     {
+      "role": "Co-pilot",
+      "requiredRole": "Aircraft Vehicle"
+     }
+    ]
+   },
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "PL",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "RTO",
+      "requiredRole": "SL"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "long-echoes",
+  "name": "Long Echoes",
+  "mapKey": "kunar",
+  "mapLabel": "Kunar Province",
+  "coverUrl": "/covers/long-echoes.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/69DEF693F62DE3D1",
+  "addonGuid": "69DEF693F62DE3D1",
+  "scenarioId": "{5119D6B3855E114A}Missions/long-echoes.conf",
+  "tags": [
+   "2000+",
+   "CAS",
+   "west-gear"
+  ],
+  "markersLayer": "files/long-echoes.layer",
+  "briefing": {
+   "sides": {
+    "for": "Корпус Морской Пехоты США",
+    "against": "Формирования Исламского Эмирата Афганистан"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Провинция Кунар, восток Афганистана, 2009 год. Горные долины у пакистанской границы уже несколько лет остаются вне контроля коалиции. Изрезанный рельеф и близость границы позволяют боевикам Исламского Эмирата Афганистан наносить удары по блокпостам и патрулям, а затем уходить в горы или на ту сторону границы.\nРазведка установила расположение перевалочной базы противника в верховьях долины. Через нее идет снабжение оружием и боеприпасами с пакистанской стороны, отсюда же выходят группы для нападений на позиции коалиции. Подступы к лагерю прикрыты двумя господствующими хребтами, Obj. Eagle и Obj. Khan, на которых боевики возвели укрепления и развернули ЗУ-23."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Зачистить хребет Eagle\n- Зачистить хребет Khan\n- Зачистить лагерь боевиков на вершине\n- Спуститься в поселок Tantil для эвакуации."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "- Миномет в районе лагеря\n- ЗУ-23 на одном из хребтов\n- Группы с ПЗРК\n- Укрепления со станковым вооружением\n- Технички на базе Toyota Hilux"
+    },
+    {
+     "title": "Поддержка",
+     "body": "- AH-64D Apache (M229 Hydra Rockets, M230 Chain Gun)\n- FARP\n- Sniper unit"
+    },
+    {
+     "title": "Замечания",
+     "body": "- Снайперская двойка стартует в отдалении от главных сил\n- В поселках у подножья горы присутствует мирное население"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "PL",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "RTO",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Medic",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Squad Leader",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Squad Leader",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Sierra",
+    "name": "",
+    "slots": [
+     {
+      "role": "Sniper",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Spotter",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Reaper",
+    "name": "",
+    "slots": [
+     {
+      "role": "Pilot",
+      "requiredRole": "Aircraft Vehicle"
+     },
+     {
+      "role": "Gunner",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "shabby-road",
+  "name": "Shabby Road",
+  "mapKey": "takistan",
+  "mapLabel": "Takistan",
+  "coverUrl": "/covers/shabby-road.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A6A33D446AE4704",
+  "addonGuid": "6A6A33D446AE4704",
+  "scenarioId": "{6A6A33D4FA04DA46}Missions/Operation_Moonshine.conf",
+  "tags": [
+   "2000+",
+   "artillery",
+   "west-gear"
+  ],
+  "markersLayer": "files/shabby-road.layer",
+  "briefing": {
+   "sides": {
+    "for": "Корпус Морской Пехоты США",
+    "against": "Какие-то мужики в халатах"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Лето 2009 года, провинция Такистан.\n\nПосле падения режима в центральных провинциях остатки вооружённых формирований отошли в предгорья и перешли к партизанской войне. Через этот район проходит старый караванный маршрут: под покровом ночи мятежники перебрасывают по нему оружие и боеприпасы вглубь страны. Канал\nснабжения получил у коалиции кодовое имя «Shabby Road».\n\nРазведка вскрыла три перевалочных пункта сети — Obj. Hornet, Obj. Honeybee и Obj. Wasp. Пункты прикрыты гарнизонами и полевыми укреплениями, между ними и в прилегающей долине действуют пешие и моторизованные патрули.\n\nНашей роте поставлена задача зачистить все три объекта."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Зачистить Obj. Hornet — восточный перевалочный пункт у окраины кишлака.\n- Зачистить Obj. Honeybee — основной склад сети. Ожидается наиболее плотная оборона.\n- Зачистить Obj. Wasp — северный пункт на границе зелёнки.\n\nПорядок выполнения — на усмотрение командира."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Obj. Hornet:\n\n- Гарнизон в застройке, полевые укрепления.\n- Пешие патрули в окрестностях.\n\nДолина между объектами:\n\n- Многочисленные пешие патрули.\n- Вооружённые внедорожники (УАЗ с ПКМ).\n\nObj. Honeybee:\n\n- Основные силы: усиленный гарнизон, укреплённые позиции, заграждения.\n- БРДМ-2.\n\nObj. Wasp:\n\n- Гарнизон, полевые укрепления.\n\nКроме того:\n\n- К северо-западу от объектов отмечен БТР-70.\n- Отдельные группы мятежников — по всей долине и на флангах."
+    },
+    {
+     "title": "Поддержка",
+     "body": "- 5× M1025 (M2HB)\n- 1× LAV-25\n- Артиллерия: 60× HE, 30× SMOKE, 30× ILLUM"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "PL",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "RTO",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Medic",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Squad Leader",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Squad Leader",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Machine Gunner",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Betsy",
+    "name": "",
+    "slots": [
+     {
+      "role": "Commander",
+      "requiredRole": "Armoured Crew"
+     },
+     {
+      "role": "Driver",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Gunner",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "forest-clearing",
+  "name": "Forest Clearing",
+  "mapKey": "everon",
+  "mapLabel": "Everon",
+  "coverUrl": "/covers/forest-clearing.jpg",
+  "authors": [
+   {
+    "name": "[лампас]VonScheer",
+    "discordId": "228193670371868672"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A64796678CD4404",
+  "addonGuid": "6A64796678CD4404",
+  "scenarioId": "{6A64796677F969A6}Missions/Forest_Clearing.conf",
+  "tags": [
+   "west-gear"
+  ],
+  "markersLayer": "files/forest-clearing.layer",
+  "briefing": {
+   "sides": {
+    "for": "Green berets",
+    "against": "ВС РФ"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "После высадки союзных сил на острове Эверон командование приступило к восстановлению контроля над ключевыми населёнными пунктами и транспортными узлами. Район Le Moule был занят нашими силами, однако дальнейшее продвижение в сторону Morton остановилось из-за сопротивления противника в лесном массиве южнее города.\nПо данным разведки, противник действует на острове в составе ограниченного контингента, ранее переброшенного для поддержки местных сил и удержания стратегических маршрутов. После потери Le Moule он отошёл в лес, где занял подготовленные позиции и использует местность для блокирования дорог, ведущих к Morton.\nНаше подразделение выполняет задачу по обеспечению безопасного коридора для дальнейшего продвижения союзных сил. Для продолжения операции необходимо зачистить входы в лес — OBJ ENTRY 1 и OBJ ENTRY 2, после чего захватить OBJ CROSSROADS и открыть маршрут на Morton."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "В районе действует подразделение ВС РФ.\nОжидается организованная оборона в лесистой местности, возможны стрелковые позиции, засады и пулемётные точки. Применение бронетехники противником не ожидается."
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "Green berets"
+    },
+    {
+     "title": "Задачи",
+     "body": "Зачистить два входа в лес:\n\n- OBJ ENTRY 1\n- OBJ ENTRY 2\nЗахватить и удержать OBJ CROSSROADS.\nОбеспечить безопасный проход союзных сил в направлении Morton."
+    },
+    {
+     "title": "Поддержка",
+     "body": "• 2 HMMWV\n• 2 HMMWV M2HB"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Взвода",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Зам. Ком. Взвода",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Медик",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'3",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "field-maneuvers",
+  "name": "Field Maneuvers",
+  "mapKey": "chernarus",
+  "mapLabel": "Chernarus",
+  "coverUrl": "/covers/field-maneuvers.jpg",
+  "authors": [
+   {
+    "name": "lim",
+    "discordId": "1019527250686783551"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A6FB23A79F8EEC1",
+  "addonGuid": "6A6FB23A79F8EEC1",
+  "scenarioId": "{6A6FB23A0E6AC553}Missions/Field_Maneuvers_RE.conf",
+  "tags": [
+   "east-gear",
+   "Золотой фонд"
+  ],
+  "markersLayer": "files/field-maneuvers.layer",
+  "briefing": {
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "RE-made with  using tS web mission builder (https://discord.com/channels/633726162849234957/1525384588145201214/1525384588145201214)\n Миссия золотого фонда\n\nПосле резкого обострения вдоль Chernarus'ского пролива ситуация остаётся крайне напряжённой. Город Chernogorsk уже более трёх суток находится под постоянным миномётным обстрелом, гражданское население эвакуировано, инфраструктура методично разрушается. По данным разведки у врага действуют две артиллерийские позиции — одна севернее Chernogorsk в направлении Nadezhdino, вторая восточнее города. На востоке, в Prigorodki, развёрнут полевой мобильный штаб противника с радиооборудованием, через которое осуществляется координация огня и управление группами. Союзные силы Республики Chernomoldova подтягивают резервы к зоне операции."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Не регулярные силы\nПредчернорусские гвардейцы Народного Фронта"
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "Регулярные силы\nChernomoldov'ские вооруженные силы\n3 - отделения моторизированной пехоты (BTR-70)"
+    },
+    {
+     "title": "Задачи",
+     "body": "- Униичтожить артиллерийские позиции противника:\n- севернее Chernogorsk в направлении Nadezhdino\n- восточнее Chernogorsk в районе Prigorodki\n- Уничтожить мобильный полевой штаб противника в районе Prigorodki\n- Уничтожить радиооборудование противника в районе Prigorodki"
+    },
+    {
+     "title": "Поддержка",
+     "body": "- Артиллерийская поддержка\n- 3x BTR-70\n- FARP"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "231",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ПТ",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Помощник Стрелка ПТ",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Старший стрелок (РПК)",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "232",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ПТ",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Помощник Стрелка ПТ",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Старший стрелок (РПК)",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "233",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ПТ",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Помощник Стрелка ПТ",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Старший стрелок (РПК)",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "KOROB-1",
+    "name": "",
+    "slots": [
+     {
+      "role": "Командир экипажа-Стрелок",
+      "requiredRole": "Armoured Crew"
+     },
+     {
+      "role": "Водитель",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "KOROB-2",
+    "name": "",
+    "slots": [
+     {
+      "role": "Командир экипажа-Стрелок",
+      "requiredRole": "Armoured Crew"
+     },
+     {
+      "role": "Водитель",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "KOROB-3",
+    "name": "",
+    "slots": [
+     {
+      "role": "Командир экипажа-Стрелок",
+      "requiredRole": "Armoured Crew"
+     },
+     {
+      "role": "Водитель",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "230",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Взвода",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Зам. Ком. Взвода",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Медик",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "RESERVE",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ПТ",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Помощник Стрелка ПТ",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Старший стрелок (РПК)",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "section-317",
+  "name": "Section 317",
+  "mapKey": "armenhof",
+  "mapLabel": "Armenhof",
+  "coverUrl": "/covers/section-317.jpg",
+  "authors": [
+   {
+    "name": "[лампас]VonScheer",
+    "discordId": "228193670371868672"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A7426D8A190AE55",
+  "addonGuid": "6A7426D8A190AE55",
+  "scenarioId": "{6A7426D8AB812267}Missions/Section_317.conf",
+  "tags": [
+   "1980s",
+   "artillery",
+   "west-gear"
+  ],
+  "markersLayer": "files/section-317.layer",
+  "briefing": {
+   "sides": {
+    "for": "British Army (1989)"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Противник прорвался в тыл нашему батальону и захватил высоту в районе населенного пункта Арменхоф, откуда ведет разведку в нашем направлении. Для восстановления обоороны нашему взводу необходимо выбить противника из близлежащих укрытий и вернуть высоту под контроль."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Неустановленные элементы механизированного батальона ВС СССР"
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "Взвод британской армии"
+    },
+    {
+     "title": "Задачи",
+     "body": "- Найти и уничтожить офицера разведки противника\n- Захватить и удерживать высоту 360"
+    },
+    {
+     "title": "Поддержка",
+     "body": "2x Land Rover GPMG\n4x Land Rover\n1x Land Rover Cargo\n\n81mm: 30 HE, 30 SMK, 30 ILLUM"
+    }
+   ]
+  },
+  "noSlotting": true
+ },
+ {
+  "id": "troubled-waters",
+  "name": "Troubled Waters",
+  "mapKey": "merak",
+  "mapLabel": "Merak",
+  "coverUrl": "/covers/troubled-waters.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A8AF6011B8FF081",
+  "addonGuid": "6A8AF6011B8FF081",
+  "scenarioId": "{6A8AF601A193C433}Missions/Troubled_Waters.conf",
+  "tags": [
+   "east-gear",
+   "1980s"
+  ],
+  "markersLayer": "files/troubled-waters.layer",
+  "briefing": {
+   "sides": {
+    "for": "Спецназ СССР",
+    "against": "Бандиты"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Остров Мерак. Преступная группировка, известная как «Black Cell», превратила речную долину в контрабандный коридор — по воде через остров идут наркотики и оружие. За последние месяцы банда выросла в полноценное вооружённое формирование:\nблокпосты на дорогах, пулемётные гнёзда, наблюдательные вышки. Местные власти потеряли контроль над долиной.\n\nНаше подразделение скрытно высажено севернее района операции. Задача — пройти долину с севера на юг и выбить группировку с её объектов.\n\nПо данным разведки, перевалочная база группировки — посёлок Rochebrun (Obj. Zulu). Южнее, в районе Obj. Yankee, оборудован схрон с оружием; точное место неизвестно — придётся искать. Главарь группировки отсиживается в южной части долины\n(Obj. X-Ray) — по агентурным данным, он оборудовал себе укрытие в одном из бункеров.\n\nПосле выполнения задач — отход к точке эвакуации на юго-западе района операции."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Зачистить Obj. Zulu — посёлок Rochebrun, перевалочную базу группировки.\n- Найти и уничтожить схрон с оружием в районе Obj. Yankee.\n- Найти и ликвидировать главаря группировки в районе Obj. X-Ray. Скорее всего, он прячется в бункере.\n- Выйти к точке эвакуации (Extraction Point)."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "- Боевики группировки «Black Cell».\n- Гарнизоны в Rochebrun и в районе схрона; КПП, пулемётные гнёзда и вышки на дорогах вдоль реки.\n- Техники и брони у противника не отмечено."
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "- 1'1 —  (9 чел.)\n- 1'2 — (9 чел.)\n- Wolf — снайперская пара (2 чел.)"
+    }
+   ]
+  }
+ },
+ {
+  "id": "in-cold-blood",
+  "name": "In Cold Blood",
+  "mapKey": "chernarus",
+  "mapLabel": "Chernarus",
+  "coverUrl": "/covers/in-cold-blood.jpg",
+  "authors": [
+   {
+    "name": "lim",
+    "discordId": "1019527250686783551"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A8B1A7B4BBCA541",
+  "addonGuid": "6A8B1A7B4BBCA541",
+  "scenarioId": "{6A8B1A7BA5D7FD23}Missions/In_Cold_Blood_RE.conf",
+  "tags": [
+   "west-gear"
+  ],
+  "markersLayer": "files/in-cold-blood.layer",
+  "briefing": {
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "made with  using tS web mission builder  (https://discord.com/channels/633726162849234957/1524714245848174632)\n\nКарта: Chernarus\nСторона игроков: US / Green Berets Suppressed\nПротивник: CDF\n\n8 декабря 2009.\nНесмотря на морозы, вооруженный конфликт CDF и CHDKZ на территории Черноруссии находится в самом разгаре.\n\nВчера после очередного ожесточенного боестолкновения был ранен и попал в плен один из ключевых боевых командиров CHDKZ. В его распоряжении находился личный портативный ПК, содержащий критическую информацию о военных силах CHDKZ в регионе.\n\nДанные на портативном носителе зашифрованы, и CDF понадобится несколько дней, чтобы их расшифровать. Также есть опасения, что захваченный офицер может заговорить. Оба варианта развития событий являются недопустимыми для наших работодателей из руководства CHDKZ.\n\nИз этических соображений ликвидация попавшего в плен офицера и возвращение портативного ПК были поручены нашей ЧВК.\n\nУстройство обладает точным датчиком геолокации, поэтому нам не составит труда найти его.\n\nДополнительно нам было поручено ослабить тылы противника путем проведения диверсий, направленных на уничтожение топливного склада CDF, а также их штаба в г. Vybor.\n\nЗаказчик особо подчеркнул деликатность данной операции и требует не оставлять свидетелей."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Ликвидировать пленного офицера CHDKZ и захватить портативный ПК с секретной информацией.\n- Уничтожить здание штаба CDF.\n- Уничтожить топливный склад CDF.\n- Эвакуироваться."
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "Неизвестная ЧВК"
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Регулярные силы CDF"
+    },
+    {
+     "title": "Поддержка",
+     "body": "3× невооруженные машины."
+    },
+    {
+     "title": "Артиллерия",
+     "body": "Артиллерийская поддержка недоступна."
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Взвода",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Зам. Ком. Взвода",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Медик",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Подрывник",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Снайпер",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Подрывник",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Снайпер",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'3",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Подрывник",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Ком. Группы",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Снайпер",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "combat-patrol",
+  "name": "Combat Patrol",
+  "mapKey": "faircroft",
+  "mapLabel": "Faircroft Islands",
+  "coverUrl": "/covers/combat-patrol.jpg",
+  "authors": [
+   {
+    "name": "[лампас]VonScheer",
+    "discordId": "228193670371868672"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A8B3FC405A90311",
+  "addonGuid": "6A8B3FC405A90311",
+  "scenarioId": "{6A8B3FC4DEBB73A3}Missions/Combat_Patrol.conf",
+  "tags": [
+   "1980s",
+   "artillery",
+   "west-gear"
+  ],
+  "markersLayer": "files/combat-patrol.layer",
+  "briefing": {
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Первый взвод заступает на боевой патруль в районе Tarren-On-Sea, где были замечены силы противника. Командир роты обозначил маршрутные точки для патруля, а также отметил ферму, на которой было замечены вражеские силы."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Проверить RP1\n- Проверить RP2\n- Проверить ферму\n- Проверить RP3\n- Вернуться на COP ALFRED"
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "ВС СССР\nКоличество и расположение неизвестно\n\nДля планирования:\nКарта: Faircroft Islands"
+    }
+   ]
+  }
+ },
+ {
+  "id": "show-must-go-on",
+  "name": "Show Must Go On",
+  "mapKey": "westzagoria",
+  "mapLabel": "West Zagoria",
+  "coverUrl": "/covers/show-must-go-on.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A983F77D3AFFF11",
+  "addonGuid": "6A983F77D3AFFF11",
+  "scenarioId": "{6A983F777151A5F3}Missions/Show_Must_Go_On.conf",
+  "tags": [
+   "2000+",
+   "east-gear"
+  ],
+  "markersLayer": "files/show-must-go-on.layer",
+  "briefing": {
+   "sides": {
+    "for": "Охранное агентство \"Заря\"",
+    "against": "ОПГ \"Глухие\""
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "3-е сентября, Западная Загория.\nНесмотря на многочисленные угрозы со стороны ОПГ \"Глухие\", концертное агентство все же не стало переносить или отменять концерт Михаила Шуфутинского на главной площади города Разный.\nПричиной столь холодного приема со стороны местных бандитов стал отказ команды певца выплачивать местной ОПГ круглую сумму, якобы на \"разрешение\" проведения концерта.\nОпасаясь угроз, организатор нанял нас для охраны и сопровождения музыканта. Концерт должен состояться ни смотря ни на что."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Обезопасить место проведения концерта\n- Пресечь любые попытки ОПГ сорвать мероприятие\n- После концерта, сопроводить Шуфутинского до точки Коттедж"
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "- Местные жители сообщают о подозрительной активности в Районе Анна - судя по всему Глухие пытаются перекрыть въезд в город.\n- В самом городе были замечены группы противника.\n- На карте отмечены здания (церковь, школа, бассейн), которые нужно будет осмотреть/зачистить - местные сообщают, что члены группировки, вероятно, будут использовать эти здания при попытке покушения на певца. Остальные здания зачищать не требуется."
+    },
+    {
+     "title": "Замечания",
+     "body": "- На главной площади присутствует мирное население (фанаты Шуфутинского)\n- Ввиду своего возраста, Михаил Шуфутинский может передвигаться только пешком, и то неохотно. Не заставляйте его лишний раз покидать его черную Волгу.\n- Смерть певца приведет к провалу миссии\n- Доукомплекты не предусмотрены (миссия с одной жизнью)\n- Роль Шуфутинского должен занять игрок. От него требуется выучить текст песни \"3-е сентября\" и исполнить ее на главной площади города"
+    },
+    {
+     "title": "Поддержка",
+     "body": "- 1х Волга\n- 4х TIGR"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'0",
+    "name": "",
+    "slots": [
+     {
+      "role": "Шуфутинский",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком.Отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Старший стрелок",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Стрелок",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Старший стрелок",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Стрелок ГП",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Стрелок",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "sawmill-raid",
+  "name": "Sawmill Raid",
+  "mapKey": "serhiivka",
+  "mapLabel": "Serhiivka",
+  "coverUrl": "/covers/sawmill-raid.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A9AF0E72128A935",
+  "addonGuid": "6A9AF0E72128A935",
+  "scenarioId": "{6A9AF0E7B1C7B4C7}Missions/Sawmill_Raid.conf",
+  "tags": [
+   "2000+",
+   "west-gear"
+  ],
+  "markersLayer": "files/sawmill-raid.layer",
+  "briefing": {
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Где-то на лесопилках на востоке Сергеевки что-то произошло и теперь стало совсем плохо. Нам поручили сделать так, чтобы стало хорошо. или по крайней мере не хуже, чем было. Противник вооружен и очень стреляет, но и мы не пальцем деланы и готовы дать отпор. Враг сидит на лесопилке и нужно, чтобы он там сидеть перестал."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Зачистить Obj. Alpha\n- Зачистить Obj. Bravo\n- На Obj. Charlie уничтожить топливозаправщик и ликвидировать фражеского офицера."
+    }
+   ]
+  }
+ },
+ {
+  "id": "bite-the-dust",
+  "name": "Bite the Dust",
+  "mapKey": "zargabad",
+  "mapLabel": "Zargabad",
+  "coverUrl": "/covers/bite-the-dust.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A9EDC7208D8B78A",
+  "addonGuid": "6A9EDC7208D8B78A",
+  "scenarioId": "{6A9EDC724D958E3C}Missions/Bite_the_Dust.conf",
+  "tags": [
+   "2000+",
+   "west-gear"
+  ],
+  "markersLayer": "files/bite-the-dust.layer",
+  "briefing": {
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Лето 2009 года, провинция Такистан. После вывода части коалиционных сил из района Заргабада местные вооружённые формирования вернулись в кишлаки к западу от города и восстановили старые маршруты снабжения через горы. Правительственные подразделения удерживают только сам город и аэродром.\n\nПоследнюю неделю аэродром и южная окраина Заргабада регулярно попадают под миномётный обстрел. По данным разведки, огонь ведётся с северной окраины кишлака Нанго. Там же, в бывшей фабрике юго-восточнее кишлака, боевики оборудовали опорный пункт, через который проходит всё снабжение группировки. Конечная точка маршрута — Азизайт: разведка докладывает как минимум о трёх складах оружия в застройке и вокруг неё.\n\nБатальон связан боями на севере провинции, авиация задействована на другом направлении. Командование выделяет наш взвод и ставит задачу ударить по группировке. Миномётная позиция — первоочередная цель. До её уничтожения противник ведёт огонь по всему району операции, включая наши подходы. Учитывайте, что при потере фабрики и Нанго противник подтянет резервы с востока, а при штурме Азизайта — из горных кишлаков к западу от него."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Найти и уничтожить миномётную позицию на северной окраине Нанго. До её уничтожения противник ведёт огонь по всему району операции.\n- Зачистить территорию фабрики юго-восточнее Нанго.\n- Уничтожить три склада оружия в Азизайте и его окрестностях."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Нанго и фабрика:\n\n- Основные силы группировки; гарнизоны в застройке, КПП и пулемётные гнёзда на подступах.\n- Миномётная позиция на северной окраине кишлака.\n- БРДМ-2, патрулирующая дороги вокруг кишлака и фабрики.\n- При потере позиций противник, скорее всего, введет резервы с юго-востока.\n\nАзизайт:\n\n- Охрана складов: гарнизоны и укреплённые позиции у каждого объекта.\n- БТР-70 и БРДМ-2 в окрестностях кишлака.\n- Ожадаются подкрепления противника из горных кишлаков на западе.\n\nТакже пешие группы противника были замечены в двух поселениях в восточной части района операции."
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "1'1\n1'2\nSierra - снайперская пара. Начинает вдали от основных сил, на юге."
+    },
+    {
+     "title": "Поддержка",
+     "body": "Основные силы:\n\n- 4x M1025 с M2HB\n\nSierra:\n\n- 1x неприметный УАЗ"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Sierra",
+    "name": "",
+    "slots": [
+     {
+      "role": "Снайпер",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Споттер",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "trench-crawlers",
+  "name": "Trench Crawlers",
+  "mapKey": "zarichne",
+  "mapLabel": "Zarichne",
+  "coverUrl": "/covers/trench-crawlers.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AA28B716C717DA1",
+  "addonGuid": "6AA28B716C717DA1",
+  "scenarioId": "{6AA28B71668CB8F3}Missions/Trench_Crawlers.conf",
+  "tags": [
+   "artillery",
+   "east-gear"
+  ],
+  "markersLayer": "files/trench-crawlers.layer",
+  "briefing": {
+   "sides": {
+    "for": "ВС РФ",
+    "against": "Привольские повстанцы"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Осень 2009 года, Привольская Республика.\n\nПосле вывода основных сил коалиции западный берег р. Жеребец остался за местным вооружённым ополчением — отрядами НАПА. Пока шли переговоры, ополченцы успели окопаться: по данным аэрофотосъёмки, на подступах к н.п. Заричне отрыта линия траншей, а в глубине обороны развёрнут полевой штаб.\n\nРазведка докладывает: ополчение хорошо вооружено — на позициях пулемётные гнёзда, блиндажи, на дорогах КПП. В районе Борис отмечен БРДМ-2, курсирующий между позициями. Восточнее района операции противник держит резервы; при потере любого из районов ожидается их ввод, в том числе на бронетехнике."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Зачистить траншеи в Районе Анна.\n- Зачистить полевой штаб в Районе Борис.\n- Зачистить застройку в Районе Владимир.\n- Пресечь попытки противника контратаковать — удерживать район Владимир."
+    },
+    {
+     "title": "Поддержка",
+     "body": "Артиллерия 82мм\n\n- 60× HE\n- 30× SMOKE\n- 30× ILLUM"
+    }
+   ]
+  }
+ },
+ {
+  "id": "dvizhuha",
+  "name": "Dvizhuha",
+  "mapKey": "serhiivka",
+  "mapLabel": "Serhiivka",
+  "coverUrl": "/covers/dvizhuha.jpg",
+  "authors": [
+   {
+    "name": "[лампас]VonScheer",
+    "discordId": "228193670371868672"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6A9FAA00D73C3A65",
+  "addonGuid": "6A9FAA00D73C3A65",
+  "scenarioId": "{6A9FAA00C4682407}Missions/Dvizhuha.conf",
+  "tags": [
+   "2000+",
+   "artillery",
+   "west-gear"
+  ],
+  "markersLayer": "files/dvizhuha.layer",
+  "briefing": {
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Противник  занял оборонительные позиции на юге Заричного. Благодаря городской застройке, противник смог подтянуть на \"ноль\" миномет и обстреливает наши передовые позиции. \n\nНаше командование задумало операцию по дестабилизации обороны противника в секторе и уничтожению миномёта. Операция получила кодовое название \"Движуха\" - противник не ожидает рейд на свои позиции."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Зачистить территорию госпиталя\n- Уничтожить миномет противника\n- Найти и уничтожить укрытый БТР противника (опц.)"
+    }
+   ]
+  }
+ },
+ {
+  "id": "bastion-of-death",
+  "name": "Bastion of death",
+  "mapKey": "merak",
+  "mapLabel": "Merak",
+  "coverUrl": "/covers/bastion-of-death.jpg",
+  "authors": [
+   {
+    "name": "JFKennedy",
+    "discordId": "1549458727298531398"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AA47F266B557E71",
+  "addonGuid": "6AA47F266B557E71",
+  "scenarioId": "{6AA47F26C4578DC3}Missions/TS_Mission.conf",
+  "tags": [
+   "2000+",
+   "Zombie",
+   "west-gear"
+  ],
+  "markersLayer": null,
+  "briefing": {
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "2030 год. 3 года спустя появления зомби вируса. Большая часть стран пала, но мир еще жив. Местная егерская дивизия бундесвера, а точнее то, что от неё осталось, отказалась выполнять приказы нашего командования. Также они дали нам понять что буду открывать огонь по нашим силам. Нам и без них проблем хватает, поэтому штабом была создана операция по уничтожению остатков этих предателей рода людского. Они засели в городе крепости - Вудфорд (Woodford) вам необходимо взять штурмом этот город крепость, и убить их командира отступника.\n\nПервое, вам необходимо зачистить маленькую деревушку Блайтфол (Blightfall) из-за опасной близости к периметру безопасной зоны. Вы должны убить ВСЕХ кто находится в этой деревне.\n\nПоведение зараженных\nЗараженные реагируют на звук, поэтому необходимо не допускать выстрелов из оружия без глушителей, в противном случае ближайшие группы зараженных отправятся на звук.\n\nЭвакуация\nСкорее всего предатели из егерской дивизии не додумались использовать глушители, из-за чего после начала перестрелки в вашу сторону направятся орды инфицированных. Из-за чего осле ликвидации командира егерей вам необходимо эвакуироваться из Вудфорда как можно скорее. Нам известно что на территории крепости есть две вертолетные площадки, возможно там остались вертолеты, используйте их для эвакуации в район аэродрома\n\nПравила ведения огня\nПравила ведения огня предельно просты, убивайте ВСЕХ на ком нет средств индивидуальной защиты дыхания. \n\nИнфекция\nИнфекция ведет себя предельно просто, любой кто не носит СИЗД или был укушен, поцарапан, в общем любому кому был нанесен урон инфицированный - инфицирован. Лекарство - пуля в голову. Также признаком инфекции может быть кашель, но не спешите стрелять в своих товарищей, это может быть и обычный кашель, а не инфицированный. Пока ваш товарищ стоит на своих двух ногах и держит в руках оружие - он не инфицирован."
+    },
+    {
+     "title": "Задачи",
+     "body": "1) Зачистить Блайтфолл\n2) Ликвидировать офицера предателя\n3) Эвакуироваться"
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "1) Егерская дивизия бундесвера\n2) Зараженные\n3) Любой человек без СИЗ"
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "1'6 - Ком. взвода\n1'1 - Пехота\n1'2 - Пехота"
+    },
+    {
+     "title": "Поддержка",
+     "body": "Техника:\n4х вооруженных хаммера\n1х Невооруженный хаммер\n2х Невооруженные хаммера (резерв)\n1х Медицинский хаммер (резерв)"
+    }
+   ]
+  },
+  "planning": false
+ },
+ {
+  "id": "marching-fire",
+  "name": "Marching Fire",
+  "mapKey": "merak",
+  "mapLabel": "Merak",
+  "coverUrl": "/covers/marching-fire.jpg",
+  "authors": [
+   {
+    "name": "[лампас]VonScheer",
+    "discordId": "228193670371868672"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AACFCF852847C51",
+  "addonGuid": "6AACFCF852847C51",
+  "scenarioId": "{6AACFCF83CF0F473}Missions/Marching_Fire.conf",
+  "tags": [
+   "artillery",
+   "west-gear",
+   "1980s"
+  ],
+  "markersLayer": "files/marching-fire.layer",
+  "briefing": {
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Перед нашим взводом стоит задача по захвату фермы, удерживаемой противником. Ранее нам удалось инфильтрироваться сквозь оборонительные порядки и выйти к минометной позиции, расположенной на ферме.\n\nРазведка доложила о хорошо подготовленной обороне противника. Поля к западу оказались заминированы, поэтому нам остается атаковать с фронта."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Уничтожить минометы и аммуницию на позиции OBJ BALMORAL\n- Захватить позицию OBJ BALMORAL и удержать её"
+    }
+   ]
+  }
+ },
+ {
+  "id": "shortening-the-arms",
+  "name": "Shortening The Arms",
+  "mapKey": "serhiivka",
+  "mapLabel": "Serhiivka",
+  "coverUrl": "/covers/shortening-the-arms.jpg",
+  "authors": [
+   {
+    "name": "[BS] Griggs",
+    "discordId": "278544799022317568"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AB1504B0FBCB7B1",
+  "addonGuid": "6AB1504B0FBCB7B1",
+  "scenarioId": "{6AB1504B3256DEF3}Missions/Shortening_The_Arms.conf",
+  "tags": [
+   "2000+",
+   "east-gear"
+  ],
+  "markersLayer": "files/shortening-the-arms.layer",
+  "briefing": {
+   "sides": {
+    "for": "ЧДКЗ",
+    "against": "CDF"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Чернарусь, Сергеевка, октябрь 2012 года. Утро.\n\nСоюзные силы готовят крупномасштабное наступление в регионе. Его успех напрямую зависит от завоевания превосходства в воздухе и исключения возможности применения противником штурмовой авиации.\n\nРазведка подтверждает наличие на вражеском аэродроме нескольких самолётов Су-25, оставшихся на вооружении противника после распада СССР. В настоящее время авиационная техника находится в состоянии регламентного обслуживания: самолёты рассредоточены по известным стоянкам, не подготовлены к немедленному вылету и не могут быть оперативно подняты в воздух даже в случае объявления тревоги.\n\nАэродром является укреплённым объектом и прикрыт обороной по всему периметру. Следует ожидать караулы, патрули, наблюдательные посты и быстрое прибытие резервов после первого контакта.\n\nСостав сил: для проведения операции выделен усиленный взвод. В распоряжении командира находятся два БТР-70, два грузовых автомобиля «Урал-4320» и два автомобиля УАЗ-469."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Уничтожить все Су-25.\n- Уничтожить бензовозы на территории аэродрома."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "В районе аэродрома и прилегающем регионе действуют Чернарусские силы обороны (ЧСО) численностью около 300 человек. Противник располагает гарнизоном на объекте, мобильными патрулями и резервом, способным быстро прибыть после объявления тревоги.\n\nЧСО имеют лёгкую и тяжёлую вооружённую технику, которую могут использовать для огневой поддержки, блокирования дорог и проведения контратак. Ожидаются усиленная охрана аэродрома, засады на подступах и попытки перекрыть пути отхода союзных сил."
+    },
+    {
+     "title": "Контрольные точки",
+     "body": "После достижения контрольных точек (отмечены на карте красными  знаками Waypoint) дальнейшее появление подкрепления (возрождение) будет производиться с них."
+    }
+   ]
+  }
+ },
+ {
+  "id": "fallen-hawk",
+  "name": "Fallen Hawk",
+  "mapKey": "mogadishu",
+  "mapLabel": "Mogadishu",
+  "coverUrl": "/covers/fallen-hawk.jpg",
+  "authors": [
+   {
+    "name": "[BS] Griggs",
+    "discordId": "278544799022317568"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AB195F5F18A4E65",
+  "addonGuid": "6AB195F5F18A4E65",
+  "scenarioId": "{6AB195F5DF08EA17}Missions/Operation_Fallen_Hawk.conf",
+  "tags": [
+   "2000+",
+   "west-gear"
+  ],
+  "markersLayer": "files/fallen-hawk.layer",
+  "briefing": {
+   "sides": {
+    "for": "US Army",
+    "against": "Сомалийские мужики"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Сегодня в 17:40 транспортный вертолёт группы 1'3 Cobra был сбит во время рейда. Машина упала в Центральном районе; связь с выжившими нестабильна. По последнему докладу, среди личного состава есть раненые, оба пилота живы. Противник быстро стягивает силы к месту крушения.\n\nОперация начинается на закате и продолжится после наступления темноты. Снижение видимости осложнит ориентирование, поиск раненых, распознавание целей и эвакуацию. Используйте свет, приборы ночного видения и радиосвязь дисциплинированно.\n\nЭвакуационные отделения 1'1 Viper и 1'2 Serpent выдвигаются на Humvee. Ваша задача — прорваться в Центральный район, установить контакт с 1'3 Cobra, оказать помощь раненым, обеспечить периметр и вывезти выживших в безопасную зону."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Достичь Центрального района и установить связь с 1'3 Cobra.\n- Стабилизировать и эвакуировать всех раненых, включая экипаж вертолёта.\n- Организовать отход наземным транспортом."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "По данным разведки, в районе действует до 300 бойцов противника. Они разделены на небольшие мобильные группы, хорошо знают город и используют здания, крыши, дворы и узкие улицы для засад. В непосредственной зоне крушения может находиться лишь часть этих сил, однако противник способен быстро подтянуть подкрепления и перекрыть маршруты отхода."
+    },
+    {
+     "title": "Поддержка",
+     "body": "В ваше распоряжение переданы:\n2 × M1025 HMMWV в окраске Tan, вооружённые пулемётами M2 — огневая поддержка колонны и подавление огневых точек.\n3 × M998 HMMWV Platoon в окраске Tan — транспорт для личного состава, раненых и эвакуируемых пилотов."
+    }
+   ]
+  }
+ },
+ {
+  "id": "regina-brawl",
+  "name": "Regina Brawl",
+  "mapKey": "everon",
+  "mapLabel": "Everon",
+  "coverUrl": "/covers/regina-brawl.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AB522FB103542B5",
+  "addonGuid": "6AB522FB103542B5",
+  "scenarioId": "{6AB522FB3398BA17}Missions/Regina_Brawl.conf",
+  "tags": [
+   "1980s",
+   "artillery",
+   "west-gear"
+  ],
+  "markersLayer": "files/regina-brawl.layer",
+  "briefing": {
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Лето 1989 года, Эверон.\n\nСоветская группировка, высадившаяся на острове, удерживает его южную часть. Посёлок Регина в долине одноимённой реки является узлом дорог на нашем участке, и именно здесь противник развернул командный пункт батальона.\n\nРадиоразведка установила, что на КП работает командно-штабная машина на шасси «Урал-4320». В её кунге находятся аппаратура засекреченной связи и действующие ключевые документы. Захватив машину целой, наши специалисты смогут читать советский радиообмен по всему острову. Задача поставлена 1-му взводу.\n\nВзвод выдвигается с севера по дороге на Регину. Северный подход к посёлку прикрывает лесопилка: противник оборудовал там опорный пункт, и, пока он держится, дорога простреливается с фланга. Основные силы противника находятся в самом посёлке. Дома в южной части заняты, по улицам и окрестностям ходят патрули, замечен БТР.\n\nЗахваченную КШМ нужно довести до моста через р. Регину юго-восточнее посёлка. Противник не отдаст штаб без боя: при атаке на КП к нему будут брошены резервы с востока, юго-востока и запада, в том числе стоит ожидать бронетехнику."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Зачистить лесопилку и открыть северный подход к Регине.\n- Найти КШМ в районе штаба противника в северной части посёлка. Огонь артиллерии по району штаба не вести: машина нужна целой.\n- Доставить КШМ к мосту через р. Регину (отметка «Доставить КШМ»). Машина должна дойти неповреждённой."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Мотострелки, усиленные морской пехотой.\nПешие патрули в окрестностях. В холмах к северо-востоку и востоку замечены пулемётные и противотанковые расчёты.\nБТР-70 в районе города.\nЖилая застройка, вероятно, плотно занята противником."
+    },
+    {
+     "title": "Поддержка",
+     "body": "Техника\n- 1× LAV-25\n- 2× M923A1 (транспорт)\n- 1× M151A2 (транспорт)\n\nАртиллерия\n- 30× HE\n- 30× SMOKE"
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "1-й взвод:\n\n- 1'6: управление взвода (3 чел.)\n- 1'1: 1-е отделение (9 чел.)\n- 1'2: 2-е отделение (9 чел.)\n- LAV-25: экипаж (2 чел.)"
+    }
+   ]
+  }
+ },
+ {
+  "id": "reverse-slope",
+  "name": "Reverse Slope",
+  "mapKey": "armenhof",
+  "mapLabel": "Armenhof",
+  "coverUrl": "/covers/reverse-slope.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6ABA83C4E59FFB51",
+  "addonGuid": "6ABA83C4E59FFB51",
+  "scenarioId": "{6ABA83C429A816E3}Missions/Reverse_Slope.conf",
+  "tags": [
+   "2000+",
+   "artillery",
+   "east-gear"
+  ],
+  "markersLayer": "files/reverse-slope.layer",
+  "briefing": {
+   "sides": {
+    "for": "ВСРФ",
+    "against": "Bundeswehr"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Батальон наступает на запад вдоль шоссе. Северный фланг наступления — долина Хауне и Бибера западнее Визена. Её обороняет усиленный взвод егерей бундесвера с разведывательными бронемашинами «Феннек».\n\nНаш взвод спешился в лесу южнее шоссе и действует в пешем порядке. Задача — снять пост, сбить противника с опорного пункта на обратном скате и обезглавить его оборону в долине."
+    },
+    {
+     "title": "Задачи",
+     "body": "- ДУБ — уничтожить разведывательную машину «Феннек» с мачтой наблюдения у одинокого дуба.\n- ЯСЕНЬ — зачистить хутор на обратном скате, около 400 м севернее поста. Задача выполнена, когда в районе хутора не останется противника.\n- ОЛЬХА — ликвидировать командира роты гауптмана Ланга на КП в очистных сооружениях у ручья Бибер."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Егеря бундесвера, до роты неполного состава: G36, пулемёты MG5, гранатомёты Panzerfaust 3. Разведка вскрыла не все позиции противника.\n\n\n- По данным разведки, у противника есть БМП «Мардер», который он может задействовать для обороны своих позиций.\n- Визен занят противником. Входить в город запрещено.\n- Миномёты противника активны, пока на позиции ДУБ находятся корректировщики."
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "1'1, 1'2 — мотострелковые отделения.\n1'6 — управление взвода.\n\nОсновные силы батальона наступают вдоль шоссе южнее района операции."
+    },
+    {
+     "title": "Поддержка",
+     "body": "Миномёт: 12 осколочно-фугасных, 16 дымовых, 8 осветительных мин.\nТехники нет — взвод действует в пешем порядке."
+    },
+    {
+     "title": "Замечания",
+     "body": "- Операция проходит ранним утром до восхода солнца\n- Поля на подступах открыты. Используйте складки местности, лесополосы и дым.\n- Позицию ДУБ зачищать необязательно, достаточно будет уничтожить вражеский Феннек.\n- Гауптман Ланг при опасности, скорее всего, укроется в одном из зданий."
+    }
+   ]
+  }
+ },
+ {
+  "id": "quiet-witness",
+  "name": "Quiet Witness",
+  "mapKey": "seitenbuch",
+  "mapLabel": "Seitenbuch",
+  "coverUrl": "/covers/quiet-witness.jpg",
+  "authors": [
+   {
+    "name": "[BS] Griggs",
+    "discordId": "278544799022317568"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AB7B9CABBE582C1",
+  "addonGuid": "6AB7B9CABBE582C1",
+  "scenarioId": "{6AB7B9CA95823263}Missions/Quiet_Witness.conf",
+  "tags": [
+   "1980s",
+   "west-gear"
+  ],
+  "markersLayer": "files/quiet-witness.layer",
+  "briefing": {
+   "sides": {
+    "for": "British Special Forces",
+    "against": "FIA"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Neuses, Бавария — 1989 год\nВремя начала: 02:10\n\nОбстановка\nРазведка установила местонахождение бывшего британского офицера, известного под именем полковник Алан Мерсер. Во время Второй мировой войны он передал противнику сведения, приведшие к гибели британских военнослужащих. После войны Мерсер исчез и десятилетиями жил под чужим именем.\n\nНесколько дней назад источник подтвердил: Мерсер скрывается в деревне Neuses. Его охраняет группа наёмников. Их численность и вооружение точно не установлены."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Ликвидировать Алана Мерсера."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "По имеющимся данным, в районе Neuses действует около 100 вооружённых бойцов, распределённых по деревне и окрестностям. Их подготовка, структура командования и оснащение неизвестны. В регионе также могут находиться дополнительные силы, способные прибыть после обнаружения группы."
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "Squad Leader",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Стрелок 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Стрелок 2",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Стрелок 3",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Стрелок 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Стрелок 2",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Стрелок 3",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "Squad Leader",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Стрелок 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Стрелок 2",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "RED - Стрелок 3",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Стрелок 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Стрелок 2",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Стрелок 3",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. взвода",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Санитар",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "counterpunch",
+  "name": "Counterpunch",
+  "mapKey": "ruha",
+  "mapLabel": "Ruha",
+  "coverUrl": "/covers/counterpunch.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AB833768890BF01",
+  "addonGuid": "6AB833768890BF01",
+  "scenarioId": "{6AB83376A80D5F53}Missions/Counterpunch.conf",
+  "tags": [
+   "2000+",
+   "artillery",
+   "west-gear"
+  ],
+  "markersLayer": "files/counterpunch.layer",
+  "briefing": {
+   "sides": {
+    "for": "USMC",
+    "against": "ЧДКЗ"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Неделю назад боевики ЧДКЗ, усиленные бронетехникой, прорвали наш слабый заслон севернее озера Руха. Противник занял деревни Исомяки, Нюрхиланмяки и Уусила и северную часть Рухи у развилки. Закрепиться противник ещё не успел. Командует прорывом полевой командир по прозвищу «Лесник», его штаб в лесном лагере севернее Исомяки.\n\nВзвод морской пехоты, усиленный «Страйкером», переходит в контрнаступление от Охменлуомы. Задача - отбросить противника за лес, пока он не подтянул резервы."
+    },
+    {
+     "title": "Задачи",
+     "body": "- JAB — зачистить деревню Исомяки, главный опорный пункт противника на дороге на север.\n- CROSS — уничтожить 82-мм миномёт 2Б14 на огневой позиции в поле за Нюрхиланмяки.\n- HOOK — уничтожить топливозаправщик бронегруппы в Уусиле.\n- UPPERCUT — ликвидировать «Лесника» в лесном лагере на поляне севернее Исомяки.\n\nПорядок выполнения задач — на усмотрение командира взвода."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "- Боевики ЧДКЗ, до усиленной роты. Разведка вскрыла не все позиции.\n- Миномёт противника работает по обнаруженным целям, пока позиция CROSS в его руках.\n- БМП-3 курсирует по MSR Washington\n- В районе Ob. Hook был замечен Т-72\n- В случае потери ключевых точек, противник подтянет резервы с севера."
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "1'1, 1'2 - пехотные отделения.\n1'5 - логистика (подвоз БК и подкрепов)\n1'6 - управление взвода.\nStryker — экипаж M1126 «Страйкер» CROWS-J (M2 и ПТРК «Джавелин»)."
+    },
+    {
+     "title": "Поддержка",
+     "body": "Транспорт:\n1x M1126 «Страйкер» CROWS-J\n5× M1025 (M2)\n1× M23A транспортный\nМиномёт роты:\n\n- 60 ОФ\n- 60 дымовых"
+    },
+    {
+     "title": "Замечания",
+     "body": "- Доукомплект доступен после выполнения трех первых задачи и перед началом выполнения последней.\n- Доступен один редеплой. Для его получения - вернитесь на точку старта"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'5",
+    "name": "",
+    "slots": [
+     {
+      "role": "Logistics Officer",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Driver",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "PL",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "RTO",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Corpsman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Stryker",
+    "name": "",
+    "slots": [
+     {
+      "role": "Commander",
+      "requiredRole": "Armoured Crew"
+     },
+     {
+      "role": "Driver",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Gunner",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "emerald-fields",
+  "name": "Emerald Fields",
+  "mapKey": "zargabad",
+  "mapLabel": "Zargabad",
+  "coverUrl": "/covers/emerald-fields.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AC0BDEBF8C5C001",
+  "addonGuid": "6AC0BDEBF8C5C001",
+  "scenarioId": "{6AC0BDEBE18D1773}Missions/Emerald_Fields.conf",
+  "tags": [
+   "2000+",
+   "artillery",
+   "west-gear"
+  ],
+  "markersLayer": "files/emerald-fields.layer",
+  "briefing": {
+   "sides": {
+    "for": "USMC",
+    "against": "Мужики в халатах"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Весна 2019 года, Такистан, провинция Заргабад. К югу от города вдоль реки тянется «зелёная зона» — орошаемые поля, сады и глинобитные дувалы между каналами. С приходом весны её заняли повстанцы: долина превратилась в их опорный район, откуда они перекрывают трассу на Заргабад и держат под контролем подходы к плотине Абе-Шур.\nНашему взводу поставлена задача пройти долину с юга на север и выбить противника с его опорных пунктов. Выдвигаемся с южной трассы.\n\nРазведка докладывает: основные силы боевиков сосредоточены в посёлке Шахбаз (Obj. Indiana) в центре долины. Севернее, за сухим руслом, противник удерживает дорожную развилку (Obj. Virginia). У плотины Абе-Шур, в районе Obj. Texas, развёрнута миномётная позиция: обнаруженные группы попадают под огонь в любой точке района операции, и так будет до тех пор, пока позиция не будет взята. После выполнения задач — выход на север, к точке эвакуации южнее Ярума (Exfill)."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Зачистить Obj. Indiana — посёлок Шахбаз, главный опорный пункт противника в долине.\n- Найти и уничтожить миномёт в районе Obj. Texas у плотины Абе-Шур. До захвата позиции противник ведёт огонь по всему району операции.\n- Зачистить Obj. Virginia — дорожную развилку на северо-востоке долины.\n- Выйти к точке эвакуации (Exfill)."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Местные повстанческие формирования. Пехота вооружена пулемётами и гранатомётами, замечены снайперы; на объектах — гарнизоны в застройке, КПП, пулемётные гнёзда и вышки. По дорогам долины курсируют вооруженные УАЗы, замечена лёгкая бронетехника — БРДМ-2 и БТР-70. Противник подтянет резервы с севера и востока. В полях и садах между объектами возможно наличие малых групп противника."
+    },
+    {
+     "title": "Поддержка",
+     "body": "Техника\n3× JLTV (M2HB)\n2× FMTV M1083 (M2HB)\nСтанковые пулемёты M2 с треногами для 1'4 в ящиках снабжения на точке старта.\n\nМиномет\n30 HE\n40 SMK"
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "1'6 — platoon HQ (3 чел.)\n1'1 — rifle squad (9 чел.)\n1'2 — rifle squad (9 чел.)\n1'4 — weapons squad (5 чел.)"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "1'1",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'2",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'4",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "HMG Gunner 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "HMG Gunner 2",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "HMG Gunner 3",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "HMG Gunner 4",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "1'6",
+    "name": "",
+    "slots": [
+     {
+      "role": "PL",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "RTO",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "Corpsman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "another-castle",
+  "name": "Another Castle",
+  "mapKey": "everon",
+  "mapLabel": "Everon",
+  "coverUrl": "/covers/another-castle.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AC3943C1ABD7B35",
+  "addonGuid": "6AC3943C1ABD7B35",
+  "scenarioId": "{6AC3943C45D65247}Missions/Another_Castle.conf",
+  "tags": [],
+  "markersLayer": "files/another-castle.layer",
+  "briefing": {
+   "sides": {
+    "for": "Спецназ СССР",
+    "against": "Армия США"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Август 1989 года, остров Эверон. Месяц назад мы выбили американцев из Сент-Пьерра. Остатки их гарнизона, отрезанные у Перевала Пеннант, заперлись в Замке Монфор, и выбить их оттуда тогда не удалось. Теперь эта ошибка обходится нам дорого: за последние недели противник скрытно нарастил силы, и старая крепость превратилась в плацдарм для удара по Сент-Пьерру.\n\nПехота США сосредоточена на протяжении всего хребта, от Пика Таран до Волнистой горы, и в самом замке. Огневые позиции и пулемётные гнёзда развёрнуты фронтом на восток, на Сент-Пьерр и дорогу через Вернон. Для начала наступления противнику не хватает только брони. По нашим разведданным, из Регины на Дюррас выдвигается колонна: LAV-25, HMMWV и грузовики с пехотой и боеприпасами. Её путь лежит через Перевал Пеннант.\n\nНашему подразделению поставлена задача выйти на перевал и устроить засаду на американский конвой. Сразу после засады нам необходимо зачистить хребет с северо-запада на юго-восток и, пользуясь смятением в рядах противника, выбить его из замка Монфор."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Устроить засаду на Перевале Пеннант и уничтожить колонну.\n- Зачистить отмеченные на карте укрепы противника на хребте.\n- Взять штурмом Замок Монфор и ликвидировать майора Рэдклиффа."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Колонна:\n\n- 2× LAV-25\n- 2× HMMWV\n- грузовики M923 с пехотой и боеприпасами\n\nХребет:\n\n- пехота армии США, сосредоточенная для наступления\n- укреплённые огневые позиции и пулемётные гнёзда, развёрнутые на Сент-Пьерр. Подходы к укрепам могут быть заминированы.\n- патрули на самом хребте и его склонах\n\nЗамок Монфор:\n\n- штаб наступления с пехотой до 2-3х отделений\n- майор Рэдклифф\n- подходы к замку могут быть заминированы"
+    },
+    {
+     "title": "Поддержка",
+     "body": "Миномет роты:\n\n- 30 дымов\n- 10 осветительных"
+    },
+    {
+     "title": "Замечания",
+     "body": "- не дайте себя обнаружить до моменты засады, иначе силы противника стянутся на наши позиции с юго-востока\n- начинаем за 40 минут до рассвета\n- редеплоев нет\n- 1 доукомплект после засады и еще один после зачистки Укрепления 3."
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "Синица-1",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Ком. отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Снайпер СВД",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Старший стрелок",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Гранатометчик",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Помощник гранатометчика",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Синица-2",
+    "name": "",
+    "slots": [
+     {
+      "role": "RED - Ком. отделения",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Снайпер СВД",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - Старший стрелок",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Пулеметчик",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Гранатометчик",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Помощник гранатометчика",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Синица-6",
+    "name": "",
+    "slots": [
+     {
+      "role": "Ком. взвода",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Санитар",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Сапер 1",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "Сапер 2",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "project-geras",
+  "name": "Project Geras",
+  "mapKey": "iraq1990",
+  "mapLabel": "Iraq 1990",
+  "coverUrl": "/covers/project-geras.jpg",
+  "authors": [
+   {
+    "name": "JFKennedy",
+    "discordId": "1549458727298531398"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AB19822A1BC4771",
+  "addonGuid": "6AB19822A1BC4771",
+  "scenarioId": "{6AB1982207F8B873}Missions/TS_Mission.conf",
+  "tags": [
+   "2000+",
+   "west-gear"
+  ],
+  "markersLayer": "files/project-geras.layer",
+  "briefing": {
+   "sides": {
+    "for": "КМП США",
+    "against": "Остатки иракских вооружённых сил и лояльные режиму нерегулярные формирования"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Ирак, 2003 год. Коалиционные силы ведут наступление в глубь страны. Подразделения Корпуса морской пехоты США продвигаются вдоль основных коммуникаций, занимают населённые пункты, перекрывают пути отхода и уничтожают оставшиеся очаги сопротивления.\n\nВы — военнослужащие Корпуса морской пехоты США, действующие в составе передового подразделения. Ваш отряд направлен в район небольшого иракского города, расположенного неподалёку военного аэродрома. Основные силы уже ушли вперёд, поэтому задача вашей группы — проверить район, подавить оставшееся сопротивление и обеспечить безопасность объекта до подхода следующих подразделений.\n\nПротив вас действуют остатки иракских вооружённых сил и лояльные режиму нерегулярные формирования. После распада организованной обороны часть подразделений бросила позиции, однако другие продолжают сопротивление самостоятельно. В районе отмечены хорошо вооружённые группы, использующие военные склады, укреплённые позиции и инфраструктуру аэродрома.\n\nОсобый интерес представляет сам аэродром. Разведка предполагает, что противник использует его как временную базу и склад, однако точная численность гарнизона и характер находящихся там объектов неизвестны.\n\nПравила ведения огня: вам запрещено открывать огонь по мечетям и минаретам в городе. Они отмечены на карте красными крестами."
+    },
+    {
+     "title": "Задачи",
+     "body": "1) Зачистить посольство\n2) Уничтожить радар в районе базара\n3) Уничтожить минометные позиции в жилом районе\n4) Занять базу в районе аэродрома (необходимо зачистить все здания в выделенных квадратах)"
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "Остатки иракских вооружённых сил и лояльные режиму нерегулярные формирования"
+    },
+    {
+     "title": "Дружественные силы",
+     "body": "1) Браво 1\n2) Браво 2\n3) Крёстный отец (PL)"
+    },
+    {
+     "title": "Поддержка",
+     "body": "1) х4 вооруженных хаммера \n2) х1 невооруженый хаммер\n3) Артиллерия не предусматривается"
+    }
+   ]
+  },
+  "squads": [
+   {
+    "groupId": "Bravo-1",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Bravo-2",
+    "name": "",
+    "slots": [
+     {
+      "role": "SL",
+      "requiredRole": "SL"
+     },
+     {
+      "role": "RED - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "RED - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "RED - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "RED - Rifleman",
+      "requiredRole": "Rifleman"
+     },
+     {
+      "role": "BLUE - FTL",
+      "requiredRole": "FTL"
+     },
+     {
+      "role": "BLUE - Automatic Rifleman",
+      "requiredRole": "Machine Gunner"
+     },
+     {
+      "role": "BLUE - Grenadier",
+      "requiredRole": "Grenadier"
+     },
+     {
+      "role": "BLUE - Rifleman",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   },
+   {
+    "groupId": "Godfather",
+    "name": "",
+    "slots": [
+     {
+      "role": "PL",
+      "requiredRole": "PL"
+     },
+     {
+      "role": "Medic",
+      "requiredRole": "Rifleman"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mushroom-trip",
+  "name": "Mushroom Trip",
+  "mapKey": "chernarus",
+  "mapLabel": "Chernarus",
+  "coverUrl": "/covers/mushroom-trip.jpg",
+  "authors": [
+   {
+    "name": "Galaxy",
+    "discordId": "216926207453691906"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AC7623DCCFF7859",
+  "addonGuid": "6AC7623DCCFF7859",
+  "scenarioId": "{6AC7623D000F027B}Missions/Mushroom_Trip.conf",
+  "tags": [
+   "2000+",
+   "east-gear"
+  ],
+  "markersLayer": "files/mushroom-trip.layer",
+  "briefing": {
+   "sides": {
+    "for": "НАПА",
+    "against": "ЧДКЗ"
+   },
+   "sections": [
+    {
+     "title": "Ситуация",
+     "body": "Сентябрь 2009 года, Южная Загория, окрестности Новомитравска. Пока силы ЧСО связаны боями на юге провинции, север фактически отдан ЧДКЗ. Боевики заняли брошенную военную базу у села Каменное и превратили её в опорный пункт: отсюда оружие и боеприпасы расходятся по ячейкам движения во всём районе. Помешать этому здесь может только партизанский отряд НАПА в Новомитравске.\n\nВ Наттигном ЧДКЗ держит радиовышку, через которую гарнизон Каменного поддерживает связь с основными силами движения. Её уничтожение — первый шаг: пока противник восстанавливает связь, отряд должен пройти блокпост на перекрёстке лесных дорог и выбить боевиков с базы."
+    },
+    {
+     "title": "Задачи",
+     "body": "- Уничтожить радиовышку в Наттигном.\n- Зачистить перекрёсток лесных дорог и блокпост ЧДКЗ.\n- Зачистить военную базу у Каменного."
+    },
+    {
+     "title": "Враждебные силы",
+     "body": "- Чернорусское Движение Красной Звезды (ЧДКЗ).\n- Леса между объектами патрулируются. Известные позиции противника отмечены на карте, но данные неполные.\n- На перекресток и военную базу, возможно, подтянут подкрепления, в том числе броню. Уничтожать ее или быстро отойти - выбор за вами."
+    },
+    {
+     "title": "Поддержка",
+     "body": "- 2× УАЗ-469 (пулемёт UK59)\n- 1× УАЗ-469\n- 2× УАЗ-452 (транспорт)\n- 1× УАЗ-452 (санитарный)"
+    },
+    {
+     "title": "Замечания",
+     "body": "- В лесах в районе операции много грибников. Не допустите потерь среди гражданских"
+    }
+   ]
+  },
+  "noSlotting": true
+ },
+ {
+  "id": "metal-gambit",
+  "name": "Metal Gambit",
+  "mapKey": "merak",
+  "mapLabel": "Merak",
+  "coverUrl": "/covers/metal-gambit.jpg",
+  "authors": [
+   {
+    "name": "[лампас]VonScheer",
+    "discordId": "228193670371868672"
+   }
+  ],
+  "workshopUrl": "https://reforger.armaplatform.com/workshop/6AB7841BEEEDF4D1-MetalGambit",
+  "addonGuid": "6AB7841BEEEDF4D1",
+  "scenarioId": "{6AB7841BFB1DAE63}Missions/Metal_Gambit.conf",
+  "tags": [],
+  "markersLayer": "files/metal-gambit.layer"
+ }
+]

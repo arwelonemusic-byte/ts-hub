@@ -1,0 +1,154 @@
+PolylineShapeEntity {
+ components {
+  TS_MapOverlayComponent "{69956768CE1640E4}" {
+   m_OutlineWidth 4
+  }
+  RplComponent "{69956768D5F62DEF}" {
+  }
+ }
+ coords 10307.765 10.234 1617.211
+ Points {
+  ShapePoint "{69956768792F72A8}" {
+   Position 97.479 -8.873 -90.173
+  }
+  ShapePoint "{69956768EF0DFAC8}" {
+   Position 286.464 -3.639 -177.451
+  }
+  ShapePoint "{69956768E9B2B9A8}" {
+   Position 798.975 -347.449 -102.338
+  }
+  ShapePoint "{699567680631E304}" {
+   Position 1083.912 -101.498 146.214
+  }
+  ShapePoint "{699567681BE45F60}" {
+   Position 956.954 -19.418 385.543
+  }
+  ShapePoint "{6995676807FC9D8B}" {
+   Position 628.529 158.376 419.71
+  }
+  ShapePoint "{69956768007A8A70}" {
+   Position 486.646 92.125 263.443
+  }
+  ShapePoint "{69956768221FBBCE}" {
+   Position 2.586 0.013 313.891
+  }
+  ShapePoint "{6995676859DFAB59}" {
+   Position -32.862 20.472 171.125
+  }
+  ShapePoint "{69956768792E486A}" {
+   Position 97.429 -9.238 -90.192
+  }
+ }
+}
+PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ components {
+  TS_MapOverlayComponent "{68568A2C31E137C9}" {
+   m_OutlineWidth 4
+  }
+ }
+ coords 10492.073 145.802 2033.997
+ angles 0 45.855 0
+ scale 34.928
+ Points {
+  ShapePoint "{68568A2CAE54701B}" {
+   Position 23.994 -3.019 16.062
+  }
+  ShapePoint "{68568A2CAE545584}" {
+   Position 22.685 -2.529 -16.263
+  }
+  ShapePoint "{68568A2CAE545D3E}" {
+   Position -119.006 0.999 -19.157
+  }
+  ShapePoint "{68568A2CAE5446CE}" {
+   Position -26.059 1.315 15.564
+  }
+ }
+}
+GenericEntity Area1 : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 9417.983 257.268 3297.198
+ {
+  GenericEntity Layer13 : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{6995411ADC7D7DC0}" {
+         m_sMapMarkerText "FOB X-ray"
+         m_eMapMarkerIcon FLAG
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords -1576.27 -0.258 696.143
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{6995411A9C3CE622}" {
+         m_sMapMarkerText "LZ Whiskey"
+         m_eMapMarkerIcon ENTRY_POINT
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords 446.361 35.826 -782.307
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{6995411B7F1DDFB3}" {
+         m_eMapMarkerFactionIcon INDFOR
+        }
+       }
+      }
+      coords 975.83 -137.112 -1290.39
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{6995411B4306751B}" {
+         m_eMapMarkerFactionIcon INDFOR
+        }
+       }
+      }
+      coords 1334.119 -149.424 -1146.19
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{6995411B5A8D03C9}" {
+         m_sMapMarkerText "Kill zone"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords 962.72 -247.519 -1666.462
+     }
+     SlotMarker7 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{6995411B4306751B}" {
+         m_eMapMarkerFactionIcon INDFOR
+        }
+       }
+      }
+      coords 1187.772 -238.65 -1654.867
+     }
+     SlotMarker8 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{6995411B4306751B}" {
+         m_eMapMarkerFactionIcon INDFOR
+        }
+       }
+      }
+      coords 1616.526 -224.94 -1594.815
+     }
+    }
+   }
+  }
+ }
+}

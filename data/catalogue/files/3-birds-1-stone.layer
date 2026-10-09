@@ -1,0 +1,108 @@
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0.706
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_FillOutside 0
+   }
+  }
+  coords 4553.17 58.589 6207.928
+  angles 0 -21.726 0
+  scale 9.743
+ }
+ {
+  coords 5004.729 80.501 6236.45
+  angles 0 24.886 0
+  scale 77.278
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 35.557 -1.04 21.038
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 35.557 -1.09 -19.277
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -24 0.744 -19.277
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -24 0.568 21.038
+   }
+  }
+ }
+}
+GenericEntity Area1 : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ components {
+  SCR_ScenarioFrameworkArea "{59E8CDC50969206E}" {
+   m_iDynamicDespawnRange 10000
+  }
+ }
+ coords 4865.747 53.718 5818.398
+ {
+  GenericEntity Layer3 : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69D70E5BE1E607F7}" {
+         m_sMapMarkerText "Meeting Area"
+         m_eMapMarkerIcon FLAG
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -386.953 3.253 353.774
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69D70E5BE1E607F7}" {
+         m_sMapMarkerText "Obj. Virginia"
+         m_eMapMarkerIcon CROSS2
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords -1001.3 48.472 481.976
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69D70E5BE1E607F7}" {
+         m_sMapMarkerText "Obj. Idaho"
+         m_eMapMarkerIcon CROSS2
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 1343.13 55.045 -703.459
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{69D70E5BE1E607F7}" {
+         m_sMapMarkerText "Obj. Alaska"
+         m_eMapMarkerIcon CROSS2
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 786.865 79.032 767.23
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69DAC691793EDA94}" {
+         m_sMapMarkerText "Start"
+        }
+       }
+      }
+      coords -1900.794 -46.358 -3736.857
+     }
+    }
+   }
+  }
+ }
+}

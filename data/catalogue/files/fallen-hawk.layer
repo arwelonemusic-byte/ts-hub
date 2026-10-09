@@ -1,0 +1,56 @@
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 2061.65 8.43 2603.2
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Место падения вертолёта"
+         m_eMapMarkerIcon DEFEND
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords 935.95 -5.621 -118.7
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Точка старта группы эвакуации"
+         m_eMapMarkerIcon ENTRY_POINT
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords -935.95 5.621 118.7
+     }
+    }
+   }
+  }
+ }
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 2893.7 6.278 2821.8
+  angles 0 334 0
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 1858.4 0 970.35
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 1858.4 0 -970.35
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -1858.4 0 -970.35
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -1858.4 0 970.35
+   }
+  }
+ }
+}

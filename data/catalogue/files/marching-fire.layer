@@ -1,0 +1,196 @@
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 8026.982 61.493 5869.736
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_eMapMarkerIcon MINE_FIELD
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords -221.182 -1.365 -164.036
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_eMapMarkerIcon MINE_FIELD
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords -123.982 0.666 -163.336
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_eMapMarkerIcon MINE_FIELD
+         m_eMapMarkerColor RED
+         m_iMapMarkerRotation 145
+        }
+       }
+      }
+      coords 230.618 -0.621 157.364
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "OBJ BALMORAL"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+         m_iMapMarkerRotation 8
+        }
+       }
+      }
+      coords 26.718 -0.525 127.564
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "B1"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+         m_iMapMarkerRotation 8
+        }
+       }
+      }
+      coords 27.918 0.043 -1.136
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "B2"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+         m_iMapMarkerRotation 8
+        }
+       }
+      }
+      coords 67.518 0.211 33.364
+     }
+     SlotMarker7 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "B3"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+         m_iMapMarkerRotation 8
+        }
+       }
+      }
+      coords 25.318 0.14 88.764
+     }
+     SlotMarker8 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Bunker"
+         m_eMapMarkerIcon FORTIFICATION2
+         m_eMapMarkerColor RED
+         m_iMapMarkerRotation 8
+        }
+       }
+      }
+      coords 159.018 1.137 108.264
+     }
+     SlotMarker9 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "HMG"
+         m_eMapMarkerIcon FORTIFICATION2
+         m_eMapMarkerColor RED
+         m_iMapMarkerRotation 8
+        }
+       }
+      }
+      coords -120.082 0.676 -71.436
+     }
+     SlotMarker10 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Trench w/ MG"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+         m_iMapMarkerRotation 8
+        }
+       }
+      }
+      coords -84.682 -0.467 -62.536
+     }
+     SlotMarker11 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Trench"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor RED
+         m_iMapMarkerRotation 8
+        }
+       }
+      }
+      coords 12.818 0.1 -52.836
+     }
+    }
+   }
+  }
+ }
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 8051.8 64.577 5520.2
+  angles 0 352 0
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 351.7 0 540.95
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 351.7 0 -540.95
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -351.7 0 -540.95
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -351.7 0 540.95
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 8003.1 61.758 5841
+  angles 0 317 0
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 142.95 0 82.3
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 142.95 0 -82.3
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -142.95 0 -82.3
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -142.95 0 82.3
+   }
+  }
+ }
+}

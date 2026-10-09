@@ -1,0 +1,140 @@
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 6345.6 38.02 3019.7
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 404.3 0 482.995
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 404.3 0 -1048.3
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -404.3 0 -1048.3
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -404.3 0 482.995
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.156 0.156 0.094
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 6609.6 36.632 3007.4
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 92.9 0 74.45
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 92.9 0 -74.45
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -92.9 0 -74.45
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -92.9 0 74.45
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.156 0.156 0.094
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 6283.3 35.468 2699.5
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 72.5 0 59.5
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 72.5 0 -59.5
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -72.5 0 -59.5
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -72.5 0 59.5
+   }
+  }
+ }
+}
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 6312.66 41.148 2799.08
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Старт"
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 367.548 -2.864 646.042
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Obj. Zulu"
+         m_eMapMarkerIcon OBJECTIVE_MARKER2
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 365.74 -3.682 258.82
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Obj. Yankee"
+         m_eMapMarkerIcon OBJECTIVE_MARKER2
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 9.34 -4.884 -51.08
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Obj. X-Ray"
+         m_eMapMarkerIcon OBJECTIVE_MARKER2
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 5.04 0.314 -635.88
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Выход"
+         m_eMapMarkerIcon POINT_OF_INTEREST
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords -242.16 11.409 -703.58
+     }
+    }
+   }
+  }
+ }
+}

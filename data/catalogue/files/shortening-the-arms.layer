@@ -1,0 +1,154 @@
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 3026.825 154.204 5531.275
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697E675AD7054FB0}" {
+         m_sMapMarkerText "База"
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier SUPPLY
+         m_eMapMarkerType2Modifier SUPPLY
+        }
+       }
+      }
+      coords -2704.725 6.202 3700.125
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Стоянка Су-25 №1"
+         m_eMapMarkerIcon OBJECTIVE_MARKER
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords -38.625 3.577 -956.175
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Стоянка Су-25 №2"
+         m_eMapMarkerIcon OBJECTIVE_MARKER
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords 264.075 3.577 -899.675
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Стоянка Су-25 №3"
+         m_eMapMarkerIcon OBJECTIVE_MARKER
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords 449.275 3.779 -1289.975
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Стоянка бензовозов"
+         m_eMapMarkerIcon OBJECTIVE_MARKER2
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords 477.775 3.577 -910.075
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Контрольная точка №1"
+         m_eMapMarkerIcon WAYPOINT
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords -578.325 -1.137 823.725
+     }
+     SlotMarker7 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Контрольная точка №2"
+         m_eMapMarkerIcon WAYPOINT
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords 854.775 -1.755 251.825
+     }
+     SlotMarker8 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Контрольная точка №3"
+         m_eMapMarkerIcon WAYPOINT
+         m_eMapMarkerColor RED
+        }
+       }
+      }
+      coords 1275.775 -17.822 -719.775
+     }
+    }
+   }
+  }
+ }
+}
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  coords 3168 161.275 6283.7
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 3168 0 3276.3
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 3168 0 -3276.3
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -3168 0 -3276.3
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -3168 0 3276.3
+   }
+  }
+ }
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.623957 0.155932 0.155932 0.094118
+    m_OutlineColor 0.623529 0.156863 0.156863 1
+    m_OutlineWidth 2
+    m_FillOutside 0
+   }
+  }
+  coords 3160.8 157.781 4396.9
+  angles 0 354 0
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 816 0 356.4
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 816 0 -356.4
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -816 0 -356.4
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -816 0 356.4
+   }
+  }
+ }
+}

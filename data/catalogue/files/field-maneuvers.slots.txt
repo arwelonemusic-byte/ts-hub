@@ -1,0 +1,11 @@
+09.08.2026, 19:00
+Arma Reforger:
+Operation Field Maneuvers (RE)
+231 | RED - Ком. Отделения [@SL] | RED - Пулеметчик [@MachineGunner] | RED - Стрелок ПТ [@Rifleman] | RED - Помощник Стрелка ПТ [@Rifleman] | BLUE - Старший стрелок (РПК) | BLUE - Стрелок ГП [@Grenadier] | BLUE - Стрелок [@Rifleman]
+232 | RED - Ком. Отделения [@SL] | RED - Пулеметчик [@MachineGunner] | RED - Стрелок ПТ [@Rifleman] | RED - Помощник Стрелка ПТ [@Rifleman] | BLUE - Старший стрелок (РПК) | BLUE - Стрелок ГП [@Grenadier] | BLUE - Стрелок [@Rifleman]
+233 | RED - Ком. Отделения [@SL] | RED - Пулеметчик [@MachineGunner] | RED - Стрелок ПТ [@Rifleman] | RED - Помощник Стрелка ПТ [@Rifleman] | BLUE - Старший стрелок (РПК) | BLUE - Стрелок ГП [@Grenadier] | BLUE - Стрелок [@Rifleman]
+KOROB-1 | Командир экипажа-Стрелок [@Armoured Crew] | Водитель [@Armoured Crew]
+KOROB-2 | Командир экипажа-Стрелок [@Armoured Crew] | Водитель [@Armoured Crew]
+KOROB-3 | Командир экипажа-Стрелок [@Armoured Crew] | Водитель [@Armoured Crew]
+230 | Ком. Взвода [@PL] | Зам. Ком. Взвода | Медик
+RESERVE | RED - Ком. Отделения [@SL] | RED - Пулеметчик [@MachineGunner] | RED - Стрелок ПТ [@Rifleman] | RED - Помощник Стрелка ПТ [@Rifleman] | BLUE - Старший стрелок (РПК) | BLUE - Стрелок ГП [@Grenadier] | BLUE - Стрелок [@Rifleman]

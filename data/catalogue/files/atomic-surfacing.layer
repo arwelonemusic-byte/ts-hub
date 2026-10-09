@@ -1,0 +1,108 @@
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 3660.85 118.092 5104.25
+ {
+  GenericEntity LayerMarkers : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "FOB"
+         m_eMapMarkerIcon FLAG2
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 677.25 331.219 1209.35
+     }
+     SlotMarker2 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Захватить вертолет"
+         m_eMapMarkerIcon PICK_UP
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords -1137.85 -93.873 196.75
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Подорвать МС №1"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords -800.85 -93.873 13.65
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Подорвать МС №2"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords -784.15 -93.873 82.65
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Подорвать МС №3"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords -694.95 -93.873 45.75
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Подорвать МС №4"
+         m_eMapMarkerIcon MARK_EXCLAMATION
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords -718.75 -93.873 -32.65
+     }
+     SlotMarker7 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Установить заряд №1"
+         m_eMapMarkerIcon MINE_FIELD2
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords 1238.882 34.283 -1094.622
+     }
+     SlotMarker8 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{697E675AD7054FB0}" {
+         m_sMapMarkerText "Установить заряд №2"
+         m_eMapMarkerIcon MINE_FIELD2
+         m_eMapMarkerColor BLUE
+        }
+       }
+      }
+      coords 2221.624 103.864 -493.676
+     }
+    }
+   }
+  }
+ }
+}

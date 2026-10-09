@@ -1,0 +1,152 @@
+$grp PolylineShapeEntity : "{9DF03DB4B7D791C3}Prefabs/TSSystems/TS_MapOverlay.et" {
+ {
+  components {
+   TS_MapOverlayComponent "{68568A2C31E137C9}" {
+    m_FillColor 0.624 0.157 0.157 0.212
+    m_OutlineColor 0.624 0.157 0.157 1
+    m_FillOutside 0
+   }
+  }
+  coords 2531.343 405.454 936.076
+  scale 4.35
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 50.547 -2.06 16
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 50.547 -2.121 -24.759
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -24 0.727 -24.759
+   }
+  }
+ }
+ {
+  coords 1134.028 473.649 875.689
+  scale 40.619
+  Points {
+   ShapePoint "{68568A2CAE54701B}" {
+    Position 57.084 -2.879 17.941
+   }
+   ShapePoint "{68568A2CAE545584}" {
+    Position 57.084 -2.959 -13.208
+   }
+   ShapePoint "{68568A2CAE545D3E}" {
+    Position -24 0.713 -13.208
+   }
+   ShapePoint "{68568A2CAE5446CE}" {
+    Position -24 0.567 17.941
+   }
+  }
+ }
+}
+GenericEntity AreaMarkers : "{C72F956E4AC6A6E7}Prefabs/Systems/ScenarioFramework/Components/Area.et" {
+ coords 258.891 367.874 682.276
+ {
+  GenericEntity Layer2 : "{5F9FFF4BF027B3A3}Prefabs/Systems/ScenarioFramework/Components/Layer.et" {
+   coords 0 0 0
+   {
+    $grp GenericEntity : "{E537867C6E760514}Prefabs/Systems/ScenarioFramework/Components/SlotMarker.et" {
+     SlotMarker1 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{69707188AE08F43D}" {
+         m_sMapMarkerText "Insertion"
+        }
+       }
+      }
+      coords -96.112 -1.394 -38.727
+     }
+     SlotMarker3 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{6970718D265FC960}" {
+         m_sMapMarkerText "Obj. Windsor"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 1311.802 46.418 351.107
+     }
+     SlotMarker4 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerCustom "{6970718D265FC960}" {
+         m_sMapMarkerText "Obj. Stuart"
+         m_eMapMarkerIcon DOT
+         m_eMapMarkerColor OPFOR
+        }
+       }
+      }
+      coords 2438.712 31.171 279.871
+     }
+     SlotMarker5 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697071839A563A59}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 1440.473 51.518 416.025
+     }
+     SlotMarker6 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697071839A563A59}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 1699.913 52.606 -123.629
+     }
+     SlotMarker7 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697071839A563A59}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 2250.718 32.511 -52.872
+     }
+     SlotMarker8 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697071839A563A59}" {
+         m_eMapMarkerFactionIcon OPFOR
+        }
+       }
+      }
+      coords 2386.91 34.227 213.618
+     }
+     SlotMarker9 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697071839A563A59}" {
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier ARMOR
+         m_eMapMarkerType2Modifier ARMOR
+        }
+       }
+      }
+      coords 2267.285 35.022 325.388
+     }
+     SlotMarker10 {
+      components {
+       SCR_ScenarioFrameworkSlotMarker "{5EA2BD9901E5E82E}" {
+        m_MapMarkerType SCR_ScenarioFrameworkMarkerMilitary "{697071839A563A59}" {
+         m_eMapMarkerFactionIcon OPFOR
+         m_eMapMarkerType1Modifier ARMOR
+         m_eMapMarkerType2Modifier ARMOR
+        }
+       }
+      }
+      coords 1526.606 54.467 386.807
+     }
+    }
+   }
+  }
+ }
+}
