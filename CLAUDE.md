@@ -90,8 +90,8 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   2. **Briefing and Markers.layer** — typed in and uploaded, or read from the addon folder the author picks
      (`lib/missions/addonFolder.ts`, in the browser, nothing uploaded): the journal config (`SCR_JournalSetupConfig`)
      gives the sections, and the scenario's world gives `<world>_Layers/Markers.layer`. «Миссия без плана» needs no layer.
-  3. **Slots** — squads and slots with their Discord role, or «Без слотинга». The slotting bot's text pastes in
-     (`lib/missions/slotText.ts`). Editing the template doesn't touch games already scheduled (they keep their copy).
+  3. **Slots** — squads and slots with their Discord role. No squads = played without slotting (`no_slotting`).
+     Editing the template doesn't touch games already scheduled (they keep their copy).
 
   A new mission goes step by step; an edit can jump between steps and save from any. Saving (`saveMission`) fetches the
   Workshop image again for a new mission or on «Обновить из Workshop», and stores it in the uploads folder

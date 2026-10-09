@@ -113,7 +113,6 @@ export async function loadMissionDraft(id: string): Promise<MissionDraft | null>
       sections: mission.briefing?.sections ?? [],
     },
     planning: mission.planning !== false,
-    noSlotting: !!mission.noSlotting,
     squads: mission.squads ?? [],
   };
 }

@@ -23,7 +23,6 @@ const EMPTY: MissionDraft = {
   briefing: { sides: { for: "", against: "" }, sections: [] },
   planning: true,
   markersLayer: null,
-  noSlotting: false,
   squads: [],
 };
 

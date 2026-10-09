@@ -96,7 +96,8 @@ export async function saveMission(input: MissionDraft): Promise<SaveResult> {
   const row = [
     id, d.name, d.mapKey, mapLabel(d.mapKey), cover, workshopPage(d.workshopGuid), d.workshopGuid, d.scenarioId,
     // An object, not a JSON string: the driver encodes jsonb itself (a string would be stored double-encoded).
-    briefing, d.tags, d.planning, d.noSlotting, player,
+    // No squads = played without slotting.
+    briefing, d.tags, d.planning, d.squads.length === 0, player,
   ];
   await db.transaction(async (tx) => {
     if (existing) {

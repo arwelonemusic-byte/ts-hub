@@ -31,8 +31,7 @@ export interface MissionDraft {
   planning: boolean;
   /** The Markers.layer text; undefined = keep the mission's (editing), null = none. */
   markersLayer?: string | null;
-  /** Played without slotting (RSVP only); squads are ignored then. */
-  noSlotting: boolean;
+  /** Slot template, HQ first. None = played without slotting (RSVP only). */
   squads: MissionSquad[];
   /** Take the cover from the Workshop again (editing; a new mission always does). */
   refreshCover?: boolean;
@@ -133,17 +132,15 @@ export function normalizeDraft(d: MissionDraft): MissionDraft {
         .filter((s) => s.title || s.body),
     },
     markersLayer: d.planning ? d.markersLayer : null,
-    squads: d.noSlotting
-      ? []
-      : d.squads
-          .map((sq) => ({
-            groupId: clip(sq.groupId, LIMITS.groupId),
-            name: clip(sq.name, LIMITS.groupName),
-            slots: sq.slots
-              .map((s) => ({ role: clip(s.role, LIMITS.role), ...(s.requiredRole?.trim() ? { requiredRole: clip(s.requiredRole, LIMITS.requiredRole) } : {}) }))
-              .filter((s) => s.role || s.requiredRole),
-          }))
-          .filter((sq) => sq.groupId || sq.name || sq.slots.length),
+    squads: d.squads
+      .map((sq) => ({
+        groupId: clip(sq.groupId, LIMITS.groupId),
+        name: clip(sq.name, LIMITS.groupName),
+        slots: sq.slots
+          .map((s) => ({ role: clip(s.role, LIMITS.role), ...(s.requiredRole?.trim() ? { requiredRole: clip(s.requiredRole, LIMITS.requiredRole) } : {}) }))
+          .filter((s) => s.role || s.requiredRole),
+      }))
+      .filter((sq) => sq.groupId || sq.name || sq.slots.length),
   };
 }
 
@@ -163,13 +160,10 @@ export function checkDraft(d: MissionDraft, mapKeys: readonly string[], hasLayer
     if (typeof d.markersLayer === "string" && (d.markersLayer.length > LIMITS.layer || d.markersLayer.includes("\0"))) return "layer";
     if (d.markersLayer === null || (d.markersLayer === undefined && !hasLayer)) return "layerMissing";
   }
-  if (!d.noSlotting) {
-    if (!d.squads.length || d.squads.length > LIMITS.squads) return "squads";
-    if (d.squads.reduce((n, sq) => n + sq.slots.length, 0) > LIMITS.slots) return "squads";
-    if (d.squads.some((sq) => !sq.groupId)) return "groupId";
-    if (new Set(d.squads.map((sq) => sq.groupId.toLowerCase())).size !== d.squads.length) return "groupDup";
-    if (d.squads.some((sq) => !sq.slots.length || sq.slots.length > LIMITS.squadSlots || sq.slots.some((s) => !s.role))) return "role";
-  }
+  if (d.squads.length > LIMITS.squads || d.squads.reduce((n, sq) => n + sq.slots.length, 0) > LIMITS.slots) return "squads";
+  if (d.squads.some((sq) => !sq.groupId)) return "groupId";
+  if (new Set(d.squads.map((sq) => sq.groupId.toLowerCase())).size !== d.squads.length) return "groupDup";
+  if (d.squads.some((sq) => !sq.slots.length || sq.slots.length > LIMITS.squadSlots || sq.slots.some((s) => !s.role))) return "role";
   return null;
 }
 
