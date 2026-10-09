@@ -1,56 +1,31 @@
 "use client";
 
 import { useActionState, type FormEvent } from "react";
-import { attachPlan, type AttachState } from "@/lib/plans/actions";
+import { attachPlan, detachPlan, type AttachState } from "@/lib/plans/actions";
 import { buttonClass } from "../ui";
 
 export interface AttachErrors {
   invalid: string;
-  /** "{code}" is replaced with the code. */
+  /** "{code}" is replaced with the code (here and in wrongMap). */
   notFound: string;
+  wrongMap: string;
   forbidden: string;
+  /** Someone else attached a plan meanwhile. */
+  taken: string;
 }
 
 function errorText(state: AttachState, errors: AttachErrors): string | null {
   return state ? errors[state.error].replace("{code}", state.code ?? "") : null;
 }
 
-/** Replacing the game's current plan asks first. */
+/** Replacing or detaching the game's plan asks first. */
 function confirmFirst(text: string | undefined) {
   return (e: FormEvent) => {
     if (text && !confirm(text)) e.preventDefault();
   };
 }
 
-/** «Использовать» on a listed plan. */
-export function UsePlanButton({
-  eventId,
-  plan,
-  label,
-  confirmText,
-  errors,
-}: {
-  eventId: string;
-  plan: { id?: string; code: string };
-  label: string;
-  confirmText?: string;
-  errors: AttachErrors;
-}) {
-  const [state, action, pending] = useActionState(attachPlan, null);
-  const error = errorText(state, errors);
-  return (
-    <form action={action} onSubmit={confirmFirst(confirmText)} className="flex items-center gap-2">
-      <input type="hidden" name="event" value={eventId} />
-      {plan.id ? <input type="hidden" name="plan" value={plan.id} /> : <input type="hidden" name="code" value={plan.code} />}
-      {error && <span className="type-caption text-fg-danger">{error}</span>}
-      <button type="submit" disabled={pending} className={buttonClass("outline", "s")}>
-        {label}
-      </button>
-    </form>
-  );
-}
-
-/** Attach a plan by its code (one drawn outside the hub, or shared in Discord). */
+/** «Прикрепить план»: paste the code the planner gave on push. */
 export function AttachCodeForm({
   eventId,
   placeholder,
@@ -89,6 +64,18 @@ export function AttachCodeForm({
         </button>
       </div>
       {error && <p className="type-caption text-fg-danger">{error}</p>}
+    </form>
+  );
+}
+
+/** An admin's «Открепить». */
+export function DetachButton({ eventId, label, confirmText }: { eventId: string; label: string; confirmText: string }) {
+  return (
+    <form action={detachPlan} onSubmit={confirmFirst(confirmText)}>
+      <input type="hidden" name="event" value={eventId} />
+      <button type="submit" className={buttonClass("outline", "s")}>
+        {label}
+      </button>
     </form>
   );
 }

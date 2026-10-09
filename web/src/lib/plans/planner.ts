@@ -38,15 +38,18 @@ export async function fetchVersions(keys: string[]): Promise<Map<string, PlanVer
   return out;
 }
 
-export async function planExists(code: string): Promise<boolean> {
+/** A pushed plan's map (pushes carry `mapKey` since the hub hand-off); null when there's no such plan. */
+export async function fetchPlan(code: string): Promise<{ mapKey?: string } | null> {
   try {
     const res = await fetch(`${PLANS_PLANNER_URL}/api/plans/${encodeURIComponent(code)}`, {
       cache: "no-store",
       signal: AbortSignal.timeout(3000),
     });
-    return res.ok;
+    if (!res.ok) return null;
+    const { mapKey } = (await res.json()) as { mapKey?: unknown };
+    return typeof mapKey === "string" ? { mapKey } : {};
   } catch {
-    return false;
+    return null;
   }
 }
 

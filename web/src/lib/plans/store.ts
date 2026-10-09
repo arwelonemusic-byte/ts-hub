@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { getDb, type Db } from "../db";
+import { getDb } from "../db";
 
 /**
  * A hub plan: the planner versions that belong together, plus who it's for.
@@ -42,13 +42,9 @@ function fromRow(r: Record<string, unknown>): PlanRecord {
   };
 }
 
-/** Plans of a mission, or the plans of the given games. */
-export async function listPlanRecords(where: { missionId?: string; eventIds?: string[] }): Promise<PlanRecord[]> {
+/** A mission's hub plans. */
+export async function listPlanRecords(where: { missionId: string }): Promise<PlanRecord[]> {
   const db = await getDb();
-  if (where.eventIds) {
-    if (where.eventIds.length === 0) return [];
-    return (await db.query("SELECT * FROM plans WHERE event_id = ANY($1::text[]) ORDER BY created_at", [where.eventIds])).map(fromRow);
-  }
   return (await db.query("SELECT * FROM plans WHERE mission_id = $1 ORDER BY created_at", [where.missionId])).map(fromRow);
 }
 
@@ -67,7 +63,8 @@ export function newPlanRecord(fields: Omit<PlanRecord, "id" | "key" | "createdAt
   };
 }
 
-async function insert(db: Db, r: PlanRecord): Promise<void> {
+export async function insertPlanRecord(r: PlanRecord): Promise<PlanRecord> {
+  const db = await getDb();
   await db.query(
     `INSERT INTO plans (id, mission_id, event_id, event_starts_at, author_discord_id, author_name, plan_key,
                         seed_code, seed_author, seed_created_at, created_at)
@@ -75,22 +72,5 @@ async function insert(db: Db, r: PlanRecord): Promise<void> {
     [r.id, r.missionId, r.eventId, r.eventStartsAt, r.authorId, r.authorName, r.key,
      r.seed?.code ?? null, r.seed?.author ?? null, r.seed?.createdAt ?? null, r.createdAt],
   );
-}
-
-export async function insertPlanRecord(rec: PlanRecord): Promise<PlanRecord> {
-  await insert(await getDb(), rec);
-  return rec;
-}
-
-/**
- * A game's plan changes hands: the old one (if any) is demoted to a mission plan
- * (`keepOld`) or deleted, and `rec` takes its place — in one transaction.
- */
-export async function replaceEventPlan(old: { id: string; keepOld: boolean } | null, rec: PlanRecord): Promise<void> {
-  const db = await getDb();
-  await db.transaction(async (tx) => {
-    if (old?.keepOld) await tx.query("UPDATE plans SET event_id = NULL, event_starts_at = NULL WHERE id = $1", [old.id]);
-    else if (old) await tx.query("DELETE FROM plans WHERE id = $1", [old.id]);
-    await insert(tx, rec);
-  });
+  return r;
 }

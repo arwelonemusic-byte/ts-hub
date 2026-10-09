@@ -2,38 +2,49 @@
 
 import { revalidatePath } from "next/cache";
 import { getHubData } from "../data";
+import { getDb } from "../db";
+import { playerIdOf } from "../players";
 import { getViewer } from "../viewer";
-import { canEditEventPlan, resolvePlans, setEventPlan } from "./index";
-import { planExists } from "./planner";
-import { getPlanRecord } from "./store";
+import { canAttachPlan, canDetachPlan } from "./index";
+import { fetchPlan } from "./planner";
 
-export type AttachState = { error: "invalid" | "notFound" | "forbidden"; code?: string } | null;
+export type AttachState = { error: "invalid" | "notFound" | "wrongMap" | "forbidden" | "taken"; code?: string } | null;
 
-/**
- * Make a plan game `event`'s plan: a listed hub plan (`plan` = its id) or a code
- * (`code`, typed in or a played game's). The game's plan then starts from that version.
- */
+/** «Прикрепить план»: a planner code becomes the game's plan (or replaces the one the viewer attached). */
 export async function attachPlan(_prev: AttachState, form: FormData): Promise<AttachState> {
-  const data = getHubData();
-  const [viewer, ev] = await Promise.all([getViewer(), data.getEvent(String(form.get("event") ?? ""), new Date())]);
-  if (!viewer || !ev || ev.status !== "upcoming" || !canEditEventPlan(viewer, ev)) return { error: "forbidden" };
+  const [viewer, ev] = await Promise.all([getViewer(), getHubData().getEvent(String(form.get("event") ?? ""), new Date())]);
+  if (!viewer || !ev || ev.status !== "upcoming" || !canAttachPlan(viewer, ev)) return { error: "forbidden" };
 
-  const planId = form.get("plan");
-  let seed: { code: string; author: string; createdAt: string };
-  if (typeof planId === "string" && planId) {
-    const rec = await getPlanRecord(planId);
-    const ref = rec?.missionId === ev.mission.id ? (await resolvePlans([rec]))[0] : null;
-    if (!ref) return { error: "notFound" };
-    seed = { code: ref.code, author: ref.author, createdAt: ref.createdAt };
-  } else {
-    const code = String(form.get("code") ?? "").trim().toUpperCase();
-    if (!/^[A-Z0-9]{6}$/.test(code)) return { error: "invalid", code };
-    if (!(await planExists(code))) return { error: "notFound", code };
-    // A code the mission already lists keeps its author; one from elsewhere counts as the PL's own.
-    const known = (await data.getMissionHistory(ev.mission.id)).plans.find((p) => p.code === code);
-    seed = { code, author: known?.author ?? viewer.name, createdAt: known?.createdAt ?? new Date().toISOString() };
-  }
-  await setEventPlan(viewer, ev, seed);
+  const code = String(form.get("code") ?? "").trim().toUpperCase();
+  if (!/^[A-Z0-9]{6}$/.test(code)) return { error: "invalid", code };
+  const plan = await fetchPlan(code);
+  if (!plan) return { error: "notFound", code };
+  // Pushes made since the hub hand-off say which map they were drawn on.
+  if (plan.mapKey && plan.mapKey !== ev.mission.mapKey) return { error: "wrongMap", code };
+
+  const player = await playerIdOf(viewer);
+  const db = await getDb();
+  // Someone may have attached a plan since the page loaded: only an empty slot or your own plan.
+  const hit = await db.query(
+    `UPDATE events SET plan_code = $2, plan_attached_by = $3, plan_attached_at = NOW(), updated_at = NOW()
+     WHERE id = $1 AND status = 'scheduled' AND (plan_code IS NULL OR plan_attached_by = $3)
+     RETURNING id`,
+    [ev.id, code, player],
+  );
+  if (!hit.length) return { error: "taken", code };
   revalidatePath(`/events/${ev.id}`);
   return null;
+}
+
+/** An admin takes the plan off a game, so someone else can attach theirs. */
+export async function detachPlan(form: FormData): Promise<void> {
+  const [viewer, ev] = await Promise.all([getViewer(), getHubData().getEvent(String(form.get("event") ?? ""), new Date())]);
+  if (!ev || ev.status !== "upcoming" || !canDetachPlan(viewer, ev)) return;
+  const db = await getDb();
+  await db.query(
+    `UPDATE events SET plan_code = NULL, plan_attached_by = NULL, plan_attached_at = NULL, updated_at = NOW()
+     WHERE id = $1 AND status = 'scheduled'`,
+    [ev.id],
+  );
+  revalidatePath(`/events/${ev.id}`);
 }

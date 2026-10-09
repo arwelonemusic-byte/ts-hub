@@ -5,7 +5,7 @@
  */
 import { cache } from "react";
 import { getDb } from "../db";
-import { eventPlans, missionPlans } from "../plans";
+import { missionPlans } from "../plans";
 import type { Award, HubEvent, LeaderboardEntry, PastEvent, PlanRef, Slot, UpcomingEvent } from "../types";
 import type { HubData } from "./index";
 import { loadMarkersLayer, loadMissions, missionMap } from "./missions";
@@ -32,6 +32,9 @@ interface EventRow {
   started_at: Date | string | null;
   ended_at: Date | string | null;
   plan_code: string | null;
+  plan_attached_by: string | null;
+  plan_attached_by_id: string | null;
+  plan_attached_at: Date | string | null;
   stats: GameStats | null;
 }
 
@@ -43,16 +46,18 @@ function group<T extends { event_id: string }>(rows: T[]): Map<string, T[]> {
   return out;
 }
 
-/** Every game but the cancelled ones, soonest first; scheduled ones without their plans (see withPlans). */
+/** Every game but the cancelled ones, soonest first. */
 const loadGames = cache(async (): Promise<HubEvent[]> => {
   const db = await getDb();
   const [events, slots, attendance, replays, missions] = await Promise.all([
     db.query(
       `SELECT e.id, e.mission_id, e.starts_at, e.extra, e.status, h.display_name AS host_name,
-              pl.display_name AS platoon_leader, e.started_at, e.ended_at, e.plan_code, e.stats
+              pl.display_name AS platoon_leader, e.started_at, e.ended_at, e.plan_code, e.stats,
+              pa.display_name AS plan_attached_by, pa.discord_id AS plan_attached_by_id, e.plan_attached_at
        FROM events e
        LEFT JOIN players h ON h.id = e.host_id
        LEFT JOIN players pl ON pl.id = e.platoon_leader_id
+       LEFT JOIN players pa ON pa.id = e.plan_attached_by
        WHERE e.status <> 'cancelled'
        ORDER BY e.starts_at`,
     ) as Promise<EventRow[]>,
@@ -93,7 +98,18 @@ const loadGames = cache(async (): Promise<HubEvent[]> => {
       ...(e.host_name ? { hostName: e.host_name } : {}),
       platoonLeader: e.platoon_leader,
     };
-    if (e.status === "scheduled") return { ...base, status: "upcoming", slots: gameSlots, plan: null };
+    if (e.status === "scheduled") {
+      // The plan someone attached («Прикрепить план»): its author here is whoever attached it.
+      const plan = e.plan_code
+        ? {
+            code: e.plan_code,
+            author: e.plan_attached_by ?? "—",
+            ...(e.plan_attached_by_id ? { authorId: e.plan_attached_by_id } : {}),
+            createdAt: iso(e.plan_attached_at ?? e.starts_at),
+          }
+        : null;
+      return { ...base, status: "upcoming", slots: gameSlots, plan };
+    }
 
     const stats = e.stats ?? { totals: { deaths: 0 }, leaderboards: { aiKills: [], deaths: [] }, awards: [], friendlyFire: [] };
     const players = attendanceOf.get(e.id) ?? [];
@@ -124,14 +140,6 @@ function listed(games: HubEvent[], now: Date): HubEvent[] {
   return games.filter((e) => isPast(e) || new Date(e.startsAt).getTime() + GAME_MS > now.getTime());
 }
 
-/** Scheduled games get their hub plans (lib/plans). */
-async function withPlans(games: HubEvent[]): Promise<HubEvent[]> {
-  const upcoming = games.filter(isUpcoming);
-  if (!upcoming.length) return games;
-  const plans = await eventPlans(upcoming);
-  return games.map((e) => (isUpcoming(e) ? { ...e, plan: plans.get(e.id) ?? null } : e));
-}
-
 /** The plans played games used: a played game's plan is a plan for its mission. */
 function gamePlans(games: HubEvent[], missionId: string): PlanRef[] {
   return games
@@ -144,22 +152,20 @@ const newestFirst = (a: HubEvent, b: HubEvent) => b.startsAt.localeCompare(a.sta
 
 export const gamesData: HubData = {
   async listUpcoming(now) {
-    return (await withPlans(listed(await loadGames(), now).filter(isUpcoming))) as UpcomingEvent[];
+    return listed(await loadGames(), now).filter(isUpcoming);
   },
   async listPast() {
     return (await loadGames()).filter(isPast).sort(newestFirst);
   },
   async getEvent(id, now) {
     void now;
-    const ev = (await loadGames()).find((e) => e.id === id);
-    return ev ? (await withPlans([ev]))[0] : null;
+    return (await loadGames()).find((e) => e.id === id) ?? null;
   },
   async listBetween(from, to, now) {
-    const games = listed(await loadGames(), now).filter((e) => {
+    return listed(await loadGames(), now).filter((e) => {
       const t = new Date(e.startsAt).getTime();
       return t >= from.getTime() && t < to.getTime();
     });
-    return withPlans(games);
   },
   async getRange(now) {
     const times = listed(await loadGames(), now).map((e) => new Date(e.startsAt).getTime());
@@ -179,7 +185,7 @@ export const gamesData: HubData = {
     const games = listed(await loadGames(), now).filter((e) => e.mission.id === missionId);
     const next = games.filter(isUpcoming);
     const played = games.filter(isPast).sort(newestFirst);
-    return withPlans([...next, ...played]);
+    return [...next, ...played];
   },
   async getMissionHistory(missionId) {
     const games = await loadGames();

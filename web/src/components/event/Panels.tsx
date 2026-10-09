@@ -8,7 +8,7 @@ import { buttonClass, ButtonLink, Eyebrow, Icon, ProgressBar, Tag } from "../ui"
 import { CopyButton } from "./CopyButton";
 import { CopyValue } from "./CopyValue";
 import { AwardCard } from "./AwardCard";
-import { AttachCodeForm, UsePlanButton } from "./PlanForms";
+import { AttachCodeForm, DetachButton } from "./PlanForms";
 
 /**
  * A write action the viewer can't take here. Signed-out users are sent to log in;
@@ -217,82 +217,81 @@ export function PlanRow({
 }
 
 /**
- * An upcoming game's plan. Its PL (or host, or an admin) draws it from here — every
- * push becomes the game's plan — or uses one of the mission's plans (lib/plans).
+ * A scheduled game's plan: the one someone attached (lib/plans). Anyone signed in draws a plan in
+ * the planner from here and pastes the code it gives back. Whoever attached it can paste a newer
+ * code; an admin can detach it. Other plans for the mission are on the mission page.
  */
 export function PlanPanel({
   ev,
-  history,
-  viewerId,
-  canEdit,
+  signedIn,
+  canAttach,
+  canDetach,
   t,
 }: {
   ev: UpcomingEvent;
-  history: MissionHistory;
-  /** Signed-in viewer's Discord id. */
-  viewerId?: string;
-  canEdit: boolean;
+  signedIn: boolean;
+  /** The game has no plan yet, or the viewer attached it. */
+  canAttach: boolean;
+  canDetach: boolean;
   t: T;
 }) {
-  const signedIn = !!viewerId;
   const attached = ev.plan;
-  const missionId = ev.mission.id;
-  const others = history.plans.filter((p) => p.code !== attached?.code && p.event?.id !== ev.id);
-  const errors = { invalid: t("plan.error.invalid"), notFound: t("plan.error.notFound"), forbidden: t("plan.error.forbidden") };
-  const replace = attached ? t("plan.replaceConfirm") : undefined;
-  const locked = t("plan.plOnly");
+  const own = !!attached && canAttach;
+  const errors = {
+    invalid: t("plan.error.invalid"),
+    notFound: t("plan.error.notFound"),
+    wrongMap: t("plan.error.wrongMap"),
+    forbidden: t("plan.error.forbidden"),
+    taken: t("plan.error.taken"),
+  };
   return (
     <section className="flex flex-col gap-4 rounded-xl bg-surface p-6">
       <div className="flex items-center justify-between">
         <h2 className="type-heading-m text-fg">{t("plan.title")}</h2>
         <Tag>{attached ? t("plan.attachedTag") : t("plan.noneTag")}</Tag>
       </div>
-      {attached && <PlanRow plan={attached} missionId={missionId} t={t} showGame={false} />}
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:gap-6">
-        {canEdit ? (
-          <ButtonLink href={`/plan/open?event=${encodeURIComponent(ev.id)}`} external className="md:flex-1">
-            {t(attached ? "plan.edit" : "plan.draw")}
-            <Icon name="external-trailing" />
-          </ButtonLink>
-        ) : (
-          <WriteAction signedIn={signedIn} t={t} title={locked} className={`${buttonClass("secondary", "m")} md:flex-1`}>
-            {t("plan.draw")}
-            <Icon name="external-trailing" />
-          </WriteAction>
-        )}
-        <div className="hidden w-px self-stretch bg-raised md:block" />
-        {canEdit ? (
-          <AttachCodeForm eventId={ev.id} placeholder={t("plan.codePlaceholder")} label={t("plan.attach")} confirmText={replace} errors={errors} />
-        ) : (
-          <div className="flex min-w-0 flex-1 items-center gap-2">
-            <input
-              name="code"
-              maxLength={6}
-              disabled
-              placeholder={t("plan.codePlaceholder")}
-              aria-label={t("plan.attach")}
-              className="h-11 min-w-0 flex-1 rounded-lg border border-line bg-page px-3 type-code tracking-[0.2em] text-fg uppercase outline-none placeholder:text-fg-faint"
-            />
-            <WriteAction signedIn={signedIn} t={t} title={locked} className={buttonClass("primary", "m")}>
-              {t("plan.attach")}
+      {attached && (
+        <PlanRow plan={{ ...attached, author: t("plan.attachedBy", { name: attached.author }) }} missionId={ev.mission.id} t={t} showGame={false}>
+          {canDetach && <DetachButton eventId={ev.id} label={t("plan.detach")} confirmText={t("plan.detachConfirm")} />}
+        </PlanRow>
+      )}
+      {(!attached || own || !signedIn) && (
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:gap-6">
+          {signedIn ? (
+            <ButtonLink href={`/plan/open?event=${encodeURIComponent(ev.id)}`} external className="md:flex-1">
+              {t("plan.draw")}
+              <Icon name="external-trailing" />
+            </ButtonLink>
+          ) : (
+            <WriteAction signedIn={false} t={t} className={`${buttonClass("secondary", "m")} md:flex-1`}>
+              {t("plan.draw")}
+              <Icon name="external-trailing" />
             </WriteAction>
-          </div>
-        )}
-      </div>
-      {others.length > 0 && (
-        <div className="flex flex-col gap-2.5">
-          <Eyebrow>{t("plan.previous")}</Eyebrow>
-          {others.map((p) => (
-            <PlanRow key={p.id ?? p.code} plan={p} missionId={missionId} t={t} own={isOwnPlan(p, viewerId)}>
-              {canEdit ? (
-                <UsePlanButton eventId={ev.id} plan={{ id: p.id, code: p.code }} label={t("plan.attachShort")} confirmText={replace} errors={errors} />
-              ) : (
-                <WriteAction signedIn={signedIn} t={t} title={locked} className={buttonClass("outline", "s")}>
-                  {t("plan.attachShort")}
-                </WriteAction>
-              )}
-            </PlanRow>
-          ))}
+          )}
+          <div className="hidden w-px self-stretch bg-raised md:block" />
+          {signedIn ? (
+            <AttachCodeForm
+              eventId={ev.id}
+              placeholder={t("plan.codePlaceholder")}
+              label={t(own ? "plan.replace" : "plan.attach")}
+              confirmText={own ? t("plan.replaceConfirm") : undefined}
+              errors={errors}
+            />
+          ) : (
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <input
+                name="code"
+                maxLength={6}
+                disabled
+                placeholder={t("plan.codePlaceholder")}
+                aria-label={t("plan.attach")}
+                className="h-11 min-w-0 flex-1 rounded-lg border border-line bg-page px-3 type-code tracking-[0.2em] text-fg uppercase outline-none placeholder:text-fg-faint"
+              />
+              <WriteAction signedIn={false} t={t} className={buttonClass("primary", "m")}>
+                {t("plan.attach")}
+              </WriteAction>
+            </div>
+          )}
         </div>
       )}
     </section>

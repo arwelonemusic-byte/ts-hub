@@ -113,26 +113,28 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
 - **Plans and replays are referenced by code.** They live in the planner's DB. Replay links are in `lib/links.ts`:
   given the game, `replayUrl` adds `&mission=` and `&plan=` so the replay viewer's Plan overlay shows the game's plan
   (when the replay has no /syncplan stamp) and the mission's Markers.layer.
-- **Plans** (`lib/plans/`, user decision 2026-10-09). Every push in the planner mints a new code, so the hub groups
-  them: a hub plan has a secret key, the planner tags each push made with it (only the key's SHA-256 is stored there,
-  `plans.lineage`), and the hub shows the newest version (`GET <planner>/api/plans?lineage=`). Where the plan is
-  started decides what it is:
-  - from a game's page (its PL, host or an admin): the game's plan. Every push becomes «План» for the game; pushes
-    after the game starts don't count;
-  - from a mission page: always a new plan of the author's (a PL often tries a different approach on a rerun, so a
-    player can have several per mission). They continue one from its row, which says «Редактировать» for them.
-    It's listed on the mission and on its upcoming games, where the PL can «Использовать» it, or attach any code.
-    Using a plan copies its current version: later pushes on either side don't affect the other.
+- **Plans** (`lib/plans/`, user decisions 2026-10-09). Two kinds:
+  - **A game's plan** is one planner code, attached on the game's page. «Нарисовать план» opens the planner on the
+    mission's map and Markers.layer (no hub plan, no key); the PL draws, pushes, and pastes the code back into
+    «Прикрепить план». Anyone signed in can attach when the game has none; whoever attached it can paste a newer code
+    («Заменить план»); an admin can «Открепить» it. It's stored on the event (`plan_code`, `plan_attached_by`,
+    `plan_attached_at`; `lib/plans/actions.ts`). A pushed plan carries `mapKey`, and one drawn on another map is
+    refused. The game page shows only that plan; the mission's other plans are on the mission page. It's for people
+    to look at: what the game really used comes from the replay's /syncplan stamp (`meta.planCode`), and a played
+    game's `plan_code` is that.
+  - **A mission plan** is started from a mission page («Нарисовать план», a form POST to `app/plan/open`): always a
+    new plan of the author's (a PL often tries a different approach on a rerun, so a player can have several). Every
+    push in the planner mints a new code, so the hub groups them: a hub plan has a secret key, the planner tags each
+    push made with it (only the key's SHA-256 is stored there, `plans.lineage`), and the hub shows the newest version
+    (`GET <planner>/api/plans?lineage=`). No version history (user decision): a push supersedes the previous one. The
+    author continues it from its row («Редактировать»). Hub plans are the `plans` table (`lib/plans/store.ts`); its
+    `event_id` columns are from the earlier design and no longer written.
 
-  No version history (user decision): a push supersedes the plan's previous version, and rows show only the newest.
-  Starting a mission plan is a form POST to `app/plan/open`; opening an existing one is a GET link.
-
-  Every «open in the planner» goes through `app/plan/open`, which only puts the key in the link for someone who may
-  push to that plan; everyone else gets a view-only link. The planner's side of the hand-off is `?mission=&plan=&key=&event=`
-  (planner `lib/hubLink.ts`); it fetches the map key and Markers.layer from `/api/missions/<id>/planner`, which allows
-  the planner origin (CORS). Plans are the `plans` table (`lib/plans/store.ts`).
-  In dev the planner is the local one on :3000 (`PLANNER_PLANS_URL` overrides); replay links stay on production.
-  Scheduled games start with no plan.
+  Every «open in the planner» goes through `app/plan/open`, which only puts a key in the link for the plan's author;
+  everyone else gets a view-only link. The planner's side of the hand-off is `?mission=&plan=&key=&event=` (planner
+  `lib/hubLink.ts`); it fetches the map key and Markers.layer from `/api/missions/<id>/planner`, which allows the
+  planner origin (CORS). In dev the planner is the local one on :3000 (`PLANNER_PLANS_URL` overrides); replay links
+  stay on production. Signing in creates the member's `players` row (`lib/players.ts`), which attaching points at.
 - **Auth:** Discord OAuth ported from the Training Portal, plus an OAuth `state` cookie. The session is an HS256
   JWT in `ts_hub_session`. Without the env vars, login redirects back with a "not configured" notice. Steam is planned.
   Env template: `web/.env.example`. Pages ask `getViewer()` (`lib/viewer.ts`) who is looking. On a dev machine

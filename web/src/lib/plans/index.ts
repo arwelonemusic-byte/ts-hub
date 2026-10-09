@@ -1,18 +1,17 @@
 import type { PlanRef, UpcomingEvent } from "../types";
 import type { Viewer } from "../viewer";
 import { fetchVersions, type PlanVersion } from "./planner";
-import { insertPlanRecord, listPlanRecords, newPlanRecord, replaceEventPlan, type PlanRecord } from "./store";
+import { insertPlanRecord, listPlanRecords, newPlanRecord, type PlanRecord } from "./store";
 
 /*
- * Where a plan is started decides what it is:
- * - from a game's page (its PL, host or an admin): that game's plan. Every push
- *   becomes «План» for the game, until the game starts;
- * - from a mission page: a new plan of the author's for the mission (a PL often
- *   tries a different approach on a rerun, so a player can have several). It's
- *   listed on the mission and offered on its upcoming games, where the PL can
- *   «Использовать» it — which starts the game's plan from that version, so later
- *   pushes on either side don't touch the other.
- * A plan has no version history: each push supersedes the last.
+ * Two kinds of plan:
+ * - a game's plan: a planner code someone pastes on the game's page («Прикрепить план»,
+ *   lib/plans/actions.ts, stored on the event). The page only shows that one. Whoever
+ *   attached it can swap in a newer code; an admin can detach it. What the game really
+ *   used comes from its replay (the /syncplan stamp), not from here;
+ * - a mission plan: «Нарисовать план» on a mission page starts a new hub plan of the
+ *   author's (a PL often tries a different approach on a rerun, so a player can have
+ *   several). Pushes made from it are its versions; each supersedes the last.
  */
 
 function toRef(r: PlanRecord, versions: PlanVersion[]): PlanRef | null {
@@ -52,62 +51,18 @@ export async function missionPlans(missionId: string, fromGames: PlanRef[]): Pro
   return out.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-/** Each upcoming game's own plan, by event id. */
-export async function eventPlans(events: UpcomingEvent[]): Promise<Map<string, PlanRef>> {
-  const records = await listPlanRecords({ eventIds: events.map((e) => e.id) });
-  const refs = await resolvePlans(records);
-  const out = new Map<string, PlanRef>();
-  records.forEach((r, i) => {
-    if (refs[i]) out.set(r.eventId!, refs[i]!);
-  });
-  return out;
+/** Anyone signed in can attach a plan to a game that has none; whoever attached it can replace it. */
+export function canAttachPlan(viewer: Viewer | null, ev: UpcomingEvent): boolean {
+  if (!viewer) return false;
+  return !ev.plan || (!!ev.plan.authorId && ev.plan.authorId === viewer.discordId);
 }
 
-/** The PL (or host, or an admin) can set and draw a game's plan until it starts. */
-export function canEditEventPlan(viewer: Viewer | null, ev: UpcomingEvent, now = new Date()): boolean {
-  if (!viewer || new Date(ev.startsAt) <= now) return false;
-  return viewer.isAdmin || ev.platoonLeader === viewer.name || ev.hostName === viewer.name;
-}
-
-export async function findEventPlan(eventId: string): Promise<PlanRecord | null> {
-  return (await listPlanRecords({ eventIds: [eventId] }))[0] ?? null;
-}
-
-export async function openEventPlan(viewer: Viewer, ev: UpcomingEvent): Promise<PlanRecord> {
-  return (
-    (await findEventPlan(ev.id)) ??
-    insertPlanRecord(
-      newPlanRecord({
-        missionId: ev.mission.id,
-        eventId: ev.id,
-        eventStartsAt: ev.startsAt,
-        authorId: viewer.discordId,
-        authorName: viewer.name,
-        seed: null,
-      }),
-    )
-  );
+/** Detaching someone's plan is for admins. */
+export function canDetachPlan(viewer: Viewer | null, ev: UpcomingEvent): boolean {
+  return !!viewer?.isAdmin && !!ev.plan;
 }
 
 /** «Нарисовать план» on a mission always starts a new plan; an existing one is continued from its row. */
 export function newMissionPlan(viewer: Viewer, missionId: string): Promise<PlanRecord> {
   return insertPlanRecord(newPlanRecord({ missionId, eventId: null, eventStartsAt: null, authorId: viewer.discordId, authorName: viewer.name, seed: null }));
-}
-
-/**
- * «Использовать»: the game's plan restarts from `seed`. A replaced game plan the
- * PL already pushed to stays on as their mission plan; an untouched one is dropped.
- */
-export async function setEventPlan(viewer: Viewer, ev: UpcomingEvent, seed: NonNullable<PlanRecord["seed"]>): Promise<void> {
-  const old = await findEventPlan(ev.id);
-  const oldPushed = old ? ((await fetchVersions([old.key])).get(old.key)?.length ?? 0) > 0 : false;
-  const rec = newPlanRecord({
-    missionId: ev.mission.id,
-    eventId: ev.id,
-    eventStartsAt: ev.startsAt,
-    authorId: viewer.discordId,
-    authorName: viewer.name,
-    seed,
-  });
-  await replaceEventPlan(old ? { id: old.id, keepOld: oldPushed } : null, rec);
 }
