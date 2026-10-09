@@ -47,6 +47,8 @@ export interface PostGame {
   plan: { code: string; title?: string; author: string } | null;
   /** A played game: how many played. */
   attended?: number;
+  /** Roles pinged when the post goes up (DISCORD_ANNOUNCE_PING_ROLES): @Анонсы, @Reforger in #анонсы. */
+  pingRoles: string[];
 }
 
 /** A post: the Discord message, plus the image attached when it first goes up. */
@@ -57,12 +59,11 @@ export interface GamePost extends DiscordMessage {
 const ACCENT = 0xf4db50;
 const GREY = 0x2e3439;
 
-/**
- * Pinged when the post goes up (@Анонсы, @Reforger). Mentions only ping from the message text, and only on the first
- * post: the hub's edits never ping again. allowed_mentions lets exactly these roles ping, so a player's name can't.
- * TS Hub Bot has «Mention @everyone, @here and All Roles» in #анонсы.
+/*
+ * The pinged roles (g.pingRoles) only ping from the message text, and only on the first post: the hub's edits never
+ * ping again. allowed_mentions lets exactly these roles ping, so a player's name can't. TS Hub Bot has «Mention
+ * @everyone, @here and All Roles» in #анонсы.
  */
-const PING_ROLES = ["1211570718592991312", "1260874468641869894"];
 
 /** The message text: what and when, the sides, the pings. */
 function header(g: PostGame, unix: number): string {
@@ -72,8 +73,7 @@ function header(g: PostGame, unix: number): string {
     `# Что | Operation ${g.mission.name}`,
     `# Когда | <t:${unix}:F>`,
     ...(sideLines.length ? ["", ...sideLines] : []),
-    "",
-    PING_ROLES.map((id) => `<@&${id}>`).join(" "),
+    ...(g.pingRoles.length ? ["", g.pingRoles.map((id) => `<@&${id}>`).join(" ")] : []),
   ].join("\n");
 }
 
@@ -82,7 +82,7 @@ export function renderGamePost(g: PostGame): GamePost {
   const about = [`Карта: ${g.mission.mapLabel}`, g.mission.authors.length ? `Автор: ${g.mission.authors.join(", ")}` : null];
   const base = {
     content: header(g, unix),
-    allowed_mentions: { roles: PING_ROLES },
+    allowed_mentions: { roles: g.pingRoles },
     image: g.mission.coverUrl,
   };
 

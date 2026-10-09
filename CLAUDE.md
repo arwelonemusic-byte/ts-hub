@@ -149,8 +149,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   one edit; one post or edit at a time per game; an edit whose content didn't change is skipped via `events.discord_hash`,
   migration 008). The post's button links to the game's page: signing up happens on the site. A post deleted in Discord
   is forgotten on the next edit and the button comes back. The look is ONE pure function, `renderGamePost(PostGame)` in
-  `lib/discord/template.ts`, in Galaxy's layout from his hand-written announcements: the message text (# Что | Operation …,
-  # Когда | <date>, За кого / Против кого, @Анонсы @Reforger pinged on the first post only), the cover attached to the
+  `lib/discord/template.ts`, in the layout of Galaxy's hand-written announcements: the message text (# Что | Operation …,
+  # Когда | <date>, За кого / Против кого, then the roles in `DISCORD_ANNOUNCE_PING_ROLES`, @Анонсы,@Reforger in
+  production, pinged on the first post only; empty for a test channel), the cover attached to the
   first post as a file so it renders large (edits keep it), then the slot card and «Записаться». `fitLimits` trims any
   template to Discord's limits and nobody else is pinged (`allowed_mentions`). Dev: no channel = off;
   `/api/dev/discord-post/<id>` returns the message JSON; `DISCORD_API_URL` points the sender at a stand-in for testing.

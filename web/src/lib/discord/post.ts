@@ -20,6 +20,12 @@ import { renderGamePost, type PostGame } from "./template";
  */
 
 const channel = () => process.env.DISCORD_ANNOUNCE_CHANNEL_ID || null;
+/** Role ids pinged when a post goes up, comma-separated (production: @Анонсы,@Reforger); empty for a test channel. */
+const pingRoles = () =>
+  (process.env.DISCORD_ANNOUNCE_PING_ROLES ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => /^\d+$/.test(s));
 const hubUrl = () => (process.env.NEXT_PUBLIC_BASE_URL ?? "https://hub.tacticalshift.ru").replace(/\/$/, "");
 const absolute = (url: string | null) => (url ? (/^https?:\/\//.test(url) ? url : `${hubUrl()}${url}`) : null);
 
@@ -66,10 +72,22 @@ export async function postGame(eventId: string): Promise<PostGame | null> {
       slotted: ev.slots.filter((s) => s.playerName).length,
       slotCount: ev.slots.length,
       plan: ev.plan ? { code: ev.plan.code, title: ev.plan.title, author: ev.plan.author } : null,
+      pingRoles: pingRoles(),
     };
   }
   if (ev) {
-    return { status: "played", url, startsAt: ev.startsAt, mission: missionOf(ev.mission), squads: [], slotted: 0, slotCount: 0, plan: null, attended: ev.attended };
+    return {
+      status: "played",
+      url,
+      startsAt: ev.startsAt,
+      mission: missionOf(ev.mission),
+      squads: [],
+      slotted: 0,
+      slotCount: 0,
+      plan: null,
+      attended: ev.attended,
+      pingRoles: pingRoles(),
+    };
   }
   // Cancelled games aren't in the hub's game lists any more.
   const [row] = (await (await getDb()).query("SELECT mission_id, starts_at FROM events WHERE id = $1 AND status = 'cancelled'", [eventId])) as {
@@ -78,7 +96,17 @@ export async function postGame(eventId: string): Promise<PostGame | null> {
   }[];
   const mission = row && (await getHubData().getMission(row.mission_id));
   if (!mission) return null;
-  return { status: "cancelled", url, startsAt: new Date(row.starts_at).toISOString(), mission: missionOf(mission), squads: [], slotted: 0, slotCount: 0, plan: null };
+  return {
+    status: "cancelled",
+    url,
+    startsAt: new Date(row.starts_at).toISOString(),
+    mission: missionOf(mission),
+    squads: [],
+    slotted: 0,
+    slotCount: 0,
+    plan: null,
+    pingRoles: pingRoles(),
+  };
 }
 
 const clip = (s: string | undefined, n: number) => (s && s.length > n ? `${s.slice(0, n - 1)}…` : s);
