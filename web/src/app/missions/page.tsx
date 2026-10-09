@@ -2,6 +2,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { MissionCatalog } from "@/components/mission/MissionCatalog";
 import { parseCatalogQuery, toCatalog } from "@/lib/catalog";
 import { getHubData } from "@/lib/data";
+import { plural } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
 
 /** Figma "Missions · List" (node 52:1362). Filters live in the URL so a filtered list can be shared. */
@@ -23,7 +24,7 @@ export default async function MissionsPage({ searchParams }: PageProps<"/mission
         <div className="flex w-full max-w-[1216px] flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h1 className="type-display-page text-fg">{t("nav.missions")}</h1>
-            <p className="type-body-l text-fg-secondary">{t("catalog.subtitle")}</p>
+            <p className="type-body-l text-fg-secondary">{plural(locale, "catalog.total", missions.length)}</p>
           </div>
           <MissionCatalog missions={toCatalog(missions, upcoming, past)} initial={parseCatalogQuery(sp)} locale={locale} />
         </div>

@@ -76,7 +76,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   «Я приду!» instead. The hub doesn't show Workshop dependencies or update dates (user decision).
 - **Missions list** (`app/missions`) follows Figma frame 52:1362: a filter rail (search, map and author dropdowns, tag
   chips; a mission must carry every selected tag) and mission-only cards (cover, title, map, author; no game details).
-  Filters and sort live in the URL (`?q=&map=&author=&tag=&sort=`) via `history.replaceState`; logic is in `lib/catalog.ts`.
+  Filters live in the URL (`?q=&map=&author=&tag=`) via `history.replaceState`; logic is in `lib/catalog.ts`. No sort
+  control (user decision): scheduled soonest first, then most recently played, then never played. The subtitle is the
+  catalogue's size («41 миссия в каталоге»).
 - **Missions own their slot template.** Each game copies it, and the author or an admin can grow it later (adding
   squads to an old mission). Fireteams are plain text in the slot name ("BLUE - Grenadier"). `requiredRole` is a
   Discord role, and Discord stays the source of truth for roles. Which slot name needs which role is in

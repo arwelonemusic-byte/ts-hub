@@ -1,6 +1,6 @@
 import type { Mission, PastEvent, UpcomingEvent } from "@/lib/types";
 
-/** A mission as the catalogue lists it: no event details, just what the filters and the "recent" sort need. */
+/** A mission as the catalogue lists it: no event details, just what the filters and the order need. */
 export interface CatalogMission {
   id: string;
   name: string;
@@ -15,15 +15,12 @@ export interface CatalogMission {
   lastPlayedAt: string | null;
 }
 
-export type CatalogSort = "recent" | "name";
-
-/** Filters and sort, mirrored in the URL (?q=&map=&author=&tag=&tag=&sort=). */
+/** Filters, mirrored in the URL (?q=&map=&author=&tag=&tag=). */
 export interface CatalogQuery {
   q: string;
   map: string;
   author: string;
   tags: string[];
-  sort: CatalogSort;
 }
 
 export function toCatalog(missions: Mission[], upcoming: UpcomingEvent[], past: PastEvent[]): CatalogMission[] {
@@ -42,7 +39,6 @@ export function parseCatalogQuery(sp: Record<string, string | string[] | undefin
     map: one(sp.map),
     author: one(sp.author),
     tags: Array.isArray(tag) ? tag : tag ? [tag] : [],
-    sort: one(sp.sort) === "name" ? "name" : "recent",
   };
 }
 
@@ -52,12 +48,11 @@ export function catalogSearch(q: CatalogQuery): string {
   if (q.map) p.set("map", q.map);
   if (q.author) p.set("author", q.author);
   for (const t of q.tags) p.append("tag", t);
-  if (q.sort !== "recent") p.set("sort", q.sort);
   const s = p.toString();
   return s ? `?${s}` : "";
 }
 
-/** A mission must match every filter, and carry every selected tag. */
+/** A mission must match every filter, and carry every selected tag. Scheduled soonest first, then the most recently played, then never played. */
 export function filterCatalog(missions: CatalogMission[], q: CatalogQuery): CatalogMission[] {
   const needle = q.q.trim().toLocaleLowerCase("ru");
   const out = missions.filter(
@@ -68,8 +63,6 @@ export function filterCatalog(missions: CatalogMission[], q: CatalogQuery): Cata
       q.tags.every((t) => m.tags.includes(t)),
   );
   const byName = (a: CatalogMission, b: CatalogMission) => a.name.localeCompare(b.name, "ru");
-  if (q.sort === "name") return out.sort(byName);
-  // Scheduled soonest first, then the most recently played, then never played.
   return out.sort((a, b) => {
     if (a.nextAt && b.nextAt) return a.nextAt.localeCompare(b.nextAt);
     if (a.nextAt || b.nextAt) return a.nextAt ? -1 : 1;

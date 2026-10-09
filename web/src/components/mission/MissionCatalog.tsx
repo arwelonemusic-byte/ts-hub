@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
-import { catalogSearch, catalogTags, filterCatalog, type CatalogMission, type CatalogQuery, type CatalogSort } from "@/lib/catalog";
-import { makeT, plural, type Locale } from "@/lib/i18n";
+import { catalogSearch, catalogTags, filterCatalog, type CatalogMission, type CatalogQuery } from "@/lib/catalog";
+import { makeT, type Locale } from "@/lib/i18n";
 import { buttonClass, Cover, Icon } from "../ui";
 
-const EMPTY: Omit<CatalogQuery, "sort"> = { q: "", map: "", author: "", tags: [] };
+const EMPTY: CatalogQuery = { q: "", map: "", author: "", tags: [] };
 
 /** Figma "Missions · List" (node 52:1362): filter rail on the left, mission cards on the right. */
 export function MissionCatalog({ missions, initial, locale }: { missions: CatalogMission[]; initial: CatalogQuery; locale: Locale }) {
@@ -92,16 +92,6 @@ export function MissionCatalog({ missions, initial, locale }: { missions: Catalo
       </aside>
 
       <section aria-label={t("nav.missions")} className="flex min-w-0 flex-1 flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
-          <h2 className="type-heading-s text-fg">{plural(locale, "catalog.count", shown.length)}</h2>
-          <label className="flex items-center gap-2 type-body-s text-fg-secondary">
-            {t("catalog.sort")}
-            <Select size="s" value={query.sort} onChange={(sort) => update({ sort: sort as CatalogSort })}>
-              <option value="recent">{t("catalog.sort.recent")}</option>
-              <option value="name">{t("catalog.sort.name")}</option>
-            </Select>
-          </label>
-        </div>
         {shown.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-line-strong px-4 py-12 text-center">
             <span className="type-label-m text-fg-label">{t("catalog.empty")}</span>
@@ -130,18 +120,14 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-/** Figma "Select": M fills a filter field on the page background, S sits in the results toolbar. */
-function Select({ value, onChange, size = "m", children }: { value: string; onChange: (v: string) => void; size?: "m" | "s"; children: ReactNode }) {
-  const cls =
-    size === "m"
-      ? "h-11 w-full bg-page pl-3 pr-9 type-body-m"
-      : "h-8 w-[230px] bg-inset pl-2.5 pr-8 type-body-s";
+/** Figma "Select" (M): fills a filter field on the page background. */
+function Select({ value, onChange, children }: { value: string; onChange: (v: string) => void; children: ReactNode }) {
   return (
-    <span className={`relative flex items-center ${size === "m" ? "w-full" : ""}`}>
+    <span className="relative flex w-full items-center">
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`cursor-pointer appearance-none rounded-lg border border-line text-fg outline-none focus:border-line-strong ${cls}`}
+        className="h-11 w-full cursor-pointer appearance-none rounded-lg border border-line bg-page pr-9 pl-3 type-body-m text-fg outline-none focus:border-line-strong"
       >
         {children}
       </select>
