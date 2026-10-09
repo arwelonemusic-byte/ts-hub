@@ -31,11 +31,13 @@ export async function AppHeader({ active }: { active: "events" | "missions" | "p
             href={n.href}
             {...(n.external ? { target: "_blank", rel: "noreferrer" } : {})}
             aria-current={n.key === active ? "page" : undefined}
-            className={`flex h-11 items-center rounded-lg px-3.5 type-label-s ${
+            className={`flex h-11 items-center gap-1.5 rounded-lg px-3.5 type-label-s ${
               n.key === active ? "bg-raised text-fg" : "text-fg-secondary hover:text-fg"
             }`}
           >
             {t(`nav.${n.key}`)}
+            {/* The other TS apps open in a new tab; the icon (62% white) matches the nav's text. */}
+            {n.external && <Icon name="external-ff" />}
           </Link>
         ))}
       </nav>
