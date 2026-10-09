@@ -181,6 +181,7 @@ export function PlanRow({
   t,
   showGame = true,
   own = false,
+  syncCopy = false,
   children,
 }: {
   plan: PlanRef;
@@ -188,6 +189,8 @@ export function PlanRow({
   t: T;
   showGame?: boolean;
   own?: boolean;
+  /** The code copies as "/syncplan CODE", ready for the game's chat (a game's attached plan). */
+  syncCopy?: boolean;
   children?: ReactNode;
 }) {
   const caption = [
@@ -198,7 +201,13 @@ export function PlanRow({
   return (
     <div className="flex min-h-15 flex-wrap items-center gap-2.5 rounded-lg bg-inset px-4 py-3">
       <div className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate type-label-s text-fg">{plan.title ?? plan.code}</span>
+        {syncCopy ? (
+          <span className="flex min-w-0 type-label-s">
+            <CopyValue value={plan.code} text={`/syncplan ${plan.code}`} hint={t("mission.copyHint")} copiedLabel={t("mission.copied")} />
+          </span>
+        ) : (
+          <span className="truncate type-label-s text-fg">{plan.title ?? plan.code}</span>
+        )}
         <span className="flex flex-wrap items-center gap-x-2 type-caption text-fg-secondary">
           {caption.map((c, i) => (
             <span key={i} className="flex items-center gap-2">
@@ -258,7 +267,7 @@ export function PlanPanel({
         <Tag>{attached ? t("plan.attachedTag") : t("plan.noneTag")}</Tag>
       </div>
       {attached && (
-        <PlanRow plan={{ ...attached, author: t("plan.attachedBy", { name: attached.author }) }} missionId={ev.mission.id} t={t} showGame={false}>
+        <PlanRow plan={{ ...attached, author: t("plan.attachedBy", { name: attached.author }) }} missionId={ev.mission.id} t={t} showGame={false} syncCopy>
           {canDetach && <DetachButton eventId={ev.id} label={t("plan.detach")} confirmText={t("plan.detachConfirm")} />}
         </PlanRow>
       )}
