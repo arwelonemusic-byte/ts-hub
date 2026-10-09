@@ -29,7 +29,8 @@ export async function GET(request: NextRequest) {
       userId: user.id,
       username: user.username,
       displayName,
-      avatar,
+      // Discord's avatar hash, not a URL: the Training Portal reads the same cookie.
+      avatar: user.avatar,
       roles: mapRoleIdsToNames(member.roles),
     });
     const res = NextResponse.redirect(`${base}/events`);

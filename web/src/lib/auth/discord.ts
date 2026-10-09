@@ -86,8 +86,10 @@ export function mapRoleIdsToNames(roleIds: string[]): string[] {
 /** Every role name the hub knows (slot templates pick a required role from these). */
 export const discordRoleNames = () => Object.values(roleMap());
 
+/** A Discord avatar hash as an image URL (logins made before 2026-10-09 already hold a URL: kept as is). */
 export function avatarUrl(userId: string, avatar: string | null): string | null {
-  return avatar ? `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png?size=64` : null;
+  if (!avatar) return null;
+  return avatar.startsWith("http") ? avatar : `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png?size=64`;
 }
 
 /**

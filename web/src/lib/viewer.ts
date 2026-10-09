@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { discordConfigured, fetchGuildMemberByBot, mapRoleIdsToNames } from "./auth/discord";
+import { avatarUrl, discordConfigured, fetchGuildMemberByBot, mapRoleIdsToNames } from "./auth/discord";
 import { getSession } from "./auth/session";
 import { getDb } from "./db";
 
@@ -93,7 +93,7 @@ export async function getViewer(): Promise<Viewer | null> {
     return {
       discordId: session.userId,
       name: session.displayName,
-      avatar: session.avatar,
+      avatar: avatarUrl(session.userId, session.avatar),
       roles,
       isAdmin: ADMIN_IDS.includes(session.userId) || roles.some((r) => ADMIN_ROLES.includes(r)),
       isMissionMaker: roles.some((r) => roleKey(r) === roleKey(MISSION_MAKER_ROLE)),
