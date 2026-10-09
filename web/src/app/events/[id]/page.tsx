@@ -25,7 +25,7 @@ import { plannerEmbedUrl } from "@/lib/plans/planner";
 import { playerNames, slottingOpen, viewerSlot } from "@/lib/slots";
 import { LeaveSlotButton } from "@/components/event/SlotForms";
 import { LiveRefresh } from "@/components/event/LiveRefresh";
-import { SlotsJump } from "@/components/event/SlotsJump";
+import { JumpLink } from "@/components/event/Jump";
 import { EventAdminMenu } from "@/components/schedule/Schedule";
 import type { MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
@@ -97,19 +97,22 @@ function Upcoming({
             </div>
             <ProgressBar value={taken} max={ev.slots.length} />
           </HeroBox>
-          <HeroBox>
+          {/* Same look as a HeroBox, but it takes you to the Plan section. */}
+          <JumpLink target="plan" className="flex min-w-0 flex-1 flex-col gap-2 rounded-lg bg-inset px-4 py-3 hover:bg-raised">
             <Eyebrow>{t("event.plan")}</Eyebrow>
             <span className="flex items-center gap-1.5 type-label-l text-fg">
               <Icon name={attached ? "check-circle" : "plan-pending"} />
               {attached ? `${t("event.plan.ready")} · ${attached.code}` : t("event.plan.none")}
             </span>
-          </HeroBox>
+          </JumpLink>
         </div>
         <div className="flex flex-wrap gap-2">
           {mySlot && (viewer!.isAdmin || slottingOpen(ev)) ? (
             <LeaveSlotButton eventId={ev.id} label={t("event.leaveSlot")} className={buttonClass("danger", "m")} />
           ) : (
-            <SlotsJump label={t("event.slotIn")} className={`${buttonClass("primary", "m")} flex-1`} />
+            <JumpLink target="slots" className={`${buttonClass("primary", "m")} flex-1`}>
+              {t("event.slotIn")}
+            </JumpLink>
           )}
           <ButtonLink href={workshopUrl(ev.mission)} external>
             {t("event.workshop")}

@@ -251,7 +251,8 @@ export function PlanPanel({
     taken: t("plan.error.taken"),
   };
   return (
-    <section className="flex flex-col gap-4 rounded-xl bg-surface p-6">
+    // The hero's plan box jumps here (components/event/Jump.tsx), like «Занять слот» to the slots.
+    <section id="plan" className="flex scroll-mt-24 flex-col gap-4 rounded-xl bg-surface p-6 lg:scroll-mt-[72px]">
       <div className="flex items-center justify-between">
         <h2 className="type-heading-m text-fg">{t("plan.title")}</h2>
         <Tag>{attached ? t("plan.attachedTag") : t("plan.noneTag")}</Tag>

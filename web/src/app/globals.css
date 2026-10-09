@@ -199,7 +199,7 @@
   }
 }
 
-/* «Занять слот» flashes the slots panel when it scrolls there (components/event/SlotsJump.tsx). */
+/* «Занять слот» and the hero's plan box flash the section they scroll to (components/event/Jump.tsx). */
 @theme {
   --animate-attention: attention 1.4s ease-out;
 
