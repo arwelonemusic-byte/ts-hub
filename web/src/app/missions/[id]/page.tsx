@@ -153,7 +153,7 @@ function Hero({
                 <input type="hidden" name="mission" value={mission.id} />
                 <button type="submit" className={buttonClass("secondary", "m")}>
                   {t("plan.draw")}
-                  <Icon name="external-trailing" />
+                  <Icon name="pencil" />
                 </button>
               </form>
             )}

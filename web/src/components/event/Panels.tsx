@@ -286,12 +286,12 @@ export function PlanPanel({
           {signedIn ? (
             <ButtonLink href={`/plan/open?event=${encodeURIComponent(ev.id)}`} external className="md:flex-1">
               {t("plan.draw")}
-              <Icon name="external-trailing" />
+              <Icon name="pencil" />
             </ButtonLink>
           ) : (
             <WriteAction signedIn={false} t={t} className={`${buttonClass("secondary", "m")} md:flex-1`}>
               {t("plan.draw")}
-              <Icon name="external-trailing" />
+              <Icon name="pencil" />
             </WriteAction>
           )}
           <div className="hidden w-px self-stretch bg-raised md:block" />
@@ -449,6 +449,16 @@ function CopyFact({ label, value, t }: { label: string; value?: string; t: T }) 
  * The mission's facts. On an event page it also says how often the mission was played and
  * links to the mission page; on the mission page itself it shows the Workshop ids instead.
  */
+function MissionTags({ tags }: { tags: string[] }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {tags.map((tag) => (
+        <Tag key={tag}>{tag}</Tag>
+      ))}
+    </div>
+  );
+}
+
 export function MissionPanel({
   mission,
   history,
@@ -462,7 +472,7 @@ export function MissionPanel({
   locale: Locale;
   t: T;
   onMissionPage?: boolean;
-  /** A played game's page (Figma 24:3241): the mission's tags instead of its GUID and scenario. */
+  /** A played game's page (Figma 24:3241): the mission's tags instead of its GUID and scenario. The mission page shows them under the title. */
   played?: boolean;
 }) {
   const planning = (
@@ -491,6 +501,7 @@ export function MissionPanel({
   return (
     <section className="flex flex-col gap-4 rounded-xl bg-inset p-5">
       <h2 className="type-heading-xs text-fg">{t("mission.title")}</h2>
+      {onMissionPage && mission.tags.length > 0 && <MissionTags tags={mission.tags} />}
       <div className="flex flex-col gap-2.5">
         <Fact label={t("mission.author")}>
           <span className="text-fg">{mission.authors.join(", ") || "—"}</span>
@@ -517,13 +528,7 @@ export function MissionPanel({
           </>
         )}
       </div>
-      {played && mission.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {mission.tags.map((tag) => (
-            <Tag key={tag}>{tag}</Tag>
-          ))}
-        </div>
-      )}
+      {played && mission.tags.length > 0 && <MissionTags tags={mission.tags} />}
       {!onMissionPage && (
         <ButtonLink href={`/missions/${mission.id}`} className="w-full">
           {t("mission.page")}
