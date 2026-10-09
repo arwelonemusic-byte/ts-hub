@@ -128,11 +128,14 @@ function Hero({
               </span>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <StatBox label={t("missionPage.played")} value={n ? plural(locale, "mission.times", n) : "—"} />
-            <StatBox label={t("missionPage.players")} value={avgPlayers ?? "—"} />
-            <StatBox label={t("missionPage.duration")} value={avgMin === null ? "—" : `${n > 1 ? "~" : ""}${duration(avgMin, locale)}`} />
-          </div>
+          {/* A mission nobody has played yet has nothing to show here. */}
+          {n > 0 && (
+            <div className="grid grid-cols-3 gap-3">
+              <StatBox label={t("missionPage.played")} value={plural(locale, "mission.times", n)} />
+              <StatBox label={t("missionPage.players")} value={avgPlayers ?? "—"} />
+              <StatBox label={t("missionPage.duration")} value={avgMin === null ? "—" : `${n > 1 ? "~" : ""}${duration(avgMin, locale)}`} />
+            </div>
+          )}
           {/* For an admin, scheduling is the page's main action; for everyone else, the Workshop. */}
           <div className="flex flex-wrap gap-2">
             {canSchedule && (

@@ -1,7 +1,10 @@
-# Shared Discord login: Hub + Training Portal (plan, 2026-10-09)
+# Shared Discord login: Hub + Training Portal (2026-10-09)
 
 Goal: log in once with Discord and be logged in on both `hub.tacticalshift.ru` and `training.tacticalshift.ru`;
-log out on either and be logged out of both. To do after the hub is public.
+log out on either and be logged out of both.
+
+**Done 2026-10-09** as planned below. Decisions: the parent-domain cookie is fine (it also reaches the apex);
+everyone logs in once more; the Discord app is renamed "Tactical Shift". The "Today" table is the state before.
 
 ## Today
 

@@ -200,8 +200,10 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   `lib/hubLink.ts`); it fetches the map key and Markers.layer from `/api/missions/<id>/planner`, which allows the
   planner origin (CORS). In dev the planner is the local one on :3000 (`PLANNER_PLANS_URL` overrides); replay links
   stay on production. Signing in creates the member's `players` row (`lib/players.ts`), which attaching points at.
-- **Auth:** Discord OAuth ported from the Training Portal, plus an OAuth `state` cookie. The session is an HS256
-  JWT in `ts_hub_session`. Without the env vars, login redirects back with a "not configured" notice. Steam is planned.
+- **Auth:** Discord OAuth ported from the Training Portal, plus an OAuth `state` cookie. The login is shared with the
+  Training Portal (`docs/shared-login.md`): one HS256 JWT cookie, `ts_auth`, on the parent domain in production
+  (`AUTH_COOKIE_DOMAIN`) and signed with `TS_AUTH_SECRET`, the same value in both apps; `lib/auth/session.ts` must stay in
+  step with the portal's. Roles are refreshed with the bot token every 10 minutes per member (`lib/viewer.ts`). Without the env vars, login redirects back with a "not configured" notice. Steam is planned.
   Env template: `web/.env.example`. Pages ask `getViewer()` (`lib/viewer.ts`) who is looking. On a dev machine
   without OAuth configured it returns a stand-in from `data/players` (Galaxy, an admin, by default; switch with
   `/api/dev/viewer?name=<display name>[&roles=SL,Rifleman]`, roles default to Rifleman) so write flows can be tried;

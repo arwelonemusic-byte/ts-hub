@@ -9,7 +9,7 @@ export function discordConfigured(): boolean {
     process.env.DISCORD_CLIENT_ID &&
     process.env.DISCORD_CLIENT_SECRET &&
     process.env.DISCORD_GUILD_ID &&
-    process.env.SESSION_SECRET &&
+    process.env.TS_AUTH_SECRET &&
     process.env.NEXT_PUBLIC_BASE_URL
   );
 }
@@ -88,4 +88,26 @@ export const discordRoleNames = () => Object.values(roleMap());
 
 export function avatarUrl(userId: string, avatar: string | null): string | null {
   return avatar ? `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png?size=64` : null;
+}
+
+/**
+ * A member's current roles and nickname via the bot token (no user OAuth), so a Discord role given after
+ * login counts without logging in again. null = no bot token, or Discord didn't answer.
+ */
+export async function fetchGuildMemberByBot(userId: string): Promise<{ roles: string[]; nick: string | null } | "NOT_IN_GUILD" | null> {
+  const token = process.env.DISCORD_BOT_TOKEN;
+  if (!token) return null;
+  try {
+    const res = await fetch(`${DISCORD_API}/guilds/${process.env.DISCORD_GUILD_ID}/members/${userId}`, {
+      headers: { Authorization: `Bot ${token}` },
+      signal: AbortSignal.timeout(4000),
+      cache: "no-store",
+    });
+    if (res.status === 404) return "NOT_IN_GUILD";
+    if (!res.ok) return null;
+    const d = await res.json();
+    return { roles: d.roles ?? [], nick: d.nick ?? null };
+  } catch {
+    return null;
+  }
 }

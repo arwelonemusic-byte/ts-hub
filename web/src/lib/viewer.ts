@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { discordConfigured } from "./auth/discord";
+import { discordConfigured, fetchGuildMemberByBot, mapRoleIdsToNames } from "./auth/discord";
 import { getSession } from "./auth/session";
 import { getDb } from "./db";
 
@@ -69,16 +69,34 @@ async function devViewer(): Promise<Viewer | null> {
   };
 }
 
+/**
+ * Roles as Discord has them now, checked with the bot at most every 10 minutes per member (the login cookie
+ * holds them as of login; the Training Portal refreshes its copy the same way). Falls back to the login's.
+ */
+const ROLES_TTL_MS = 10 * 60_000;
+const roleCache = ((globalThis as unknown as { __tsHubRoles?: Map<string, { at: number; roles: string[] }> }).__tsHubRoles ??= new Map());
+
+async function currentRoles(userId: string, atLogin: string[]): Promise<string[]> {
+  const hit = roleCache.get(userId);
+  if (hit && Date.now() - hit.at < ROLES_TTL_MS) return hit.roles;
+  const member = await fetchGuildMemberByBot(userId);
+  // Left the server: no roles. Discord not answering: the login's roles, asked again next time.
+  const roles = member === "NOT_IN_GUILD" ? [] : member ? mapRoleIdsToNames(member.roles) : atLogin;
+  if (member) roleCache.set(userId, { at: Date.now(), roles });
+  return roles;
+}
+
 export async function getViewer(): Promise<Viewer | null> {
   const session = await getSession();
   if (session) {
+    const roles = await currentRoles(session.userId, session.roles);
     return {
       discordId: session.userId,
       name: session.displayName,
       avatar: session.avatar,
-      roles: session.roles,
-      isAdmin: ADMIN_IDS.includes(session.userId) || session.roles.some((r) => ADMIN_ROLES.includes(r)),
-      isMissionMaker: session.roles.some((r) => roleKey(r) === roleKey(MISSION_MAKER_ROLE)),
+      roles,
+      isAdmin: ADMIN_IDS.includes(session.userId) || roles.some((r) => ADMIN_ROLES.includes(r)),
+      isMissionMaker: roles.some((r) => roleKey(r) === roleKey(MISSION_MAKER_ROLE)),
     };
   }
   return DEV_VIEWER ? devViewer() : null;
