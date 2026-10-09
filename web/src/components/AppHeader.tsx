@@ -25,7 +25,9 @@ export async function AppHeader({ active }: { active: "events" | "missions" | "p
         <span className="type-heading-xxs text-fg">Tactical Shift</span>
       </Link>
       <nav className="hidden items-center gap-1 xl:flex">
-        {nav.map((n) => (
+        {nav.map((n, i) => [
+          // A hairline between the hub's own sections and the other TS apps.
+          n.external && !nav[i - 1]?.external && <span key="divider" aria-hidden className="mx-2 h-5 w-px bg-line-strong" />,
           <Link
             key={n.key}
             href={n.href}
@@ -38,8 +40,8 @@ export async function AppHeader({ active }: { active: "events" | "missions" | "p
             {t(`nav.${n.key}`)}
             {/* The other TS apps open in a new tab; the icon (62% white) matches the nav's text. */}
             {n.external && <Icon name="external-ff" />}
-          </Link>
-        ))}
+          </Link>,
+        ])}
       </nav>
       <div className="flex items-center gap-3 justify-self-end">
         {ENABLED_LOCALES.length > 1 && <LanguageToggle locale={locale} />}
