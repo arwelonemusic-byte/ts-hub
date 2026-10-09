@@ -217,7 +217,7 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   #анонсы exports out (they hold members' IDs, names, avatars and who slotted where). Never commit them.
 - **Deployment:** `hub.tacticalshift.ru` (A record → the Selectel box, requested from the domain owner), following
   the other apps: unit `ts-hub` on :3004 from `/opt/ts-web/ts-hub`, env `/etc/ts-hub.env`, database `ts_hub`.
-  Running on the box since 2026-10-09; public once DNS resolves and the Caddy block is added (`deploy/README.md`).
+  Running on the box and public at https://hub.tacticalshift.ru since 2026-10-09 (`deploy/README.md`).
   Repo: https://github.com/arwelonemusic-byte/ts-hub (public).
 - **Discord login reuses the Training Portal's Discord app**; it needs the hub's callback URL added as a redirect.
 

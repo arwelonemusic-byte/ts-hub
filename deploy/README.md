@@ -11,8 +11,8 @@ Routine deploy, after pushing `master`:
 ssh slotbot-msk /opt/ts-web/deploy-hub.sh
 ```
 
-**Status (2026-10-09):** steps 1-4 and the service are done; the hub runs on `127.0.0.1:3004` with its database
-seeded. Still to do: the Caddy block (step 5, once DNS resolves) and the Discord redirect (step 0).
+**Status (2026-10-09):** live at https://hub.tacticalshift.ru: every step below is done (DNS resolved at 21:08 MSK,
+Caddy got the certificate, the Discord redirect is in place).
 
 **The box runs npm 10.8.2.** A lockfile written by a newer npm can be missing entries npm 10 insists on (it once lacked
 `@emnapi/*`, optional WASM fallbacks), and `npm ci` then refuses to run. Regenerate it with the box's npm:
@@ -54,6 +54,8 @@ seeded. Still to do: the Caddy block (step 5, once DNS resolves) and the Discord
    ```sh
    cp deploy/ts-hub.service /etc/systemd/system/ && systemctl daemon-reload && systemctl enable ts-hub
    cat deploy/Caddyfile.hub >> /etc/caddy/Caddyfile && caddy validate --config /etc/caddy/Caddyfile && systemctl reload caddy
+   # `caddy validate` run as root creates a new site's log file owned by root, and the reload then fails
+   # (Caddy runs as `caddy`): chown caddy:caddy /var/log/caddy/hub-access.log and reload again.
    /opt/ts-web/deploy-hub.sh
    ```
 
