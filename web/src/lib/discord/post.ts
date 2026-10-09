@@ -4,7 +4,7 @@ import { getDb } from "../db";
 import { workshopUrl } from "../links";
 import { squadsOf } from "../squads";
 import type { Mission } from "../types";
-import { DiscordError, discordRequest, type DiscordEmbed, type DiscordMessage } from "./api";
+import { DiscordError, discordRequest, type DiscordEmbed, type DiscordFile, type DiscordMessage } from "./api";
 import { renderGamePost, type PostGame } from "./template";
 
 /*
@@ -41,6 +41,7 @@ function missionOf(m: Mission): PostGame["mission"] {
     mapLabel: m.mapLabel,
     authors: m.authors,
     tags: m.tags,
+    sides: m.briefing?.sides ?? null,
     coverUrl: absolute(m.coverUrl),
     workshopUrl: workshopUrl(m),
   };
@@ -110,11 +111,31 @@ export function fitLimits(msg: DiscordMessage): DiscordMessage {
   return { ...msg, content: clip(msg.content, 2000), embeds };
 }
 
-/** Exactly what an edit sends: missing parts empty, so an edit replaces the whole post. */
-function render(game: PostGame): { body: DiscordMessage; hash: string } {
-  const msg = fitLimits(renderGamePost(game));
+/**
+ * Exactly what an edit sends: missing parts empty, so an edit replaces the whole post. The image isn't part of it:
+ * it's attached once, when the post goes up, and an edit that doesn't mention attachments keeps it.
+ */
+function render(game: PostGame): { body: DiscordMessage; hash: string; image: string | null } {
+  const { image, ...rest } = renderGamePost(game);
+  const msg = fitLimits(rest);
   const body: DiscordMessage = { content: msg.content ?? "", embeds: msg.embeds ?? [], components: msg.components ?? [], allowed_mentions: msg.allowed_mentions ?? { parse: [] } };
-  return { body, hash: createHash("md5").update(JSON.stringify(body)).digest("hex") };
+  return { body, hash: createHash("md5").update(JSON.stringify(body)).digest("hex"), image: image ?? null };
+}
+
+/** The image to attach, downloaded from its URL; null when it can't be had (the post then goes up without it). */
+async function imageFile(url: string | null): Promise<DiscordFile | null> {
+  if (!url) return null;
+  try {
+    const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(10_000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const type = res.headers.get("content-type") ?? "";
+    const data = await res.blob();
+    if (!type.startsWith("image/") || data.size > 9_500_000) throw new Error(`${type}, ${data.size} bytes`);
+    return { name: `cover.${type.includes("png") ? "png" : type.includes("webp") ? "webp" : "jpg"}`, data };
+  } catch (err) {
+    console.error(`[discord] cover ${url} not attached:`, err);
+    return null;
+  }
 }
 
 // One post or edit at a time per game (a create racing an edit would post twice), and edits wait a moment so a
@@ -146,9 +167,15 @@ export function postAnnouncement(eventId: string): Promise<AnnounceResult> {
     if (row?.discord_message_id) return (await announcement(eventId))!;
     const game = await postGame(eventId);
     if (!row || game?.status !== "scheduled") return { error: "notFound" } as const;
-    const { body, hash } = render(game);
+    const { body, hash, image } = render(game);
+    const file = await imageFile(image);
     try {
-      const sent = await discordRequest<{ id: string }>("POST", `/channels/${ch}/messages`, body);
+      const sent = await discordRequest<{ id: string }>(
+        "POST",
+        `/channels/${ch}/messages`,
+        file ? { ...body, attachments: [{ id: 0, filename: file.name }] } : body,
+        file ? [file] : [],
+      );
       await (await getDb()).query(
         "UPDATE events SET discord_channel_id = $2, discord_message_id = $3, discord_hash = $4 WHERE id = $1",
         [eventId, ch, sent.id, hash],

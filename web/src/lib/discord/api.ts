@@ -40,18 +40,30 @@ export class DiscordError extends Error {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** One API call; waits out a rate limit (429) up to three times. */
-export async function discordRequest<T>(method: "GET" | "POST" | "PATCH", path: string, body?: unknown): Promise<T> {
+/** A file sent with a message: it shows as an attachment (an image renders large, above the card). */
+export interface DiscordFile {
+  name: string;
+  data: Blob;
+}
+
+/** One API call; waits out a rate limit (429) up to three times. With files it's a multipart upload. */
+export async function discordRequest<T>(method: "GET" | "POST" | "PATCH", path: string, body?: unknown, files: DiscordFile[] = []): Promise<T> {
   const token = process.env.DISCORD_BOT_TOKEN;
   if (!token) throw new DiscordError(0, undefined, "DISCORD_BOT_TOKEN is not set");
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(API + path, {
-      method,
-      headers: { Authorization: `Bot ${token}`, "Content-Type": "application/json" },
-      body: body === undefined ? undefined : JSON.stringify(body),
-      cache: "no-store",
-      signal: AbortSignal.timeout(10_000),
-    });
+    const headers: Record<string, string> = { Authorization: `Bot ${token}` };
+    let payload: BodyInit | undefined;
+    if (files.length) {
+      // The message as payload_json, each file as files[n] (fetch sets the multipart boundary itself).
+      const form = new FormData();
+      form.append("payload_json", JSON.stringify(body ?? {}));
+      files.forEach((f, i) => form.append(`files[${i}]`, f.data, f.name));
+      payload = form;
+    } else if (body !== undefined) {
+      headers["Content-Type"] = "application/json";
+      payload = JSON.stringify(body);
+    }
+    const res = await fetch(API + path, { method, headers, body: payload, cache: "no-store", signal: AbortSignal.timeout(20_000) });
     const json = await res.json().catch(() => null);
     if (res.status === 429 && attempt < 3) {
       await sleep(Math.ceil((json?.retry_after ?? 1) * 1000) + 100);

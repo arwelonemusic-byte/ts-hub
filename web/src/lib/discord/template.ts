@@ -1,15 +1,20 @@
-import { eventDay, time } from "../format";
 import type { DiscordMessage } from "./api";
 
 /*
  * THE POST TEMPLATE. A game's Discord announcement is renderGamePost(game): edit this file to change how it looks.
  * It's a pure function of PostGame, re-run on every change, and the hub edits the post only when the result differs.
- * PLACEHOLDER until Galaxy's template: the slotting bot's layout (time above the title, a field per squad,
- * ✅ taken / ⬜ free) plus the cover and a «Записаться» link button to the game's page.
  *
- * Discord renders `<t:UNIX:F>` / `<t:UNIX:R>` in each reader's own time zone ("через 2 дня") in content, a
- * description or a field value, not in a title, author or footer. Limits (post.ts trims to them anyway):
- * title 256, description 4096, 25 fields of name 256 / value 1024, footer 2048, 6000 characters per embed.
+ * Galaxy's layout (2026-10-09), after the announcements posted by hand until now:
+ *   message text  # Что | Operation <name> / # Когда | <date> / За кого, Против кого / @Анонсы @Reforger
+ *   image         the mission's cover, attached to the message so it renders large
+ *   card          mission name, countdown, map, author, then a block per squad (✅ taken / ⬜ free)
+ *   button        «Записаться» → the game's page
+ * Discord always draws them in that order (text, attachments, card, buttons). The image goes up with the first post
+ * only; edits keep it.
+ *
+ * Discord renders `<t:UNIX:F>` (a full date) and `<t:UNIX:R>` ("через 2 дня") in each reader's own language and time
+ * zone, in the message text, a card's description or a field, not in a card's title or footer. Limits (post.ts trims to
+ * them anyway): message text 2000; card title 256, description 4096, 25 fields of name 256 / value 1024, 6000 in all.
  */
 
 /** Everything a post can show (lib/discord/post.ts gathers it). URLs are absolute. */
@@ -20,10 +25,13 @@ export interface PostGame {
   /** ISO start. */
   startsAt: string;
   mission: {
+    /** Without "Operation" (the hub prints that above every mission name). */
     name: string;
     mapLabel: string;
     authors: string[];
     tags: string[];
+    /** «За кого» / «Против кого» from the briefing. */
+    sides: { for?: string; against?: string } | null;
     /** The cover (title printed on it), null when the mission has none. */
     coverUrl: string | null;
     workshopUrl: string;
@@ -41,41 +49,60 @@ export interface PostGame {
   attended?: number;
 }
 
+/** A post: the Discord message, plus the image attached when it first goes up. */
+export interface GamePost extends DiscordMessage {
+  image?: string | null;
+}
+
 const ACCENT = 0xf4db50;
 const GREY = 0x2e3439;
 
 /**
- * Pinged when the post goes up (@Анонсы, @Reforger). Mentions only ping from the message text above the card, and
- * only on the first post: the hub's edits never ping again. allowed_mentions lets exactly these roles ping, so a
- * player's name in a slot can't. TS Hub Bot has «Mention @everyone, @here and All Roles» in #анонсы.
+ * Pinged when the post goes up (@Анонсы, @Reforger). Mentions only ping from the message text, and only on the first
+ * post: the hub's edits never ping again. allowed_mentions lets exactly these roles ping, so a player's name can't.
+ * TS Hub Bot has «Mention @everyone, @here and All Roles» in #анонсы.
  */
 const PING_ROLES = ["1211570718592991312", "1260874468641869894"];
-const ping = { content: PING_ROLES.map((id) => `<@&${id}>`).join(" "), allowed_mentions: { roles: PING_ROLES } };
 
-export function renderGamePost(g: PostGame): DiscordMessage {
+/** The message text: what and when, the sides, the pings. */
+function header(g: PostGame, unix: number): string {
+  const sides = g.mission.sides;
+  const sideLines = [sides?.for && `**За кого:** ${sides.for}`, sides?.against && `**Против кого:** ${sides.against}`].filter(Boolean);
+  return [
+    `# Что | Operation ${g.mission.name}`,
+    `# Когда | <t:${unix}:F>`,
+    ...(sideLines.length ? ["", ...sideLines] : []),
+    "",
+    PING_ROLES.map((id) => `<@&${id}>`).join(" "),
+  ].join("\n");
+}
+
+export function renderGamePost(g: PostGame): GamePost {
   const unix = Math.floor(new Date(g.startsAt).getTime() / 1000);
-  const when = `${eventDay(g.startsAt, "ru")} · ${time(g.startsAt)} МСК`;
   const about = [`Карта: ${g.mission.mapLabel}`, g.mission.authors.length ? `Автор: ${g.mission.authors.join(", ")}` : null];
+  const base = {
+    content: header(g, unix),
+    allowed_mentions: { roles: PING_ROLES },
+    image: g.mission.coverUrl,
+  };
 
   if (g.status === "cancelled") {
     return {
-      ...ping,
-      embeds: [{ color: GREY, author: { name: when }, title: g.mission.name, description: "**Игра отменена**" }],
+      ...base,
+      embeds: [{ color: GREY, title: g.mission.name, description: "**Игра отменена**" }],
       components: [],
     };
   }
 
   if (g.status === "played") {
     return {
-      ...ping,
+      ...base,
       embeds: [
         {
           color: GREY,
-          author: { name: when },
           title: g.mission.name,
           url: g.url,
           description: [`**Игра сыграна**${g.attended ? ` · играло ${g.attended}` : ""}`, ...about].filter(Boolean).join("\n"),
-          thumbnail: g.mission.coverUrl ? { url: g.mission.coverUrl } : undefined,
         },
       ],
       components: [{ type: 1, components: [{ type: 2, style: 5, label: "Итоги", url: g.url }] }],
@@ -83,11 +110,10 @@ export function renderGamePost(g: PostGame): DiscordMessage {
   }
 
   return {
-    ...ping,
+    ...base,
     embeds: [
       {
         color: ACCENT,
-        author: { name: when },
         title: g.mission.name,
         url: g.url,
         description: [`<t:${unix}:R>`, ...about, g.plan ? `План: ${g.plan.code}` : null].filter(Boolean).join("\n"),
@@ -95,8 +121,6 @@ export function renderGamePost(g: PostGame): DiscordMessage {
           name: [sq.groupId, sq.name].filter(Boolean).join(" "),
           value: sq.slots.map((s) => (s.player ? `✅ ${s.role} — **${s.player}**` : `⬜ ${s.role}`)).join("\n"),
         })),
-        image: g.mission.coverUrl ? { url: g.mission.coverUrl } : undefined,
-        footer: g.slotCount ? { text: `Записались: ${g.slotted} из ${g.slotCount}` } : undefined,
       },
     ],
     components: [{ type: 1, components: [{ type: 2, style: 5, label: "Записаться", url: g.url }] }],
