@@ -367,7 +367,8 @@ export function SlotsPanel({ ev, viewer, players, t }: { ev: UpcomingEvent; view
   };
 
   return (
-    <section id="slots" className="flex scroll-mt-24 flex-col gap-6 rounded-xl bg-inset p-5">
+    // «Занять слот» jumps here; on desktop the columns then start just under the 60px header.
+    <section id="slots" className="flex scroll-mt-24 flex-col gap-6 rounded-xl bg-inset p-5 lg:scroll-mt-[72px]">
       <div className="flex items-baseline justify-between">
         <h2 className="type-heading-xs text-fg">{t("slots.title")}</h2>
         <span className="type-caption text-fg-secondary">{t("slots.taken", { taken, max: slots.length })}</span>

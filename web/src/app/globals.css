@@ -198,3 +198,20 @@
     cursor: pointer;
   }
 }
+
+/* «Занять слот» flashes the slots panel when it scrolls there (components/event/SlotsJump.tsx). */
+@theme {
+  --animate-attention: attention 1.4s ease-out;
+
+  @keyframes attention {
+    0%,
+    35%,
+    100% {
+      box-shadow: 0 0 0 2px transparent;
+    }
+    15%,
+    55% {
+      box-shadow: 0 0 0 2px var(--ts-color-bg-accent);
+    }
+  }
+}

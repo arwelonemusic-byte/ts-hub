@@ -25,6 +25,7 @@ import { plannerEmbedUrl } from "@/lib/plans/planner";
 import { playerNames, slottingOpen, viewerSlot } from "@/lib/slots";
 import { LeaveSlotButton } from "@/components/event/SlotForms";
 import { LiveRefresh } from "@/components/event/LiveRefresh";
+import { SlotsJump } from "@/components/event/SlotsJump";
 import type { MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
 
@@ -107,9 +108,7 @@ function Upcoming({
           {mySlot && (viewer!.isAdmin || slottingOpen(ev)) ? (
             <LeaveSlotButton eventId={ev.id} label={t("event.leaveSlot")} className={buttonClass("danger", "m")} />
           ) : (
-            <ButtonLink href="#slots" variant="primary" className="flex-1">
-              {t("event.slotIn")}
-            </ButtonLink>
+            <SlotsJump label={t("event.slotIn")} className={`${buttonClass("primary", "m")} flex-1`} />
           )}
           <ButtonLink href={workshopUrl(ev.mission)} external>
             {t("event.workshop")}
