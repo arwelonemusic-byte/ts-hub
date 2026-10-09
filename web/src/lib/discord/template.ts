@@ -5,7 +5,8 @@ import type { DiscordMessage } from "./api";
  * It's a pure function of PostGame, re-run on every change, and the hub edits the post only when the result differs.
  *
  * Galaxy's layout (2026-10-09), after the announcements posted by hand until now:
- *   message text  # Что | Operation <name> / # Когда | <date> / За кого, Против кого / @Анонсы @Reforger
+ *   message text  # Что | Operation <name> / # Когда | <date> / За кого, Против кого / the briefing's first
+ *                 paragraph / # Полный брифинг и слоты (link) / @Анонсы @Reforger
  *   image         the mission's cover, attached to the message so it renders large
  *   card          mission name, countdown, map, author, then a block per squad (✅ taken / ⬜ free)
  *   button        «Записаться» → the game's page
@@ -104,8 +105,10 @@ function header(g: PostGame, unix: number): string {
     `# Что | Operation ${plain(g.mission.name)}`,
     `# Когда | <t:${unix}:F>`,
     ...(sideLines.length ? ["", ...sideLines] : []),
-    // <url> in a masked link keeps Discord from adding its own preview card for the hub page.
-    ...(intro ? ["", plain(intro), `[Полный брифинг](<${g.url}#briefing>)`] : []),
+    ...(intro ? ["", plain(intro)] : []),
+    // A heading-sized link stands in for a bright button (bots' link buttons are always grey). <url> in a masked link
+    // keeps Discord from adding its own preview card for the hub page.
+    `# [Полный брифинг и слоты](<${g.url}#briefing>)`,
     ...(g.pingRoles.length ? ["", g.pingRoles.map((id) => `<@&${id}>`).join(" ")] : []),
     "\u200b",
   ].join("\n");
