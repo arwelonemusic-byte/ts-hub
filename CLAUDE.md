@@ -92,7 +92,13 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   status scheduled / played / cancelled; a played game's replay-stats are its `stats` JSONB), `event_slots` (the game's
   copy of the mission's slot template, taken by a player or, for someone with no player row, a name), `event_attendance`
   (in-game names from the replays, not yet linked to players) and `event_replays`. Each mission is its own game, so the
-  22 Sep evening is two. Host and PL are players. No progressive slot locks: the bot has none.
+  22 Sep evening is two. Host and PL are players.
+- **Slotting** (`lib/slots/`, user decisions 2026-10-09): anyone signed in takes a free slot whose Discord role
+  (`requiredRole`) they have, one slot per player per game (taking another moves them), and leaves their own, until the
+  game starts. An admin's «…» on each slot puts any member in a free slot (by display name, no role check) or empties
+  it, any time. Role names compare without case or spaces ("MachineGunner" = "Machine Gunner"). No progressive locks
+  (the bot has none) and no reserving slots for friends (parked). Roles come from the session, so a new Discord role
+  counts after the next login.
 - **Played games** (Sep 2026 on) come from `db/seed/played-events.json`: `py data/events/build_past_events.py <reports>`
   builds it from the replay-stats reports in ts-wrapped (numbers, roster, rankings, achievements) plus its `OPS` table
   (mission, scheduled time, plan, PL; one row per op), and `npm run db:seed -- --update` loads it. Add a row and re-run after
@@ -140,7 +146,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   JWT in `ts_hub_session`. Without the env vars, login redirects back with a "not configured" notice. Steam is planned.
   Env template: `web/.env.example`. Pages ask `getViewer()` (`lib/viewer.ts`) who is looking. On a dev machine
   without OAuth configured it returns a stand-in from `data/players` (Galaxy, an admin, by default; switch with
-  `/api/dev/viewer?name=<display name>`) so write flows can be tried; the header shows "dev" next to the name.
+  `/api/dev/viewer?name=<display name>[&roles=SL,Rifleman]`, roles default to Rifleman) so write flows can be tried;
+  the header shows "dev" next to the name. Roles: `viewer.roles` (names via `DISCORD_ROLE_MAP`), `hasRole`,
+  `isMissionMaker` (@mission officer), `isAdmin` (`HUB_ADMIN_IDS` / `HUB_ADMIN_ROLES`).
   Admins are the Discord user IDs in `HUB_ADMIN_IDS` (production: Galaxy) and/or the role names in `HUB_ADMIN_ROLES`.
 
 ## Decided (2026-10-09)

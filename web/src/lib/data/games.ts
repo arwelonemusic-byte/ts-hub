@@ -62,10 +62,22 @@ const loadGames = cache(async (): Promise<HubEvent[]> => {
        ORDER BY e.starts_at`,
     ) as Promise<EventRow[]>,
     db.query(
-      `SELECT s.event_id, s.position, s.group_id, s.group_name, s.role, COALESCE(p.display_name, s.player_name) AS player_name
+      `SELECT s.event_id, s.position, s.group_id, s.group_name, s.role, s.required_role,
+              COALESCE(p.display_name, s.player_name) AS player_name, p.discord_id AS player_discord_id
        FROM event_slots s LEFT JOIN players p ON p.id = s.player_id
        ORDER BY s.event_id, s.position`,
-    ) as Promise<{ event_id: string; position: number; group_id: string; group_name: string; role: string; player_name: string | null }[]>,
+    ) as Promise<
+      {
+        event_id: string;
+        position: number;
+        group_id: string;
+        group_name: string;
+        role: string;
+        required_role: string | null;
+        player_name: string | null;
+        player_discord_id: string | null;
+      }[]
+    >,
     db.query("SELECT event_id, player_name, attended FROM event_attendance ORDER BY event_id, player_name") as Promise<
       { event_id: string; player_name: string; attended: boolean }[]
     >,
@@ -86,7 +98,9 @@ const loadGames = cache(async (): Promise<HubEvent[]> => {
       groupId: s.group_id,
       groupName: s.group_name,
       role: s.role,
+      ...(s.required_role ? { requiredRole: s.required_role } : {}),
       playerName: s.player_name,
+      ...(s.player_discord_id ? { playerId: s.player_discord_id } : {}),
       // The hub doesn't run progressive slotting (yet), and the bot has none.
       locked: false,
     }));

@@ -22,6 +22,7 @@ import { getT } from "@/lib/i18n-server";
 import { replayUrl, workshopUrl } from "@/lib/links";
 import { canAttachPlan, canDetachPlan } from "@/lib/plans";
 import { plannerEmbedUrl } from "@/lib/plans/planner";
+import { playerNames, viewerSlot } from "@/lib/slots";
 import type { MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
 
@@ -31,7 +32,11 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
   const data = getHubData();
   const [ev, { locale, t }, viewer] = await Promise.all([data.getEvent(id, new Date()), getT(), getViewer()]);
   if (!ev) notFound();
-  const history = await data.getMissionHistory(ev.mission.id);
+  const [history, players] = await Promise.all([
+    data.getMissionHistory(ev.mission.id),
+    // Names for an admin's «Посадить» picker.
+    ev.status === "upcoming" && viewer?.isAdmin ? playerNames() : null,
+  ]);
 
   return (
     <>
@@ -39,7 +44,7 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
       <main className="relative flex flex-col items-center gap-6 overflow-clip px-4 pb-16 pt-6 md:px-8">
         <Backdrop coverUrl={ev.mission.coverUrl} />
         {ev.status === "upcoming" ? (
-          <Upcoming ev={ev} history={history} viewer={viewer} locale={locale} t={t} />
+          <Upcoming ev={ev} history={history} viewer={viewer} players={players} locale={locale} t={t} />
         ) : (
           <Played ev={ev} history={history} locale={locale} t={t} />
         )}
@@ -57,8 +62,23 @@ function Columns({ content, aside }: { content: ReactNode; aside: ReactNode }) {
   );
 }
 
-function Upcoming({ ev, history, viewer, locale, t }: { ev: UpcomingEvent; history: MissionHistory; viewer: Viewer | null; locale: Locale; t: T }) {
+function Upcoming({
+  ev,
+  history,
+  viewer,
+  players,
+  locale,
+  t,
+}: {
+  ev: UpcomingEvent;
+  history: MissionHistory;
+  viewer: Viewer | null;
+  players: string[] | null;
+  locale: Locale;
+  t: T;
+}) {
   const taken = ev.slots.filter((s) => s.playerName).length;
+  const mySlot = viewerSlot(viewer, ev);
   const attached = ev.plan;
   return (
     <>
@@ -81,7 +101,7 @@ function Upcoming({ ev, history, viewer, locale, t }: { ev: UpcomingEvent; histo
         </div>
         <div className="flex flex-wrap gap-2">
           <ButtonLink href="#slots" variant="primary" className="flex-1">
-            {t("event.slotIn")}
+            {mySlot ? t("event.yourSlot", { role: mySlot.role }) : t("event.slotIn")}
           </ButtonLink>
           <ButtonLink href={`/events/${ev.id}/calendar.ics`}>
             <Icon name="calendar" />
@@ -109,7 +129,7 @@ function Upcoming({ ev, history, viewer, locale, t }: { ev: UpcomingEvent; histo
         }
         aside={
           <>
-            <SlotsPanel slots={ev.slots} signedIn={!!viewer} t={t} />
+            <SlotsPanel ev={ev} viewer={viewer} players={players} t={t} />
             <MissionPanel mission={ev.mission} history={history} locale={locale} t={t} />
           </>
         }

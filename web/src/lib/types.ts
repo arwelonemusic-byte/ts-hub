@@ -73,7 +73,11 @@ export interface Slot {
   groupName: string;
   /** As written in the slot file, fireteam prefix included: "BLUE - Grenadier". */
   role: string;
+  /** Discord role a player needs to take it. */
+  requiredRole?: string;
   playerName: string | null;
+  /** Discord id of whoever took it, when they're a player (not a name copied from the bot). */
+  playerId?: string;
   /** Progressive slotting: opens once the leader slots above it are filled. */
   locked: boolean;
 }

@@ -9,6 +9,9 @@ import { CopyButton } from "./CopyButton";
 import { CopyValue } from "./CopyValue";
 import { AwardCard } from "./AwardCard";
 import { AttachCodeForm, DetachButton } from "./PlanForms";
+import { SlotAdminMenu, SlotButton, type SlotErrors } from "./SlotForms";
+import { slottingOpen, takeBlock } from "@/lib/slots";
+import type { Viewer } from "@/lib/viewer";
 
 /**
  * A write action the viewer can't take here. Signed-out users are sent to log in;
@@ -313,10 +316,56 @@ export function PlanPanel({
 
 // ---------------------------------------------------------------- slots
 
-/** Roles on the left, names on the right — same order as the Discord slotting post (HQ first). */
-export function SlotsPanel({ slots, signedIn, t }: { slots: Slot[]; signedIn: boolean; t: T }) {
+/**
+ * Roles on the left, names on the right — same order as the Discord slotting post (HQ first).
+ * Signed-in players take a free slot whose role they have and leave their own (lib/slots);
+ * an admin gets «…» on every slot. `players` (member names for that menu) is admins only.
+ */
+export function SlotsPanel({ ev, viewer, players, t }: { ev: UpcomingEvent; viewer: Viewer | null; players: string[] | null; t: T }) {
+  const slots = ev.slots;
   const taken = slots.filter((s) => s.playerName).length;
   const groups = [...new Set(slots.map((s) => s.groupId))].sort((a, b) => (a === "1'6" ? -1 : b === "1'6" ? 1 : a.localeCompare(b)));
+  const errors: SlotErrors = {
+    taken: t("slots.error.taken"),
+    role: t("slots.needRole", { role: "{name}" }),
+    closed: t("slots.error.closed"),
+    forbidden: t("slots.error.forbidden"),
+    noPlayer: t("slots.error.noPlayer"),
+    ambiguous: t("slots.error.ambiguous"),
+  };
+  const menu = {
+    menu: t("slots.admin.menu"),
+    assign: t("slots.admin.assign"),
+    placeholder: t("slots.admin.placeholder"),
+    clear: t("slots.admin.clear"),
+    clearConfirm: t("slots.admin.clearConfirm"),
+  };
+
+  const action = (s: Slot): ReactNode => {
+    const mine = !!viewer && s.playerId === viewer.discordId;
+    if (s.playerName) {
+      return (
+        <>
+          <span className={`min-w-0 truncate type-label-s ${mine ? "text-fg-accent" : "text-fg"}`}>{s.playerName}</span>
+          {mine && (viewer!.isAdmin || slottingOpen(ev)) && (
+            <SlotButton kind="leave" eventId={ev.id} position={s.id} label={t("slots.leave")} errors={errors} />
+          )}
+        </>
+      );
+    }
+    if (!viewer) {
+      return (
+        <WriteAction signedIn={false} t={t} className={buttonClass("primary", "xs")}>
+          {t("slots.take")}
+        </WriteAction>
+      );
+    }
+    const block = takeBlock(viewer, ev, s);
+    if (block === "closed") return null;
+    if (block === "role") return <span className="truncate type-caption text-fg-faint">{t("slots.needRole", { role: s.requiredRole ?? "" })}</span>;
+    return <SlotButton kind="take" eventId={ev.id} position={s.id} label={t("slots.take")} errors={errors} />;
+  };
+
   return (
     <section id="slots" className="flex scroll-mt-24 flex-col gap-6 rounded-xl bg-inset p-5">
       <div className="flex items-baseline justify-between">
@@ -324,6 +373,13 @@ export function SlotsPanel({ slots, signedIn, t }: { slots: Slot[]; signedIn: bo
         <span className="type-caption text-fg-secondary">{t("slots.taken", { taken, max: slots.length })}</span>
       </div>
       <ProgressBar value={taken} max={slots.length} />
+      {players && (
+        <datalist id="hub-players">
+          {players.map((n) => (
+            <option key={n} value={n} />
+          ))}
+        </datalist>
+      )}
       {groups.map((g) => {
         const rows = slots.filter((s) => s.groupId === g);
         return (
@@ -338,22 +394,13 @@ export function SlotsPanel({ slots, signedIn, t }: { slots: Slot[]; signedIn: bo
             </div>
             {rows.map((s) => (
               <div key={s.id} className="flex h-10 items-center gap-2.5 border-t border-line">
-                <span
-                  className={`min-w-0 flex-1 truncate type-body-s ${
-                    s.playerName ? "text-fg-secondary" : s.locked ? "text-fg-faint" : "text-fg"
-                  }`}
-                >
-                  {s.role}
-                </span>
-                {s.playerName ? (
-                  <span className="max-w-[55%] truncate type-label-s text-fg">{s.playerName}</span>
-                ) : s.locked ? (
-                  <span className="type-caption text-fg-faint">{t("slots.locked")}</span>
-                ) : (
-                  <WriteAction signedIn={signedIn} t={t} className={buttonClass("primary", "xs")}>
-                    {t("slots.take")}
-                  </WriteAction>
-                )}
+                <span className={`min-w-0 flex-1 truncate type-body-s ${s.playerName ? "text-fg-secondary" : "text-fg"}`}>{s.role}</span>
+                <div className="flex max-w-[62%] min-w-0 items-center justify-end gap-1.5">
+                  {action(s)}
+                  {viewer?.isAdmin && (
+                    <SlotAdminMenu eventId={ev.id} position={s.id} role={s.role} taken={!!s.playerName} labels={menu} errors={errors} />
+                  )}
+                </div>
               </div>
             ))}
           </div>
