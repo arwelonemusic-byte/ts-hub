@@ -1,10 +1,10 @@
 import type { HubEvent, Mission, MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
-import { mockData } from "./mock";
+import { gamesData } from "./games";
 
 /**
- * Everything the pages read goes through this interface, so swapping mock data
- * for the real sources touches only this folder. Missions already come from the
- * database (missions.ts); games are still mock data (mock.ts).
+ * Everything the pages read goes through this interface, so the sources behind it
+ * change only in this folder. Missions (missions.ts) and games (games.ts) come from
+ * the database.
  */
 export interface HubData {
   /** Scheduled events from `now` on, soonest first. */
@@ -28,5 +28,5 @@ export interface HubData {
 }
 
 export function getHubData(): HubData {
-  return mockData;
+  return gamesData;
 }

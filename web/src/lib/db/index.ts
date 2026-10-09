@@ -5,7 +5,7 @@ export type { Db };
 /**
  * One connection pool per server process (kept on globalThis so dev reloads reuse it).
  * Production migrates in the deploy script; the dev database (PGlite) sets itself up here:
- * migrations, then the catalogue and member list the first time it's empty.
+ * migrations, then the seed (catalogue, games, member list) while it has no missions or no games.
  */
 const g = globalThis as unknown as { __tsHubDb?: Promise<Db> };
 
@@ -13,8 +13,10 @@ async function connect(): Promise<Db> {
   const db = await openDb();
   if (!process.env.DATABASE_URL) {
     await migrate(db);
-    const [{ n }] = await db.query("SELECT count(*)::int AS n FROM missions");
-    if (n === 0) await seed(db);
+    const [{ missions, events }] = await db.query(
+      "SELECT (SELECT count(*)::int FROM missions) AS missions, (SELECT count(*)::int FROM events) AS events",
+    );
+    if (missions === 0 || events === 0) await seed(db);
   }
   return db;
 }

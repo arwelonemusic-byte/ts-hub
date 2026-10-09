@@ -1,0 +1,16 @@
+[
+ {
+  "id": "2026-10-10-project-geras",
+  "missionId": "project-geras",
+  "startsAt": "2026-10-10T16:00:00.000Z",
+  "extra": true,
+  "slots": {
+   "Bravo-1/SL": "Arstotzka",
+   "Bravo-1/RED - FTL": { "name": "[лампас] Venom_coceT", "discordId": "289742293122940930" },
+   "Bravo-1/RED - Automatic Rifleman": "Smoker (OnlineKiller)",
+   "Bravo-1/RED - Grenadier": "Shultz",
+   "Bravo-1/RED - Rifleman": "[HL]Prais777",
+   "Bravo-2/SL": "lim"
+  }
+ }
+]

@@ -1,9 +1,8 @@
 # CLAUDE.md
 
 TS Hub is the community portal for Tactical Shift that ties together Player / Mission / Plan / Event / Replay.
-Status: **POC**, not deployed yet (`deploy/README.md`). Missions, players and plans are in PostgreSQL. Games are real
-but not in the database yet (below). Use real data when it's at hand; otherwise fill gaps with plausible mock values
-instead of blocking.
+Status: **POC**, not deployed yet (`deploy/README.md`). Missions, players, games and plans are in PostgreSQL. Use real
+data when it's at hand; otherwise fill gaps with plausible mock values instead of blocking.
 
 ## Layout
 
@@ -17,7 +16,7 @@ instead of blocking.
 
 ```bash
 cd web
-npm run dev     # http://localhost:3000 — works with no .env at all (PGlite database, mock games, dev viewer)
+npm run dev     # http://localhost:3000 — works with no .env at all (PGlite database, seeded games, dev viewer)
 npm run build   # type check + production build; run before calling a change done
 npm run lint
 ```
@@ -42,8 +41,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
 
 ## Conventions
 
-- **Data access goes through `getHubData()`** (`web/src/lib/data/`). Pages never query or import mock data directly,
-  so real sources replace `mock.ts` without touching the UI. Missions already come from the database (`missions.ts`).
+- **Data access goes through `getHubData()`** (`web/src/lib/data/`). Pages never query the database directly, so the
+  sources can change without touching the UI. Missions come from `missions.ts`, games from `games.ts` (one load of every
+  game per request; there are a few dozen).
 - **Times are MSK** (fixed UTC+3). The usual ops are Tue 20:00 and Sun 19:00 (`lib/schedule.ts`), with muster 15 minutes before.
   Format with `lib/format.ts` (it pins `Europe/Moscow`).
 - **Russian only (since 2026-10-08).** All UI work is done in RU: copy, designs and new strings. New keys go
@@ -88,16 +88,23 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   and Endsieg, taken from their unpacked addons), and `npm run db:seed` loads it with the Markers.layer files into the
   database. Covers in `web/public/covers/<id>.jpg` are each addon's main Workshop cover (not the scenario image); see
   `coverSource` in missions.json for the exceptions. Wolfs nest and Endsieg use the scenario image from the addon.
-- **Played games** (Sep 2026 on) are `web/src/lib/data/past-events.json`, read by `mock.ts`. `py data/events/build_past_events.py
-  <reports>` builds it from the replay-stats reports in ts-wrapped (numbers, roster, rankings, achievements) plus its `OPS`
-  table (mission, scheduled time, plan, PL; one row per op). Add a row and re-run after each op. An op's mission is named by its
-  replay's world file (`ops_planner.replays.world`; a generic `TS_Mission` world needs the terrain and where the players were).
-  Its plan is the last push before the op whose markers sit where it was played: no replay has a /syncplan stamp yet.
-  `slotted` is null for these games (nobody slotted through the hub), and friendly-fire incidents have no op clock.
-- **Scheduled games** are `UPCOMING` in `web/src/lib/data/mock.ts`, copied by hand from the slotting bot's #анонсы post:
-  mission, MSK time, and who took which slot (`"<groupId>/<role>"` → Discord display name, as the bot shows it). A game
-  drops off 4 hours after its start; back-fill it once its stats report exists. Usual Tue/Sun slots with nothing
-  scheduled are open slots in the feed. No progressive slot locks: the bot has none.
+- **Games** are the `events` tables (`db/migrations/002_events.sql`): `events` (one row per game, id `<date>-<mission>`,
+  status scheduled / played / cancelled; a played game's replay-stats are its `stats` JSONB), `event_slots` (the game's
+  copy of the mission's slot template, taken by a player or, for someone with no player row, a name), `event_attendance`
+  (in-game names from the replays, not yet linked to players) and `event_replays`. Each mission is its own game, so the
+  22 Sep evening is two. Host and PL are players. No progressive slot locks: the bot has none.
+- **Played games** (Sep 2026 on) come from `db/seed/played-events.json`: `py data/events/build_past_events.py <reports>`
+  builds it from the replay-stats reports in ts-wrapped (numbers, roster, rankings, achievements) plus its `OPS` table
+  (mission, scheduled time, plan, PL; one row per op), and `npm run db:seed -- --update` loads it. Add a row and re-run after
+  each op. An op's mission is named by its replay's world file (`ops_planner.replays.world`; a generic `TS_Mission` world
+  needs the terrain and where the players were). Its plan is the last push before the op whose markers sit where it was
+  played: no replay has a /syncplan stamp yet. `slotted` is null for games nobody slotted through the hub, and
+  friendly-fire incidents have no op clock.
+- **Scheduled games**, until the hub creates them, come from `db/seed/scheduled-events.json`, copied by hand from the slotting
+  bot's #анонсы post: mission, time, and who took which slot (`"<groupId>/<role>"` → Discord display name as the bot shows
+  it, or `{name, discordId}` for someone missing from the member list, who is then added as a player). The seed only adds
+  scheduled games, never updates them. A game drops off 4 hours after its start; back-fill it once its stats report exists
+  (it keeps its slots). Usual Tue/Sun slots with nothing scheduled are open slots in the feed.
 - **Briefings are sections** (`Briefing.sections`, plus optional `sides` for За кого / Против кого), as authors write
   them in the catalogue. A section body is plain text: blank lines split paragraphs, "- " lines are list items, and
   list items under «Задачи» get the numbered badges.

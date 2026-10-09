@@ -1,7 +1,7 @@
 // npm run db:migrate            apply pending db/migrations
 // npm run db:seed [-- --update] [-- --players <file>]
-//                               load the catalogue (+ players, if the member list is present);
-//                               --update overwrites missions already in the database.
+//                               load the catalogue, the games (+ players, if the member list is present);
+//                               --update overwrites missions and played games already in the database.
 // Production reads DATABASE_URL (deploy: `set -a; . /etc/ts-hub.env`). In dev the server
 // migrates and seeds its PGlite database by itself; run this only with the dev server stopped,
 // since PGlite allows one process at a time.
@@ -22,7 +22,8 @@ try {
   } else if (cmd === "seed") {
     await migrate(db);
     const n = await seed(db, { update: flag("--update"), players: value("--players") ?? MEMBERS_FILE });
-    console.log(`seeded ${n.missions} missions, ${n.players} players`);
+    console.log(`seeded ${n.missions} missions, ${n.events} games, ${n.players} players`);
+    if (n.unmatched.length) console.log(`no player with the display name: ${[...new Set(n.unmatched)].join(", ")}`);
   } else {
     console.error("usage: node scripts/db.mjs migrate | seed [--update] [--players <file>]");
     process.exitCode = 2;

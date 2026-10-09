@@ -1,12 +1,15 @@
-"""Build the hub's played games (web/src/lib/data/past-events.json) from the replay-stats reports.
+"""Build the hub's played games (db/seed/played-events.json) from the replay-stats reports.
 
 Run from the repo root with the per-op reports (ts-wrapped: a month file holds one "# <date> — Статистика
 операции — `CODE`" section per op; a per-op file is named <date>-<CODE>.md):
 
     py data/events/build_past_events.py ../ts-wrapped/september-2026/september-2026.md ../ts-wrapped/october-2026/stats/*.md
 
+then load them with `npm run db:seed -- --update` in web/ (db/README.md).
+
 The reports are the source of truth for the numbers. What they don't hold is kept in OPS below: the
-mission (the replay's world file names it), the scheduled time, the plan and the platoon leader.
+mission (the replay's world file names it), the scheduled time, the plan and the platoon leader
+(their Discord display name, which the seed matches to a player).
 """
 import datetime as dt
 import json
@@ -15,7 +18,7 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, 'web', 'src', 'lib', 'data', 'past-events.json')
+OUT = os.path.join(ROOT, 'db', 'seed', 'played-events.json')
 MSK = dt.timezone(dt.timedelta(hours=3))
 
 # date, replay codes, mission id, scheduled start (MSK), plan, platoon leader.
@@ -40,7 +43,7 @@ OPS = [
     ('2026-09-29', ['EXWZSN'], 'reverse-slope', '20:00', 'UQ2BWJ', None),
     ('2026-10-01', ['MCKFLK'], 'quiet-witness', '20:00', 'ALTHRY', None),
     ('2026-10-03', ['ERL7B9'], 'emerald-fields', '19:00', 'FESVGD', None),
-    ('2026-10-04', ['JNCFEB'], 'counterpunch', '19:00', 'QXVTZ6', 'OnlineKiller.'),
+    ('2026-10-04', ['JNCFEB'], 'counterpunch', '19:00', 'QXVTZ6', 'Smoker (OnlineKiller)'),
     ('2026-10-06', ['DFTZSB'], 'another-castle', '20:00', 'Q6W5N5', 'Galaxy'),
 ]
 # Same evening as the usual slot, so not an extra op.
@@ -217,34 +220,32 @@ def build(reports):
         # A restart splits an op into replays: it starts with the first one and ends with the last.
         last = codes[-1]
         last_len = op['parts'].get(last, t['duration']) if len(codes) > 1 else t['duration']
-        ff = op['boards']['ff']
-        aik = op['boards']['aiKills']
         out.append({
             'id': f'{date}-{mission}',
             'missionId': mission,
             'startsAt': iso(starts.timestamp() * 1000),
-            'startedAt': iso(FIRST_JOIN[codes[0]]),
-            'endedAt': iso(FIRST_JOIN[last] + last_len * 1000),
             'extra': not usual and (date, mission) not in NOT_EXTRA,
             **({'platoonLeader': pl} if pl else {}),
-            'attended': t['players'],
-            'replayCodes': codes,
+            'startedAt': iso(FIRST_JOIN[codes[0]]),
+            'endedAt': iso(FIRST_JOIN[last] + last_len * 1000),
             'planCode': plan,
-            'stats': {
-                'deaths': t['deaths'],
-                'shots': t['shots'],
-                'aiShots': t['aiShots'],
-                'grenades': t['grenades'],
-                'rockets': t['rockets'],
-                'knockdowns': sum(e['value'] for e in op['boards']['knockdowns']),
-                'aiKilled': t['aiKilled'],
-                'friendlyFire': t['friendlyFire'],
-                'topAiKills': aik[0] if aik else None,
-            },
-            'friendlyFireIncidents': ff,
-            'awards': sorted(op['awards'], key=lambda a: ORDER.index(a['kind'])),
-            'leaderboards': {'aiKills': aik, 'deaths': op['boards']['deaths']},
+            'replays': codes,
             'attendance': op['roster'],
+            'stats': {
+                'totals': {
+                    'deaths': t['deaths'],
+                    'shots': t['shots'],
+                    'aiShots': t['aiShots'],
+                    'grenades': t['grenades'],
+                    'rockets': t['rockets'],
+                    'knockdowns': sum(e['value'] for e in op['boards']['knockdowns']),
+                    'aiKilled': t['aiKilled'],
+                    'friendlyFire': t['friendlyFire'],
+                },
+                'leaderboards': {'aiKills': op['boards']['aiKills'], 'deaths': op['boards']['deaths']},
+                'awards': sorted(op['awards'], key=lambda a: ORDER.index(a['kind'])),
+                'friendlyFire': op['boards']['ff'],
+            },
         })
         if len(op['roster']) != t['players']:
             print(f"warning: {date} {mission}: roster {len(op['roster'])} ≠ players {t['players']}")
