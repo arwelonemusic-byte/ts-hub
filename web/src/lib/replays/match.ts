@@ -1,10 +1,12 @@
 import type { ReplayInfo } from "./planner";
 
 /*
- * Which recordings belong to a game. Every server boot starts a new recording (and so ends the one before),
- * so an op is in the last recording on its map that started before the game, plus any that started during
- * it (a crash restart). Test sessions earlier that day are their own, earlier recordings. The «Игра окончена»
- * dialog ticks those; the admin confirms.
+ * Which recordings belong to a game. Every server boot starts a new recording (and so ends the one before).
+ * The server runs the mission for 3–4 hours before an op so players can download the mods, then is restarted
+ * about 15 minutes before the start: that restart is the official run. So an op is the last recording on its
+ * map that started within the hour before the game, plus any started during it (a late start or a crash
+ * restart). Warm-up runs and test sessions are earlier recordings and aren't ticked. The «Игра окончена»
+ * dialog ticks these; the admin confirms.
  */
 
 const squash = (s: string) => s.toLowerCase().replace(/[^a-z0-9а-яё]/g, "");
@@ -72,9 +74,12 @@ function matchReplay(r: ReplayInfo, game: Game): Omit<ReplayMatch, "suggested"> 
   return { sameMap, sameName: sameWorld && world !== "tsmission", fits: sameWorld && sameMap !== false };
 }
 
+/** How far before the start the official run's restart may be (it's usually 15 minutes). */
+const OFFICIAL_RESTART_MAX = 1 * HOUR;
+
 /**
  * Each recording with how it matches the game. Suggested: of this mission's recordings, the last one started
- * up to 3 hours before the game, and those started in the 3 hours after its start.
+ * in the hour before the game, and those started in the 3 hours after its start.
  */
 export function suggest(replays: ReplayInfo[], game: Game): (ReplayInfo & ReplayMatch)[] {
   const start = Date.parse(game.startsAt);
@@ -84,7 +89,7 @@ export function suggest(replays: ReplayInfo[], game: Game): (ReplayInfo & Replay
   });
   const fits = matched.filter((x) => x.fits).map((x) => x.r);
   const at = (r: ReplayInfo) => r.startedAt * 1000;
-  const before = fits.filter((r) => at(r) <= start && at(r) > start - 3 * HOUR).sort((a, b) => b.startedAt - a.startedAt)[0];
+  const before = fits.filter((r) => at(r) <= start && at(r) > start - OFFICIAL_RESTART_MAX).sort((a, b) => b.startedAt - a.startedAt)[0];
   for (const r of fits) if (r === before || (at(r) > start && at(r) < start + 3 * HOUR)) r.suggested = true;
   return matched.map((x) => x.r);
 }

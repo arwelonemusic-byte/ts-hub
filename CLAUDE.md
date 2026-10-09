@@ -145,8 +145,11 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   «Игра окончена». The dialog lists the planner's recordings around the game's time and ticks the game's own
   (`lib/replays/match.ts`): the world file is the scenario's (`Another_Castle.conf` → `Another_Castle`; a shared `TS_Mission`
   world also needs the map, from the terrain folder), and since every server boot starts a new recording, the op is
-  the last one started before the game plus any started during it (crash restarts). That picked the real recordings
-  for all 12 ops of 15 Sep–6 Oct. «Проверить» shows the numbers, «Сохранить игру» writes them: attendance, totals,
+  the last one started within the hour before the game plus any started in the 3 hours after its start (a late start,
+  crash restarts). The server runs the mission for 3–4 hours before an op so players can download mods, then is
+  restarted ~15 minutes before the start for the official run: the warm-up runs are older recordings and aren't
+  ticked. That picked the real recordings for all 12 ops of 15 Sep–6 Oct (official runs at −14 to −20 min, warm-ups
+  at −56 min to −5 h). «Проверить» shows the numbers, «Сохранить игру» writes them: attendance, totals,
   rankings, awards (`lib/replays/stats.ts`, a port of the planner's tools/replay-stats; recordings nobody joined are
   ignored), the replay's /syncplan plan (else the attached one), the PL from the PL slot, `status = 'played'` and
   `finished_at` (migration 007). A played game's «Пересчитать» redoes it with other recordings. Recordings are read
