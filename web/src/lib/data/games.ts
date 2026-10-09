@@ -132,8 +132,8 @@ const loadGames = cache(async (): Promise<HubEvent[]> => {
       status: "past",
       startedAt: iso(e.started_at ?? e.starts_at),
       endedAt: iso(e.ended_at ?? e.started_at ?? e.starts_at),
-      // Slots exist only for games scheduled in the hub.
-      slotted: gameSlots.length ? gameSlots.filter((s) => s.playerName).length : null,
+      // Slots exist only for games scheduled in the hub, and count only if people slotted there.
+      slotted: gameSlots.filter((s) => s.playerName).length || null,
       attended: players.filter((a) => a.attended).length,
       replayCodes: (replaysOf.get(e.id) ?? []).map((r) => r.replay_code),
       planCode: e.plan_code,
@@ -178,7 +178,7 @@ export const gamesData: HubData = {
   async getEventVersion(id) {
     const db = await getDb();
     const [row] = await db.query(
-      `SELECT md5(coalesce(e.plan_code, '') || '|' || coalesce(
+      `SELECT md5(e.status || '|' || coalesce(e.plan_code, '') || '|' || coalesce(
                 (SELECT string_agg(s.position || ':' || s.group_id || ':' || s.group_name || ':' || s.role || ':' || coalesce(s.player_id::text, s.player_name, ''), ',' ORDER BY s.position)
                  FROM event_slots s WHERE s.event_id = e.id), '')) AS v
        FROM events e WHERE e.id = $1`,

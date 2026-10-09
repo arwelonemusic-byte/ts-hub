@@ -141,18 +141,30 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
 - **Scheduled game pages stay live** (`components/event/LiveRefresh.tsx`): while the tab is visible it polls
   `/api/events/<id>/version` every 5 s (an md5 of the slots, who's in them and the attached plan, `getEventVersion`) and calls
   `router.refresh()` when it changed (slot names count too, so an admin's rename shows up). Taking a slot someone just took is refused anyway («Слот уже заняли»).
-- **Played games** (Sep 2026 on) come from `db/seed/played-events.json`: `py data/events/build_past_events.py <reports>`
+- **Finishing a game** («Игра окончена», `lib/events/finish.ts`, admins): from a game's start its hero button becomes
+  «Игра окончена». The dialog lists the planner's recordings around the game's time and ticks the game's own
+  (`lib/replays/match.ts`): the world file is the scenario's (`Another_Castle.conf` → `Another_Castle`; a shared `TS_Mission`
+  world also needs the map, from the terrain folder), and since every server boot starts a new recording, the op is
+  the last one started before the game plus any started during it (crash restarts). That picked the real recordings
+  for all 12 ops of 15 Sep–6 Oct. «Проверить» shows the numbers, «Сохранить игру» writes them: attendance, totals,
+  rankings, awards (`lib/replays/stats.ts`, a port of the planner's tools/replay-stats; recordings nobody joined are
+  ignored), the replay's /syncplan plan (else the attached one), the PL from the PL slot, `status = 'played'` and
+  `finished_at` (migration 007). A played game's «Пересчитать» redoes it with other recordings. Recordings are read
+  from the production planner even in dev (`PLANNER_REPLAYS_URL` overrides). Not handled: join-less players and GM
+  exclusions (the Python tool's `--label` / `--exclude`).
+- **Played games before the hub** (Sep 2026 on) come from `db/seed/played-events.json`: `py data/events/build_past_events.py <reports>`
   builds it from the replay-stats reports in ts-wrapped (numbers, roster, rankings, achievements) plus its `OPS` table
-  (mission, scheduled time, plan, PL; one row per op), and `npm run db:seed -- --update` loads it. Add a row and re-run after
-  each op. An op's mission is named by its replay's world file (`ops_planner.replays.world`; a generic `TS_Mission` world
+  (mission, scheduled time, plan, PL; one row per op), and `npm run db:seed -- --update` loads it (never over a game
+  finished in the hub). An op's mission is named by its replay's world file (`ops_planner.replays.world`; a generic `TS_Mission` world
   needs the terrain and where the players were). Its plan is the last push before the op whose markers sit where it was
   played: no replay has a /syncplan stamp yet. `slotted` is null for games nobody slotted through the hub, and
-  friendly-fire incidents have no op clock.
+  friendly-fire incidents have no op clock. The reports' older awards differ from today's rules: «Первая кровь» was the
+  first shot (now the first AI kill), and split ops compared raw event times across recordings.
 - **Scheduled games**, until the hub creates them, come from `db/seed/scheduled-events.json`, copied by hand from the slotting
   bot's #анонсы post: mission, time, and who took which slot (`"<groupId>/<role>"` → Discord display name as the bot shows
   it, or `{name, discordId}` for someone missing from the member list, who is then added as a player). The seed only adds
-  scheduled games, never updates them. A game drops off 4 hours after its start; back-fill it once its stats report exists
-  (it keeps its slots). Usual Tue/Sun slots with nothing scheduled are open slots in the feed.
+  scheduled games, never updates them. A game drops off the feed 4 hours after its start until it's finished
+  («Игра окончена»; its page and mission page still reach it). Usual Tue/Sun slots with nothing scheduled are open slots in the feed.
 - **Briefings are sections** (`Briefing.sections`, plus optional `sides` for За кого / Против кого), as authors write
   them in the catalogue. A section body is plain text: blank lines split paragraphs, "- " lines are list items, and
   list items under «Задачи» get the numbered badges.

@@ -27,6 +27,7 @@ import { LeaveSlotButton } from "@/components/event/SlotForms";
 import { LiveRefresh } from "@/components/event/LiveRefresh";
 import { JumpLink } from "@/components/event/Jump";
 import { EventAdminMenu } from "@/components/schedule/Schedule";
+import { FinishGameButton } from "@/components/event/FinishGameDialog";
 import { slotRoles } from "@/lib/missions";
 import type { MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
@@ -55,7 +56,7 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
         {ev.status === "upcoming" ? (
           <Upcoming ev={ev} history={history} viewer={viewer} players={players} roles={roles ?? []} locale={locale} t={t} />
         ) : (
-          <Played ev={ev} history={history} locale={locale} t={t} />
+          <Played ev={ev} history={history} isAdmin={!!viewer?.isAdmin} locale={locale} t={t} />
         )}
       </main>
     </>
@@ -91,6 +92,8 @@ function Upcoming({
 }) {
   const taken = ev.slots.filter((s) => s.playerName).length;
   const mySlot = viewerSlot(viewer, ev);
+  // Slotting closes when the game starts; from then on the admin finishes it («Игра окончена»).
+  const started = !slottingOpen(ev);
   const attached = ev.plan;
   return (
     <>
@@ -113,7 +116,9 @@ function Upcoming({
           </JumpLink>
         </div>
         <div className="flex flex-wrap gap-2">
-          {mySlot && (viewer!.isAdmin || slottingOpen(ev)) ? (
+          {viewer?.isAdmin && started ? (
+            <FinishGameButton eventId={ev.id} locale={locale} label={t("finish.button")} className={`${buttonClass("primary", "m")} flex-1`} />
+          ) : mySlot && (viewer!.isAdmin || slottingOpen(ev)) ? (
             <LeaveSlotButton eventId={ev.id} label={t("event.leaveSlot")} className={buttonClass("danger", "m")} />
           ) : (
             <JumpLink target="slots" className={`${buttonClass("primary", "m")} flex-1`}>
@@ -154,7 +159,7 @@ function Upcoming({
   );
 }
 
-function Played({ ev, history, locale, t }: { ev: PastEvent; history: MissionHistory; locale: Locale; t: T }) {
+function Played({ ev, history, isAdmin, locale, t }: { ev: PastEvent; history: MissionHistory; isAdmin: boolean; locale: Locale; t: T }) {
   const used = ev.planCode
     ? (history.plans.find((p) => p.code === ev.planCode) ?? { code: ev.planCode, author: ev.platoonLeader ?? "—", createdAt: ev.startsAt })
     : null;
@@ -192,6 +197,7 @@ function Played({ ev, history, locale, t }: { ev: PastEvent; history: MissionHis
             {t("event.workshop")}
             <Icon name="external-trailing" />
           </ButtonLink>
+          {isAdmin && <FinishGameButton eventId={ev.id} recompute locale={locale} label={t("finish.recompute")} className={buttonClass("secondary", "m")} />}
         </div>
       </Hero>
       <OpTotals ev={ev} locale={locale} t={t} />

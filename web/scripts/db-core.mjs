@@ -206,8 +206,9 @@ async function seedEvents(db, { update }) {
       count++;
     }
     for (const e of played) {
-      const exists = (await tx.query("SELECT 1 FROM events WHERE id = $1", [e.id])).length > 0;
-      if (exists && !update) continue;
+      // A game finished in the hub («Игра окончена», finished_at) has its stats from there: never overwritten.
+      const [have] = await tx.query("SELECT finished_at FROM events WHERE id = $1", [e.id]);
+      if (have && (!update || have.finished_at)) continue;
       const pl = await playerFor(tx, e.platoonLeader);
       if (e.platoonLeader && !pl) unmatched.push(nameOf(e.platoonLeader));
       // A scheduled game that got played keeps its slots and host.
