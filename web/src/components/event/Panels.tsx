@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { number, shortDate } from "@/lib/format";
 import { plural, type Locale, type T } from "@/lib/i18n";
 import { squadsOf } from "@/lib/squads";
-import { planOpenHref, replayUrl, TRAINING_URL } from "@/lib/links";
+import { planOpenHref, TRAINING_URL } from "@/lib/links";
 import type { Award, Briefing, LeaderboardEntry, Mission, MissionHistory, PastEvent, PlanRef, Slot, UpcomingEvent } from "@/lib/types";
 import { buttonClass, ButtonLink, Eyebrow, Icon, ProgressBar, Tag } from "../ui";
 import { CopyButton } from "./CopyButton";
@@ -641,24 +641,16 @@ export function LeaderboardsPanel({ ev, t }: { ev: PastEvent; t: T }) {
       {ff.length > 0 && (
         <div className="flex flex-col gap-1">
           <Eyebrow className="text-fg-danger">{t("boards.friendlyFire")}</Eyebrow>
+          {/* Plain rows (user decision 2026-10-10): the replay link lives in the hero («Смотреть повтор»). */}
           {ff.map((f, i) => (
-            <a
-              key={i}
-              href={replayUrl(ev.replayCodes[0], ev)}
-              target="_blank"
-              rel="noreferrer"
-              className="flex h-10 items-center gap-3 border-t border-line hover:bg-inset"
-            >
+            <div key={i} className="flex h-10 items-center gap-3 border-t border-line">
               <span className="flex min-w-0 flex-1 items-center gap-3 type-label-m text-fg">
                 <span className="truncate">{f.shooter}</span>
                 <Icon name="arrow-right-ff" />
                 <span className="truncate">{f.victim}</span>
               </span>
-              <span className="flex items-center gap-1 type-caption text-fg-secondary">
-                {f.at}
-                <Icon name="external-ff" />
-              </span>
-            </a>
+              {f.at && <span className="type-caption text-fg-secondary">{f.at}</span>}
+            </div>
           ))}
         </div>
       )}
