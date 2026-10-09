@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { BriefingPanel, isOwnPlan, MissionPanel, PlanRow } from "@/components/event/Panels";
+import { MissionMenu } from "@/components/mission/MissionActions";
 import { MissionSlotsPanel } from "@/components/mission/MissionSlotsPanel";
 import { ScheduleButton } from "@/components/schedule/Schedule";
 import { buttonClass, ButtonLink, Cover, Eyebrow, Icon, StatusChip } from "@/components/ui";
@@ -10,7 +11,9 @@ import { getHubData } from "@/lib/data";
 import { duration, eventDay, minutesBetween } from "@/lib/format";
 import { plural, type Locale, type T } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
+import { loadMissionDraft } from "@/lib/data/missions";
 import { replayUrl, workshopUrl } from "@/lib/links";
+import { canEditMission, editorOptions, missionHasGames } from "@/lib/missions";
 import type { HubEvent, Mission, MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
 
@@ -20,13 +23,33 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
   const data = getHubData();
   const [mission, { locale, t }, viewer] = await Promise.all([data.getMission(id), getT(), getViewer()]);
   if (!mission) notFound();
-  const [games, history] = await Promise.all([data.listMissionEvents(mission.id, new Date()), data.getMissionHistory(mission.id)]);
+  const canEdit = canEditMission(viewer, mission);
+  const isAdmin = !!viewer?.isAdmin;
+  const [games, history, options, draft, hasGames] = await Promise.all([
+    data.listMissionEvents(mission.id, new Date()),
+    data.getMissionHistory(mission.id),
+    canEdit ? editorOptions() : null,
+    canEdit ? loadMissionDraft(mission.id) : null,
+    isAdmin ? missionHasGames(mission.id) : true,
+  ]);
+  const menu =
+    viewer && (canEdit || isAdmin) ? (
+      <MissionMenu
+        mission={{ id: mission.id, name: mission.name, archived: !!mission.archived }}
+        editing={draft && { draft, coverUrl: mission.coverUrl, workshopUrl: mission.workshopUrl ?? null, hasMarkersLayer: mission.hasMarkersLayer }}
+        options={options}
+        viewer={{ discordId: viewer.discordId, name: viewer.name, isAdmin }}
+        canEdit={canEdit}
+        deletable={!hasGames}
+        locale={locale}
+      />
+    ) : null;
 
   return (
     <>
       <AppHeader active="missions" />
       <main className="flex flex-col items-center gap-6 px-4 pb-16 pt-6 md:px-8">
-        <Hero mission={mission} games={games} canSchedule={!!viewer?.isAdmin} locale={locale} t={t} />
+        <Hero mission={mission} games={games} canSchedule={isAdmin && !mission.archived} menu={menu} locale={locale} t={t} />
         <div className="flex w-full max-w-[1216px] flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex min-w-0 flex-1 flex-col gap-4">
             {mission.briefing && <BriefingPanel b={mission.briefing} t={t} />}
@@ -53,7 +76,22 @@ function StatBox({ label, value }: { label: string; value: ReactNode }) {
 }
 
 /** Summary on the left, cover on the right (the designer's swap on the canvas). */
-function Hero({ mission, games, canSchedule, locale, t }: { mission: Mission; games: HubEvent[]; canSchedule: boolean; locale: Locale; t: T }) {
+function Hero({
+  mission,
+  games,
+  canSchedule,
+  menu,
+  locale,
+  t,
+}: {
+  mission: Mission;
+  games: HubEvent[];
+  canSchedule: boolean;
+  /** The «…» with edit / archive / delete, for whoever may. */
+  menu: ReactNode;
+  locale: Locale;
+  t: T;
+}) {
   const played = games.filter((g): g is PastEvent => g.status === "past");
   const n = played.length;
   const avgPlayers = n ? Math.round(played.reduce((s, g) => s + g.attended, 0) / n) : null;
@@ -66,7 +104,10 @@ function Hero({ mission, games, canSchedule, locale, t }: { mission: Mission; ga
       </Link>
       <div className="flex flex-col-reverse gap-10 lg:flex-row lg:items-center">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <StatusChip tone="neutral">{t("missionPage.chip")}</StatusChip>
+          <span className="flex gap-2">
+            <StatusChip tone="neutral">{t("missionPage.chip")}</StatusChip>
+            {mission.archived && <StatusChip tone="neutral">{t("missionPage.archived")}</StatusChip>}
+          </span>
           <div className="flex flex-col">
             <span className="type-display-kicker text-fg-label">{t("event.kicker")}</span>
             <h1 className="type-display-event text-fg">{mission.name}</h1>
@@ -115,6 +156,7 @@ function Hero({ mission, games, canSchedule, locale, t }: { mission: Mission; ga
                 </button>
               </form>
             )}
+            {menu}
           </div>
         </div>
         <Cover

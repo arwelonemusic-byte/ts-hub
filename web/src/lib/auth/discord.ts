@@ -68,16 +68,23 @@ export async function fetchGuildMember(accessToken: string): Promise<{ roles: st
   return { roles: d.roles ?? [], nick: d.nick ?? null };
 }
 
-/** DISCORD_ROLE_MAP = {"<role id>":"<name>"}; unknown ids are dropped. */
-export function mapRoleIdsToNames(roleIds: string[]): string[] {
-  let map: Record<string, string> = {};
+function roleMap(): Record<string, string> {
   try {
-    map = JSON.parse((process.env.DISCORD_ROLE_MAP ?? "{}").replace(/^﻿/, "").trim() || "{}");
+    return JSON.parse((process.env.DISCORD_ROLE_MAP ?? "{}").replace(/^﻿/, "").trim() || "{}");
   } catch {
     console.error("[ts-hub] DISCORD_ROLE_MAP is not valid JSON");
+    return {};
   }
+}
+
+/** DISCORD_ROLE_MAP = {"<role id>":"<name>"}; unknown ids are dropped. */
+export function mapRoleIdsToNames(roleIds: string[]): string[] {
+  const map = roleMap();
   return roleIds.map((id) => map[id]).filter((n): n is string => !!n);
 }
+
+/** Every role name the hub knows (slot templates pick a required role from these). */
+export const discordRoleNames = () => Object.values(roleMap());
 
 export function avatarUrl(userId: string, avatar: string | null): string | null {
   return avatar ? `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png?size=64` : null;

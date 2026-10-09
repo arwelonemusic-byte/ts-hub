@@ -34,6 +34,8 @@ export interface Mission {
   /** Public path or null → map art fallback. Covers have the title printed on them: never crop. */
   coverUrl: string | null;
   authors: string[];
+  /** Discord ids of the authors who are members: they (with @mission officer) may edit it. */
+  authorIds: string[];
   workshopUrl?: string;
   /** Workshop addon GUID, e.g. "6AB195F5F18A4E65". */
   addonGuid?: string;
@@ -49,6 +51,8 @@ export interface Mission {
   squads?: MissionSquad[];
   /** Played without slotting: players just say «Я приду!». No squads and no flag = slots not set up yet. */
   noSlotting?: boolean;
+  /** Hidden from the catalogue and the schedule dialog (a broken or retired mission); its games still show it. */
+  archived?: boolean;
 }
 
 /** One squad of a mission's slot template — a line of the Discord bot's slot file. */

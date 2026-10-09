@@ -78,9 +78,9 @@ export async function migrate(db) {
 /**
  * Load the catalogue (db/seed/missions.json, built by data/catalogue/build_seed.py), the games
  * (db/seed/played-events.json and scheduled-events.json) and, when the member list is present, the
- * players. Missions and played games already in the database are left alone unless `update` — once
- * the hub edits them, the database is their source of truth. Scheduled games are only ever added:
- * their slots fill up in the hub.
+ * players. Missions and played games already in the database are left alone unless `update`, and a
+ * mission saved in the hub (hub_edited_at) is left alone even then: the database is its source of
+ * truth now. Scheduled games are only ever added: their slots fill up in the hub.
  */
 export async function seed(db, { update = false, players = MEMBERS_FILE } = {}) {
   let playerCount = 0;
@@ -103,8 +103,8 @@ export async function seed(db, { update = false, players = MEMBERS_FILE } = {}) 
   let missionCount = 0;
   await db.transaction(async (tx) => {
     for (const m of missions) {
-      const exists = (await tx.query("SELECT 1 FROM missions WHERE id = $1", [m.id])).length > 0;
-      if (exists && !update) continue;
+      const [have] = await tx.query("SELECT hub_edited_at FROM missions WHERE id = $1", [m.id]);
+      if (have && (!update || have.hub_edited_at)) continue;
       const layer = m.markersLayer ? await readFile(path.join(CATALOGUE, m.markersLayer), "utf8") : null;
       const row = [
         m.id, m.name, m.mapKey, m.mapLabel, m.coverUrl ?? null, m.workshopUrl ?? null, m.addonGuid ?? null,

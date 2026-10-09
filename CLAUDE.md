@@ -78,7 +78,27 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   chips; a mission must carry every selected tag) and mission-only cards (cover, title, map, author; no game details).
   Filters live in the URL (`?q=&map=&author=&tag=`) via `history.replaceState`; logic is in `lib/catalog.ts`. No sort
   control (user decision): scheduled soonest first, then most recently played, then never played. The subtitle is the
-  catalogue's size («41 миссия в каталоге»).
+  catalogue's size («41 миссия в каталоге»). Archived missions are left out; admins open them at `?archive=1`.
+- **Mission CRUD** (`lib/missions/`, user decisions 2026-10-09): admins add, edit, archive and delete any mission;
+  @mission officer members add missions and edit the ones they're a listed author of (a mission maker can't take
+  themselves off the authors). One dialog (`components/mission/editor/`) in three steps:
+  1. **Workshop** — the link fills in the GUID, scenario (a picker when the addon has several), title without
+     "Operation" and the addon's main image. The map comes from the addon's terrain dependency (`lib/maps.ts`: known
+     terrain GUIDs, then addon names). Takistan's addon also holds Zargabad, and Everon, Arland and Kolguyev come with
+     the game, so an ambiguous or missing match asks. The Workshop has no API: `lib/missions/workshop.ts` reads the
+     page's `__NEXT_DATA__`. A scenario already in the catalogue is refused (unique `scenario_id`).
+  2. **Briefing and Markers.layer** — typed in and uploaded, or read from the addon folder the author picks
+     (`lib/missions/addonFolder.ts`, in the browser, nothing uploaded): the journal config (`SCR_JournalSetupConfig`)
+     gives the sections, and the scenario's world gives `<world>_Layers/Markers.layer`. «Миссия без плана» needs no layer.
+  3. **Slots** — squads and slots with their Discord role, or «Без слотинга». The slotting bot's text pastes in
+     (`lib/missions/slotText.ts`). Editing the template doesn't touch games already scheduled (they keep their copy).
+
+  A new mission goes step by step; an edit can jump between steps and save from any. Saving (`saveMission`) fetches the
+  Workshop image again for a new mission or on «Обновить из Workshop», and stores it in the uploads folder
+  (`lib/uploads.ts`: `HUB_UPLOADS_DIR`, served at `/uploads/…`). The page's «…» holds Изменить, В архив / Вернуть из
+  архива and Удалить; delete is only for a mission with no games at all (else archive). Archived missions leave the
+  catalogue and the schedule dialog, and their page shows «В архиве». Every hub save sets `missions.hub_edited_at`
+  (migration 005), and `db:seed --update` leaves those missions alone.
 - **Missions own their slot template.** Each game copies it, and the author or an admin can grow it later (adding
   squads to an old mission). Fireteams are plain text in the slot name ("BLUE - Grenadier"). `requiredRole` is a
   Discord role, and Discord stays the source of truth for roles. Which slot name needs which role is in

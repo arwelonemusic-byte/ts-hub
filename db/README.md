@@ -20,6 +20,7 @@ Code: `web/scripts/db-core.mjs` (connection, migrations, seed — plain JS so th
 npm run db:migrate                       # apply pending migrations/*.sql, recorded in schema_migrations
 npm run db:seed                          # migrate, then load the catalogue, the games and (if present) the member list
 npm run db:seed -- --update              # also overwrite missions and played games already in the database
+                                         # (not missions saved in the hub: hub_edited_at is set on those)
 npm run db:seed -- --players <file>      # member list from elsewhere (default data/players/discord-members.json)
 ```
 

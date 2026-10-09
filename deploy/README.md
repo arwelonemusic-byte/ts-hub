@@ -32,7 +32,9 @@ seeded. Still to do: the Caddy block (step 5, once DNS resolves) and the Discord
    sudo -u postgres psql -c "CREATE ROLE tsweb_hub LOGIN PASSWORD '<password>'"
    sudo -u postgres psql -c "CREATE DATABASE ts_hub OWNER tsweb_hub"
    ```
-2. **Env file.** Fill `ts-hub.env.example` into `/etc/ts-hub.env`, then `chmod 600` it (root:root).
+2. **Env file.** Fill `ts-hub.env.example` into `/etc/ts-hub.env`, then `chmod 600` it (root:root). The uploads
+   folder (mission covers) lives outside the code: `mkdir -p /var/lib/ts-hub/uploads && chown -R tsweb: /var/lib/ts-hub`
+   (the unit's `ReadWritePaths` lists it).
 3. **Code.**
    ```sh
    sudo -u tsweb git clone https://github.com/<owner>/ts-hub.git /opt/ts-web/ts-hub
@@ -56,4 +58,5 @@ seeded. Still to do: the Caddy block (step 5, once DNS resolves) and the Discord
    ```
 
 Re-running `npm run db:seed` later adds missions that aren't in the database yet and refreshes players; it leaves
-existing missions alone unless given `-- --update`, because the hub becomes the missions' source of truth.
+existing missions alone unless given `-- --update`, and even then skips missions saved in the hub: the hub is
+their source of truth.

@@ -22,7 +22,7 @@ export async function scheduleGame(_prev: ScheduleState, form: FormData): Promis
   if (!viewer?.isAdmin) return { error: "forbidden" };
   const mission = await getHubData().getMission(String(form.get("mission") ?? ""));
   const startsAt = fromMskFields(String(form.get("date") ?? ""), String(form.get("time") ?? ""));
-  if (!mission || !startsAt) return { error: "invalid" };
+  if (!mission || mission.archived || !startsAt) return { error: "invalid" };
   if (startsAt.getTime() <= Date.now()) return { error: "past" };
 
   const id = `${mskDayKey(startsAt)}-${mission.id}`;
