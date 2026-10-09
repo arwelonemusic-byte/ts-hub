@@ -153,21 +153,26 @@ export function PlayedRow({ ev, locale, t }: { ev: Played; locale: Locale; t: T 
   );
 }
 
-/** Figma "Open slot" (13:347): a usual slot with no mission picked yet. For an admin it opens the schedule dialog. */
+/**
+ * Figma "Open slot" (13:347): a usual slot with no mission picked yet. An admin gets «Создать игру»
+ * on the right on hover (always shown where there's no hover), which opens the schedule dialog.
+ */
 export function OpenSlot({ t, onSchedule }: { t: T; onSchedule?: () => void }) {
-  const box = "flex h-[76px] min-w-0 flex-1 flex-col justify-center gap-0.5 rounded-xl border border-dashed border-line-strong px-5 py-4";
-  if (onSchedule) {
-    return (
-      <button type="button" onClick={onSchedule} className={`${box} group text-left hover:border-line-accent hover:bg-accent-subtle`}>
-        <span className="type-label-m text-fg-label group-hover:text-fg-accent">{t("feed.open.schedule")}</span>
-        <span className="type-caption text-fg-tertiary">{t("feed.open.detail")}</span>
-      </button>
-    );
-  }
   return (
-    <div className={box}>
-      <span className="type-label-m text-fg-label">{t("feed.open.title")}</span>
-      <span className="type-caption text-fg-tertiary">{t("feed.open.detail")}</span>
+    <div className="group flex h-[76px] min-w-0 flex-1 items-center gap-4 rounded-xl border border-dashed border-line-strong px-5 py-4">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="type-label-m text-fg-label">{t("feed.open.title")}</span>
+        <span className="truncate type-caption text-fg-tertiary">{t("feed.open.detail")}</span>
+      </div>
+      {onSchedule && (
+        <button
+          type="button"
+          onClick={onSchedule}
+          className={`${buttonClass("primary", "s")} opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100`}
+        >
+          {t("feed.open.create")}
+        </button>
+      )}
     </div>
   );
 }

@@ -101,7 +101,8 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   counts after the next login.
 - **Scheduling** (`lib/events/actions.ts`, admins only — user decision 2026-10-09): one dialog
   (`components/schedule/Schedule.tsx`) picks a mission plus an MSK date and time and creates the game with a copy of the
-  mission's slot template, then opens its page. It opens from an open usual slot in the feed (time filled in), from
+  mission's slot template, then opens its page. It opens from «Создать игру» on an open usual slot in the feed (shown
+  on hover, always on touch screens; time filled in), from
   «Запланировать игру» above the calendar (any time, so extra ops too) and from a mission page (mission filled in).
   `extra` is set when the time isn't a usual slot. The game page's «…» changes the time («Изменить время»: same id,
   mission and slots) or cancels it (`status = 'cancelled'`: off the feed, row kept; scheduling that mission on that day

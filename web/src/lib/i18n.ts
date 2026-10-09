@@ -148,7 +148,7 @@ const RU: Dict = {
   "feed.players.many": "{n} игроков",
   "feed.replay": "Повтор",
   "feed.open.title": "Игра будет",
-  "feed.open.schedule": "Запланировать игру",
+  "feed.open.create": "Создать игру",
   "feed.open.detail": "Но с миссией еще не определились",
   "feed.emptyMonth": "В этом месяце игр не было",
   "feed.loading": "Загружаем…",
