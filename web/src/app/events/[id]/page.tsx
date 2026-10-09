@@ -28,6 +28,8 @@ import { LiveRefresh } from "@/components/event/LiveRefresh";
 import { JumpLink } from "@/components/event/Jump";
 import { EventAdminMenu } from "@/components/schedule/Schedule";
 import { FinishGameButton } from "@/components/event/FinishGameDialog";
+import { AnnounceButton } from "@/components/event/AnnounceButton";
+import { announcement } from "@/lib/discord/post";
 import { slotRoles } from "@/lib/missions";
 import type { MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
@@ -38,13 +40,15 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
   const data = getHubData();
   const [ev, { locale, t }, viewer] = await Promise.all([data.getEvent(id, new Date()), getT(), getViewer()]);
   if (!ev) notFound();
-  const [history, players, version, roles] = await Promise.all([
+  const [history, players, version, roles, announced] = await Promise.all([
     data.getMissionHistory(ev.mission.id),
     // Names for an admin's «Посадить» picker.
     ev.status === "upcoming" && viewer?.isAdmin ? playerNames() : null,
     ev.status === "upcoming" ? data.getEventVersion(ev.id) : null,
     // Required roles for slots an admin adds («Изменить слоты»).
     ev.status === "upcoming" && viewer?.isAdmin ? slotRoles() : null,
+    // Its Discord announcement («Анонс в Дискорд»), for an admin's link to it.
+    ev.status === "upcoming" && viewer?.isAdmin ? announcement(ev.id) : null,
   ]);
 
   return (
@@ -54,7 +58,7 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
         <Backdrop coverUrl={ev.mission.coverUrl} />
         {ev.status === "upcoming" && version && <LiveRefresh eventId={ev.id} version={version} />}
         {ev.status === "upcoming" ? (
-          <Upcoming ev={ev} history={history} viewer={viewer} players={players} roles={roles ?? []} locale={locale} t={t} />
+          <Upcoming ev={ev} history={history} viewer={viewer} players={players} roles={roles ?? []} announced={announced} locale={locale} t={t} />
         ) : (
           <Played ev={ev} history={history} isAdmin={!!viewer?.isAdmin} locale={locale} t={t} />
         )}
@@ -78,6 +82,7 @@ function Upcoming({
   viewer,
   players,
   roles,
+  announced,
   locale,
   t,
 }: {
@@ -85,6 +90,8 @@ function Upcoming({
   history: MissionHistory;
   viewer: Viewer | null;
   players: string[] | null;
+  /** The game's Discord post (admins), null when not announced. */
+  announced: { url: string } | null;
   /** Required roles for slots an admin adds. */
   roles: string[];
   locale: Locale;
@@ -129,6 +136,30 @@ function Upcoming({
             {t("event.workshop")}
             <Icon name="external-trailing" />
           </ButtonLink>
+          {viewer?.isAdmin &&
+            (announced ? (
+              <ButtonLink href={announced.url} external>
+                {t("announce.open")}
+                <Icon name="external-trailing" />
+              </ButtonLink>
+            ) : (
+              !started && (
+                <AnnounceButton
+                  eventId={ev.id}
+                  labels={{
+                    button: t("announce.button"),
+                    pending: t("announce.pending"),
+                    confirm: t("announce.confirm"),
+                    errors: {
+                      forbidden: t("announce.error.forbidden"),
+                      notConfigured: t("announce.error.notConfigured"),
+                      notFound: t("announce.error.notFound"),
+                      discord: t("announce.error.discord"),
+                    },
+                  }}
+                />
+              )
+            ))}
           {viewer?.isAdmin && (
             <EventAdminMenu eventId={ev.id} startsAt={ev.startsAt} missionName={ev.mission.name} slots={ev.slots} roles={roles} locale={locale} />
           )}

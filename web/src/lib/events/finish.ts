@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getHubData } from "../data";
 import { getDb } from "../db";
+import { refreshAnnouncement } from "../discord/post";
 import { playerIdOf } from "../players";
 import { suggest, type ReplayMatch } from "../replays/match";
 import { fetchReplay, listRecentReplays } from "../replays/planner";
@@ -149,6 +150,7 @@ export async function finishGame(eventId: string, codes: string[]): Promise<{ er
       await tx.query("INSERT INTO event_replays (replay_code, event_id, part) VALUES ($1, $2, $3)", [code, ev.id, i + 1]);
     }
   });
+  refreshAnnouncement(ev.id);
   revalidatePath("/events");
   revalidatePath(`/events/${ev.id}`);
   revalidatePath(`/missions/${ev.missionId}`);

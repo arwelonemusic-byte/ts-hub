@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getHubData } from "../data";
 import { getDb } from "../db";
+import { refreshAnnouncement } from "../discord/post";
 import { LIMITS } from "../missions/draft";
 import { playerIdOf } from "../players";
 import { fromMskFields, isUsualSlot, mskDayKey } from "../schedule";
@@ -76,6 +77,7 @@ export async function rescheduleGame(_prev: ScheduleState, form: FormData): Prom
     "UPDATE events SET starts_at = $2, extra = $3, updated_at = NOW() WHERE id = $1 AND status = 'scheduled'",
     [ev.id, startsAt.toISOString(), !isUsualSlot(startsAt)],
   );
+  refreshAnnouncement(ev.id);
   revalidatePath("/events");
   revalidatePath(`/events/${ev.id}`);
   revalidatePath(`/missions/${ev.mission.id}`);
@@ -91,6 +93,7 @@ export async function cancelGame(form: FormData): Promise<void> {
   await (await getDb()).query("UPDATE events SET status = 'cancelled', updated_at = NOW() WHERE id = $1 AND status = 'scheduled'", [
     ev.id,
   ]);
+  refreshAnnouncement(ev.id);
   revalidatePath("/events");
   revalidatePath(`/missions/${ev.mission.id}`);
   redirect("/events");
@@ -155,6 +158,7 @@ export async function editGameSlots(eventId: string, input: EditableSquad[]): Pr
     }
     await tx.query("UPDATE events SET updated_at = NOW() WHERE id = $1", [eventId]);
   });
+  refreshAnnouncement(eventId);
   revalidatePath(`/events/${eventId}`);
   revalidatePath("/events");
   return null;

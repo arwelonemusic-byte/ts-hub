@@ -141,6 +141,17 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
 - **Scheduled game pages stay live** (`components/event/LiveRefresh.tsx`): while the tab is visible it polls
   `/api/events/<id>/version` every 5 s (an md5 of the slots, who's in them and the attached plan, `getEventVersion`) and calls
   `router.refresh()` when it changed (slot names count too, so an admin's rename shows up). Taking a slot someone just took is refused anyway («Слот уже заняли»).
+- **Discord announcement** («Анонс в Дискорд», `lib/discord/`, admins; user decisions 2026-10-09): the hub drives slotting
+  and the Discord post only mirrors it. An admin's button on an upcoming game posts it to `DISCORD_ANNOUNCE_CHANNEL_ID`
+  as the Tactical Shift bot (`DISCORD_BOT_TOKEN`, plain REST, no gateway), after a confirm; the page then links to the
+  post. From then on every change to the game (slots taken/left/assigned/cleared, «Изменить слоты», time, plan attached
+  or detached, cancelled, «Игра окончена») calls `refreshAnnouncement`, which edits the post 2 s later (a burst becomes
+  one edit; one post or edit at a time per game; an edit whose content didn't change is skipped via `events.discord_hash`,
+  migration 008). The post's button links to the game's page: signing up happens on the site. A post deleted in Discord
+  is forgotten on the next edit and the button comes back. The look is ONE pure function, `renderGamePost(PostGame)` in
+  `lib/discord/template.ts` (placeholder in the bot's layout until Galaxy's template); `fitLimits` trims any template to
+  Discord's limits and nobody is pinged unless the template sets `allowed_mentions`. Dev: no channel = off;
+  `/api/dev/discord-post/<id>` returns the message JSON; `DISCORD_API_URL` points the sender at a stand-in for testing.
 - **Finishing a game** («Игра окончена», `lib/events/finish.ts`, admins): from a game's start its hero button becomes
   «Игра окончена». The dialog lists the planner's recordings around the game's time and ticks the game's own
   (`lib/replays/match.ts`): the world file is the scenario's (`Another_Castle.conf` → `Another_Castle`; a shared `TS_Mission`
@@ -213,8 +224,8 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
 
 ## Decided (2026-10-09)
 
-- **The hub drives slotting.** Games are created and slotted in the hub. Whether the Discord bot then mirrors the
-  hub's slotting or retires is still open.
+- **The hub drives slotting.** Games are created and slotted in the hub. The slotting bot retires; the hub posts and
+  keeps up to date the game's Discord announcement itself («Анонс в Дискорд», an admin's button, not automatic).
 - **Public repo, Discord exports out of git.** The root `.gitignore` keeps the member list and the raw catalogue /
   #анонсы exports out (they hold members' IDs, names, avatars and who slotted where). Never commit them.
 - **Deployment:** `hub.tacticalshift.ru` (A record → the Selectel box, requested from the domain owner), following

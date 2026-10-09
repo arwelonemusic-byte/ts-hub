@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getHubData } from "../data";
 import { getDb, type Db } from "../db";
+import { refreshAnnouncement } from "../discord/post";
 import { playerIdOf } from "../players";
 import type { UpcomingEvent } from "../types";
 import { getViewer, type Viewer } from "../viewer";
@@ -54,6 +55,7 @@ export async function takeSlot(_prev: SlotState, form: FormData): Promise<SlotSt
   const player = await playerIdOf(c.viewer);
   if (!player) return { error: "forbidden" };
   const state = await seat(await getDb(), c.ev.id, c.position, player);
+  refreshAnnouncement(c.ev.id);
   revalidatePath(`/events/${c.ev.id}`);
   return state;
 }
@@ -69,6 +71,7 @@ export async function leaveSlot(_prev: SlotState, form: FormData): Promise<SlotS
     "UPDATE event_slots SET player_id = NULL, player_name = NULL, taken_at = NULL WHERE event_id = $1 AND player_id = $2",
     [c.ev.id, player],
   );
+  refreshAnnouncement(c.ev.id);
   revalidatePath(`/events/${c.ev.id}`);
   return null;
 }
@@ -83,6 +86,7 @@ export async function assignSlot(_prev: SlotState, form: FormData): Promise<Slot
   if (rows.length === 0) return { error: "noPlayer", name };
   if (rows.length > 1) return { error: "ambiguous", name };
   const state = await seat(db, c.ev.id, c.position, String(rows[0].id));
+  refreshAnnouncement(c.ev.id);
   revalidatePath(`/events/${c.ev.id}`);
   return state;
 }
@@ -95,6 +99,7 @@ export async function clearSlot(_prev: SlotState, form: FormData): Promise<SlotS
     "UPDATE event_slots SET player_id = NULL, player_name = NULL, taken_at = NULL WHERE event_id = $1 AND position = $2",
     [c.ev.id, c.position],
   );
+  refreshAnnouncement(c.ev.id);
   revalidatePath(`/events/${c.ev.id}`);
   return null;
 }

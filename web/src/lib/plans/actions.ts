@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getHubData } from "../data";
 import { getDb } from "../db";
+import { refreshAnnouncement } from "../discord/post";
 import { playerIdOf } from "../players";
 import { getViewer } from "../viewer";
 import { canAttachPlan, canDetachPlan } from "./index";
@@ -34,6 +35,7 @@ export async function attachPlan(_prev: AttachState, form: FormData): Promise<At
     [ev.id, code, player],
   );
   if (!hit.length) return { error: "taken", code };
+  refreshAnnouncement(ev.id);
   revalidatePath(`/events/${ev.id}`);
   return null;
 }
@@ -48,6 +50,7 @@ export async function detachPlan(form: FormData): Promise<void> {
      WHERE id = $1 AND status = 'scheduled'`,
     [ev.id],
   );
+  refreshAnnouncement(ev.id);
   revalidatePath(`/events/${ev.id}`);
 }
 
