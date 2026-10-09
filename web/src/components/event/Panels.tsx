@@ -126,12 +126,13 @@ export function BriefingBody({ b, t }: { b: Briefing; t: T }) {
   );
 }
 
+/** Discord markdown, ready to paste: the sides in bold on their own lines, then a "# " heading per section. */
 function briefingText(b: Briefing, t: T): string {
-  const parts: string[] = [];
-  if (b.sides?.for) parts.push(`${t("briefing.for")}: ${b.sides.for}`);
-  if (b.sides?.against) parts.push(`${t("briefing.against")}: ${b.sides.against}`);
-  for (const sec of b.sections) parts.push(`${sec.title}\n${sec.body}`);
-  return parts.join("\n\n");
+  const lines: string[] = [];
+  if (b.sides?.for) lines.push(`**${t("briefing.for")}:** ${b.sides.for}`);
+  if (b.sides?.against) lines.push(`**${t("briefing.against")}:** ${b.sides.against}`);
+  for (const sec of b.sections) lines.push(`# ${sec.title}`, sec.body.trim());
+  return lines.join("\n");
 }
 
 export function BriefingPanel({ b, t }: { b: Briefing; t: T }) {
