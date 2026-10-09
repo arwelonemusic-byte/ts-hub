@@ -1,8 +1,9 @@
 # CLAUDE.md
 
 TS Hub is the community portal for Tactical Shift that ties together Player / Mission / Plan / Event / Replay.
-Status: **POC**, not deployed yet (`deploy/README.md`). Missions, players and plans are in PostgreSQL; games are
-still mock data. Use real data when it's at hand; otherwise fill gaps with plausible mock values instead of blocking.
+Status: **POC**, not deployed yet (`deploy/README.md`). Missions, players and plans are in PostgreSQL. Played games
+are real but not in the database yet (below); upcoming games are mock data. Use real data when it's at hand; otherwise
+fill gaps with plausible mock values instead of blocking.
 
 ## Layout
 
@@ -82,10 +83,17 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   `data/catalogue/slot-roles.json`: the user's fixed rules ("always") plus case-by-case answers ("decided"). Match
   the name without the fireteam prefix or trailing number, case-insensitive. Ask the user about any new slot name.
 - **Real mission catalogue:** `data/catalogue/` holds the Discord #каталог-миссий export and the gaps still to fill.
-  The hub's missions come from it: `py data/catalogue/build_seed.py` writes `db/seed/missions.json` (Metal Gambit, missing
-  from the catalogue, comes from `data/catalogue/missions-extra.json`), and `npm run db:seed` loads it with the Markers.layer
-  files into the database. Covers in `web/public/covers/<id>.jpg` are each
-  addon's main Workshop cover (not the scenario image); see `coverSource` in missions.json for the exceptions. Games are still mock.
+  The hub's missions come from it: `py data/catalogue/build_seed.py` writes `db/seed/missions.json` (missions missing
+  from the catalogue come from `data/catalogue/missions-extra.json`: Metal Gambit, and JFKennedy's Chernarus ops Wolfs nest
+  and Endsieg, taken from their unpacked addons), and `npm run db:seed` loads it with the Markers.layer files into the
+  database. Covers in `web/public/covers/<id>.jpg` are each addon's main Workshop cover (not the scenario image); see
+  `coverSource` in missions.json for the exceptions. Wolfs nest and Endsieg use the scenario image from the addon.
+- **Played games** (Sep 2026 on) are `web/src/lib/data/past-events.json`, read by `mock.ts`. `py data/events/build_past_events.py
+  <reports>` builds it from the replay-stats reports in ts-wrapped (numbers, roster, rankings, achievements) plus its `OPS`
+  table (mission, scheduled time, plan, PL; one row per op). Add a row and re-run after each op. An op's mission is named by its
+  replay's world file (`ops_planner.replays.world`; a generic `TS_Mission` world needs the terrain and where the players were).
+  Its plan is the last push before the op whose markers sit where it was played: no replay has a /syncplan stamp yet.
+  `slotted` is null for these games (nobody slotted through the hub), and friendly-fire incidents have no op clock.
 - **Briefings are sections** (`Briefing.sections`, plus optional `sides` for За кого / Против кого), as authors write
   them in the catalogue. A section body is plain text: blank lines split paragraphs, "- " lines are list items, and
   list items under «Задачи» get the numbered badges.

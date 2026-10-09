@@ -123,13 +123,14 @@ export interface LeaderboardEntry {
 export interface FriendlyFireIncident {
   shooter: string;
   victim: string;
-  /** Op clock, "1:42:10". */
-  at: string;
+  /** Op clock, "1:42:10"; the replay-stats reports don't give it. */
+  at?: string;
 }
 
 export interface AttendanceEntry {
   playerName: string;
-  role: string;
+  /** The slot they took; unknown for games played before the hub ran slotting. */
+  role?: string;
   attended: boolean;
 }
 
@@ -138,7 +139,8 @@ export interface PastEvent extends EventBase {
   /** Actual server times from the replay — can differ from the scheduled `startsAt`. */
   startedAt: ISODate;
   endedAt: ISODate;
-  slotted: number;
+  /** null when unknown: games played before the hub ran slotting. */
+  slotted: number | null;
   attended: number;
   /** Several codes when a server restart split the op. */
   replayCodes: string[];

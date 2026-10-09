@@ -1,11 +1,11 @@
 /**
- * Games are still mock data for the POC: past ops are real, but upcoming dates, slot fills,
- * PL names and the Fallen Hawk plan codes are invented. Missions come from the database
+ * Games are still mock data for the POC. Played games are real: past-events.json, built from the
+ * replay-stats reports by data/events/build_past_events.py. Upcoming dates, slot fills, PL names
+ * and the Fallen Hawk plan codes are invented. Missions come from the database
  * (lib/data/missions.ts) and hub plans are real (lib/plans, against the planner). Upcoming
  * events are pinned to the next usual slots relative to "now", so the page never goes stale.
  */
 import type {
-  AttendanceEntry,
   Award,
   HubEvent,
   LeaderboardEntry,
@@ -21,6 +21,7 @@ import { eventPlans, missionPlans } from "@/lib/plans";
 import { mskDate, usualSlotsFrom } from "@/lib/schedule";
 import type { HubData } from "./index";
 import { loadMarkersLayer, loadMissions, missionMap } from "./missions";
+import pastEvents from "./past-events.json";
 
 // ---------------------------------------------------------------- missions
 
@@ -32,21 +33,13 @@ function pick(ms: Missions, id: string): Mission {
   return m;
 }
 
-/** The missions the mock games use (ids in the catalogue). */
+/** The missions the mock upcoming games use (ids in the catalogue). */
 const M = {
   foxhound: "foxhound",
   geras: "project-geras",
   baseJumping: "base-jumping",
   circuitBreaker: "circuit-breaker",
   counterpunch: "counterpunch",
-  anotherCastle: "another-castle",
-  emerald: "emerald-fields",
-  quietWitness: "quiet-witness",
-  reverseSlope: "reverse-slope",
-  metalGambit: "metal-gambit",
-  regina: "regina-brawl",
-  troubledWaters: "troubled-waters",
-  marchingFire: "marching-fire",
   fallenHawk: "fallen-hawk",
 };
 
@@ -92,118 +85,23 @@ function makeSlots(squads: MissionSquad[], filled: number, pl: string | null): S
 
 // ---------------------------------------------------------------- past ops
 
-const lb = (rows: [string, number][]): LeaderboardEntry[] => rows.map(([playerName, value]) => ({ playerName, value }));
-
-const COUNTERPUNCH_AI_KILLS = lb([
-  ["JFKennedy", 90], ["M_i", 20], ["[BS] Ушастый перец", 17], ["[En-Y]Inspector", 15], ["[En-Y]Boba", 13],
-  ["Mike_Jay_Evans", 12], ["[En-Y]Sasce2044", 11], ["[RTT] J.A.N.", 10], ["Prais777", 9], ["[En-Y]Sterben", 7],
-  ["[En-Y]amil1Xe", 7], ["Osamich", 5], ["Jaelise", 5], ["OnlineKiller.", 5], ["Galaxy", 4], ["Сваркослав", 3],
-  ["Venom_coceT", 2], ["Tactical Shift", 1], ["Valso", 1],
-]);
-
-const COUNTERPUNCH_DEATHS = lb([
-  ["[RTT] J.A.N.", 3], ["[En-Y]amil1Xe", 3], ["[En-Y]Sterben", 3], ["[En-Y]BURBON", 2], ["[En-Y]Sasce2044", 2],
-  ["Mike_Jay_Evans", 2], ["JFKennedy", 2], ["[En-Y]Inspector", 2], ["[BS] Ушастый перец", 1], ["Tactical Shift", 1],
-  ["Osamich", 1], ["Georg Shultz", 1], ["Venom_coceT", 1], ["M_i", 1], ["Jaelise", 1], ["Galaxy", 1], ["Valso", 1],
-  ["Prais777", 1],
-]);
-
-const COUNTERPUNCH_AWARDS: Award[] = [
-  { kind: "butcher", players: ["JFKennedy"], detail: "90 убийств ИИ" },
-  { kind: "demolitionist", players: ["[BS] Ушастый перец"], detail: "69 гранат / подствольник" },
-  { kind: "rocketman", players: ["[En-Y]Inspector"], detail: "8 ракет" },
-  { kind: "firstBlood", players: ["Mike_Jay_Evans"], detail: "Первым убил бота" },
-  { kind: "firstToDie", players: ["Tactical Shift"], detail: "Погиб первым" },
-  { kind: "returnee", players: ["OnlineKiller."], detail: "5 подъёмов из нокаута" },
-  { kind: "notForLong", players: ["[En-Y]Sterben"], detail: "Снова погиб через 1м 34с" },
-  { kind: "hitYourOwn", players: ["[En-Y]Inspector"], detail: "1 случай дружественного огня" },
-  // Mock: no one in this list died (see COUNTERPUNCH_DEATHS); the real list comes from replay stats.
-  { kind: "untouchables", players: ["[En-Y]Inspector", "[En-Y]Sterben", "[BS] Ушастый перец"], detail: "Ни царапины за всю миссию" },
-];
-
-function counterpunchAttendance(ms: Missions): AttendanceEntry[] {
-  // Prais777 led the op, so they take the Platoon Leader row.
-  const attended = [...new Set(["Prais777", ...[...COUNTERPUNCH_AI_KILLS, ...COUNTERPUNCH_DEATHS].map((e) => e.playerName)]), "Kedr"];
-  const roles = (pick(ms, M.counterpunch).squads ?? []).flatMap((sq) => sq.slots.map((s) => s.role));
-  const rows = attended.map((playerName, i) => ({ playerName, role: roles[i] ?? "Rifleman", attended: true }));
-  const noShows = ["DarkCote", "alien_2010", "Lis", "Nomad"].map((playerName, i) => ({
-    playerName,
-    role: roles[attended.length + i] ?? "Rifleman",
-    attended: false,
-  }));
-  return [...rows, ...noShows];
+/** A played game as build_past_events.py writes it: the mission by id, players by name. */
+interface PastRecord extends Omit<PastEvent, "status" | "mission" | "slotted" | "attendance"> {
+  missionId: string;
+  awards: Award[];
+  leaderboards: { aiKills: LeaderboardEntry[]; deaths: LeaderboardEntry[] };
+  attendance: string[];
 }
-
-interface PastSeed {
-  mission: string;
-  at: [number, number, number, number]; // month (1-12), day, hour, minute — 2026, MSK
-  extra?: boolean;
-  players: number;
-  minutes: number;
-  deaths: number;
-  top: [string, number];
-  replays: string[];
-  plan: string | null;
-  award?: Award;
-}
-
-const PAST: PastSeed[] = [
-  { mission: M.anotherCastle, at: [10, 6, 20, 0], players: 17, minutes: 103, deaths: 18, top: ["M_i", 17], replays: ["DFTZSB"], plan: "HV3KQ2", award: { kind: "firstBlood", players: ["alien_2010"], detail: "Первым убил бота" } },
-  { mission: M.counterpunch, at: [10, 4, 19, 0], players: 22, minutes: 184, deaths: 29, top: ["JFKennedy", 90], replays: ["JNCFEB"], plan: "P9TXBN" },
-  { mission: M.emerald, at: [10, 3, 19, 0], extra: true, players: 19, minutes: 134, deaths: 12, top: ["Jaelise", 44], replays: ["ERL7B9"], plan: "M4RZDK", award: { kind: "demolitionist", players: ["DarkCote"], detail: "Больше всех гранат / подствольник" } },
-  { mission: M.quietWitness, at: [10, 1, 20, 0], extra: true, players: 19, minutes: 93, deaths: 9, top: ["Prais777", 24], replays: ["MCKFLK"], plan: null },
-  { mission: M.reverseSlope, at: [9, 29, 20, 0], players: 24, minutes: 114, deaths: 15, top: ["M_i", 16], replays: ["EXWZSN"], plan: "C8WLJF" },
-  { mission: M.metalGambit, at: [9, 27, 19, 0], players: 17, minutes: 131, deaths: 16, top: ["Prais777", 63], replays: ["LW4AH8", "4BNRSS"], plan: "T2NQVA" },
-  { mission: M.regina, at: [9, 24, 20, 0], extra: true, players: 13, minutes: 129, deaths: 11, top: ["JFKennedy", 68], replays: ["6L239S"], plan: null },
-  { mission: M.troubledWaters, at: [9, 22, 20, 0], players: 14, minutes: 78, deaths: 6, top: ["Prais777", 25], replays: ["S2RM53"], plan: "K6DPWR" },
-  { mission: M.marchingFire, at: [9, 22, 21, 30], players: 20, minutes: 66, deaths: 9, top: ["Prais777", 21], replays: ["VNG9BN"], plan: null },
-];
 
 function buildPast(ms: Missions): PastEvent[] {
-  return PAST.map((p) => {
-    const start = mskDate(2026, p.at[0] - 1, p.at[1], p.at[2], p.at[3]);
-    const id = `${start.toISOString().slice(0, 10)}-${p.mission}`;
-    const base: PastEvent = {
-      id,
-      status: "past",
-      startsAt: start.toISOString(),
-      startedAt: start.toISOString(),
-      endedAt: new Date(start.getTime() + p.minutes * 60_000).toISOString(),
-      mission: pick(ms, p.mission),
-      extra: !!p.extra,
-      slotted: p.players + 2,
-      attended: p.players,
-      replayCodes: p.replays,
-      planCode: p.plan,
-      stats: { deaths: p.deaths, topAiKills: { playerName: p.top[0], value: p.top[1] } },
-      awards: p.award ? [p.award] : [],
-      attendance: ROSTER.slice(0, p.players).map((playerName) => ({ playerName, role: "Rifleman", attended: true })),
-    };
-    if (p.mission !== M.counterpunch) return base;
-    return {
-      ...base,
-      slotted: 26,
-      platoonLeader: "Prais777",
-      // Actual server time, 18:58 – 22:02.
-      startedAt: mskDate(2026, 9, 4, 18, 58).toISOString(),
-      endedAt: mskDate(2026, 9, 4, 22, 2).toISOString(),
-      stats: {
-        ...base.stats,
-        shots: 14129,
-        aiShots: 15342,
-        aiKilled: COUNTERPUNCH_AI_KILLS.reduce((n, e) => n + e.value, 0),
-        grenades: 186,
-        rockets: 14,
-        knockdowns: 47,
-        friendlyFire: 1,
-      },
-      // Matches the «Бей своих» award; the victim and time are mock.
-      friendlyFireIncidents: [{ shooter: "[En-Y]Inspector", victim: "Kedr", at: "1:42:10" }],
-      awards: COUNTERPUNCH_AWARDS,
-      leaderboards: { aiKills: COUNTERPUNCH_AI_KILLS, deaths: COUNTERPUNCH_DEATHS },
-      attendance: counterpunchAttendance(ms),
-    };
-  });
+  return (pastEvents as PastRecord[]).map(({ missionId, attendance, ...rest }) => ({
+    ...rest,
+    status: "past",
+    mission: pick(ms, missionId),
+    // Nobody slotted through the hub yet.
+    slotted: null,
+    attendance: attendance.map((playerName) => ({ playerName, attended: true })),
+  }));
 }
 
 // ---------------------------------------------------------------- upcoming

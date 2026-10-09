@@ -6,9 +6,9 @@ The Discord forum #каталог-миссий, read once to seed the hub's real
 - `missions.json`: one record per mission, normalised for the hub. It has 38 missions. Ten were dropped on the user's call: Copperhead, GR Iron Dragon, and eight old, probably broken missions (Anvil, Chokehold, Delayed Departure, Squabble, Frozen Assets, Cleaning Crew, Fury Road, Day Zero).
 - `announcements-slotting.json`: every #анонсы announcement since February that matches a catalogue mission, with the slotting bot's messages from its thread (crawled 2026-10-09).
 - `build_seed.py`: turns `missions.json` plus `missions-extra.json` into the hub's mission seed (`db/seed/missions.json`). Re-run it after changing the catalogue, then `npm run db:seed -- --update` in `web/` (see `db/README.md`).
-- `missions-extra.json`: missions the Discord catalogue lacks (Metal Gambit), already in the seed's shape.
+- `missions-extra.json`: missions the Discord catalogue lacks, already in the seed's shape: Metal Gambit, plus JFKennedy's Wolfs nest and Endsieg (played 6 and 13 Sep 2026; briefing, Markers.layer and cover from their unpacked Workshop addons).
 - `slot-roles.json`: slot name → Discord role, the user's rules plus case-by-case answers.
-- `files/`: every mission's Markers.layer (`<id>.layer`) plus Field Maneuvers' slot file. `metal-gambit.layer` belongs to Metal Gambit, which isn't in the catalogue (see `missions-extra.json`). Bastion of death (Бастион Смерти) has no planning (`planning: false`), so it needs no layer.
+- `files/`: every mission's Markers.layer (`<id>.layer`) plus Field Maneuvers' slot file. `metal-gambit.layer`, `wolfs-nest.layer` and `endsieg.layer` belong to missions that aren't in the catalogue (see `missions-extra.json`). Bastion of death (Бастион Смерти) has no planning (`planning: false`), so it needs no layer.
 
 missions.json fields:
   - title: the Workshop title with "Operation" dropped (user decision; the catalogue title is in `catalogue.title`)

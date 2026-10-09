@@ -1,0 +1,4103 @@
+[
+ {
+  "id": "2026-10-06-another-castle",
+  "missionId": "another-castle",
+  "startsAt": "2026-10-06T17:00:00.000Z",
+  "startedAt": "2026-10-06T16:43:36.752Z",
+  "endedAt": "2026-10-06T18:27:11.752Z",
+  "extra": false,
+  "platoonLeader": "Galaxy",
+  "attended": 17,
+  "replayCodes": [
+   "DFTZSB"
+  ],
+  "planCode": "Q6W5N5",
+  "stats": {
+   "deaths": 18,
+   "shots": 7223,
+   "aiShots": 7640,
+   "grenades": 119,
+   "rockets": 13,
+   "knockdowns": 23,
+   "aiKilled": 109,
+   "friendlyFire": 0,
+   "topAiKills": {
+    "playerName": "M_i",
+    "value": 17
+   }
+  },
+  "friendlyFireIncidents": [],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "M_i"
+    ],
+    "detail": "17 убийств ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "[RTT] J.A.N."
+    ],
+    "detail": "27 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "7 ракет"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "alien_2010"
+    ],
+    "detail": "Первое убийство ИИ"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Venom_coceT"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "[RTT] J.A.N."
+    ],
+    "detail": "2 подъёма из нокаута"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "OnlineKiller."
+    ],
+    "detail": "2 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "M_i",
+     "value": 17
+    },
+    {
+     "playerName": "Prais777",
+     "value": 14
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 14
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 11
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 9
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 7
+    },
+    {
+     "playerName": "alien_2010",
+     "value": 6
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 6
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 5
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 4
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 4
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 4
+    },
+    {
+     "playerName": "Yascher",
+     "value": 1
+    },
+    {
+     "playerName": "BS_MaryJ24",
+     "value": 1
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "Venom_coceT",
+     "value": 2
+    },
+    {
+     "playerName": "BS_MaryJ24",
+     "value": 2
+    },
+    {
+     "playerName": "Prais777",
+     "value": 2
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 1
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 1
+    },
+    {
+     "playerName": "bot",
+     "value": 1
+    },
+    {
+     "playerName": "Yascher",
+     "value": 1
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 1
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    },
+    {
+     "playerName": "M_i",
+     "value": 1
+    },
+    {
+     "playerName": "alien_2010",
+     "value": 1
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 1
+    },
+    {
+     "playerName": "Comrade",
+     "value": 1
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "BS_MaryJ24",
+   "Comrade",
+   "Galaxy",
+   "Georg Shultz",
+   "Glory to Arstotzka",
+   "JFKennedy",
+   "Jaelise",
+   "M_i",
+   "OnlineKiller.",
+   "Prais777",
+   "Venom_coceT",
+   "VonScheer",
+   "Yascher",
+   "[BS] Jenya",
+   "[RTT] J.A.N.",
+   "alien_2010",
+   "bot"
+  ]
+ },
+ {
+  "id": "2026-10-04-counterpunch",
+  "missionId": "counterpunch",
+  "startsAt": "2026-10-04T16:00:00.000Z",
+  "startedAt": "2026-10-04T15:41:00.355Z",
+  "endedAt": "2026-10-04T18:45:29.355Z",
+  "extra": false,
+  "platoonLeader": "OnlineKiller.",
+  "attended": 22,
+  "replayCodes": [
+   "JNCFEB"
+  ],
+  "planCode": "QXVTZ6",
+  "stats": {
+   "deaths": 29,
+   "shots": 14129,
+   "aiShots": 18560,
+   "grenades": 257,
+   "rockets": 31,
+   "knockdowns": 52,
+   "aiKilled": 267,
+   "friendlyFire": 1,
+   "topAiKills": {
+    "playerName": "JFKennedy",
+    "value": 90
+   }
+  },
+  "friendlyFireIncidents": [
+   {
+    "shooter": "[En-Y]Inspector",
+    "victim": "[En-Y]Sasce2044"
+   }
+  ],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "JFKennedy"
+    ],
+    "detail": "90 убийств ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "69 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "[En-Y]Inspector"
+    ],
+    "detail": "8 ракет"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Mike_Jay_Evans"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Tactical Shift"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "OnlineKiller."
+    ],
+    "detail": "5 подъёмов из нокаута"
+   },
+   {
+    "kind": "notForLong",
+    "players": [
+     "[En-Y]Sterben"
+    ],
+    "detail": "Снова погиб через 1м 34с"
+   },
+   {
+    "kind": "hitYourOwn",
+    "players": [
+     "[En-Y]Inspector"
+    ],
+    "detail": "1 случай дружественного огня"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "OnlineKiller."
+    ],
+    "detail": "5 нокаутов, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "JFKennedy",
+     "value": 90
+    },
+    {
+     "playerName": "M_i",
+     "value": 20
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 17
+    },
+    {
+     "playerName": "[En-Y]Inspector",
+     "value": 15
+    },
+    {
+     "playerName": "[En-Y]Boba",
+     "value": 13
+    },
+    {
+     "playerName": "Mike_Jay_Evans",
+     "value": 12
+    },
+    {
+     "playerName": "[En-Y]Sasce2044",
+     "value": 11
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 10
+    },
+    {
+     "playerName": "Prais777",
+     "value": 9
+    },
+    {
+     "playerName": "[En-Y]Sterben",
+     "value": 7
+    },
+    {
+     "playerName": "[En-Y]amil1Xe",
+     "value": 7
+    },
+    {
+     "playerName": "Osamich",
+     "value": 5
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 5
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 5
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 4
+    },
+    {
+     "playerName": "Сваркослав",
+     "value": 3
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 2
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 1
+    },
+    {
+     "playerName": "Valso",
+     "value": 1
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 3
+    },
+    {
+     "playerName": "[En-Y]amil1Xe",
+     "value": 3
+    },
+    {
+     "playerName": "[En-Y]Sterben",
+     "value": 3
+    },
+    {
+     "playerName": "[En-Y]BURBON",
+     "value": 2
+    },
+    {
+     "playerName": "[En-Y]Sasce2044",
+     "value": 2
+    },
+    {
+     "playerName": "Mike_Jay_Evans",
+     "value": 2
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 2
+    },
+    {
+     "playerName": "[En-Y]Inspector",
+     "value": 2
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 1
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 1
+    },
+    {
+     "playerName": "Osamich",
+     "value": 1
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 1
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 1
+    },
+    {
+     "playerName": "M_i",
+     "value": 1
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 1
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 1
+    },
+    {
+     "playerName": "Valso",
+     "value": 1
+    },
+    {
+     "playerName": "Prais777",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Galaxy",
+   "Georg Shultz",
+   "JFKennedy",
+   "Jaelise",
+   "M_i",
+   "Mike_Jay_Evans",
+   "OnlineKiller.",
+   "Osamich",
+   "Prais777",
+   "Tactical Shift",
+   "Valso",
+   "Venom_coceT",
+   "[BS] Ушастый перец",
+   "[En-Y]BURBON",
+   "[En-Y]Boba",
+   "[En-Y]Inspector",
+   "[En-Y]Russo",
+   "[En-Y]Sasce2044",
+   "[En-Y]Sterben",
+   "[En-Y]amil1Xe",
+   "[RTT] J.A.N.",
+   "Сваркослав"
+  ]
+ },
+ {
+  "id": "2026-10-03-emerald-fields",
+  "missionId": "emerald-fields",
+  "startsAt": "2026-10-03T16:00:00.000Z",
+  "startedAt": "2026-10-03T15:45:27.741Z",
+  "endedAt": "2026-10-03T18:00:17.741Z",
+  "extra": true,
+  "attended": 19,
+  "replayCodes": [
+   "ERL7B9"
+  ],
+  "planCode": "FESVGD",
+  "stats": {
+   "deaths": 12,
+   "shots": 11750,
+   "aiShots": 12617,
+   "grenades": 230,
+   "rockets": 15,
+   "knockdowns": 22,
+   "aiKilled": 203,
+   "friendlyFire": 0,
+   "topAiKills": {
+    "playerName": "Jaelise",
+    "value": 44
+   }
+  },
+  "friendlyFireIncidents": [],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Jaelise"
+    ],
+    "detail": "44 убийства ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "DarkCote"
+    ],
+    "detail": "50 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "5 ракет"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Jaelise"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Valso"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "[En-Y]VERTO_KOL"
+    ],
+    "detail": "3 подъёма из нокаута"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "Galaxy",
+     "Jaelise",
+     "Osamich",
+     "Venom_coceT"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "[En-Y]VERTO_KOL"
+    ],
+    "detail": "3 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Jaelise",
+     "value": 44
+    },
+    {
+     "playerName": "Prais777",
+     "value": 21
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 18
+    },
+    {
+     "playerName": "Mike_Jay_Evans",
+     "value": 17
+    },
+    {
+     "playerName": "Osamich",
+     "value": 14
+    },
+    {
+     "playerName": "[En-Y]Boba",
+     "value": 10
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 10
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 9
+    },
+    {
+     "playerName": "[En-Y]VERTO_KOL",
+     "value": 9
+    },
+    {
+     "playerName": "Papa Het",
+     "value": 7
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 7
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 7
+    },
+    {
+     "playerName": "Сваркослав",
+     "value": 5
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 5
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 4
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 4
+    },
+    {
+     "playerName": "[En-Y]Inspector",
+     "value": 4
+    },
+    {
+     "playerName": "Valso",
+     "value": 2
+    },
+    {
+     "playerName": "DarkCote",
+     "value": 2
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "VonScheer",
+     "value": 3
+    },
+    {
+     "playerName": "[En-Y]Inspector",
+     "value": 2
+    },
+    {
+     "playerName": "Papa Het",
+     "value": 2
+    },
+    {
+     "playerName": "Valso",
+     "value": 1
+    },
+    {
+     "playerName": "[En-Y]Boba",
+     "value": 1
+    },
+    {
+     "playerName": "DarkCote",
+     "value": 1
+    },
+    {
+     "playerName": "Сваркослав",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "DarkCote",
+   "Galaxy",
+   "Glory to Arstotzka",
+   "JFKennedy",
+   "Jaelise",
+   "Mike_Jay_Evans",
+   "OnlineKiller.",
+   "Osamich",
+   "Papa Het",
+   "Prais777",
+   "Valso",
+   "Venom_coceT",
+   "VonScheer",
+   "[BS] Jenya",
+   "[BS] Ушастый перец",
+   "[En-Y]Boba",
+   "[En-Y]Inspector",
+   "[En-Y]VERTO_KOL",
+   "Сваркослав"
+  ]
+ },
+ {
+  "id": "2026-10-01-quiet-witness",
+  "missionId": "quiet-witness",
+  "startsAt": "2026-10-01T17:00:00.000Z",
+  "startedAt": "2026-10-01T16:42:10.583Z",
+  "endedAt": "2026-10-01T18:15:36.583Z",
+  "extra": true,
+  "attended": 19,
+  "replayCodes": [
+   "MCKFLK"
+  ],
+  "planCode": "ALTHRY",
+  "stats": {
+   "deaths": 9,
+   "shots": 9776,
+   "aiShots": 9244,
+   "grenades": 109,
+   "rockets": 2,
+   "knockdowns": 20,
+   "aiKilled": 113,
+   "friendlyFire": 0,
+   "topAiKills": {
+    "playerName": "Prais777",
+    "value": 24
+   }
+  },
+  "friendlyFireIncidents": [],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "24 убийства ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "28 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "Papa Het"
+    ],
+    "detail": "1 ракета"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Venom_coceT"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "3 подъёма из нокаута"
+   },
+   {
+    "kind": "notForLong",
+    "players": [
+     "JFKennedy"
+    ],
+    "detail": "Снова погиб через 3м 03с"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "Galaxy",
+     "M_i",
+     "Papa Het",
+     "Tactical Shift",
+     "VonScheer",
+     "Сваркослав"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "3 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Prais777",
+     "value": 24
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 9
+    },
+    {
+     "playerName": "Сваркослав",
+     "value": 9
+    },
+    {
+     "playerName": "M_i",
+     "value": 9
+    },
+    {
+     "playerName": "[En-Y]BURBON",
+     "value": 8
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 8
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 7
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 5
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 5
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 4
+    },
+    {
+     "playerName": "BS_MaryJ24",
+     "value": 4
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 4
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 3
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 3
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 2
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 1
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 1
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "JFKennedy",
+     "value": 2
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 1
+    },
+    {
+     "playerName": "[En-Y]BURBON",
+     "value": 1
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 1
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 1
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 1
+    },
+    {
+     "playerName": "[En-Y]Boba",
+     "value": 1
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "BS_MaryJ24",
+   "Galaxy",
+   "Georg Shultz",
+   "Glory to Arstotzka",
+   "JFKennedy",
+   "Jaelise",
+   "M_i",
+   "OnlineKiller.",
+   "Papa Het",
+   "Prais777",
+   "Tactical Shift",
+   "Venom_coceT",
+   "VonScheer",
+   "[BS] Jenya",
+   "[BS] Ушастый перец",
+   "[En-Y]BURBON",
+   "[En-Y]Boba",
+   "[RTT] J.A.N.",
+   "Сваркослав"
+  ]
+ },
+ {
+  "id": "2026-09-29-reverse-slope",
+  "missionId": "reverse-slope",
+  "startsAt": "2026-09-29T17:00:00.000Z",
+  "startedAt": "2026-09-29T16:43:12.247Z",
+  "endedAt": "2026-09-29T18:38:01.247Z",
+  "extra": false,
+  "attended": 24,
+  "replayCodes": [
+   "EXWZSN"
+  ],
+  "planCode": "UQ2BWJ",
+  "stats": {
+   "deaths": 15,
+   "shots": 17304,
+   "aiShots": 19101,
+   "grenades": 288,
+   "rockets": 19,
+   "knockdowns": 35,
+   "aiKilled": 120,
+   "friendlyFire": 1,
+   "topAiKills": {
+    "playerName": "M_i",
+    "value": 16
+   }
+  },
+  "friendlyFireIncidents": [
+   {
+    "shooter": "abdulagaminge",
+    "victim": "Comrade"
+   }
+  ],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "M_i"
+    ],
+    "detail": "16 убийств ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "JFKennedy"
+    ],
+    "detail": "51 граната / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "[En-Y]Sterben"
+    ],
+    "detail": "6 ракет"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "JFKennedy"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "Tactical Shift"
+    ],
+    "detail": "3 подъёма из нокаута"
+   },
+   {
+    "kind": "notForLong",
+    "players": [
+     "VonScheer"
+    ],
+    "detail": "Снова погиб через 1.0с"
+   },
+   {
+    "kind": "hitYourOwn",
+    "players": [
+     "abdulagaminge"
+    ],
+    "detail": "1 случай дружественного огня"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "BS_MaryJ24",
+     "Papa Het",
+     "Prais777",
+     "Valso",
+     "[BS] Jenya",
+     "[En-Y]Boba",
+     "[RTT] J.A.N."
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "[BS] Griggs"
+    ],
+    "detail": "3 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "M_i",
+     "value": 16
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 13
+    },
+    {
+     "playerName": "[En-Y]Sterben",
+     "value": 10
+    },
+    {
+     "playerName": "[En-Y]Boba",
+     "value": 8
+    },
+    {
+     "playerName": "Prais777",
+     "value": 6
+    },
+    {
+     "playerName": "BS_MaryJ24",
+     "value": 6
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 6
+    },
+    {
+     "playerName": "[BS] Griggs",
+     "value": 5
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 5
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 5
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 4
+    },
+    {
+     "playerName": "PolarQuest",
+     "value": 4
+    },
+    {
+     "playerName": "abdulagaminge",
+     "value": 4
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 4
+    },
+    {
+     "playerName": "[En-Y]Vampire",
+     "value": 3
+    },
+    {
+     "playerName": "Сваркослав",
+     "value": 3
+    },
+    {
+     "playerName": "Papa Het",
+     "value": 3
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 2
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 2
+    },
+    {
+     "playerName": "Comrade",
+     "value": 1
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "VonScheer",
+     "value": 7
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    },
+    {
+     "playerName": "abdulagaminge",
+     "value": 1
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 1
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 1
+    },
+    {
+     "playerName": "[En-Y]Sterben",
+     "value": 1
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 1
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 1
+    },
+    {
+     "playerName": "Comrade",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "BS_MaryJ24",
+   "Comrade",
+   "Galaxy",
+   "Georg Shultz",
+   "JFKennedy",
+   "Jaelise",
+   "M_i",
+   "OnlineKiller.",
+   "Papa Het",
+   "PolarQuest",
+   "Prais777",
+   "Tactical Shift",
+   "Valso",
+   "Venom_coceT",
+   "VonScheer",
+   "[BS] Griggs",
+   "[BS] Jenya",
+   "[BS] Ушастый перец",
+   "[En-Y]Boba",
+   "[En-Y]Sterben",
+   "[En-Y]Vampire",
+   "[RTT] J.A.N.",
+   "abdulagaminge",
+   "Сваркослав"
+  ]
+ },
+ {
+  "id": "2026-09-27-metal-gambit",
+  "missionId": "metal-gambit",
+  "startsAt": "2026-09-27T16:00:00.000Z",
+  "startedAt": "2026-09-27T15:44:54.648Z",
+  "endedAt": "2026-09-27T17:58:49.751Z",
+  "extra": false,
+  "attended": 17,
+  "replayCodes": [
+   "LW4AH8",
+   "4BNRSS"
+  ],
+  "planCode": "E8PMVU",
+  "stats": {
+   "deaths": 16,
+   "shots": 6819,
+   "aiShots": 3189,
+   "grenades": 192,
+   "rockets": 15,
+   "knockdowns": 18,
+   "aiKilled": 152,
+   "friendlyFire": 1,
+   "topAiKills": {
+    "playerName": "Prais777",
+    "value": 63
+   }
+  },
+  "friendlyFireIncidents": [
+   {
+    "shooter": "Сваркослав",
+    "victim": "DarkCote"
+   }
+  ],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "63 убийства ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "44 гранаты / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "Сваркослав"
+    ],
+    "detail": "5 ракет"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Georg Shultz"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "M_i"
+    ],
+    "detail": "2 подъёма из нокаута"
+   },
+   {
+    "kind": "hitYourOwn",
+    "players": [
+     "Сваркослав"
+    ],
+    "detail": "1 случай дружественного огня"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "Arsdor",
+     "Galaxy",
+     "Georg Shultz",
+     "Prais777",
+     "Venom_coceT",
+     "VonScheer"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Prais777",
+     "value": 63
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 13
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 12
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 11
+    },
+    {
+     "playerName": "M_i",
+     "value": 7
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 6
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 5
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 4
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 3
+    },
+    {
+     "playerName": "Сваркослав",
+     "value": 3
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 3
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 2
+    },
+    {
+     "playerName": "DarkCote",
+     "value": 2
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 3
+    },
+    {
+     "playerName": "DarkCote",
+     "value": 2
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 2
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 2
+    },
+    {
+     "playerName": "M_i",
+     "value": 2
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 1
+    },
+    {
+     "playerName": "Osamich",
+     "value": 1
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 1
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 1
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Arsdor",
+   "DarkCote",
+   "Galaxy",
+   "Georg Shultz",
+   "Itarossa",
+   "JFKennedy",
+   "Jaelise",
+   "M_i",
+   "OnlineKiller.",
+   "Osamich",
+   "Prais777",
+   "Tactical Shift",
+   "Venom_coceT",
+   "VonScheer",
+   "[BS] Jenya",
+   "[BS] Ушастый перец",
+   "Сваркослав"
+  ]
+ },
+ {
+  "id": "2026-09-24-regina-brawl",
+  "missionId": "regina-brawl",
+  "startsAt": "2026-09-24T17:00:00.000Z",
+  "startedAt": "2026-09-24T16:44:05.010Z",
+  "endedAt": "2026-09-24T18:53:42.010Z",
+  "extra": true,
+  "attended": 13,
+  "replayCodes": [
+   "6L239S"
+  ],
+  "planCode": "4FZKCK",
+  "stats": {
+   "deaths": 11,
+   "shots": 8754,
+   "aiShots": 8639,
+   "grenades": 85,
+   "rockets": 3,
+   "knockdowns": 30,
+   "aiKilled": 153,
+   "friendlyFire": 0,
+   "topAiKills": {
+    "playerName": "JFKennedy",
+    "value": 68
+   }
+  },
+  "friendlyFireIncidents": [],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "JFKennedy"
+    ],
+    "detail": "68 убийств ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "Jaelise"
+    ],
+    "detail": "47 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "2 ракеты"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "Itarossa"
+    ],
+    "detail": "4 подъёма из нокаута"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "Georg Shultz",
+     "JFKennedy"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "Itarossa"
+    ],
+    "detail": "4 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "JFKennedy",
+     "value": 68
+    },
+    {
+     "playerName": "Prais777",
+     "value": 17
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 14
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 9
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 7
+    },
+    {
+     "playerName": "Yascher",
+     "value": 7
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 4
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 3
+    },
+    {
+     "playerName": "[BS] Griggs",
+     "value": 1
+    },
+    {
+     "playerName": "Comrade",
+     "value": 1
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "Prais777",
+     "value": 2
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 2
+    },
+    {
+     "playerName": "Papa Het",
+     "value": 1
+    },
+    {
+     "playerName": "[BS] Griggs",
+     "value": 1
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 1
+    },
+    {
+     "playerName": "Yascher",
+     "value": 1
+    },
+    {
+     "playerName": "Comrade",
+     "value": 1
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 1
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Comrade",
+   "Galaxy",
+   "Georg Shultz",
+   "Itarossa",
+   "JFKennedy",
+   "Jaelise",
+   "OnlineKiller.",
+   "Papa Het",
+   "Prais777",
+   "VonScheer",
+   "Yascher",
+   "[BS] Griggs",
+   "[BS] Jenya"
+  ]
+ },
+ {
+  "id": "2026-09-22-troubled-waters",
+  "missionId": "troubled-waters",
+  "startsAt": "2026-09-22T18:00:00.000Z",
+  "startedAt": "2026-09-22T17:59:11.286Z",
+  "endedAt": "2026-09-22T19:18:07.286Z",
+  "extra": false,
+  "attended": 14,
+  "replayCodes": [
+   "S2RM53"
+  ],
+  "planCode": null,
+  "stats": {
+   "deaths": 6,
+   "shots": 9128,
+   "aiShots": 4764,
+   "grenades": 148,
+   "rockets": 3,
+   "knockdowns": 11,
+   "aiKilled": 154,
+   "friendlyFire": 2,
+   "topAiKills": {
+    "playerName": "Prais777",
+    "value": 25
+   }
+  },
+  "friendlyFireIncidents": [
+   {
+    "shooter": "Glory to Arstotzka",
+    "victim": "OnlineKiller."
+   },
+   {
+    "shooter": "Prais777",
+    "victim": "Georg Shultz"
+   }
+  ],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "25 убийств ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "59 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "JFKennedy"
+    ],
+    "detail": "2 ракеты"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Georg Shultz"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "Itarossa"
+    ],
+    "detail": "2 подъёма из нокаута"
+   },
+   {
+    "kind": "hitYourOwn",
+    "players": [
+     "Glory to Arstotzka"
+    ],
+    "detail": "1 случай дружественного огня"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "Galaxy",
+     "Glory to Arstotzka",
+     "JFKennedy",
+     "M_i",
+     "Venom_coceT",
+     "Yascher",
+     "[BS] Jenya"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "Itarossa"
+    ],
+    "detail": "2 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Prais777",
+     "value": 25
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 16
+    },
+    {
+     "playerName": "M_i",
+     "value": 14
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 14
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 14
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 11
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 11
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 10
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 9
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 8
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 7
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 5
+    },
+    {
+     "playerName": "Yascher",
+     "value": 4
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 1
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 1
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 1
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 1
+    },
+    {
+     "playerName": "Prais777",
+     "value": 1
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 1
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Galaxy",
+   "Georg Shultz",
+   "Glory to Arstotzka",
+   "Itarossa",
+   "JFKennedy",
+   "Jaelise",
+   "M_i",
+   "OnlineKiller.",
+   "Prais777",
+   "Venom_coceT",
+   "Yascher",
+   "[BS] Jenya",
+   "[BS] Ушастый перец",
+   "[RTT] J.A.N."
+  ]
+ },
+ {
+  "id": "2026-09-22-marching-fire",
+  "missionId": "marching-fire",
+  "startsAt": "2026-09-22T17:00:00.000Z",
+  "startedAt": "2026-09-22T16:45:45.771Z",
+  "endedAt": "2026-09-22T17:52:05.771Z",
+  "extra": false,
+  "attended": 20,
+  "replayCodes": [
+   "VNG9BN"
+  ],
+  "planCode": "K9LNW8",
+  "stats": {
+   "deaths": 9,
+   "shots": 5119,
+   "aiShots": 10569,
+   "grenades": 86,
+   "rockets": 2,
+   "knockdowns": 8,
+   "aiKilled": 128,
+   "friendlyFire": 1,
+   "topAiKills": {
+    "playerName": "Prais777",
+    "value": 21
+   }
+  },
+  "friendlyFireIncidents": [
+   {
+    "shooter": "[BS] Jenya",
+    "victim": "Georg Shultz"
+   }
+  ],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "21 убийство ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "JFKennedy"
+    ],
+    "detail": "13 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "1 ракета"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Georg Shultz"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Goga"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "[RTT] J.A.N."
+    ],
+    "detail": "2 подъёма из нокаута"
+   },
+   {
+    "kind": "notForLong",
+    "players": [
+     "Goga"
+    ],
+    "detail": "Снова погиб через 1м 34с"
+   },
+   {
+    "kind": "hitYourOwn",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "1 случай дружественного огня"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "GEX0GEN",
+     "Glory to Arstotzka",
+     "Jaelise",
+     "Orchara61",
+     "Venom_coceT",
+     "VonScheer",
+     "Yascher",
+     "[BS] Jenya",
+     "Сваркослав"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "[RTT] J.A.N."
+    ],
+    "detail": "2 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Prais777",
+     "value": 21
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 17
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 16
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 11
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 9
+    },
+    {
+     "playerName": "Orchara61",
+     "value": 8
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 6
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 5
+    },
+    {
+     "playerName": "Yascher",
+     "value": 5
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 5
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 5
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 5
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 4
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 3
+    },
+    {
+     "playerName": "Goga",
+     "value": 2
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "Goga",
+     "value": 3
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 1
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 1
+    },
+    {
+     "playerName": "Prais777",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    },
+    {
+     "playerName": "Blink199133",
+     "value": 1
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Blink199133",
+   "GEX0GEN",
+   "Galaxy",
+   "Georg Shultz",
+   "Glory to Arstotzka",
+   "Goga",
+   "Itarossa",
+   "JFKennedy",
+   "Jaelise",
+   "OnlineKiller.",
+   "Orchara61",
+   "PolarQuest",
+   "Prais777",
+   "Venom_coceT",
+   "VonScheer",
+   "Yascher",
+   "[BS] Jenya",
+   "[BS] Ушастый перец",
+   "[RTT] J.A.N.",
+   "Сваркослав"
+  ]
+ },
+ {
+  "id": "2026-09-20-circuit-breaker",
+  "missionId": "circuit-breaker",
+  "startsAt": "2026-09-20T16:00:00.000Z",
+  "startedAt": "2026-09-20T15:46:49.711Z",
+  "endedAt": "2026-09-20T18:46:02.711Z",
+  "extra": false,
+  "attended": 19,
+  "replayCodes": [
+   "BX3QAA"
+  ],
+  "planCode": "BQFKNZ",
+  "stats": {
+   "deaths": 20,
+   "shots": 12651,
+   "aiShots": 17981,
+   "grenades": 393,
+   "rockets": 30,
+   "knockdowns": 54,
+   "aiKilled": 254,
+   "friendlyFire": 2,
+   "topAiKills": {
+    "playerName": "[BS] Griggs",
+    "value": 61
+   }
+  },
+  "friendlyFireIncidents": [
+   {
+    "shooter": "Сваркослав",
+    "victim": "OnlineKiller."
+   },
+   {
+    "shooter": "[BS] Jenya",
+    "victim": "[BS] Griggs"
+   }
+  ],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "[BS] Griggs"
+    ],
+    "detail": "61 убийство ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "93 гранаты / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "VonScheer"
+    ],
+    "detail": "7 ракет"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "[BS] Griggs"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Galaxy"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "5 подъёмов из нокаута"
+   },
+   {
+    "kind": "hitYourOwn",
+    "players": [
+     "Сваркослав"
+    ],
+    "detail": "1 случай дружественного огня"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "Glory to Arstotzka"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "5 нокаутов, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "[BS] Griggs",
+     "value": 61
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 19
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 19
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 16
+    },
+    {
+     "playerName": "M_i",
+     "value": 15
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 13
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 12
+    },
+    {
+     "playerName": "Сваркослав",
+     "value": 11
+    },
+    {
+     "playerName": "[BS]_XxX_SINIY_KIT_XxX",
+     "value": 9
+    },
+    {
+     "playerName": "Yascher",
+     "value": 8
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 8
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 6
+    },
+    {
+     "playerName": "Mike_Jay_Evans",
+     "value": 6
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 6
+    },
+    {
+     "playerName": "alien_2010",
+     "value": 5
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 5
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 4
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 4
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 2
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 2
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 2
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 1
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 1
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 1
+    },
+    {
+     "playerName": "alien_2010",
+     "value": 1
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 1
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 1
+    },
+    {
+     "playerName": "Сваркослав",
+     "value": 1
+    },
+    {
+     "playerName": "M_i",
+     "value": 1
+    },
+    {
+     "playerName": "[BS]_XxX_SINIY_KIT_XxX",
+     "value": 1
+    },
+    {
+     "playerName": "[BS] Griggs",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Galaxy",
+   "Georg Shultz",
+   "Glory to Arstotzka",
+   "JFKennedy",
+   "Jaelise",
+   "M_i",
+   "Mike_Jay_Evans",
+   "OnlineKiller.",
+   "Tactical Shift",
+   "Venom_coceT",
+   "VonScheer",
+   "Yascher",
+   "[BS] Griggs",
+   "[BS] Jenya",
+   "[BS] Ушастый перец",
+   "[BS]_XxX_SINIY_KIT_XxX",
+   "[RTT] J.A.N.",
+   "alien_2010",
+   "Сваркослав"
+  ]
+ },
+ {
+  "id": "2026-09-17-bastion-of-death",
+  "missionId": "bastion-of-death",
+  "startsAt": "2026-09-17T17:00:00.000Z",
+  "startedAt": "2026-09-17T16:44:10.414Z",
+  "endedAt": "2026-09-17T18:56:58.211Z",
+  "extra": true,
+  "attended": 15,
+  "replayCodes": [
+   "VNVHSZ",
+   "A5BYRF"
+  ],
+  "planCode": null,
+  "stats": {
+   "deaths": 17,
+   "shots": 16622,
+   "aiShots": 6541,
+   "grenades": 82,
+   "rockets": 1,
+   "knockdowns": 21,
+   "aiKilled": 672,
+   "friendlyFire": 5,
+   "topAiKills": {
+    "playerName": "Jaelise",
+    "value": 62
+   }
+  },
+  "friendlyFireIncidents": [
+   {
+    "shooter": "[RTT] J.A.N.",
+    "victim": "VonScheer"
+   },
+   {
+    "shooter": "[BS] Griggs",
+    "victim": "союзный ИИ"
+   },
+   {
+    "shooter": "JFKennedy",
+    "victim": "Prais777"
+   },
+   {
+    "shooter": "JFKennedy",
+    "victim": "[RTT] J.A.N."
+   },
+   {
+    "shooter": "[BS] Ушастый перец",
+    "victim": "[RTT] J.A.N."
+   }
+  ],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Jaelise"
+    ],
+    "detail": "62 убийства ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "Comrade"
+    ],
+    "detail": "25 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "Glory to Arstotzka"
+    ],
+    "detail": "1 ракета"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Georg Shultz"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "Comrade"
+    ],
+    "detail": "3 подъёма из нокаута"
+   },
+   {
+    "kind": "hitYourOwn",
+    "players": [
+     "JFKennedy"
+    ],
+    "detail": "2 случая дружественного огня"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "Comrade"
+    ],
+    "detail": "3 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Jaelise",
+     "value": 62
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 58
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 50
+    },
+    {
+     "playerName": "Comrade",
+     "value": 48
+    },
+    {
+     "playerName": "M_i",
+     "value": 45
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 45
+    },
+    {
+     "playerName": "Prais777",
+     "value": 44
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 43
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 39
+    },
+    {
+     "playerName": "[BS] Griggs",
+     "value": 36
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 34
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 32
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 20
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 16
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 14
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "OnlineKiller.",
+     "value": 2
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 2
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 2
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 1
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 1
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 1
+    },
+    {
+     "playerName": "Prais777",
+     "value": 1
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 1
+    },
+    {
+     "playerName": "M_i",
+     "value": 1
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 1
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    },
+    {
+     "playerName": "[BS] Griggs",
+     "value": 1
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Comrade",
+   "Galaxy",
+   "Georg Shultz",
+   "Glory to Arstotzka",
+   "Itarossa",
+   "JFKennedy",
+   "Jaelise",
+   "M_i",
+   "OnlineKiller.",
+   "Prais777",
+   "VonScheer",
+   "[BS] Griggs",
+   "[BS] Jenya",
+   "[BS] Ушастый перец",
+   "[RTT] J.A.N."
+  ]
+ },
+ {
+  "id": "2026-09-15-dvizhuha",
+  "missionId": "dvizhuha",
+  "startsAt": "2026-09-15T17:00:00.000Z",
+  "startedAt": "2026-09-15T16:44:53.545Z",
+  "endedAt": "2026-09-15T18:52:21.545Z",
+  "extra": false,
+  "attended": 16,
+  "replayCodes": [
+   "4GS87F"
+  ],
+  "planCode": "3U8SEL",
+  "stats": {
+   "deaths": 14,
+   "shots": 10959,
+   "aiShots": 15574,
+   "grenades": 401,
+   "rockets": 13,
+   "knockdowns": 28,
+   "aiKilled": 147,
+   "friendlyFire": 1,
+   "topAiKills": {
+    "playerName": "Prais777",
+    "value": 24
+   }
+  },
+  "friendlyFireIncidents": [
+   {
+    "shooter": "Glory to Arstotzka",
+    "victim": "VonScheer"
+   }
+  ],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "24 убийства ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "83 гранаты / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "3 ракеты"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Jaelise"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Tactical Shift"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "3 подъёма из нокаута"
+   },
+   {
+    "kind": "hitYourOwn",
+    "players": [
+     "Glory to Arstotzka"
+    ],
+    "detail": "1 случай дружественного огня"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "Georg Shultz",
+     "OnlineKiller.",
+     "Prais777"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "Itarossa"
+    ],
+    "detail": "2 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Prais777",
+     "value": 24
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 17
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 12
+    },
+    {
+     "playerName": "Comrade",
+     "value": 12
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 11
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 11
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 9
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 9
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 7
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 6
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 6
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 4
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 4
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 3
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 2
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "VonScheer",
+     "value": 3
+    },
+    {
+     "playerName": "Comrade",
+     "value": 3
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 2
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 2
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 2
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Comrade",
+   "Galaxy",
+   "Georg Shultz",
+   "Glory to Arstotzka",
+   "Itarossa",
+   "JFKennedy",
+   "Jaelise",
+   "OnlineKiller.",
+   "Prais777",
+   "Tactical Shift",
+   "Venom_coceT",
+   "VonScheer",
+   "Yascher",
+   "[BS] Jenya",
+   "[BS] Ушастый перец",
+   "[RTT] J.A.N."
+  ]
+ },
+ {
+  "id": "2026-09-13-endsieg",
+  "missionId": "endsieg",
+  "startsAt": "2026-09-13T16:00:00.000Z",
+  "startedAt": "2026-09-13T15:45:52.787Z",
+  "endedAt": "2026-09-13T18:00:14.787Z",
+  "extra": false,
+  "attended": 17,
+  "replayCodes": [
+   "58HK3E"
+  ],
+  "planCode": "AXVYNW",
+  "stats": {
+   "deaths": 12,
+   "shots": 5974,
+   "aiShots": 9693,
+   "grenades": 138,
+   "rockets": 8,
+   "knockdowns": 17,
+   "aiKilled": 245,
+   "friendlyFire": 0,
+   "topAiKills": {
+    "playerName": "Prais777",
+    "value": 26
+   }
+  },
+  "friendlyFireIncidents": [],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "26 убийств ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "47 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "Tactical Shift"
+    ],
+    "detail": "3 ракеты"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Georg Shultz"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Tactical Shift"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "Georg Shultz"
+    ],
+    "detail": "4 подъёма из нокаута"
+   },
+   {
+    "kind": "notForLong",
+    "players": [
+     "Galaxy"
+    ],
+    "detail": "Снова погиб через 41.3с"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "Prais777",
+     "Venom_coceT",
+     "Yascher",
+     "[BS] jaeger77",
+     "[BS] Ушастый перец",
+     "[BS]_XxX_SINIY_KIT_XxX"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Prais777",
+     "value": 26
+    },
+    {
+     "playerName": "[BS] jaeger77",
+     "value": 26
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 20
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 17
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 10
+    },
+    {
+     "playerName": "[BS]_XxX_SINIY_KIT_XxX",
+     "value": 10
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 9
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 9
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 9
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 8
+    },
+    {
+     "playerName": "Mike_Jay_Evans",
+     "value": 8
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 8
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 8
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 4
+    },
+    {
+     "playerName": "Сваркослав",
+     "value": 3
+    },
+    {
+     "playerName": "Yascher",
+     "value": 2
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "Galaxy",
+     "value": 3
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 2
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 2
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 1
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 1
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Galaxy",
+   "Georg Shultz",
+   "Itarossa",
+   "JFKennedy",
+   "Jaelise",
+   "Mike_Jay_Evans",
+   "OnlineKiller.",
+   "Prais777",
+   "Tactical Shift",
+   "Venom_coceT",
+   "Yascher",
+   "[BS] Jenya",
+   "[BS] jaeger77",
+   "[BS] Ушастый перец",
+   "[BS]_XxX_SINIY_KIT_XxX",
+   "[RTT] J.A.N.",
+   "Сваркослав"
+  ]
+ },
+ {
+  "id": "2026-09-10-trench-crawlers",
+  "missionId": "trench-crawlers",
+  "startsAt": "2026-09-10T17:00:00.000Z",
+  "startedAt": "2026-09-10T16:53:05.436Z",
+  "endedAt": "2026-09-10T18:48:05.436Z",
+  "extra": true,
+  "attended": 7,
+  "replayCodes": [
+   "D5DCTD"
+  ],
+  "planCode": null,
+  "stats": {
+   "deaths": 6,
+   "shots": 7564,
+   "aiShots": 45753,
+   "grenades": 235,
+   "rockets": 12,
+   "knockdowns": 16,
+   "aiKilled": 187,
+   "friendlyFire": 0,
+   "topAiKills": {
+    "playerName": "[BS] Ушастый перец",
+    "value": 44
+   }
+  },
+  "friendlyFireIncidents": [],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "44 убийства ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "JFKennedy"
+    ],
+    "detail": "77 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "8 ракет"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Georg Shultz"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "3 подъёма из нокаута"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "OnlineKiller.",
+     "Prais777"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "Galaxy"
+    ],
+    "detail": "2 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 44
+    },
+    {
+     "playerName": "M_i",
+     "value": 29
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 22
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 12
+    },
+    {
+     "playerName": "Prais777",
+     "value": 12
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 9
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 3
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "Georg Shultz",
+     "value": 2
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 2
+    },
+    {
+     "playerName": "M_i",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Galaxy",
+   "Georg Shultz",
+   "JFKennedy",
+   "M_i",
+   "OnlineKiller.",
+   "Prais777",
+   "[BS] Ушастый перец"
+  ]
+ },
+ {
+  "id": "2026-09-08-bite-the-dust",
+  "missionId": "bite-the-dust",
+  "startsAt": "2026-09-08T17:00:00.000Z",
+  "startedAt": "2026-09-08T16:42:46.410Z",
+  "endedAt": "2026-09-08T19:27:20.410Z",
+  "extra": false,
+  "attended": 18,
+  "replayCodes": [
+   "VNRQB8"
+  ],
+  "planCode": "QX2F2Y",
+  "stats": {
+   "deaths": 21,
+   "shots": 12240,
+   "aiShots": 11998,
+   "grenades": 161,
+   "rockets": 8,
+   "knockdowns": 50,
+   "aiKilled": 262,
+   "friendlyFire": 0,
+   "topAiKills": {
+    "playerName": "Prais777",
+    "value": 32
+   }
+  },
+  "friendlyFireIncidents": [],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "32 убийства ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "Venom_coceT"
+    ],
+    "detail": "68 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "OnlineKiller."
+    ],
+    "detail": "3 ракеты"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Galaxy"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Comrade"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "Сваркослав"
+    ],
+    "detail": "5 подъёмов из нокаута"
+   },
+   {
+    "kind": "notForLong",
+    "players": [
+     "[BS] Jenya"
+    ],
+    "detail": "Снова погиб через 58.9с"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "Сваркослав"
+    ],
+    "detail": "5 нокаутов, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Prais777",
+     "value": 32
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 30
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 22
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 22
+    },
+    {
+     "playerName": "M_i",
+     "value": 21
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 19
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 19
+    },
+    {
+     "playerName": "abrashkaa",
+     "value": 19
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 15
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 14
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 9
+    },
+    {
+     "playerName": "Сваркослав",
+     "value": 8
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 7
+    },
+    {
+     "playerName": "bot",
+     "value": 5
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 4
+    },
+    {
+     "playerName": "Comrade",
+     "value": 4
+    },
+    {
+     "playerName": "Yascher",
+     "value": 2
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "[BS] Jenya",
+     "value": 3
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 3
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 3
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 2
+    },
+    {
+     "playerName": "Comrade",
+     "value": 2
+    },
+    {
+     "playerName": "bot",
+     "value": 2
+    },
+    {
+     "playerName": "Yascher",
+     "value": 2
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 1
+    },
+    {
+     "playerName": "M_i",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    },
+    {
+     "playerName": "abrashkaa",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Comrade",
+   "Galaxy",
+   "Georg Shultz",
+   "Itarossa",
+   "JFKennedy",
+   "M_i",
+   "OnlineKiller.",
+   "Prais777",
+   "Tactical Shift",
+   "Valso",
+   "Venom_coceT",
+   "VonScheer",
+   "Yascher",
+   "[BS] Jenya",
+   "[RTT] J.A.N.",
+   "abrashkaa",
+   "bot",
+   "Сваркослав"
+  ]
+ },
+ {
+  "id": "2026-09-06-wolfs-nest",
+  "missionId": "wolfs-nest",
+  "startsAt": "2026-09-06T16:00:00.000Z",
+  "startedAt": "2026-09-06T15:42:36.885Z",
+  "endedAt": "2026-09-06T17:32:55.576Z",
+  "extra": false,
+  "attended": 22,
+  "replayCodes": [
+   "QDW8FW",
+   "JE4RMN"
+  ],
+  "planCode": "8CJEH2",
+  "stats": {
+   "deaths": 26,
+   "shots": 10144,
+   "aiShots": 5733,
+   "grenades": 98,
+   "rockets": 12,
+   "knockdowns": 44,
+   "aiKilled": 185,
+   "friendlyFire": 1,
+   "topAiKills": {
+    "playerName": "Venom_coceT",
+    "value": 27
+   }
+  },
+  "friendlyFireIncidents": [
+   {
+    "shooter": "JFKennedy",
+    "victim": "VonScheer"
+   }
+  ],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Venom_coceT"
+    ],
+    "detail": "27 убийств ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "36 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "[A-762]SEDOI"
+    ],
+    "detail": "8 ракет"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Glory to Arstotzka"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "BS_ANR"
+    ],
+    "detail": "3 подъёма из нокаута"
+   },
+   {
+    "kind": "notForLong",
+    "players": [
+     "[BS] WaleraTV"
+    ],
+    "detail": "Снова погиб через 2м 47с"
+   },
+   {
+    "kind": "hitYourOwn",
+    "players": [
+     "JFKennedy"
+    ],
+    "detail": "1 случай дружественного огня"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "BS_ANR"
+    ],
+    "detail": "3 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Venom_coceT",
+     "value": 27
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 16
+    },
+    {
+     "playerName": "[BS] WaleraTV",
+     "value": 15
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 11
+    },
+    {
+     "playerName": "Osamich",
+     "value": 11
+    },
+    {
+     "playerName": "[A-762]SEDOI",
+     "value": 11
+    },
+    {
+     "playerName": "Prais777",
+     "value": 10
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 8
+    },
+    {
+     "playerName": "Mike_Jay_Evans",
+     "value": 5
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 5
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 5
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 5
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 5
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 4
+    },
+    {
+     "playerName": "BS_ANR",
+     "value": 4
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 3
+    },
+    {
+     "playerName": "[A-762] Nemo",
+     "value": 2
+    },
+    {
+     "playerName": "Tactical Shift",
+     "value": 2
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 3
+    },
+    {
+     "playerName": "[BS] WaleraTV",
+     "value": 3
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 2
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 2
+    },
+    {
+     "playerName": "Mike_Jay_Evans",
+     "value": 2
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 2
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 2
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 2
+    },
+    {
+     "playerName": "Osamich",
+     "value": 2
+    },
+    {
+     "playerName": "Prais777",
+     "value": 1
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 1
+    },
+    {
+     "playerName": "[BS] Jenya",
+     "value": 1
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 1
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 1
+    },
+    {
+     "playerName": "Yascher",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "BS_ANR",
+   "Galaxy",
+   "Georg Shultz",
+   "Glory to Arstotzka",
+   "Itarossa",
+   "JFKennedy",
+   "Jaelise",
+   "Mike_Jay_Evans",
+   "OnlineKiller.",
+   "Osamich",
+   "Prais777",
+   "SquirtSoda",
+   "Tactical Shift",
+   "Venom_coceT",
+   "VonScheer",
+   "Yascher",
+   "[A-762] Nemo",
+   "[A-762]SEDOI",
+   "[BS] Jenya",
+   "[BS] WaleraTV",
+   "[BS] Ушастый перец",
+   "[RTT] J.A.N."
+  ]
+ },
+ {
+  "id": "2026-09-04-sawmill-raid",
+  "missionId": "sawmill-raid",
+  "startsAt": "2026-09-04T17:30:00.000Z",
+  "startedAt": "2026-09-04T17:13:36.008Z",
+  "endedAt": "2026-09-04T18:38:04.008Z",
+  "extra": true,
+  "attended": 10,
+  "replayCodes": [
+   "9UCK4Y"
+  ],
+  "planCode": "LWL2UB",
+  "stats": {
+   "deaths": 4,
+   "shots": 8216,
+   "aiShots": 3982,
+   "grenades": 118,
+   "rockets": 4,
+   "knockdowns": 10,
+   "aiKilled": 136,
+   "friendlyFire": 0,
+   "topAiKills": {
+    "playerName": "Prais777",
+    "value": 23
+   }
+  },
+  "friendlyFireIncidents": [],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "23 убийства ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "Jaelise"
+    ],
+    "detail": "62 гранаты / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "[BS] Ушастый перец"
+    ],
+    "detail": "2 ракеты"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "OnlineKiller."
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Glory to Arstotzka"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "3 подъёма из нокаута"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "OnlineKiller.",
+     "[BS] Ушастый перец"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "3 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Prais777",
+     "value": 23
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 19
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 18
+    },
+    {
+     "playerName": "[BS] Ушастый перец",
+     "value": 17
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 14
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 10
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 8
+    },
+    {
+     "playerName": "abrashkaa",
+     "value": 5
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 5
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 4
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 1
+    },
+    {
+     "playerName": "Galaxy",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Galaxy",
+   "Georg Shultz",
+   "Glory to Arstotzka",
+   "Itarossa",
+   "JFKennedy",
+   "Jaelise",
+   "OnlineKiller.",
+   "Prais777",
+   "[BS] Ушастый перец",
+   "abrashkaa"
+  ]
+ },
+ {
+  "id": "2026-09-03-show-must-go-on",
+  "missionId": "show-must-go-on",
+  "startsAt": "2026-09-03T17:00:00.000Z",
+  "startedAt": "2026-09-03T17:37:36.142Z",
+  "endedAt": "2026-09-03T18:54:46.142Z",
+  "extra": true,
+  "attended": 10,
+  "replayCodes": [
+   "GC4JJ6"
+  ],
+  "planCode": null,
+  "stats": {
+   "deaths": 10,
+   "shots": 4556,
+   "aiShots": 2439,
+   "grenades": 99,
+   "rockets": 4,
+   "knockdowns": 14,
+   "aiKilled": 133,
+   "friendlyFire": 0,
+   "topAiKills": {
+    "playerName": "Prais777",
+    "value": 32
+   }
+  },
+  "friendlyFireIncidents": [],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "32 убийства ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "Venom_coceT"
+    ],
+    "detail": "68 гранат / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "Glory to Arstotzka"
+    ],
+    "detail": "4 ракеты"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "Georg Shultz"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "Itarossa"
+    ],
+    "detail": "2 подъёма из нокаута"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "VonScheer"
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "Itarossa"
+    ],
+    "detail": "2 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Prais777",
+     "value": 32
+    },
+    {
+     "playerName": "Itarossa",
+     "value": 14
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 14
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 13
+    },
+    {
+     "playerName": "abrashkaa",
+     "value": 12
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 12
+    },
+    {
+     "playerName": "Venom_coceT",
+     "value": 10
+    },
+    {
+     "playerName": "bot",
+     "value": 8
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 7
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "Venom_coceT",
+     "value": 2
+    },
+    {
+     "playerName": "abrashkaa",
+     "value": 2
+    },
+    {
+     "playerName": "bot",
+     "value": 2
+    },
+    {
+     "playerName": "Prais777",
+     "value": 1
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 1
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Galaxy",
+   "Georg Shultz",
+   "Glory to Arstotzka",
+   "Itarossa",
+   "JFKennedy",
+   "Prais777",
+   "Venom_coceT",
+   "VonScheer",
+   "abrashkaa",
+   "bot"
+  ]
+ },
+ {
+  "id": "2026-09-01-in-cold-blood",
+  "missionId": "in-cold-blood",
+  "startsAt": "2026-09-01T17:00:00.000Z",
+  "startedAt": "2026-09-01T16:51:09.504Z",
+  "endedAt": "2026-09-01T18:02:54.504Z",
+  "extra": false,
+  "attended": 12,
+  "replayCodes": [
+   "T2G8DM"
+  ],
+  "planCode": null,
+  "stats": {
+   "deaths": 3,
+   "shots": 5688,
+   "aiShots": 3768,
+   "grenades": 58,
+   "rockets": 4,
+   "knockdowns": 14,
+   "aiKilled": 130,
+   "friendlyFire": 0,
+   "topAiKills": {
+    "playerName": "Prais777",
+    "value": 30
+   }
+  },
+  "friendlyFireIncidents": [],
+  "awards": [
+   {
+    "kind": "butcher",
+    "players": [
+     "Prais777"
+    ],
+    "detail": "30 убийств ИИ"
+   },
+   {
+    "kind": "demolitionist",
+    "players": [
+     "PolarQuest"
+    ],
+    "detail": "22 гранаты / подствольник"
+   },
+   {
+    "kind": "rocketman",
+    "players": [
+     "Jaelise"
+    ],
+    "detail": "1 ракета"
+   },
+   {
+    "kind": "firstBlood",
+    "players": [
+     "OnlineKiller."
+    ],
+    "detail": "Первый выстрел операции"
+   },
+   {
+    "kind": "firstToDie",
+    "players": [
+     "PolarQuest"
+    ],
+    "detail": "Погиб первым"
+   },
+   {
+    "kind": "returnee",
+    "players": [
+     "Glory to Arstotzka"
+    ],
+    "detail": "3 подъёма из нокаута"
+   },
+   {
+    "kind": "untouchables",
+    "players": [
+     "VonScheer",
+     "[RTT] J.A.N."
+    ],
+    "detail": "Ни нокаута, ни смерти"
+   },
+   {
+    "kind": "toughNut",
+    "players": [
+     "Glory to Arstotzka"
+    ],
+    "detail": "3 нокаута, ни одной смерти"
+   }
+  ],
+  "leaderboards": {
+   "aiKills": [
+    {
+     "playerName": "Prais777",
+     "value": 30
+    },
+    {
+     "playerName": "Glory to Arstotzka",
+     "value": 20
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 17
+    },
+    {
+     "playerName": "[RTT] J.A.N.",
+     "value": 17
+    },
+    {
+     "playerName": "Jaelise",
+     "value": 12
+    },
+    {
+     "playerName": "Dreges",
+     "value": 11
+    },
+    {
+     "playerName": "PolarQuest",
+     "value": 8
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 5
+    },
+    {
+     "playerName": "Georg Shultz",
+     "value": 1
+    },
+    {
+     "playerName": "VonScheer",
+     "value": 1
+    }
+   ],
+   "deaths": [
+    {
+     "playerName": "PolarQuest",
+     "value": 1
+    },
+    {
+     "playerName": "OnlineKiller.",
+     "value": 1
+    },
+    {
+     "playerName": "JFKennedy",
+     "value": 1
+    }
+   ]
+  },
+  "attendance": [
+   "Dreges",
+   "Galaxy",
+   "Georg Shultz",
+   "Glory to Arstotzka",
+   "JFKennedy",
+   "Jaelise",
+   "OnlineKiller.",
+   "PolarQuest",
+   "Prais777",
+   "VonScheer",
+   "Yascher",
+   "[RTT] J.A.N."
+  ]
+ }
+]

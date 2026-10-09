@@ -122,9 +122,11 @@ function Played({ ev, history, locale, t }: { ev: PastEvent; history: MissionHis
             <Eyebrow>{t("event.attended")}</Eyebrow>
             <div className="flex items-baseline gap-1.5">
               <span className="type-heading-l text-fg">{ev.attended}</span>
-              <span className="type-body-s text-fg-secondary">{t("event.ofSlotted", { n: ev.slotted })}</span>
+              {ev.slotted !== null && (
+                <span className="type-body-s text-fg-secondary">{t("event.ofSlotted", { n: ev.slotted })}</span>
+              )}
             </div>
-            <ProgressBar value={ev.attended} max={ev.slotted} tone="success" />
+            {ev.slotted !== null && <ProgressBar value={ev.attended} max={ev.slotted} tone="success" />}
           </HeroBox>
           <HeroBox>
             <Eyebrow>{t("event.duration")}</Eyebrow>
