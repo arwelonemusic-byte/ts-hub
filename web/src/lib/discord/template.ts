@@ -108,7 +108,8 @@ function header(g: PostGame, unix: number): string {
     ...(intro ? ["", plain(intro)] : []),
     // A heading-sized link stands in for a bright button (bots' link buttons are always grey). <url> in a masked link
     // keeps Discord from adding its own preview card for the hub page.
-    `# [Полный брифинг и слоты](<${g.url}#briefing>)`,
+    // 👉 itself, not ":point_right:": Discord turns shortcodes into emoji only as a person types them.
+    `# 👉 [Полный брифинг и слоты](<${g.url}#briefing>)`,
     ...(g.pingRoles.length ? ["", g.pingRoles.map((id) => `<@&${id}>`).join(" ")] : []),
     "\u200b",
   ].join("\n");
