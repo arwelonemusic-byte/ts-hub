@@ -197,6 +197,18 @@ export function EventFeed({
     }
   }, [months, scrollTo]);
 
+  // The feed keeps its own place (?date=, landed on below), so the browser mustn't restore the old scroll
+  // position on reload: it does that once the page has loaded, covers included, which on a slow connection
+  // is after the landing, and it then put the next op's card under the header.
+  // Leaving the feed hands it back explicitly ("auto", not the value found on arrival: after a reload that is
+  // already "manual"), so Back on other pages keeps returning to where you were.
+  useEffect(() => {
+    window.history.scrollRestoration = "manual";
+    return () => {
+      window.history.scrollRestoration = "auto";
+    };
+  }, []);
+
   // Land on the anchor (the next op by default). A passive effect runs after Next's own
   // layout-phase scroll-to-top on navigation, so this wins. (Not rAF: it stalls in hidden tabs.)
   // Declared before the tracking / loading effects, so they start from the landed position.
