@@ -1,5 +1,6 @@
 import { getHubData } from "@/lib/data";
 import { MUSTER_LEAD_MIN } from "@/lib/schedule";
+import { siteUrl } from "@/lib/site";
 
 /** Most ops run 2–3 hours; the calendar entry just needs a sensible block. */
 const DEFAULT_LENGTH_MIN = 180;
@@ -15,7 +16,7 @@ export async function GET(request: Request, ctx: RouteContext<"/events/[id]/cale
 
   const start = new Date(ev.startsAt);
   const end = new Date(start.getTime() + DEFAULT_LENGTH_MIN * 60_000);
-  const url = new URL(`/events/${ev.id}`, request.url).toString();
+  const url = siteUrl(`/events/${ev.id}`, request);
   const ics = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",

@@ -41,6 +41,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
 
 ## Conventions
 
+- **Redirects and links built in a route use `siteUrl(path, request)`** (`web/src/lib/site.ts`), never
+  `new URL(path, request.url)`: behind Caddy, request.url is the app's own `localhost:3004`, so «Выйти» once sent
+  people to https://localhost:3004/events. `siteUrl` uses `NEXT_PUBLIC_BASE_URL` (dev falls back to the request).
 - **Data access goes through `getHubData()`** (`web/src/lib/data/`). Pages never query the database directly, so the
   sources can change without touching the UI. Missions come from `missions.ts`, games from `games.ts` (one load of every
   game per request; there are a few dozen).

@@ -4,6 +4,7 @@ import { newMissionPlan, resolvePlans } from "@/lib/plans";
 import { plannerLink } from "@/lib/plans/planner";
 import { getPlanRecord, type PlanRecord } from "@/lib/plans/store";
 import { getViewer } from "@/lib/viewer";
+import { siteUrl } from "@/lib/site";
 
 /**
  * Every «open in the planner» goes through here, so the plan key only goes to
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest) {
   const now = new Date();
   const data = getHubData();
   const viewer = await getViewer();
-  const back = (path: string) => Response.redirect(new URL(path, req.url), 303);
+  const back = (path: string) => Response.redirect(siteUrl(path, req), 303);
   const latest = async (rec: PlanRecord) => (await resolvePlans([rec]))[0]?.code ?? null;
 
   const eventId = sp.get("event");
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const back = (path: string) => Response.redirect(new URL(path, req.url), 303);
+  const back = (path: string) => Response.redirect(siteUrl(path, req), 303);
   const form = await req.formData();
   const mission = await getHubData().getMission(String(form.get("mission") ?? ""));
   if (!mission) return back("/missions");
