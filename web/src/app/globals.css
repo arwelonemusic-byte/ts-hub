@@ -201,16 +201,14 @@
 
 /* «Занять слот» and the hero's plan box flash the section they scroll to (components/event/Jump.tsx). */
 @theme {
-  --animate-attention: attention 1.4s ease-out;
+  --animate-attention: attention 1s ease-out;
 
   @keyframes attention {
     0%,
-    35%,
     100% {
       box-shadow: 0 0 0 2px transparent;
     }
-    15%,
-    55% {
+    20% {
       box-shadow: 0 0 0 2px var(--ts-color-bg-accent);
     }
   }
