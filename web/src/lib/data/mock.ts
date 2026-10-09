@@ -109,15 +109,16 @@ const COUNTERPUNCH_DEATHS = lb([
 ]);
 
 const COUNTERPUNCH_AWARDS: Award[] = [
-  { emoji: "🔫", title: "Первая кровь", playerName: "Mike_Jay_Evans", detail: "Первый выстрел операции" },
-  { emoji: "⚰️", title: "Первопроходец того света", playerName: "Tactical Shift", detail: "Погиб первым" },
-  { emoji: "🎯", title: "Меткий стрелок", playerName: "JFKennedy", detail: "90 убийств ИИ" },
-  { emoji: "💣", title: "Подрывник", playerName: "[BS] Ушастый перец", detail: "69 гранат / подствольник" },
-  { emoji: "🚀", title: "Ракетный хирург", playerName: "[En-Y]Inspector", detail: "8 ракет" },
-  { emoji: "👻", title: "Возвращенец", playerName: "OnlineKiller.", detail: "5 подъёмов из нокаута" },
-  { emoji: "💀", title: "Быстрое возвращение", playerName: "[En-Y]Sterben", detail: "Снова погиб через 1м 34с после прошлой смерти" },
-  { emoji: "🤝", title: "Свой по своим", playerName: "[En-Y]Inspector", detail: "1 случай дружественного огня" },
-  { emoji: "🔁", title: "Крепкий орешек", playerName: "OnlineKiller.", detail: "5 нокаутов, 0 смертей" },
+  { kind: "butcher", players: ["JFKennedy"], detail: "90 убийств ИИ" },
+  { kind: "demolitionist", players: ["[BS] Ушастый перец"], detail: "69 гранат / подствольник" },
+  { kind: "rocketman", players: ["[En-Y]Inspector"], detail: "8 ракет" },
+  { kind: "firstBlood", players: ["Mike_Jay_Evans"], detail: "Первым убил бота" },
+  { kind: "firstToDie", players: ["Tactical Shift"], detail: "Погиб первым" },
+  { kind: "returnee", players: ["OnlineKiller."], detail: "5 подъёмов из нокаута" },
+  { kind: "notForLong", players: ["[En-Y]Sterben"], detail: "Снова погиб через 1м 34с" },
+  { kind: "hitYourOwn", players: ["[En-Y]Inspector"], detail: "1 случай дружественного огня" },
+  // Mock: no one in this list died (see COUNTERPUNCH_DEATHS); the real list comes from replay stats.
+  { kind: "untouchables", players: ["[En-Y]Inspector", "[En-Y]Sterben", "[BS] Ушастый перец"], detail: "Ни царапины за всю миссию" },
 ];
 
 function counterpunchAttendance(ms: Missions): AttendanceEntry[] {
@@ -147,9 +148,9 @@ interface PastSeed {
 }
 
 const PAST: PastSeed[] = [
-  { mission: M.anotherCastle, at: [10, 6, 20, 0], players: 17, minutes: 103, deaths: 18, top: ["M_i", 17], replays: ["DFTZSB"], plan: "HV3KQ2", award: { emoji: "🔫", title: "Первая кровь", playerName: "alien_2010", detail: "Первый выстрел операции" } },
+  { mission: M.anotherCastle, at: [10, 6, 20, 0], players: 17, minutes: 103, deaths: 18, top: ["M_i", 17], replays: ["DFTZSB"], plan: "HV3KQ2", award: { kind: "firstBlood", players: ["alien_2010"], detail: "Первым убил бота" } },
   { mission: M.counterpunch, at: [10, 4, 19, 0], players: 22, minutes: 184, deaths: 29, top: ["JFKennedy", 90], replays: ["JNCFEB"], plan: "P9TXBN" },
-  { mission: M.emerald, at: [10, 3, 19, 0], extra: true, players: 19, minutes: 134, deaths: 12, top: ["Jaelise", 44], replays: ["ERL7B9"], plan: "M4RZDK", award: { emoji: "💣", title: "Подрывник", playerName: "DarkCote", detail: "Больше всех гранат / подствольник" } },
+  { mission: M.emerald, at: [10, 3, 19, 0], extra: true, players: 19, minutes: 134, deaths: 12, top: ["Jaelise", 44], replays: ["ERL7B9"], plan: "M4RZDK", award: { kind: "demolitionist", players: ["DarkCote"], detail: "Больше всех гранат / подствольник" } },
   { mission: M.quietWitness, at: [10, 1, 20, 0], extra: true, players: 19, minutes: 93, deaths: 9, top: ["Prais777", 24], replays: ["MCKFLK"], plan: null },
   { mission: M.reverseSlope, at: [9, 29, 20, 0], players: 24, minutes: 114, deaths: 15, top: ["M_i", 16], replays: ["EXWZSN"], plan: "C8WLJF" },
   { mission: M.metalGambit, at: [9, 27, 19, 0], players: 17, minutes: 131, deaths: 16, top: ["Prais777", 63], replays: ["LW4AH8", "4BNRSS"], plan: "T2NQVA" },
@@ -196,7 +197,7 @@ function buildPast(ms: Missions): PastEvent[] {
         knockdowns: 47,
         friendlyFire: 1,
       },
-      // Matches the "Свой по своим" award; the victim and time are mock.
+      // Matches the «Бей своих» award; the victim and time are mock.
       friendlyFireIncidents: [{ shooter: "[En-Y]Inspector", victim: "Kedr", at: "1:42:10" }],
       awards: COUNTERPUNCH_AWARDS,
       leaderboards: { aiKills: COUNTERPUNCH_AI_KILLS, deaths: COUNTERPUNCH_DEATHS },

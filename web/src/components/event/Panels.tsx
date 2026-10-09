@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { number, shortDate } from "@/lib/format";
 import { plural, type Locale, type T } from "@/lib/i18n";
@@ -6,6 +7,7 @@ import type { Award, Briefing, LeaderboardEntry, Mission, MissionHistory, PastEv
 import { buttonClass, ButtonLink, Eyebrow, Icon, ProgressBar, Tag } from "../ui";
 import { CopyButton } from "./CopyButton";
 import { CopyValue } from "./CopyValue";
+import { AwardCard } from "./AwardCard";
 import { AttachCodeForm, UsePlanButton } from "./PlanForms";
 
 /**
@@ -382,12 +384,15 @@ export function MissionPanel({
   locale,
   t,
   onMissionPage = false,
+  played = false,
 }: {
   mission: Mission;
   history: MissionHistory;
   locale: Locale;
   t: T;
   onMissionPage?: boolean;
+  /** A played game's page (Figma 24:3241): the mission's tags instead of its GUID and scenario. */
+  played?: boolean;
 }) {
   const planning = (
     <Fact label={t("mission.planning")}>
@@ -437,10 +442,17 @@ export function MissionPanel({
               )}
             </Fact>
             {planning}
-            {ids}
+            {!played && ids}
           </>
         )}
       </div>
+      {played && mission.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {mission.tags.map((tag) => (
+            <Tag key={tag}>{tag}</Tag>
+          ))}
+        </div>
+      )}
       {!onMissionPage && (
         <ButtonLink href={`/missions/${mission.id}`} className="w-full">
           {t("mission.page")}
@@ -453,42 +465,59 @@ export function MissionPanel({
 
 // ---------------------------------------------------------------- played op
 
+/** Figma "Op totals" (24:3476): an 80px illustration over each number. */
 export function OpTotals({ ev, locale, t }: { ev: PastEvent; locale: Locale; t: T }) {
   const s = ev.stats;
-  const items: [string, number | undefined, boolean?][] = [
-    [t("totals.shots"), s.shots],
-    [t("totals.aiShots"), s.aiShots],
-    [t("totals.deaths"), s.deaths],
-    [t("totals.aiKilled"), s.aiKilled],
-    [t("totals.knockdowns"), s.knockdowns],
-    [t("totals.friendlyFire"), s.friendlyFire, true],
+  const items: { label: string; value?: number; art: string; flip?: boolean; danger?: boolean }[] = [
+    { label: t("totals.shots"), value: s.shots, art: "player-shots" },
+    // The same drawing as the bots' shots, facing the other way.
+    { label: t("totals.aiShots"), value: s.aiShots, art: "bot-shots", flip: true },
+    { label: t("totals.deaths"), value: s.deaths, art: "players-died" },
+    { label: t("totals.aiKilled"), value: s.aiKilled, art: "bots-killed" },
+    { label: t("totals.knockdowns"), value: s.knockdowns, art: "knockdowns" },
+    { label: t("totals.friendlyFire"), value: s.friendlyFire, art: "friendly-fire", danger: true },
   ];
-  const shown = items.filter(([, v]) => v !== undefined);
   return (
     <div className="relative grid w-full max-w-[1216px] grid-cols-2 gap-6 rounded-xl px-6 py-5 sm:grid-cols-3 lg:flex">
-      {shown.map(([label, v, danger]) => (
-        <div key={label} className="flex min-w-0 flex-1 flex-col items-center gap-1 text-center">
-          <Eyebrow>{label}</Eyebrow>
-          <span className={`type-heading-number ${danger ? "text-fg-danger" : "text-fg"}`}>{number(v!, locale)}</span>
-        </div>
-      ))}
+      {items
+        .filter((i) => i.value !== undefined)
+        .map((i) => (
+          <div key={i.art} className="flex min-w-0 flex-1 flex-col items-center gap-4 text-center">
+            <div className={`relative size-20 shrink-0 ${i.flip ? "-scale-x-100" : ""}`}>
+              <Image src={`/illustrations/stats/${i.art}.png`} alt="" fill sizes="80px" className="object-cover" />
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Eyebrow>{i.label}</Eyebrow>
+              <span className={`type-heading-number ${i.danger ? "text-fg-danger" : "text-fg"}`}>{number(i.value!, locale)}</span>
+            </div>
+          </div>
+        ))}
     </div>
   );
 }
 
-/** Competition ranking: ties share a rank (1, 2, 2, 4). */
-function Board({ title, rows }: { title: string; rows: LeaderboardEntry[] }) {
+const MEDALS = ["medal-gold", "medal-silver", "medal-bronze"];
+
+/** Competition ranking: ties share a rank (1, 2, 2, 4). With `medals`, ranks 1–3 get a medal instead of the number. */
+function Board({ title, rows, medals = false }: { title: string; rows: LeaderboardEntry[]; medals?: boolean }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1">
       <Eyebrow>{title}</Eyebrow>
       <div className="flex flex-col">
-        {rows.map((r) => (
+        {rows.map((r) => {
+          const rank = rows.findIndex((x) => x.value === r.value) + 1;
+          return (
           <div key={r.playerName} className="flex h-10 items-center gap-3 border-t border-line">
-            <span className="w-[18px] shrink-0 type-code text-fg-tertiary">{rows.findIndex((x) => x.value === r.value) + 1}</span>
+            {medals && rank <= 3 ? (
+              <Image src={`/icons/${MEDALS[rank - 1]}.svg`} alt={String(rank)} width={18} height={18} className="shrink-0" />
+            ) : (
+              <span className="w-[18px] shrink-0 type-code text-fg-tertiary">{rank}</span>
+            )}
             <span className="min-w-0 flex-1 truncate type-label-m text-fg">{r.playerName}</span>
             <span className="type-heading-xxs text-fg">{r.value}</span>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -514,7 +543,7 @@ export function LeaderboardsPanel({ ev, t }: { ev: PastEvent; t: T }) {
       </div>
       {ev.leaderboards && (
         <div className="flex flex-col gap-8 md:flex-row">
-          <Board title={t("boards.aiKills")} rows={ev.leaderboards.aiKills} />
+          <Board title={t("boards.aiKills")} rows={ev.leaderboards.aiKills} medals />
           <Board title={t("boards.deaths")} rows={ev.leaderboards.deaths} />
         </div>
       )}
@@ -546,22 +575,14 @@ export function LeaderboardsPanel({ ev, t }: { ev: PastEvent; t: T }) {
   );
 }
 
+/** Figma "Ачивки" (26:3520). */
 export function AwardsPanel({ awards, t }: { awards: Award[]; t: T }) {
   return (
     <section className="flex flex-col gap-4 rounded-xl bg-inset p-6">
       <h2 className="type-heading-m text-fg">{t("awards.title")}</h2>
       <div className="flex flex-col gap-2">
         {awards.map((a) => (
-          <div key={a.title} className="flex flex-col gap-1.5 rounded-lg bg-page p-4">
-            <div className="flex items-center gap-2">
-              <span className="text-[14px] leading-4" aria-hidden>
-                {a.emoji}
-              </span>
-              <span className="type-eyebrow text-fg-accent">{a.title}</span>
-            </div>
-            <span className="type-label-xl text-fg">{a.playerName}</span>
-            <span className="type-caption text-fg-secondary">{a.detail}</span>
-          </div>
+          <AwardCard key={a.kind} award={a} t={t} />
         ))}
       </div>
     </section>

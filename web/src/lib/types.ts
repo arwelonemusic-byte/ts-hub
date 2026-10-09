@@ -95,10 +95,23 @@ export interface UpcomingEvent extends EventBase {
   plan: PlanRef | null;
 }
 
+/** The replay-stats achievements. The kind picks the title (i18n `award.<kind>`) and the illustration. */
+export type AwardKind =
+  | "butcher"
+  | "demolitionist"
+  | "rocketman"
+  | "firstBlood"
+  | "firstToDie"
+  | "returnee"
+  | "notForLong"
+  | "hitYourOwn"
+  | "untouchables"
+  | "toughNut";
+
 export interface Award {
-  emoji: string;
-  title: string;
-  playerName: string;
+  kind: AwardKind;
+  /** Usually one; «Неприкасаемые» goes to everyone who finished unhurt. */
+  players: string[];
   detail: string;
 }
 

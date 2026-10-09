@@ -170,7 +170,7 @@ function Played({ ev, history, locale, t }: { ev: PastEvent; history: MissionHis
         aside={
           <>
             {ev.awards.length > 0 && <AwardsPanel awards={ev.awards} t={t} />}
-            <MissionPanel mission={ev.mission} history={history} locale={locale} t={t} />
+            <MissionPanel mission={ev.mission} history={history} locale={locale} t={t} played />
           </>
         }
       />

@@ -283,12 +283,22 @@ const RU: Dict = {
   "totals.friendlyFire": "Огонь по своим",
 
   "boards.title": "Рейтинги",
-  "boards.players": "Игроки",
+  "boards.players": "Участники",
   "boards.aiKills": "Убийства ботов",
   "boards.deaths": "Смерти",
   "boards.friendlyFire": "Огонь по своим",
 
   "awards.title": "Ачивки",
+  "award.butcher": "Мясник",
+  "award.demolitionist": "Подрывник",
+  "award.rocketman": "Рокетмен",
+  "award.firstBlood": "Первая кровь",
+  "award.firstToDie": "Первопроходец того света",
+  "award.returnee": "Возвращенец",
+  "award.notForLong": "Я ненадолго",
+  "award.hitYourOwn": "Бей своих",
+  "award.untouchables": "Неприкасаемые",
+  "award.toughNut": "Крепкий орешек",
   "collapse.show": "Показать",
   "collapse.hide": "Скрыть",
 };

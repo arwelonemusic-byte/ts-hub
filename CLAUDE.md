@@ -64,7 +64,10 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   are shown up to the end of next month (`lib/feed.ts`).
 - **Event details** (`app/events/[id]`) follows Figma frames 20:1337 (upcoming) and 20:1990 (played). The sections live in
   `components/event/`. Write actions send signed-out users to log in; taking a slot stays disabled for signed-in users
-  until there's a data source to write to. The plan panel works (see Plans).
+  until there's a data source to write to. The plan panel works (see Plans). The played page's stat row and «Ачивки»
+  use the Figma illustrations in `web/public/illustrations/` (stats 24:3476, achievements 26:3622): an award has a
+  `kind` that picks its title (`award.<kind>`), illustration, crop and glow (`components/event/AwardCard.tsx`), and a
+  list of players. The bot-kill board gives ranks 1–3 medals.
 - **Mission page** (`app/missions/[id]`) follows variant B of the "TS Mission Details" canvas
   (https://claude.ai/artifact/7Xju6DYbRh5139tncVaqaP). It has no blurred backdrop (only event pages have one),
   and the games are rows without covers. The mock missions' GUIDs and scenario IDs are real. The aside shows the
