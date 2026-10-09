@@ -116,7 +116,7 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   Env template: `web/.env.example`. Pages ask `getViewer()` (`lib/viewer.ts`) who is looking. On a dev machine
   without OAuth configured it returns a stand-in from `data/players` (Galaxy, an admin, by default; switch with
   `/api/dev/viewer?name=<display name>`) so write flows can be tried; the header shows "dev" next to the name.
-  Admins are the Discord roles in `HUB_ADMIN_ROLES` (default `Admin`).
+  Admins are the Discord user IDs in `HUB_ADMIN_IDS` (production: Galaxy) and/or the role names in `HUB_ADMIN_ROLES`.
 
 ## Decided (2026-10-09)
 

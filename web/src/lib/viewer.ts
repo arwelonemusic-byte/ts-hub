@@ -13,8 +13,10 @@ export interface Viewer {
   dev?: boolean;
 }
 
-/** Discord role names (via DISCORD_ROLE_MAP) that make someone a hub admin. */
-const ADMIN_ROLES = (process.env.HUB_ADMIN_ROLES ?? "Admin").split(",").map((r) => r.trim());
+const list = (v: string | undefined) => (v ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+/** Hub admins: Discord role names (via DISCORD_ROLE_MAP) and/or Discord user IDs. */
+const ADMIN_ROLES = list(process.env.HUB_ADMIN_ROLES);
+const ADMIN_IDS = list(process.env.HUB_ADMIN_IDS);
 
 /**
  * On a dev machine without Discord OAuth configured, pages act as if a player
@@ -46,7 +48,7 @@ export async function getViewer(): Promise<Viewer | null> {
       discordId: session.userId,
       name: session.displayName,
       avatar: session.avatar,
-      isAdmin: session.roles.some((r) => ADMIN_ROLES.includes(r)),
+      isAdmin: ADMIN_IDS.includes(session.userId) || session.roles.some((r) => ADMIN_ROLES.includes(r)),
     };
   }
   return DEV_VIEWER ? devViewer() : null;
