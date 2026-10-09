@@ -105,8 +105,15 @@ const ART: Record<AwardKind, { glow: string; art?: ReactNode }> = {
       </div>
     ),
   },
-  // Not in the design yet: no illustration, a neutral glow.
-  toughNut: { glow: "rgb(240 246 251 / 0.08), transparent" },
+  // Figma 56:1937.
+  toughNut: {
+    glow: "rgb(255 150 64 / 0.14), transparent",
+    art: (
+      <div className="absolute top-0 right-0 h-24 w-[94px]">
+        <Art src="tough-nut" className="top-[16px] left-[9px] size-[105px] -scale-y-100 rotate-180" />
+      </div>
+    ),
+  },
 };
 
 export function AwardCard({ award, t }: { award: Award; t: T }) {
