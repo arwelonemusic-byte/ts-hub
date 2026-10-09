@@ -96,7 +96,8 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   A new mission goes step by step; an edit can jump between steps and save from any. Saving (`saveMission`) fetches the
   Workshop image again for a new mission or on «Обновить из Workshop», and stores it in the uploads folder
   (`lib/uploads.ts`: `HUB_UPLOADS_DIR`, served at `/uploads/…`). The page's «…» holds Изменить, В архив / Вернуть из
-  архива and Удалить; delete is only for a mission with no games at all (else archive). Archived missions leave the
+  архива and Удалить; delete is only for a mission with no scheduled or played games (else archive), and takes its
+  cancelled games with it. Archived missions leave the
   catalogue and the schedule dialog, and their page shows «В архиве». Every hub save sets `missions.hub_edited_at`
   (migration 005), and `db:seed --update` leaves those missions alone.
 - **Missions own their slot template.** Each game copies it, and the author or an admin can grow it later (adding

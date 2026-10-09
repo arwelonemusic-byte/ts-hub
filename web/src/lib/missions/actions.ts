@@ -8,7 +8,7 @@ import { mapLabel, MAPS } from "../maps";
 import { playerIdOf } from "../players";
 import { removeUpload } from "../uploads";
 import { getViewer } from "../viewer";
-import { canAddMission, canEditMission } from ".";
+import { canAddMission, canEditMission, missionHasGames } from ".";
 import { checkDraft, normalizeDraft, slugify, type DraftError, type MissionDraft, type WorkshopInfo } from "./draft";
 import { fetchWorkshopAsset, storeWorkshopCover, workshopGuid, workshopPage } from "./workshop";
 
@@ -155,15 +155,16 @@ export async function setMissionArchived(form: FormData): Promise<void> {
   revalidatePath("/events");
 }
 
-/** «Удалить» (admin): only a mission that was never scheduled — one with games is archived instead. */
+/** «Удалить» (admin): only a mission with no scheduled or played games (one with games is archived instead). Its cancelled games go with it. */
 export async function deleteMission(form: FormData): Promise<void> {
   const viewer = await getViewer();
   const mission = await getHubData().getMission(String(form.get("mission") ?? ""));
   if (!viewer?.isAdmin || !mission) return;
+  if (await missionHasGames(mission.id)) return;
   const db = await getDb();
-  const [game] = await db.query("SELECT 1 FROM events WHERE mission_id = $1 LIMIT 1", [mission.id]);
-  if (game) return;
   await db.transaction(async (tx) => {
+    // Only cancelled games are left; their slots go with them (ON DELETE CASCADE).
+    await tx.query("DELETE FROM events WHERE mission_id = $1 AND status = 'cancelled'", [mission.id]);
     // Plans drawn from its page point at plans in the planner; only the hub's records of them go.
     await tx.query("DELETE FROM plans WHERE mission_id = $1", [mission.id]);
     await tx.query("DELETE FROM missions WHERE id = $1", [mission.id]);

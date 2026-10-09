@@ -52,8 +52,8 @@ export async function editorOptions(): Promise<EditorOptions> {
   };
 }
 
-/** Any game of the mission on record, cancelled ones included: then it can be archived, not deleted. */
+/** A scheduled or played game of the mission: then it can be archived, not deleted. Cancelled games don't count. */
 export async function missionHasGames(id: string): Promise<boolean> {
-  const [row] = await (await getDb()).query("SELECT 1 FROM events WHERE mission_id = $1 LIMIT 1", [id]);
+  const [row] = await (await getDb()).query("SELECT 1 FROM events WHERE mission_id = $1 AND status <> 'cancelled' LIMIT 1", [id]);
   return !!row;
 }
