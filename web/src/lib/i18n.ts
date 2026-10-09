@@ -116,6 +116,8 @@ const RU: Dict = {
   "nav.planner": "Планировщик",
   "nav.training": "Учебный Портал",
   "nav.builder": "Конструктор Миссий",
+  "nav.menu": "Меню",
+  "nav.menuClose": "Закрыть меню",
   "auth.login": "Войти",
   "auth.logout": "Выйти",
   "auth.notConfigured": "Вход на этом сервере ещё не настроен.",

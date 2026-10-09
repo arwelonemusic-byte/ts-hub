@@ -5,19 +5,20 @@ import { getT } from "@/lib/i18n-server";
 import { BUILDER_URL, PLANNER_URL, TRAINING_URL } from "@/lib/links";
 import { getViewer } from "@/lib/viewer";
 import { LanguageToggle } from "./LanguageToggle";
+import { NavMenu, type NavItem } from "./NavMenu";
 import { buttonClass, Icon } from "./ui";
 
 /** Figma "App header" (8:180): brand · centred nav · account. */
 export async function AppHeader({ active }: { active: "events" | "missions" | "players" }) {
   const [{ locale, t }, viewer] = await Promise.all([getT(), getViewer()]);
-  const nav = [
+  const nav: NavItem[] = [
     { key: "events", href: "/events" },
     { key: "missions", href: "/missions" },
     // «Игроки» is hidden until the players page exists: { key: "players", href: "/players" },
     { key: "planner", href: PLANNER_URL, external: true },
     { key: "training", href: TRAINING_URL, external: true },
     { key: "builder", href: BUILDER_URL, external: true },
-  ];
+  ].map((n) => ({ ...n, label: t(`nav.${n.key}`), active: n.key === active }));
   return (
     <header className="sticky top-0 z-20 grid h-15 grid-cols-[1fr_auto] items-center border-b border-line bg-surface px-4 py-2 shadow-floating md:px-6 xl:grid-cols-[1fr_auto_1fr]">
       <Link href="/events" className="flex items-center gap-2.5 justify-self-start">
@@ -32,12 +33,12 @@ export async function AppHeader({ active }: { active: "events" | "missions" | "p
             key={n.key}
             href={n.href}
             {...(n.external ? { target: "_blank", rel: "noreferrer" } : {})}
-            aria-current={n.key === active ? "page" : undefined}
+            aria-current={n.active ? "page" : undefined}
             className={`flex h-11 items-center gap-1.5 rounded-lg px-3.5 type-label-s ${
-              n.key === active ? "bg-raised text-fg" : "text-fg-secondary hover:text-fg"
+              n.active ? "bg-raised text-fg" : "text-fg-secondary hover:text-fg"
             }`}
           >
-            {t(`nav.${n.key}`)}
+            {n.label}
             {/* The other TS apps open in a new tab; the icon (62% white) matches the nav's text. */}
             {n.external && <Icon name="external-ff" />}
           </Link>,
@@ -66,6 +67,7 @@ export async function AppHeader({ active }: { active: "events" | "missions" | "p
             {t("auth.login")}
           </a>
         )}
+        <NavMenu items={nav} labels={{ open: t("nav.menu"), close: t("nav.menuClose") }} />
       </div>
     </header>
   );
