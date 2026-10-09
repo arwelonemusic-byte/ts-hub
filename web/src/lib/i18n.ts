@@ -215,7 +215,7 @@ const RU: Dict = {
   "event.plan.none": "Пока нету",
   "event.plan.ready": "Готов",
   "event.slotIn": "Занять слот",
-  "event.yourSlot": "Вы в слоте · {role}",
+  "event.leaveSlot": "Покинуть слот",
   "event.addToCalendar": "Добавить в календарь",
   "event.workshop": "Workshop",
   "event.attended": "Игроков пришло",

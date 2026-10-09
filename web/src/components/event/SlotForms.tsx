@@ -45,6 +45,19 @@ export function SlotButton({
   );
 }
 
+/** The hero's «Освободить слот»: the viewer leaves their slot in this game. */
+export function LeaveSlotButton({ eventId, label, className }: { eventId: string; label: string; className: string }) {
+  const [, action, pending] = useActionState(leaveSlot, null);
+  return (
+    <form action={action} className="flex flex-1">
+      <input type="hidden" name="event" value={eventId} />
+      <button type="submit" disabled={pending} className={`${className} flex-1`}>
+        {label}
+      </button>
+    </form>
+  );
+}
+
 export interface SlotMenuLabels {
   menu: string;
   assign: string;

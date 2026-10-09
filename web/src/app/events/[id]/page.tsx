@@ -14,7 +14,7 @@ import {
   PlanRow,
   SlotsPanel,
 } from "@/components/event/Panels";
-import { ButtonLink, Eyebrow, Icon, ProgressBar } from "@/components/ui";
+import { buttonClass, ButtonLink, Eyebrow, Icon, ProgressBar } from "@/components/ui";
 import { getHubData } from "@/lib/data";
 import { duration, minutesBetween } from "@/lib/format";
 import type { Locale, T } from "@/lib/i18n";
@@ -22,7 +22,8 @@ import { getT } from "@/lib/i18n-server";
 import { replayUrl, workshopUrl } from "@/lib/links";
 import { canAttachPlan, canDetachPlan } from "@/lib/plans";
 import { plannerEmbedUrl } from "@/lib/plans/planner";
-import { playerNames, viewerSlot } from "@/lib/slots";
+import { playerNames, slottingOpen, viewerSlot } from "@/lib/slots";
+import { LeaveSlotButton } from "@/components/event/SlotForms";
 import type { MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
 
@@ -100,9 +101,13 @@ function Upcoming({
           </HeroBox>
         </div>
         <div className="flex flex-wrap gap-2">
-          <ButtonLink href="#slots" variant="primary" className="flex-1">
-            {mySlot ? t("event.yourSlot", { role: mySlot.role }) : t("event.slotIn")}
-          </ButtonLink>
+          {mySlot && (viewer!.isAdmin || slottingOpen(ev)) ? (
+            <LeaveSlotButton eventId={ev.id} label={t("event.leaveSlot")} className={buttonClass("danger", "m")} />
+          ) : (
+            <ButtonLink href="#slots" variant="primary" className="flex-1">
+              {t("event.slotIn")}
+            </ButtonLink>
+          )}
           <ButtonLink href={`/events/${ev.id}/calendar.ics`}>
             <Icon name="calendar" />
             {t("event.addToCalendar")}

@@ -43,6 +43,7 @@
   --ts-color-bg-accent: var(--ts-yellow-400);
   --ts-color-bg-accent-hover: var(--ts-yellow-300);
   --ts-color-bg-accent-subtle: var(--ts-yellow-400-a14);
+  --ts-color-bg-danger: var(--ts-coral-400);
   --ts-color-bg-danger-subtle: var(--ts-coral-400-a12);
   --ts-color-bg-success: var(--ts-green-400);
   --ts-color-border-default: var(--ts-neutral-800);
@@ -105,6 +106,7 @@
   --color-accent: var(--ts-color-bg-accent);
   --color-accent-hover: var(--ts-color-bg-accent-hover);
   --color-accent-subtle: var(--ts-color-bg-accent-subtle);
+  --color-danger: var(--ts-color-bg-danger);
   --color-danger-subtle: var(--ts-color-bg-danger-subtle);
   --color-success: var(--ts-color-bg-success);
 
