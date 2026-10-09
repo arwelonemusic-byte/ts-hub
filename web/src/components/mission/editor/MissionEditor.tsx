@@ -1,14 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { makeT, type Locale } from "@/lib/i18n";
 import type { EditorOptions } from "@/lib/missions";
 import { saveMission } from "@/lib/missions/actions";
 import { checkDraft, ERROR_STEP, normalizeDraft, type DraftError, type DraftStep, type MissionDraft, type WorkshopInfo } from "@/lib/missions/draft";
 import { buttonClass } from "../../ui";
 import { BriefingStep } from "./BriefingStep";
-import { SlotsStep } from "./SlotsStep";
+import { DialogShell } from "./DialogShell";
+import { SquadsEditor } from "./SquadsEditor";
 import { WorkshopStep } from "./WorkshopStep";
 
 const STEPS: DraftStep[] = ["workshop", "briefing", "slots"];
@@ -64,12 +65,6 @@ export function MissionEditor({
     setError(null);
   };
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && !saving && onClose();
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose, saving]);
-
   const problem: DraftError | null = useMemo(
     () => checkDraft(normalizeDraft(draft), options.maps.map((m) => m.key), !!editing?.hasMarkersLayer),
     [draft, options.maps, editing],
@@ -105,91 +100,81 @@ export function MissionEditor({
   };
 
   const last = i === STEPS.length - 1;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onMouseDown={(e) => e.target === e.currentTarget && !saving && onClose()}>
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={t(editing ? "editor.titleEdit" : "editor.titleNew")}
-        className="flex max-h-[92vh] w-full max-w-3xl flex-col rounded-xl bg-surface shadow-floating ring-1 ring-line-strong"
-      >
-        <header className="flex flex-col gap-4 border-b border-line px-6 pt-6 pb-4">
-          <h2 className="type-heading-m text-fg">{editing ? t("editor.titleEdit") : t("editor.titleNew")}</h2>
-          <ol className="flex flex-wrap gap-x-6 gap-y-2">
-            {STEPS.map((s, n) => {
-              const active = s === step;
-              const done = !active && n < i && stepOk(s);
-              return (
-                <li key={s}>
-                  <button
-                    type="button"
-                    disabled={!canOpen(s)}
-                    onClick={() => setStep(s)}
-                    aria-current={active ? "step" : undefined}
-                    className="flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <span
-                      className={`inline-flex size-6 items-center justify-center rounded-full type-caption-strong ${
-                        active ? "bg-accent text-fg-on-accent" : done ? "bg-accent-subtle text-fg-accent" : "bg-raised text-fg-secondary"
-                      }`}
-                    >
-                      {done ? "✓" : n + 1}
-                    </span>
-                    <span className={`type-label-s ${active ? "text-fg" : "text-fg-secondary"}`}>{t(`editor.step.${s}`)}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-        </header>
-
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
-          {step === "workshop" && (
-            <WorkshopStep
-              draft={draft}
-              set={set}
-              info={info}
-              setInfo={setInfo}
-              editing={editing ? { coverUrl: editing.coverUrl, workshopUrl: editing.workshopUrl } : null}
-              options={options}
-              viewer={viewer}
-              t={t}
-            />
-          )}
-          {step === "briefing" && <BriefingStep draft={draft} set={set} hadLayer={!!editing?.hasMarkersLayer} t={t} />}
-          {step === "slots" && <SlotsStep draft={draft} set={set} roles={options.roles} editing={!!editing} locale={locale} t={t} />}
-        </div>
-
-        <footer className="flex flex-col gap-3 border-t border-line px-6 py-4">
-          {error && <p className="type-caption text-fg-danger">{error}</p>}
-          <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={onClose} disabled={saving} className={buttonClass("secondary", "m")}>
-              {t("schedule.cancel")}
-            </button>
-            <span className="flex-1" />
-            {i > 0 && (
-              <button type="button" onClick={() => setStep(STEPS[i - 1])} disabled={saving} className={buttonClass("secondary", "m")}>
-                {t("editor.back")}
-              </button>
-            )}
-            {!last && (
-              <button
-                type="button"
-                onClick={() => setStep(STEPS[i + 1])}
-                disabled={saving || !stepOk(step)}
-                className={buttonClass(editing ? "secondary" : "primary", "m")}
+  const steps = (
+    <ol className="flex flex-wrap gap-x-6 gap-y-2">
+      {STEPS.map((s, n) => {
+        const active = s === step;
+        const done = !active && n < i && stepOk(s);
+        return (
+          <li key={s}>
+            <button
+              type="button"
+              disabled={!canOpen(s)}
+              onClick={() => setStep(s)}
+              aria-current={active ? "step" : undefined}
+              className="flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <span
+                className={`inline-flex size-6 items-center justify-center rounded-full type-caption-strong ${
+                  active ? "bg-accent text-fg-on-accent" : done ? "bg-accent-subtle text-fg-accent" : "bg-raised text-fg-secondary"
+                }`}
               >
-                {t("editor.next")}
-              </button>
-            )}
-            {(last || editing) && (
-              <button type="button" onClick={save} disabled={saving || takenScenario} className={buttonClass("primary", "m")}>
-                {saving ? t("editor.saving") : editing ? t("editor.save") : t("editor.create")}
-              </button>
-            )}
-          </div>
-        </footer>
+                {done ? "✓" : n + 1}
+              </span>
+              <span className={`type-label-s ${active ? "text-fg" : "text-fg-secondary"}`}>{t(`editor.step.${s}`)}</span>
+            </button>
+          </li>
+        );
+      })}
+    </ol>
+  );
+  const footer = (
+    <>
+      {error && <p className="type-caption text-fg-danger">{error}</p>}
+      <div className="flex flex-wrap items-center gap-2">
+        <button type="button" onClick={onClose} disabled={saving} className={buttonClass("secondary", "m")}>
+          {t("schedule.cancel")}
+        </button>
+        <span className="flex-1" />
+        {i > 0 && (
+          <button type="button" onClick={() => setStep(STEPS[i - 1])} disabled={saving} className={buttonClass("secondary", "m")}>
+            {t("editor.back")}
+          </button>
+        )}
+        {!last && (
+          <button type="button" onClick={() => setStep(STEPS[i + 1])} disabled={saving || !stepOk(step)} className={buttonClass(editing ? "secondary" : "primary", "m")}>
+            {t("editor.next")}
+          </button>
+        )}
+        {(last || editing) && (
+          <button type="button" onClick={save} disabled={saving || takenScenario} className={buttonClass("primary", "m")}>
+            {saving ? t("editor.saving") : editing ? t("editor.save") : t("editor.create")}
+          </button>
+        )}
       </div>
-    </div>
+    </>
+  );
+  return (
+    <DialogShell title={editing ? t("editor.titleEdit") : t("editor.titleNew")} head={steps} footer={footer} busy={saving} onClose={onClose}>
+      {step === "workshop" && (
+        <WorkshopStep
+          draft={draft}
+          set={set}
+          info={info}
+          setInfo={setInfo}
+          editing={editing ? { coverUrl: editing.coverUrl, workshopUrl: editing.workshopUrl } : null}
+          options={options}
+          viewer={viewer}
+          t={t}
+        />
+      )}
+      {step === "briefing" && <BriefingStep draft={draft} set={set} hadLayer={!!editing?.hasMarkersLayer} t={t} />}
+      {step === "slots" && (
+        <div className="flex flex-col gap-5">
+          <SquadsEditor squads={draft.squads} setSquads={(squads) => set({ squads })} roles={options.roles} mode="mission" locale={locale} t={t} />
+          {editing && draft.squads.length > 0 && <p className="type-caption text-fg-tertiary">{t("editor.slots.editNote")}</p>}
+        </div>
+      )}
+    </DialogShell>
   );
 }

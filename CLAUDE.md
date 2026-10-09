@@ -131,11 +131,16 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   mission and slots) or cancels it (`status = 'cancelled'`: off the feed, row kept; scheduling that mission on that day
   again replaces it). No other edits: a wrong mission means cancel and schedule anew. The id keeps the day it was first
   scheduled for.
+  «Изменить слоты» (same «…», games with slots) edits that game's own slots, never the mission's template
+  (`editGameSlots`, user decisions 2026-10-09): existing slots can be renamed (callsigns and squad names too) but
+  not deleted, and keep their required role and whoever is in them; new slots and squads (added or duplicated) go
+  at the end and take the next positions. A slot's position is its identity (slot actions post it), so it never
+  changes. The page shows squads HQ (1'6) first, then in the game's own order (`lib/squads.ts`).
   An open usual slot also has «Отменить» (no game that day): `skipped_slots` (migration 004) holds called-off slot times
   and the feed and calendar leave them out for good (`listSkippedSlots`); scheduling a game then still shows it. No undo UI.
 - **Scheduled game pages stay live** (`components/event/LiveRefresh.tsx`): while the tab is visible it polls
-  `/api/events/<id>/version` every 5 s (an md5 of who's in which slot plus the attached plan, `getEventVersion`) and calls
-  `router.refresh()` when it changed. Taking a slot someone just took is refused anyway («Слот уже заняли»).
+  `/api/events/<id>/version` every 5 s (an md5 of the slots, who's in them and the attached plan, `getEventVersion`) and calls
+  `router.refresh()` when it changed (slot names count too, so an admin's rename shows up). Taking a slot someone just took is refused anyway («Слот уже заняли»).
 - **Played games** (Sep 2026 on) come from `db/seed/played-events.json`: `py data/events/build_past_events.py <reports>`
   builds it from the replay-stats reports in ts-wrapped (numbers, roster, rankings, achievements) plus its `OPS` table
   (mission, scheduled time, plan, PL; one row per op), and `npm run db:seed -- --update` loads it. Add a row and re-run after

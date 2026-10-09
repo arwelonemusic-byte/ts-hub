@@ -8,7 +8,8 @@ import path from "node:path";
  * web/.data/uploads in dev. Served at /uploads/… by app/uploads (Caddy can serve the folder
  * directly instead). Names carry a content hash, so a URL never changes what it shows.
  */
-export const UPLOADS_DIR = process.env.HUB_UPLOADS_DIR || path.join(process.cwd(), ".data", "uploads");
+// turbopackIgnore: a folder of runtime files, not something for the build to trace.
+export const UPLOADS_DIR = process.env.HUB_UPLOADS_DIR || path.join(/* turbopackIgnore: true */ process.cwd(), ".data", "uploads");
 const URL_PREFIX = "/uploads/";
 
 export const UPLOAD_TYPES: Record<string, string> = { jpg: "image/jpeg", png: "image/png", webp: "image/webp" };

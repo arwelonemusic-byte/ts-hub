@@ -5,6 +5,8 @@ import { cancelGame, rescheduleGame, scheduleGame, type ScheduleState } from "@/
 import { time } from "@/lib/format";
 import { makeT, type Locale, type T } from "@/lib/i18n";
 import { mskDayKey } from "@/lib/schedule";
+import type { Slot } from "@/lib/types";
+import { GameSlotsDialog } from "../event/GameSlotsDialog";
 import { buttonClass, Cover, Icon } from "../ui";
 
 /** A mission in the schedule dialog's picker. */
@@ -216,11 +218,29 @@ function RescheduleDialog({ eventId, startsAt, t, onClose }: { eventId: string; 
   );
 }
 
-/** The admin's «…» on a scheduled game: change its time, or cancel it. */
-export function EventAdminMenu({ eventId, startsAt, missionName, locale }: { eventId: string; startsAt: string; missionName: string; locale: Locale }) {
+/**
+ * The admin's «…» on a scheduled game: change its time, edit its slots (a game with slots; `roles` = the
+ * required roles new slots can have), or cancel it.
+ */
+export function EventAdminMenu({
+  eventId,
+  startsAt,
+  missionName,
+  slots,
+  roles,
+  locale,
+}: {
+  eventId: string;
+  startsAt: string;
+  missionName: string;
+  slots: Slot[];
+  roles: string[];
+  locale: Locale;
+}) {
   const t = useMemo(() => makeT(locale), [locale]);
   const [open, setOpen] = useState(false);
   const [rescheduling, setRescheduling] = useState(false);
+  const [editingSlots, setEditingSlots] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -258,6 +278,18 @@ export function EventAdminMenu({ eventId, startsAt, missionName, locale }: { eve
           >
             {t("event.admin.reschedule")}
           </button>
+          {slots.length > 0 && (
+            <button
+              type="button"
+              className={`${item} text-fg`}
+              onClick={() => {
+                setOpen(false);
+                setEditingSlots(true);
+              }}
+            >
+              {t("event.admin.slots")}
+            </button>
+          )}
           <form action={cancelGame} onSubmit={confirmCancel}>
             <input type="hidden" name="event" value={eventId} />
             <button type="submit" className={`${item} text-fg-danger`}>
@@ -267,6 +299,7 @@ export function EventAdminMenu({ eventId, startsAt, missionName, locale }: { eve
         </div>
       )}
       {rescheduling && <RescheduleDialog eventId={eventId} startsAt={startsAt} t={t} onClose={() => setRescheduling(false)} />}
+      {editingSlots && <GameSlotsDialog eventId={eventId} slots={slots} roles={roles} locale={locale} t={t} onClose={() => setEditingSlots(false)} />}
     </div>
   );
 }

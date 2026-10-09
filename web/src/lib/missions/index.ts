@@ -28,28 +28,36 @@ const roleKey = (r: string) => r.toLowerCase().replace(/[\s_-]+/g, "");
 
 export async function editorOptions(): Promise<EditorOptions> {
   const db = await getDb();
-  const [members, tagRows, roleRows] = await Promise.all([
+  const [members, tagRows, roles] = await Promise.all([
     db.query("SELECT discord_id, display_name FROM players WHERE discord_id IS NOT NULL ORDER BY lower(display_name)") as Promise<
       { discord_id: string; display_name: string }[]
     >,
     db.query("SELECT DISTINCT unnest(tags) AS tag FROM missions ORDER BY 1") as Promise<{ tag: string }[]>,
-    db.query("SELECT DISTINCT required_role FROM mission_slots WHERE required_role IS NOT NULL") as Promise<{ required_role: string }[]>,
+    slotRoles(),
   ]);
+  return {
+    members: members.map((m) => ({ discordId: m.discord_id, name: m.display_name })),
+    tags: tagRows.map((t) => t.tag),
+    roles,
+    maps: [...MAPS].sort((a, b) => a.label.localeCompare(b.label)),
+  };
+}
+
+/** Required roles a slot can have: the templates' and the Discord role map's, in the bot files' order. */
+export async function slotRoles(): Promise<string[]> {
+  const rows = (await (await getDb()).query("SELECT DISTINCT required_role FROM mission_slots WHERE required_role IS NOT NULL")) as {
+    required_role: string;
+  }[];
   // The templates' spelling wins ("Machine Gunner", where the Discord role is "MachineGunner").
   const roles = new Map<string, string>();
-  for (const r of [...ROLE_ORDER, ...roleRows.map((x) => x.required_role), ...discordRoleNames()]) {
+  for (const r of [...ROLE_ORDER, ...rows.map((x) => x.required_role), ...discordRoleNames()]) {
     if (!NOT_SLOT_ROLES.some((n) => roleKey(n) === roleKey(r)) && !roles.has(roleKey(r))) roles.set(roleKey(r), r);
   }
   const rank = (r: string) => {
     const i = ROLE_ORDER.findIndex((o) => roleKey(o) === roleKey(r));
     return i < 0 ? ROLE_ORDER.length : i;
   };
-  return {
-    members: members.map((m) => ({ discordId: m.discord_id, name: m.display_name })),
-    tags: tagRows.map((t) => t.tag),
-    roles: [...roles.values()].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b)),
-    maps: [...MAPS].sort((a, b) => a.label.localeCompare(b.label)),
-  };
+  return [...roles.values()].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
 }
 
 /** A scheduled or played game of the mission: then it can be archived, not deleted. Cancelled games don't count. */

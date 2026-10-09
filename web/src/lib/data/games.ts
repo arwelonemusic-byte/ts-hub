@@ -179,7 +179,7 @@ export const gamesData: HubData = {
     const db = await getDb();
     const [row] = await db.query(
       `SELECT md5(coalesce(e.plan_code, '') || '|' || coalesce(
-                (SELECT string_agg(s.position || ':' || coalesce(s.player_id::text, s.player_name, ''), ',' ORDER BY s.position)
+                (SELECT string_agg(s.position || ':' || s.group_id || ':' || s.group_name || ':' || s.role || ':' || coalesce(s.player_id::text, s.player_name, ''), ',' ORDER BY s.position)
                  FROM event_slots s WHERE s.event_id = e.id), '')) AS v
        FROM events e WHERE e.id = $1`,
       [id],

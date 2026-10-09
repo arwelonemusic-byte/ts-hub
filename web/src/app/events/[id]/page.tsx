@@ -27,6 +27,7 @@ import { LeaveSlotButton } from "@/components/event/SlotForms";
 import { LiveRefresh } from "@/components/event/LiveRefresh";
 import { JumpLink } from "@/components/event/Jump";
 import { EventAdminMenu } from "@/components/schedule/Schedule";
+import { slotRoles } from "@/lib/missions";
 import type { MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
 
@@ -36,11 +37,13 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
   const data = getHubData();
   const [ev, { locale, t }, viewer] = await Promise.all([data.getEvent(id, new Date()), getT(), getViewer()]);
   if (!ev) notFound();
-  const [history, players, version] = await Promise.all([
+  const [history, players, version, roles] = await Promise.all([
     data.getMissionHistory(ev.mission.id),
     // Names for an admin's «Посадить» picker.
     ev.status === "upcoming" && viewer?.isAdmin ? playerNames() : null,
     ev.status === "upcoming" ? data.getEventVersion(ev.id) : null,
+    // Required roles for slots an admin adds («Изменить слоты»).
+    ev.status === "upcoming" && viewer?.isAdmin ? slotRoles() : null,
   ]);
 
   return (
@@ -50,7 +53,7 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
         <Backdrop coverUrl={ev.mission.coverUrl} />
         {ev.status === "upcoming" && version && <LiveRefresh eventId={ev.id} version={version} />}
         {ev.status === "upcoming" ? (
-          <Upcoming ev={ev} history={history} viewer={viewer} players={players} locale={locale} t={t} />
+          <Upcoming ev={ev} history={history} viewer={viewer} players={players} roles={roles ?? []} locale={locale} t={t} />
         ) : (
           <Played ev={ev} history={history} locale={locale} t={t} />
         )}
@@ -73,6 +76,7 @@ function Upcoming({
   history,
   viewer,
   players,
+  roles,
   locale,
   t,
 }: {
@@ -80,6 +84,8 @@ function Upcoming({
   history: MissionHistory;
   viewer: Viewer | null;
   players: string[] | null;
+  /** Required roles for slots an admin adds. */
+  roles: string[];
   locale: Locale;
   t: T;
 }) {
@@ -118,7 +124,9 @@ function Upcoming({
             {t("event.workshop")}
             <Icon name="external-trailing" />
           </ButtonLink>
-          {viewer?.isAdmin && <EventAdminMenu eventId={ev.id} startsAt={ev.startsAt} missionName={ev.mission.name} locale={locale} />}
+          {viewer?.isAdmin && (
+            <EventAdminMenu eventId={ev.id} startsAt={ev.startsAt} missionName={ev.mission.name} slots={ev.slots} roles={roles} locale={locale} />
+          )}
         </div>
       </Hero>
       <Columns

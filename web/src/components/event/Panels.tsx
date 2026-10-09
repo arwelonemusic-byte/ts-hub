@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { number, shortDate } from "@/lib/format";
 import { plural, type Locale, type T } from "@/lib/i18n";
+import { squadsOf } from "@/lib/squads";
 import { planOpenHref, replayUrl } from "@/lib/links";
 import type { Award, Briefing, LeaderboardEntry, Mission, MissionHistory, PastEvent, PlanRef, Slot, UpcomingEvent } from "@/lib/types";
 import { buttonClass, ButtonLink, Eyebrow, Icon, ProgressBar, Tag } from "../ui";
@@ -334,7 +335,7 @@ export function PlanPanel({
 export function SlotsPanel({ ev, viewer, players, t }: { ev: UpcomingEvent; viewer: Viewer | null; players: string[] | null; t: T }) {
   const slots = ev.slots;
   const taken = slots.filter((s) => s.playerName).length;
-  const groups = [...new Set(slots.map((s) => s.groupId))].sort((a, b) => (a === "1'6" ? -1 : b === "1'6" ? 1 : a.localeCompare(b)));
+  const groups = squadsOf(slots);
   const errors: SlotErrors = {
     taken: t("slots.error.taken"),
     role: t("slots.needRole", { role: "{name}" }),
@@ -391,13 +392,12 @@ export function SlotsPanel({ ev, viewer, players, t }: { ev: UpcomingEvent; view
           ))}
         </datalist>
       )}
-      {groups.map((g) => {
-        const rows = slots.filter((s) => s.groupId === g);
+      {groups.map(({ groupId, groupName, slots: rows }) => {
         return (
-          <div key={g} className="flex flex-col">
+          <div key={groupId} className="flex flex-col">
             <div className="flex items-baseline justify-between pb-1.5 text-fg-tertiary">
               <span className="type-eyebrow">
-                {g} {rows[0].groupName}
+                {groupId} {groupName}
               </span>
               <span className="type-caption">
                 {rows.filter((s) => s.playerName).length} / {rows.length}

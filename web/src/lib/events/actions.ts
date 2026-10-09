@@ -4,8 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getHubData } from "../data";
 import { getDb } from "../db";
+import { LIMITS } from "../missions/draft";
 import { playerIdOf } from "../players";
 import { fromMskFields, isUsualSlot, mskDayKey } from "../schedule";
+import type { EditableSquad } from "../squads";
 import { getViewer } from "../viewer";
 
 /*
@@ -92,4 +94,68 @@ export async function cancelGame(form: FormData): Promise<void> {
   revalidatePath("/events");
   revalidatePath(`/missions/${ev.mission.id}`);
   redirect("/events");
+}
+
+export type GameSlotsState = { error: "forbidden" | "invalid" | "stale" | "groupId" | "groupDup" | "role" | "squads" } | null;
+
+/**
+ * «Изменить слоты» (admin) on a scheduled game — its own slots, not the mission's template (user decisions
+ * 2026-10-09). An existing slot (`key` = its position) can be renamed and its squad's callsign and name
+ * changed, but it is never deleted and keeps its required role; whoever is in it stays. New slots and
+ * squads get the next positions, so a page left open never takes a slot by a position that moved.
+ */
+export async function editGameSlots(eventId: string, input: EditableSquad[]): Promise<GameSlotsState> {
+  const viewer = await getViewer();
+  if (!viewer?.isAdmin) return { error: "forbidden" };
+  const db = await getDb();
+  const [ev] = await db.query("SELECT status FROM events WHERE id = $1", [eventId]);
+  if (!ev || ev.status !== "scheduled" || !Array.isArray(input)) return { error: "invalid" };
+  const rows = (await db.query("SELECT position FROM event_slots WHERE event_id = $1", [eventId])) as { position: number }[];
+  const existing = new Map(rows.map((r) => [String(r.position), r.position]));
+
+  const clip = (v: unknown, n: number) => (typeof v === "string" ? v.trim().slice(0, n) : "");
+  const squads = input.map((sq) => ({
+    groupId: clip(sq?.groupId, LIMITS.groupId),
+    name: clip(sq?.name, LIMITS.groupName),
+    slots: (Array.isArray(sq?.slots) ? sq.slots : []).map((s) => ({
+      key: typeof s?.key === "string" ? s.key : undefined,
+      role: clip(s?.role, LIMITS.role),
+      requiredRole: clip(s?.requiredRole, LIMITS.requiredRole) || null,
+    })),
+  }));
+  const all = squads.flatMap((sq) => sq.slots);
+  if (squads.length > LIMITS.squads || all.length > LIMITS.slots) return { error: "squads" };
+  if (squads.some((sq) => !sq.groupId)) return { error: "groupId" };
+  if (new Set(squads.map((sq) => sq.groupId.toLowerCase())).size !== squads.length) return { error: "groupDup" };
+  if (squads.some((sq) => !sq.slots.length || sq.slots.some((s) => !s.role))) return { error: "role" };
+  // Every slot the game has, each once: none deleted, and none added meanwhile by someone else.
+  const keys = all.flatMap((s) => (s.key ? [s.key] : []));
+  if (keys.length !== existing.size || new Set(keys).size !== keys.length || keys.some((k) => !existing.has(k))) return { error: "stale" };
+
+  await db.transaction(async (tx) => {
+    let next = Math.max(-1, ...rows.map((r) => r.position)) + 1;
+    for (const sq of squads) {
+      for (const s of sq.slots) {
+        if (s.key) {
+          // Renames only: the required role and whoever is in the slot stay as they are.
+          await tx.query("UPDATE event_slots SET group_id = $3, group_name = $4, role = $5 WHERE event_id = $1 AND position = $2", [
+            eventId,
+            existing.get(s.key),
+            sq.groupId,
+            sq.name,
+            s.role,
+          ]);
+        } else {
+          await tx.query(
+            "INSERT INTO event_slots (event_id, position, group_id, group_name, role, required_role) VALUES ($1, $2, $3, $4, $5, $6)",
+            [eventId, next++, sq.groupId, sq.name, s.role, s.requiredRole],
+          );
+        }
+      }
+    }
+    await tx.query("UPDATE events SET updated_at = NOW() WHERE id = $1", [eventId]);
+  });
+  revalidatePath(`/events/${eventId}`);
+  revalidatePath("/events");
+  return null;
 }
