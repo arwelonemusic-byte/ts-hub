@@ -5,6 +5,8 @@ import type { FeedItem, FeedMeta, FeedMonth } from "@/lib/feed";
 import { dayRange, monthYear } from "@/lib/format";
 import { makeT, plural, type Locale, type T } from "@/lib/i18n";
 import { addMonths, daysInMonth, monthOf, monthStart, mskDayKey, mskParts, weekStart, type MonthKey } from "@/lib/schedule";
+import { fieldsFor, ScheduleDialog, type MissionOption, type ScheduleInitial } from "../schedule/Schedule";
+import { buttonClass } from "../ui";
 import { FeedCalendar } from "./Calendar";
 import { FeedRow, WeekHeader } from "./Cards";
 
@@ -70,8 +72,22 @@ function Edge({ edgeRef, loading, failed, onRetry, t }: { edgeRef: RefObject<HTM
  * One chronological feed of played ops, scheduled ops and open slots. Lands on the
  * next op, loads neighbouring months as you scroll, and keeps the calendar in step:
  * the calendar shows the month at the top of the feed, and clicking it jumps the feed.
+ * With `missions` (admins only) open slots and the button above the calendar schedule games.
  */
-export function EventFeed({ initial, meta, anchorDay, locale }: { initial: FeedMonth[]; meta: FeedMeta; anchorDay: string | null; locale: Locale }) {
+export function EventFeed({
+  initial,
+  meta,
+  anchorDay,
+  locale,
+  missions = null,
+}: {
+  initial: FeedMonth[];
+  meta: FeedMeta;
+  anchorDay: string | null;
+  locale: Locale;
+  missions?: MissionOption[] | null;
+}) {
+  const [scheduling, setScheduling] = useState<ScheduleInitial | null>(null);
   const t = useMemo(() => makeT(locale), [locale]);
   const now = useMemo(() => new Date(meta.now), [meta.now]);
 
@@ -279,7 +295,13 @@ export function EventFeed({ initial, meta, anchorDay, locale }: { initial: FeedM
                   <WeekHeader title={w.title} label={w.label} />
                   {w.items.map((it) => (
                     <div key={itemKey(it)} data-feed-date={mskDayKey(it.startsAt)} className="scroll-mt-[84px]">
-                      <FeedRow item={it} nextId={meta.nextId} locale={locale} t={t} />
+                      <FeedRow
+                        item={it}
+                        nextId={meta.nextId}
+                        locale={locale}
+                        t={t}
+                        onOpenSlot={missions ? (iso) => setScheduling(fieldsFor(iso)) : undefined}
+                      />
                     </div>
                   ))}
                 </div>
@@ -289,7 +311,12 @@ export function EventFeed({ initial, meta, anchorDay, locale }: { initial: FeedM
         ))}
         {last < meta.last && <Edge edgeRef={bottomRef} loading={busy === "next"} failed={failed === "next"} onRetry={retryNext} t={t} />}
       </div>
-      <aside className="sticky top-[84px] hidden w-[300px] shrink-0 lg:block">
+      <aside className="sticky top-[84px] hidden w-[300px] shrink-0 flex-col gap-3 lg:flex">
+        {missions && (
+          <button type="button" onClick={() => setScheduling({})} className={`${buttonClass("primary", "m")} w-full`}>
+            {t("schedule.button")}
+          </button>
+        )}
         <FeedCalendar
           month={calMonth}
           itemsByDay={itemsByDay}
@@ -304,6 +331,9 @@ export function EventFeed({ initial, meta, anchorDay, locale }: { initial: FeedM
           t={t}
         />
       </aside>
+      {scheduling && missions && (
+        <ScheduleDialog missions={missions} initial={scheduling} locale={locale} onClose={() => setScheduling(null)} />
+      )}
     </div>
   );
 }

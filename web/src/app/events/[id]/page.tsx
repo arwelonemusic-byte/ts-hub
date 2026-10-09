@@ -26,6 +26,7 @@ import { playerNames, slottingOpen, viewerSlot } from "@/lib/slots";
 import { LeaveSlotButton } from "@/components/event/SlotForms";
 import { LiveRefresh } from "@/components/event/LiveRefresh";
 import { SlotsJump } from "@/components/event/SlotsJump";
+import { EventAdminMenu } from "@/components/schedule/Schedule";
 import type { MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
 
@@ -114,6 +115,7 @@ function Upcoming({
             {t("event.workshop")}
             <Icon name="external-trailing" />
           </ButtonLink>
+          {viewer?.isAdmin && <EventAdminMenu eventId={ev.id} startsAt={ev.startsAt} missionName={ev.mission.name} locale={locale} />}
         </div>
       </Hero>
       <Columns

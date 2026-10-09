@@ -153,21 +153,42 @@ export function PlayedRow({ ev, locale, t }: { ev: Played; locale: Locale; t: T 
   );
 }
 
-/** Figma "Open slot" (13:347): a usual slot with no mission picked yet. */
-export function OpenSlot({ t }: { t: T }) {
+/** Figma "Open slot" (13:347): a usual slot with no mission picked yet. For an admin it opens the schedule dialog. */
+export function OpenSlot({ t, onSchedule }: { t: T; onSchedule?: () => void }) {
+  const box = "flex h-[76px] min-w-0 flex-1 flex-col justify-center gap-0.5 rounded-xl border border-dashed border-line-strong px-5 py-4";
+  if (onSchedule) {
+    return (
+      <button type="button" onClick={onSchedule} className={`${box} group text-left hover:border-line-accent hover:bg-accent-subtle`}>
+        <span className="type-label-m text-fg-label group-hover:text-fg-accent">{t("feed.open.schedule")}</span>
+        <span className="type-caption text-fg-tertiary">{t("feed.open.detail")}</span>
+      </button>
+    );
+  }
   return (
-    <div className="flex h-[76px] min-w-0 flex-1 flex-col justify-center gap-0.5 rounded-xl border border-dashed border-line-strong px-5 py-4">
+    <div className={box}>
       <span className="type-label-m text-fg-label">{t("feed.open.title")}</span>
       <span className="type-caption text-fg-tertiary">{t("feed.open.detail")}</span>
     </div>
   );
 }
 
-/** One feed row: date block + the card for its kind. */
-export function FeedRow({ item, nextId, locale, t }: { item: FeedItem; nextId: string | null; locale: Locale; t: T }) {
+/** One feed row: date block + the card for its kind. `onOpenSlot` (admins) schedules into an open slot. */
+export function FeedRow({
+  item,
+  nextId,
+  locale,
+  t,
+  onOpenSlot,
+}: {
+  item: FeedItem;
+  nextId: string | null;
+  locale: Locale;
+  t: T;
+  onOpenSlot?: (startsAt: string) => void;
+}) {
   const featured = item.kind === "upcoming" && item.id === nextId;
   let body: ReactNode;
-  if (item.kind === "open") body = <OpenSlot t={t} />;
+  if (item.kind === "open") body = <OpenSlot t={t} onSchedule={onOpenSlot && (() => onOpenSlot(item.startsAt))} />;
   else if (item.kind === "played") body = <PlayedRow ev={item} locale={locale} t={t} />;
   else body = featured ? <FeaturedCard ev={item} locale={locale} t={t} /> : <UpcomingCard ev={item} locale={locale} t={t} />;
   return (

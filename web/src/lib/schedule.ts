@@ -33,6 +33,20 @@ export function weekStart(d: Date): Date {
 }
 
 /** Usual slots from `from` onwards, covering `weeks` calendar weeks (incl. the current one). */
+/** One of the USUAL_SLOTS (Tue 20:00 / Sun 19:00 MSK); anything else is an extra op. */
+export function isUsualSlot(d: Date): boolean {
+  const m = new Date(d.getTime() + MSK_OFFSET_MS);
+  return USUAL_SLOTS.some((s) => m.getUTCDay() === s.weekday && m.getUTCHours() === s.hour && m.getUTCMinutes() === s.minute);
+}
+
+/** A date field ("2026-10-10") plus a time field ("19:00"), read as MSK wall clock; null if either is malformed. */
+export function fromMskFields(day: string, hhmm: string): Date | null {
+  const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
+  const t = /^(\d{2}):(\d{2})$/.exec(hhmm);
+  if (!d || !t || Number(t[1]) > 23 || Number(t[2]) > 59) return null;
+  return mskDate(Number(d[1]), Number(d[2]) - 1, Number(d[3]), Number(t[1]), Number(t[2]));
+}
+
 export function usualSlotsFrom(from: Date, weeks: number): Date[] {
   const start = weekStart(from);
   const { y, mo, day } = mskParts(start);

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { BriefingPanel, isOwnPlan, MissionPanel, PlanRow } from "@/components/event/Panels";
 import { MissionSlotsPanel } from "@/components/mission/MissionSlotsPanel";
+import { ScheduleButton } from "@/components/schedule/Schedule";
 import { buttonClass, ButtonLink, Cover, Eyebrow, Icon, StatusChip } from "@/components/ui";
 import { getHubData } from "@/lib/data";
 import { duration, eventDay, minutesBetween } from "@/lib/format";
@@ -25,7 +26,7 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
     <>
       <AppHeader active="missions" />
       <main className="flex flex-col items-center gap-6 px-4 pb-16 pt-6 md:px-8">
-        <Hero mission={mission} games={games} locale={locale} t={t} />
+        <Hero mission={mission} games={games} canSchedule={!!viewer?.isAdmin} locale={locale} t={t} />
         <div className="flex w-full max-w-[1216px] flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex min-w-0 flex-1 flex-col gap-4">
             {mission.briefing && <BriefingPanel b={mission.briefing} t={t} />}
@@ -52,7 +53,7 @@ function StatBox({ label, value }: { label: string; value: ReactNode }) {
 }
 
 /** Summary on the left, cover on the right (the designer's swap on the canvas). */
-function Hero({ mission, games, locale, t }: { mission: Mission; games: HubEvent[]; locale: Locale; t: T }) {
+function Hero({ mission, games, canSchedule, locale, t }: { mission: Mission; games: HubEvent[]; canSchedule: boolean; locale: Locale; t: T }) {
   const played = games.filter((g): g is PastEvent => g.status === "past");
   const n = played.length;
   const avgPlayers = n ? Math.round(played.reduce((s, g) => s + g.attended, 0) / n) : null;
@@ -96,6 +97,15 @@ function Hero({ mission, games, locale, t }: { mission: Mission; games: HubEvent
               <Icon name="external-dark" />
             </ButtonLink>
             {/* Starts a new plan of the viewer's own (app/plan/open). A POST, so only a click creates one. */}
+            {canSchedule && (
+              <ScheduleButton
+                missions={[{ id: mission.id, name: mission.name, mapLabel: mission.mapLabel }]}
+                initial={{ missionId: mission.id }}
+                locale={locale}
+                label={t("schedule.button")}
+                className={buttonClass("secondary", "m")}
+              />
+            )}
             {mission.planning !== false && (
               <form action="/plan/open" method="post" target="_blank">
                 <input type="hidden" name="mission" value={mission.id} />

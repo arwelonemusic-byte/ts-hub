@@ -99,6 +99,14 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   it, any time. Role names compare without case or spaces ("MachineGunner" = "Machine Gunner"). No progressive locks
   (the bot has none) and no reserving slots for friends (parked). Roles come from the session, so a new Discord role
   counts after the next login.
+- **Scheduling** (`lib/events/actions.ts`, admins only — user decision 2026-10-09): one dialog
+  (`components/schedule/Schedule.tsx`) picks a mission plus an MSK date and time and creates the game with a copy of the
+  mission's slot template, then opens its page. It opens from an open usual slot in the feed (time filled in), from
+  «Запланировать игру» above the calendar (any time, so extra ops too) and from a mission page (mission filled in).
+  `extra` is set when the time isn't a usual slot. The game page's «…» changes the time («Изменить время»: same id,
+  mission and slots) or cancels it (`status = 'cancelled'`: off the feed, row kept; scheduling that mission on that day
+  again replaces it). No other edits: a wrong mission means cancel and schedule anew. The id keeps the day it was first
+  scheduled for.
 - **Scheduled game pages stay live** (`components/event/LiveRefresh.tsx`): while the tab is visible it polls
   `/api/events/<id>/version` every 5 s (an md5 of who's in which slot plus the attached plan, `getEventVersion`) and calls
   `router.refresh()` when it changed. Taking a slot someone just took is refused anyway («Слот уже заняли»).

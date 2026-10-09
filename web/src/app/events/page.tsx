@@ -1,8 +1,10 @@
 import { AppHeader } from "@/components/AppHeader";
 import { EventFeed } from "@/components/feed/EventFeed";
+import { getHubData } from "@/lib/data";
 import { getFeedMeta, getFeedMonths } from "@/lib/feed";
 import { getT } from "@/lib/i18n-server";
 import { isDayKey, monthOf } from "@/lib/schedule";
+import { getViewer } from "@/lib/viewer";
 
 const AUTH_NOTICE: Record<string, string> = {
   not_configured: "auth.notConfigured",
@@ -16,7 +18,13 @@ const AUTH_NOTICE: Record<string, string> = {
  */
 export default async function EventsPage({ searchParams }: PageProps<"/events">) {
   const { auth, date } = await searchParams;
-  const [{ locale, t }, meta] = await Promise.all([getT(), getFeedMeta(new Date())]);
+  const [{ locale, t }, meta, viewer] = await Promise.all([getT(), getFeedMeta(new Date()), getViewer()]);
+  // Admins schedule games from the feed: the missions for the dialog's picker.
+  const missions = viewer?.isAdmin
+    ? (await getHubData().listMissions())
+        .map((m) => ({ id: m.id, name: m.name, mapLabel: m.mapLabel }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : null;
 
   const asked = typeof date === "string" && isDayKey(date) ? date : null;
   let anchorDay = asked ?? meta.nextDay ?? meta.today;
@@ -45,7 +53,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
             {t("events.intro.c")}
           </p>
         </div>
-        <EventFeed initial={initial} meta={meta} anchorDay={anchorDay} locale={locale} />
+        <EventFeed initial={initial} meta={meta} anchorDay={anchorDay} locale={locale} missions={missions} />
       </main>
     </>
   );
