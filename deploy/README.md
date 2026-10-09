@@ -11,6 +11,13 @@ Routine deploy, after pushing `master`:
 ssh slotbot-msk /opt/ts-web/deploy-hub.sh
 ```
 
+**Status (2026-10-09):** steps 1-4 and the service are done; the hub runs on `127.0.0.1:3004` with its database
+seeded. Still to do: the Caddy block (step 5, once DNS resolves) and the Discord redirect (step 0).
+
+**The box runs npm 10.8.2.** A lockfile written by a newer npm can be missing entries npm 10 insists on (it once lacked
+`@emnapi/*`, optional WASM fallbacks), and `npm ci` then refuses to run. Regenerate it with the box's npm:
+`npx npm@10.8.2 install --package-lock-only` in `web/`, and commit.
+
 ## One-time setup
 
 0. **Prerequisites.**
