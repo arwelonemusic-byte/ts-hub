@@ -17,7 +17,6 @@ export type FeedItem =
       id: string;
       startsAt: ISODate;
       mission: CardMission;
-      extra: boolean;
       taken: number;
       max: number;
       planReady: boolean;
@@ -86,7 +85,6 @@ export async function getFeedMonths(from: MonthKey, to: MonthKey, meta: FeedMeta
           id: e.id,
           startsAt: e.startsAt,
           mission: card(e.mission),
-          extra: e.extra,
           taken: e.slots.filter((s) => s.playerName).length,
           max: e.slots.length,
           planReady: !!e.plan,

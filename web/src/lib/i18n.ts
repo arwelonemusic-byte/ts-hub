@@ -143,7 +143,6 @@ const RU: Dict = {
   "feed.slots": "Слоты",
   "feed.plan.ready": "План готов",
   "feed.plan.awaiting": "Ждём план",
-  "feed.extra": "Доп. игра",
   "feed.players.one": "{n} игрок",
   "feed.players.few": "{n} игрока",
   "feed.players.many": "{n} игроков",

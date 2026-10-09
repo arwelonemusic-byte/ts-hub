@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { FeedItem } from "@/lib/feed";
 import { dayOfMonth, duration, eventDay, shortWeekday, time } from "@/lib/format";
 import { plural, type Locale, type T } from "@/lib/i18n";
-import { buttonClass, Cover, Icon, ProgressBar, StatusChip, Tag } from "../ui";
+import { buttonClass, Cover, Icon, ProgressBar, StatusChip } from "../ui";
 
 type Upcoming = Extract<FeedItem, { kind: "upcoming" }>;
 type Played = Extract<FeedItem, { kind: "played" }>;
@@ -89,7 +89,6 @@ export function FeaturedCard({ ev, locale, t }: { ev: Upcoming; locale: Locale; 
           <span className="type-body-s text-fg-secondary">
             {eventDay(ev.startsAt, locale)} · {time(ev.startsAt)} {t("events.msk")}
           </span>
-          {ev.extra && <Tag outline>{t("feed.extra")}</Tag>}
         </div>
         <h3 className="type-heading-xl text-fg">{ev.mission.name}</h3>
         <Meta mission={ev.mission} />
@@ -116,7 +115,6 @@ export function UpcomingCard({ ev, locale, t }: { ev: Upcoming; locale: Locale; 
           <span className="type-label-s text-fg">
             {eventDay(ev.startsAt, locale)} · {time(ev.startsAt)} {t("events.msk")}
           </span>
-          {ev.extra && <Tag outline>{t("feed.extra")}</Tag>}
         </div>
         <h3 className="type-heading-m text-fg">{ev.mission.name}</h3>
         <Meta mission={ev.mission} />
