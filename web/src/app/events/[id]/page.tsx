@@ -111,10 +111,6 @@ function Upcoming({
               {t("event.slotIn")}
             </ButtonLink>
           )}
-          <ButtonLink href={`/events/${ev.id}/calendar.ics`}>
-            <Icon name="calendar" />
-            {t("event.addToCalendar")}
-          </ButtonLink>
           <ButtonLink href={workshopUrl(ev.mission)} external>
             {t("event.workshop")}
             <Icon name="external-trailing" />
