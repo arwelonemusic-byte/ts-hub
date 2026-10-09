@@ -44,6 +44,14 @@ export interface PostGame {
 const ACCENT = 0xf4db50;
 const GREY = 0x2e3439;
 
+/**
+ * Pinged when the post goes up (@Анонсы, @Reforger). Mentions only ping from the message text above the card, and
+ * only on the first post: the hub's edits never ping again. allowed_mentions lets exactly these roles ping, so a
+ * player's name in a slot can't. TS Hub Bot has «Mention @everyone, @here and All Roles» in #анонсы.
+ */
+const PING_ROLES = ["1211570718592991312", "1260874468641869894"];
+const ping = { content: PING_ROLES.map((id) => `<@&${id}>`).join(" "), allowed_mentions: { roles: PING_ROLES } };
+
 export function renderGamePost(g: PostGame): DiscordMessage {
   const unix = Math.floor(new Date(g.startsAt).getTime() / 1000);
   const when = `${eventDay(g.startsAt, "ru")} · ${time(g.startsAt)} МСК`;
@@ -51,6 +59,7 @@ export function renderGamePost(g: PostGame): DiscordMessage {
 
   if (g.status === "cancelled") {
     return {
+      ...ping,
       embeds: [{ color: GREY, author: { name: when }, title: g.mission.name, description: "**Игра отменена**" }],
       components: [],
     };
@@ -58,6 +67,7 @@ export function renderGamePost(g: PostGame): DiscordMessage {
 
   if (g.status === "played") {
     return {
+      ...ping,
       embeds: [
         {
           color: GREY,
@@ -73,6 +83,7 @@ export function renderGamePost(g: PostGame): DiscordMessage {
   }
 
   return {
+    ...ping,
     embeds: [
       {
         color: ACCENT,
