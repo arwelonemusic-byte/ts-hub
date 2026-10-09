@@ -1,9 +1,9 @@
 # CLAUDE.md
 
 TS Hub is the community portal for Tactical Shift that ties together Player / Mission / Plan / Event / Replay.
-Status: **POC**, not deployed yet (`deploy/README.md`). Missions, players and plans are in PostgreSQL. Played games
-are real but not in the database yet (below); upcoming games are mock data. Use real data when it's at hand; otherwise
-fill gaps with plausible mock values instead of blocking.
+Status: **POC**, not deployed yet (`deploy/README.md`). Missions, players and plans are in PostgreSQL. Games are real
+but not in the database yet (below). Use real data when it's at hand; otherwise fill gaps with plausible mock values
+instead of blocking.
 
 ## Layout
 
@@ -94,6 +94,10 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   replay's world file (`ops_planner.replays.world`; a generic `TS_Mission` world needs the terrain and where the players were).
   Its plan is the last push before the op whose markers sit where it was played: no replay has a /syncplan stamp yet.
   `slotted` is null for these games (nobody slotted through the hub), and friendly-fire incidents have no op clock.
+- **Scheduled games** are `UPCOMING` in `web/src/lib/data/mock.ts`, copied by hand from the slotting bot's #анонсы post:
+  mission, MSK time, and who took which slot (`"<groupId>/<role>"` → Discord display name, as the bot shows it). A game
+  drops off 4 hours after its start; back-fill it once its stats report exists. Usual Tue/Sun slots with nothing
+  scheduled are open slots in the feed. No progressive slot locks: the bot has none.
 - **Briefings are sections** (`Briefing.sections`, plus optional `sides` for За кого / Против кого), as authors write
   them in the catalogue. A section body is plain text: blank lines split paragraphs, "- " lines are list items, and
   list items under «Задачи» get the numbered badges.
@@ -121,7 +125,7 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   (planner `lib/hubLink.ts`); it fetches the map key and Markers.layer from `/api/missions/<id>/planner`, which allows
   the planner origin (CORS). Plans are the `plans` table (`lib/plans/store.ts`).
   In dev the planner is the local one on :3000 (`PLANNER_PLANS_URL` overrides); replay links stay on production.
-  Mock upcoming games start with no plan.
+  Scheduled games start with no plan.
 - **Auth:** Discord OAuth ported from the Training Portal, plus an OAuth `state` cookie. The session is an HS256
   JWT in `ts_hub_session`. Without the env vars, login redirects back with a "not configured" notice. Steam is planned.
   Env template: `web/.env.example`. Pages ask `getViewer()` (`lib/viewer.ts`) who is looking. On a dev machine

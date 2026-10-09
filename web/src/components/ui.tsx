@@ -57,7 +57,7 @@ export function Tag({ children, outline }: { children: ReactNode; outline?: bool
 /** Figma "Status chip": Accent for upcoming, Neutral for played. */
 export function StatusChip({ tone, children }: { tone: "accent" | "neutral"; children: ReactNode }) {
   return (
-    <span className={`inline-flex items-center rounded-sm px-2 py-1 type-chip ${tone === "accent" ? "bg-accent text-fg-on-accent" : "bg-raised text-fg"}`}>
+    <span className={`inline-flex w-fit items-center rounded-sm px-2 py-1 type-chip ${tone === "accent" ? "bg-accent text-fg-on-accent" : "bg-raised text-fg"}`}>
       {children}
     </span>
   );

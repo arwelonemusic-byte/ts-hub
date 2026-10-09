@@ -1,24 +1,21 @@
 /**
- * Games are still mock data for the POC. Played games are real: past-events.json, built from the
- * replay-stats reports by data/events/build_past_events.py. Upcoming dates, slot fills, PL names
- * and the Fallen Hawk plan codes are invented. Missions come from the database
- * (lib/data/missions.ts) and hub plans are real (lib/plans, against the planner). Upcoming
- * events are pinned to the next usual slots relative to "now", so the page never goes stale.
+ * Games aren't in the database yet, but they are real. Played games are past-events.json, built from
+ * the replay-stats reports by data/events/build_past_events.py; scheduled games are UPCOMING below,
+ * copied from the slotting bot's #анонсы posts. Missions come from the database (lib/data/missions.ts)
+ * and hub plans are real (lib/plans, against the planner).
  */
 import type {
   Award,
   HubEvent,
   LeaderboardEntry,
   Mission,
-  MissionSlot,
-  MissionSquad,
   PastEvent,
   PlanRef,
   Slot,
   UpcomingEvent,
 } from "@/lib/types";
 import { eventPlans, missionPlans } from "@/lib/plans";
-import { mskDate, usualSlotsFrom } from "@/lib/schedule";
+import { mskDate, mskParts } from "@/lib/schedule";
 import type { HubData } from "./index";
 import { loadMarkersLayer, loadMissions, missionMap } from "./missions";
 import pastEvents from "./past-events.json";
@@ -31,56 +28,6 @@ function pick(ms: Missions, id: string): Mission {
   const m = ms.get(id);
   if (!m) throw new Error(`mock: no mission "${id}"`);
   return m;
-}
-
-/** The missions the mock upcoming games use (ids in the catalogue). */
-const M = {
-  foxhound: "foxhound",
-  geras: "project-geras",
-  baseJumping: "base-jumping",
-  circuitBreaker: "circuit-breaker",
-  counterpunch: "counterpunch",
-  fallenHawk: "fallen-hawk",
-};
-
-// ---------------------------------------------------------------- slots
-
-const ROSTER = [
-  "M_i", "Prais777", "JFKennedy", "[En-Y]Inspector", "[BS] Ушастый перец", "[En-Y]Boba", "Mike_Jay_Evans",
-  "[En-Y]Sasce2044", "[RTT] J.A.N.", "[En-Y]Sterben", "[En-Y]amil1Xe", "Osamich", "Jaelise", "OnlineKiller.",
-  "Galaxy", "Сваркослав", "Venom_coceT", "Tactical Shift", "Valso", "[En-Y]BURBON", "Georg Shultz", "DarkCote",
-  "[BS] Griggs", "alien_2010", "Lis", "Kedr", "Nomad", "Wolfram", "Sever", "Bort", "Grach", "Yasen",
-];
-
-/** Progressive slotting tier: leaders first, then fireteam leaders, then everyone else. */
-function tier(slot: MissionSlot): number {
-  if (slot.requiredRole === "PL" || slot.requiredRole === "SL") return 0;
-  if (slot.requiredRole === "FTL") return 1;
-  return 2;
-}
-
-/** A game's copy of the mission's slot template, first `filled` taken, with progressive locks. */
-function makeSlots(squads: MissionSquad[], filled: number, pl: string | null): Slot[] {
-  const rows = squads.flatMap((sq) => sq.slots.map((slot, i) => ({ slot, sq, i })));
-  const slots: Slot[] = rows.map(({ slot, sq, i }) => ({
-    id: `${sq.groupId}-${i}`, groupId: sq.groupId, groupName: sq.name, role: slot.role, playerName: null, locked: false,
-  }));
-  const order = rows.map((r, i) => ({ ...r, s: slots[i] })).sort((a, b) => tier(a.slot) - tier(b.slot));
-  const pool = ROSTER.filter((n) => n !== pl);
-  let taken = 0;
-  for (const { slot, s } of order) {
-    if (taken >= filled) break;
-    if (slot.requiredRole === "PL") {
-      if (!pl) continue;
-      s.playerName = pl;
-    } else {
-      s.playerName = pool.shift() ?? null;
-    }
-    taken++;
-  }
-  const openTier = Math.min(...order.filter(({ s }) => !s.playerName).map(({ slot }) => tier(slot)), 3);
-  for (const { slot, s } of order) s.locked = !s.playerName && tier(slot) > openTier;
-  return slots;
 }
 
 // ---------------------------------------------------------------- past ops
@@ -106,43 +53,75 @@ function buildPast(ms: Missions): PastEvent[] {
 
 // ---------------------------------------------------------------- upcoming
 
+/** A scheduled game stays listed this long after its start, so it doesn't vanish while it's being played. */
+const GAME_MS = 4 * 3600_000;
+
+/**
+ * Scheduled games, copied from the slotting bot's #анонсы posts until the hub runs slotting. `taken` maps
+ * "<group>/<slot>" (the mission's slot template) to the player's Discord display name, as the bot shows it.
+ * The usual Tue/Sun slots with nothing scheduled show as open slots in the feed.
+ */
+const UPCOMING: {
+  mission: string;
+  at: [number, number, number, number]; // month (1-12), day, hour, minute — 2026, MSK
+  taken: Record<string, string>;
+  platoonLeader?: string;
+}[] = [
+  {
+    mission: "project-geras",
+    at: [10, 10, 19, 0],
+    taken: {
+      "Bravo-1/SL": "Arstotzka",
+      "Bravo-1/RED - FTL": "[лампас] Venom_coceT",
+      "Bravo-1/RED - Automatic Rifleman": "Smoker (OnlineKiller)",
+      "Bravo-1/RED - Grenadier": "Shultz",
+      "Bravo-1/RED - Rifleman": "[HL]Prais777",
+      "Bravo-2/SL": "lim",
+    },
+  },
+];
+
+/** A game's copy of the mission's slot template, with the taken slots filled in. */
+function gameSlots(mission: Mission, taken: Record<string, string>): Slot[] {
+  const slots: Slot[] = (mission.squads ?? []).flatMap((sq) =>
+    sq.slots.map((slot, i) => ({
+      id: `${sq.groupId}-${i}`,
+      groupId: sq.groupId,
+      groupName: sq.name,
+      role: slot.role,
+      playerName: taken[`${sq.groupId}/${slot.role}`] ?? null,
+      // The bot has no progressive locks.
+      locked: false,
+    })),
+  );
+  const unknown = Object.keys(taken).filter((k) => !slots.some((s) => `${s.groupId}/${s.role}` === k));
+  if (unknown.length) throw new Error(`mock: ${mission.id} has no slot ${unknown.join(", ")}`);
+  return slots;
+}
+
 function buildUpcoming(now: Date, ms: Missions): UpcomingEvent[] {
-  const [s1, s2, s3, , s5] = usualSlotsFrom(now, 4);
-  const ev = (at: Date, missionId: string, rest: Partial<UpcomingEvent> & { filled: number }): UpcomingEvent => {
-    const { filled, ...more } = rest;
+  return UPCOMING.map(({ mission: missionId, at, taken, platoonLeader }): UpcomingEvent => {
+    const [month, day, hour, minute] = at;
+    const start = mskDate(2026, month - 1, day, hour, minute);
+    const { wd } = mskParts(start);
+    const usual = minute === 0 && ((wd === 2 && hour === 20) || (wd === 0 && hour === 19));
     const mission = pick(ms, missionId);
     return {
-      id: `${at.toISOString().slice(0, 10)}-${mission.id}`,
+      id: `${start.toISOString().slice(0, 10)}-${missionId}`,
       status: "upcoming",
-      startsAt: at.toISOString(),
+      startsAt: start.toISOString(),
       mission,
-      extra: false,
+      extra: !usual,
+      platoonLeader: platoonLeader ?? null,
       plan: null,
-      ...more,
-      slots: makeSlots(mission.squads ?? [], filled, more.platoonLeader ?? null),
+      slots: gameSlots(mission, taken),
     };
-  };
-  // Extra op on the Thursday after the second slot.
-  const thursday = new Date(s2.getTime() + 2 * 24 * 3600_000);
-  return [
-    ev(s1, M.foxhound, { filled: 26, platoonLeader: "Prais777" }),
-    ev(s2, M.geras, { filled: 14, platoonLeader: "M_i", hostName: "JFKennedy" }),
-    ev(thursday, M.baseJumping, { filled: 9, platoonLeader: "DarkCote", extra: true }),
-    ev(s3, M.circuitBreaker, { filled: 4, platoonLeader: null }),
-    // A rerun, so the Counterpunch mission page has an upcoming game next to its played one.
-    ev(s5, M.counterpunch, { filled: 6, platoonLeader: null }),
-  ];
+  })
+    .filter((e) => new Date(e.startsAt).getTime() + GAME_MS > now.getTime())
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 }
 
 // ---------------------------------------------------------------- plans per mission
-
-/** Plans from before the hub, for a mission with none from its games. */
-const PLANS: Record<string, PlanRef[]> = {
-  [M.fallenHawk]: [
-    { code: "FR32GS", author: "Galaxy", createdAt: mskDate(2026, 3, 12, 18, 40).toISOString() },
-    { code: "K7WQ2D", title: "VonScheer", author: "Galaxy", createdAt: mskDate(2026, 3, 12, 19, 5).toISOString() },
-  ],
-};
 
 /** The plans played games used: a played game's plan is a plan for its mission. */
 function gamePlans(missionId: string, ms: Missions): PlanRef[] {
@@ -206,7 +185,7 @@ export const mockData: HubData = {
     const ms = await missionMap();
     return {
       timesPlayed: buildPast(ms).filter((e) => e.mission.id === missionId).length,
-      plans: await missionPlans(missionId, [...gamePlans(missionId, ms), ...(PLANS[missionId] ?? [])]),
+      plans: await missionPlans(missionId, gamePlans(missionId, ms)),
     };
   },
 };
