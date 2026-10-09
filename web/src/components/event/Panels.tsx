@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { number, shortDate } from "@/lib/format";
 import { plural, type Locale, type T } from "@/lib/i18n";
 import { squadsOf } from "@/lib/squads";
-import { planOpenHref, replayUrl } from "@/lib/links";
+import { planOpenHref, replayUrl, TRAINING_URL } from "@/lib/links";
 import type { Award, Briefing, LeaderboardEntry, Mission, MissionHistory, PastEvent, PlanRef, Slot, UpcomingEvent } from "@/lib/types";
 import { buttonClass, ButtonLink, Eyebrow, Icon, ProgressBar, Tag } from "../ui";
 import { CopyButton } from "./CopyButton";
@@ -374,7 +374,21 @@ export function SlotsPanel({ ev, viewer, players, t }: { ev: UpcomingEvent; view
     }
     const block = takeBlock(viewer, ev, s);
     if (block === "closed") return null;
-    if (block === "role") return <span className="truncate type-caption text-fg-faint">{t("slots.needRole", { role: s.requiredRole ?? "" })}</span>;
+    if (block === "role") {
+      // The hint swaps for a link to the Training Portal on hover or keyboard focus (on a phone, the first tap shows
+      // it). Both labels share one grid cell, so the row doesn't change width.
+      return (
+        <a href={TRAINING_URL} target="_blank" rel="noreferrer" className="group grid min-w-0 justify-items-end type-caption">
+          <span className="truncate text-fg-faint [grid-area:1/1] group-hover:invisible group-focus-visible:invisible">
+            {t("slots.needRole", { role: s.requiredRole ?? "" })}
+          </span>
+          <span className="invisible flex items-center gap-1 text-fg-accent [grid-area:1/1] group-hover:visible group-focus-visible:visible">
+            {t("slots.training")}
+            <Icon name="external-accent" />
+          </span>
+        </a>
+      );
+    }
     return <SlotButton kind="take" eventId={ev.id} position={s.id} label={t("slots.take")} errors={errors} />;
   };
 

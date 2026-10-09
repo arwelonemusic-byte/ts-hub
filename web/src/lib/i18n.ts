@@ -281,6 +281,7 @@ const RU: Dict = {
   "slots.locked": "Закрыт",
   "slots.notWired": "Слотование пока не подключено",
   "slots.needRole": "Нужна роль {role}",
+  "slots.training": "Пройти обучение",
   "slots.error.taken": "Слот уже заняли",
   "slots.error.closed": "Игра уже началась",
   "slots.error.forbidden": "Нет доступа",

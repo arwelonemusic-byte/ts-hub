@@ -74,7 +74,7 @@ export function Eyebrow({ children, className = "text-fg-tertiary" }: { children
 export type IconName =
   | "arrow-right" | "arrow-right-dark" | "arrow-right-ff" | "calendar" | "check-circle" | "chevron-down" | "chevron-left" | "close"
   | "chevron-left-nav" | "chevron-right-nav" | "copy" | "external" | "external-ff" | "external-trailing"
-  | "external-dark" | "map-pin" | "map-pin-muted" | "menu" | "pencil" | "plan-pending" | "play" | "play-light" | "search" | "user"
+  | "external-dark" | "external-accent" | "map-pin" | "map-pin-muted" | "menu" | "pencil" | "plan-pending" | "play" | "play-light" | "search" | "user"
   | "user-login" | "user-muted" | "users-muted";
 
 export function Icon({ name, className = "" }: { name: IconName; className?: string }) {
