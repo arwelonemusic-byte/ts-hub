@@ -92,6 +92,18 @@ function teaser(sections: PostGame["mission"]["briefing"]): string | null {
 }
 
 /**
+ * The big link under the briefing: to the briefing and slots before the game, to the results after it. A cancelled
+ * game's page is gone, so it has none. A heading-sized link stands in for a bright button (bots' link buttons are
+ * always grey); <url> in a masked link keeps Discord from adding its own preview card for the hub page; 👉 is the
+ * character itself, since Discord turns ":point_right:" into an emoji only as a person types it.
+ */
+function bigLink(g: PostGame): string | null {
+  if (g.status === "scheduled") return `# 👉 [Полный брифинг и слоты](<${g.url}#briefing>)`;
+  if (g.status === "played") return `# 👉 [Итоги игры](<${g.url}>)`;
+  return null;
+}
+
+/**
  * The message text: what and when, the sides, the briefing's start with a link to the rest, the pings. It ends with
  * an invisible line (Discord drops trailing blank lines) so the cover sits a little below the text.
  */
@@ -101,15 +113,13 @@ function header(g: PostGame, unix: number): string {
   const against = sides?.against?.trim();
   const sideLines = [forSide && `**За кого:** ${plain(forSide)}`, against && `**Против кого:** ${plain(against)}`].filter(Boolean);
   const intro = teaser(g.mission.briefing);
+  const link = bigLink(g);
   return [
     `# Что | Operation ${plain(g.mission.name)}`,
     `# Когда | <t:${unix}:F>`,
     ...(sideLines.length ? ["", ...sideLines] : []),
     ...(intro ? ["", plain(intro)] : []),
-    // A heading-sized link stands in for a bright button (bots' link buttons are always grey). <url> in a masked link
-    // keeps Discord from adding its own preview card for the hub page.
-    // 👉 itself, not ":point_right:": Discord turns shortcodes into emoji only as a person types them.
-    `# 👉 [Полный брифинг и слоты](<${g.url}#briefing>)`,
+    ...(link ? [link] : []),
     ...(g.pingRoles.length ? ["", g.pingRoles.map((id) => `<@&${id}>`).join(" ")] : []),
     "\u200b",
   ].join("\n");
