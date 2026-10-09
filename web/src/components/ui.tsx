@@ -100,7 +100,7 @@ export function buttonClass(variant: ButtonVariant = "secondary", size: ButtonSi
     primary: "bg-accent text-fg-on-accent hover:bg-accent-hover",
     secondary: "bg-raised text-fg hover:bg-raised-hover",
     outline: "border border-line-accent text-fg-accent hover:bg-accent-subtle",
-    danger: "bg-danger text-fg-on-accent hover:brightness-110",
+    danger: "bg-danger text-fg hover:brightness-110",
   }[variant];
   const sz = {
     m: "h-11 gap-2 rounded-lg px-4 type-label-s",
