@@ -168,7 +168,7 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   template, never deletes them: unticking it gives them back. **Any game without slots** (a training or a mission with
   no template) takes «Я приду!» / «Не приду» (`event_rsvps`, `comeToGame`/`skipGame` in `lib/slots/actions.ts`, until
   the start; admins any time): the hero shows «N придут», the aside «Кто придёт», the feed «Придут N», the Discord card
-  «Придут: N — names» with an «Я приду» button and «Полный брифинг и запись». RSVPs count in `getEventVersion` (live
+  «Придут: N — names» with an «Я приду» button and a «👉 Записаться» link (to the page top). RSVPs count in `getEventVersion` (live
   refresh) and call `refreshAnnouncement`; a played game's «из N записались» uses them. `RsvpButton` is keyed by kind:
   useActionState keeps the action it started with.
 - **«Игроки»: in-game names → members** (`app/players`, `lib/roster/`, admins only — others get a 404 and no nav item;

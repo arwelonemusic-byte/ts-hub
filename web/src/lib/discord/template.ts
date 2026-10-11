@@ -7,7 +7,7 @@ import type { DiscordMessage } from "./api";
  * Galaxy's layout (2026-10-09), after the announcements posted by hand until now:
  *   message text  # Что | Operation <name> / # Когда | <date> / За кого, Против кого / the briefing's first
  *                 paragraph / # Полный брифинг и слоты (link) / @Анонсы @Reforger
- *                 (a training: «Тренировка <name>»; a game without slots: «… и запись»)
+ *                 (a training: «Тренировка <name>»; a game without slots: «Записаться» instead of the briefing link)
  *   image         the mission's cover, attached to the message so it renders large
  *   card          mission name, countdown, map, author, then a block per squad (✅ taken / ⬜ free)
  *   button        «Записаться» → the game's page («Я приду» when the game has no slots: the card lists who's coming)
@@ -103,7 +103,10 @@ function teaser(sections: PostGame["mission"]["briefing"]): string | null {
  * character itself, since Discord turns ":point_right:" into an emoji only as a person types it.
  */
 function bigLink(g: PostGame): string | null {
-  if (g.status === "scheduled") return `# 👉 [Полный брифинг и ${g.squads.length ? "слоты" : "запись"}](<${g.url}#briefing>)`;
+  if (g.status === "scheduled") {
+    // No slots (a training): «Записаться» opens the game page at the top, where «Я приду!» is.
+    return g.squads.length ? `# 👉 [Полный брифинг и слоты](<${g.url}#briefing>)` : `# 👉 [Записаться](<${g.url}>)`;
+  }
   if (g.status === "played") return `# 👉 [${g.training ? "Итоги тренировки" : "Итоги игры"}](<${g.url}>)`;
   return null;
 }
