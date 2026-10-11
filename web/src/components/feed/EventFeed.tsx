@@ -81,12 +81,15 @@ export function EventFeed({
   anchorDay,
   locale,
   missions = null,
+  signedIn = false,
 }: {
   initial: FeedMonth[];
   meta: FeedMeta;
   anchorDay: string | null;
   locale: Locale;
   missions?: MissionOption[] | null;
+  /** A training card's «Я приду!» sends the signed-out to log in. */
+  signedIn?: boolean;
 }) {
   const [scheduling, setScheduling] = useState<ScheduleInitial | null>(null);
   const t = useMemo(() => makeT(locale), [locale]);
@@ -323,6 +326,7 @@ export function EventFeed({
                         nextId={meta.nextId}
                         locale={locale}
                         t={t}
+                        signedIn={signedIn}
                         onOpenSlot={missions ? (iso) => setScheduling(fieldsFor(iso)) : undefined}
                         onSkipSlot={missions ? skipSlot : undefined}
                       />

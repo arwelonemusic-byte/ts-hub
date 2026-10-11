@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { CardRsvp } from "./CardRsvp";
 import type { FeedItem } from "@/lib/feed";
 import { dayOfMonth, duration, eventDay, shortWeekday, time } from "@/lib/format";
 import { plural, type Locale, type T } from "@/lib/i18n";
@@ -83,7 +84,7 @@ function Status({ ev, t }: { ev: Upcoming; t: T }) {
  * Figma "Event card", Featured (13:98): the next op. The Подробнее link stretches over the
  * whole card, so clicking anywhere on it opens the event (one link, one tab stop).
  */
-export function FeaturedCard({ ev, locale, t }: { ev: Upcoming; locale: Locale; t: T }) {
+export function FeaturedCard({ ev, locale, t, signedIn }: { ev: Upcoming; locale: Locale; t: T; signedIn: boolean }) {
   return (
     <article className="relative flex min-w-0 flex-1 flex-col gap-6 rounded-xl bg-surface p-4 shadow-floating ring-line-strong hover:ring-1 md:flex-row md:items-center">
       <Cover mission={ev.mission} sizes="400px" noCoverLabel={t("past.noCover")} priority className="w-full shrink-0 md:w-[400px]" />
@@ -97,18 +98,44 @@ export function FeaturedCard({ ev, locale, t }: { ev: Upcoming; locale: Locale; 
         </div>
         <h3 className="type-heading-xl text-fg">{ev.mission.name}</h3>
         <Meta mission={ev.mission} />
-        <Status ev={ev} t={t} />
-        <Link href={`/events/${ev.id}`} className={`${buttonClass("primary", "m")} w-full after:absolute after:inset-0 after:rounded-xl`}>
-          {t("feed.details")}
-          <Icon name="arrow-right-dark" />
-        </Link>
+        {/* A training: «Я приду!» right on the card, «Подробнее» next to it. */}
+        {ev.mission.training ? (
+          <CardRsvp eventId={ev.id} coming={ev.coming} count={ev.rsvps} signedIn={signedIn} t={t} />
+        ) : (
+          <>
+            <Status ev={ev} t={t} />
+            <Link href={`/events/${ev.id}`} className={`${buttonClass("primary", "m")} w-full after:absolute after:inset-0 after:rounded-xl`}>
+              {t("feed.details")}
+              <Icon name="arrow-right-dark" />
+            </Link>
+          </>
+        )}
       </div>
     </article>
   );
 }
 
 /** Figma "Event card", Upcoming (13:189). The whole card opens the event. */
-export function UpcomingCard({ ev, locale, t }: { ev: Upcoming; locale: Locale; t: T }) {
+export function UpcomingCard({ ev, locale, t, signedIn }: { ev: Upcoming; locale: Locale; t: T; signedIn: boolean }) {
+  // A training: the card carries «Я приду!», so it's no single link; «Подробнее» stretches over it instead.
+  if (ev.mission.training) {
+    return (
+      <article className="relative flex min-w-0 flex-1 flex-col gap-5 rounded-xl bg-surface p-3 ring-line-strong hover:ring-1 sm:flex-row sm:items-center">
+        <Cover mission={ev.mission} sizes="288px" noCoverLabel={t("past.noCover")} className="w-full shrink-0 sm:w-[288px]" />
+        <div className="flex min-w-0 flex-1 flex-col gap-2.5 py-1 pr-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <StatusChip tone="training">{t("event.kicker.training")}</StatusChip>
+            <span className="type-label-s text-fg">
+              {eventDay(ev.startsAt, locale)} · {time(ev.startsAt)} {t("events.msk")}
+            </span>
+          </div>
+          <h3 className="type-heading-m text-fg">{ev.mission.name}</h3>
+          <Meta mission={ev.mission} />
+          <CardRsvp eventId={ev.id} coming={ev.coming} count={ev.rsvps} signedIn={signedIn} t={t} />
+        </div>
+      </article>
+    );
+  }
   return (
     <Link
       href={`/events/${ev.id}`}
@@ -197,11 +224,13 @@ export function FeedRow({
   t,
   onOpenSlot,
   onSkipSlot,
+  signedIn = false,
 }: {
   item: FeedItem;
   nextId: string | null;
   locale: Locale;
   t: T;
+  signedIn?: boolean;
   onOpenSlot?: (startsAt: string) => void;
   onSkipSlot?: (startsAt: string) => void;
 }) {
@@ -217,7 +246,12 @@ export function FeedRow({
     );
   }
   else if (item.kind === "played") body = <PlayedRow ev={item} locale={locale} t={t} />;
-  else body = featured ? <FeaturedCard ev={item} locale={locale} t={t} /> : <UpcomingCard ev={item} locale={locale} t={t} />;
+  else
+    body = featured ? (
+      <FeaturedCard ev={item} locale={locale} t={t} signedIn={signedIn} />
+    ) : (
+      <UpcomingCard ev={item} locale={locale} t={t} signedIn={signedIn} />
+    );
   return (
     <div className={`flex gap-4 ${item.kind === "open" ? "items-center" : "items-start"}`}>
       <div className={item.kind === "open" ? "" : "pt-2.5"}>

@@ -21,6 +21,8 @@ export type FeedItem =
       max: number;
       /** «Я приду!» count, for a game without slots (max 0). */
       rsvps: number;
+      /** The viewer pressed «Я приду!» (a training's card offers «Не приду» then). */
+      coming: boolean;
       planReady: boolean;
     }
   | {
@@ -80,7 +82,7 @@ const card = (m: Mission): CardMission => ({
 });
 
 /** Months `from`..`to` inclusive, each with its items in time order. */
-export async function getFeedMonths(from: MonthKey, to: MonthKey, meta: FeedMeta): Promise<FeedMonth[]> {
+export async function getFeedMonths(from: MonthKey, to: MonthKey, meta: FeedMeta, viewerId: string | null = null): Promise<FeedMonth[]> {
   const now = new Date(meta.now);
   const start = monthStart(from);
   const end = monthStart(addMonths(to, 1));
@@ -99,6 +101,7 @@ export async function getFeedMonths(from: MonthKey, to: MonthKey, meta: FeedMeta
           taken: e.slots.filter((s) => s.playerName).length,
           max: e.slots.length,
           rsvps: e.rsvps.length,
+          coming: !!viewerId && e.rsvps.some((r) => r.discordId === viewerId),
           planReady: !!e.plan,
         }
       : {

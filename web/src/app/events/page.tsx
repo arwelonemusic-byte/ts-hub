@@ -34,7 +34,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
     anchorDay = meta.nextDay ?? meta.today;
     month = monthOf(new Date(`${anchorDay}T12:00:00+03:00`));
   }
-  const initial = await getFeedMonths(month, month, meta);
+  const initial = await getFeedMonths(month, month, meta, viewer?.discordId ?? null);
   const notice = typeof auth === "string" ? AUTH_NOTICE[auth] : undefined;
 
   return (
@@ -54,7 +54,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
             {t("events.intro.c")}
           </p>
         </div>
-        <EventFeed initial={initial} meta={meta} anchorDay={anchorDay} locale={locale} missions={missions} />
+        <EventFeed initial={initial} meta={meta} anchorDay={anchorDay} locale={locale} missions={missions} signedIn={!!viewer} />
       </main>
     </>
   );

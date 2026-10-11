@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFeedMeta, getFeedMonths } from "@/lib/feed";
 import { addMonths, isMonthKey } from "@/lib/schedule";
+import { getViewer } from "@/lib/viewer";
 
 /** Longest span one request may ask for. */
 const MAX_MONTHS = 12;
@@ -17,5 +18,6 @@ export async function GET(req: NextRequest) {
   let b = to > meta.last ? meta.last : to;
   if (a > b) return NextResponse.json({ months: [] });
   if (addMonths(a, MAX_MONTHS - 1) < b) b = addMonths(a, MAX_MONTHS - 1);
-  return NextResponse.json({ months: await getFeedMonths(a, b, meta) });
+  // The viewer's «Я приду!» marks, for the training cards' buttons.
+  return NextResponse.json({ months: await getFeedMonths(a, b, meta, (await getViewer())?.discordId ?? null) });
 }
