@@ -20,6 +20,8 @@ const TERRAIN_FOLDERS: Record<string, string> = {
   arland: "arland",
   cain: "kolguyev",
   chernot: "chernarus",
+  // Chernarus Minus 2.1.3 renamed its world folder ChernoT → A2_T.
+  a2t: "chernarus",
   zarichne: "zarichne",
   zargabadempty: "zargabad",
   zimnitrita: "zimnitrita",
