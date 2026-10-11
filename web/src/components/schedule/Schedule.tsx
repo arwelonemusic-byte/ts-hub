@@ -15,6 +15,7 @@ export interface MissionOption {
   name: string;
   mapLabel: string;
   coverUrl: string | null;
+  training?: boolean;
 }
 
 /** Prefill for the dialog: a mission, and/or an MSK date + time. */
@@ -162,7 +163,9 @@ export function ScheduleDialog({
                 <Cover mission={m} sizes="240px" noCoverLabel={t("past.noCover")} rounded="rounded-md" />
                 <span className="flex min-w-0 flex-col px-0.5">
                   <span className={`truncate type-label-s ${on ? "text-fg-accent" : "text-fg"}`}>{m.name}</span>
-                  <span className="truncate type-caption text-fg-tertiary">{m.mapLabel}</span>
+                  <span className="truncate type-caption text-fg-tertiary">
+                    {m.training ? `${t("event.kicker.training")} · ${m.mapLabel}` : m.mapLabel}
+                  </span>
                 </span>
               </button>
             );

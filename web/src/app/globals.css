@@ -109,6 +109,8 @@
   --color-danger: var(--ts-color-bg-danger);
   --color-danger-subtle: var(--ts-color-bg-danger-subtle);
   --color-success: var(--ts-color-bg-success);
+  /* Trainings (Mission.training): the friendly blue, so they stand apart from the yellow ops. */
+  --color-training: var(--ts-blue-400);
 
   --color-line: var(--ts-color-border-default);
   --color-line-strong: var(--ts-color-border-strong);

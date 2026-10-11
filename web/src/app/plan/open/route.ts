@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
   if (!mission) return back("/missions");
   const viewer = await getViewer();
   if (!viewer) return back("/api/auth/login");
-  if (mission.planning === false) return back(`/missions/${mission.id}`);
+  if (mission.planning === false || mission.training) return back(`/missions/${mission.id}`);
   const rec = await newMissionPlan(viewer, mission.id);
   return Response.redirect(plannerLink({ missionId: mission.id, key: rec.key }), 303);
 }

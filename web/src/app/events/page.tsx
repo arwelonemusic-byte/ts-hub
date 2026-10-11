@@ -23,7 +23,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
   const missions = viewer?.isAdmin
     ? (await getHubData().listMissions())
         .filter((m) => !m.archived)
-        .map((m) => ({ id: m.id, name: m.name, mapLabel: m.mapLabel, coverUrl: m.coverUrl }))
+        .map((m) => ({ id: m.id, name: m.name, mapLabel: m.mapLabel, coverUrl: m.coverUrl, training: !!m.training }))
         .sort((a, b) => a.name.localeCompare(b.name))
     : null;
 

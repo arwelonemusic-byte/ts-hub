@@ -8,7 +8,7 @@ import type { EditorOptions } from "@/lib/missions";
 import { lookupWorkshop } from "@/lib/missions/actions";
 import type { DraftAuthor, MissionDraft, WorkshopInfo } from "@/lib/missions/draft";
 import { buttonClass, Cover } from "../../ui";
-import { Field, Select, TextInput, ToolButton } from "./fields";
+import { Check, Field, Select, TextInput, ToolButton } from "./fields";
 
 /** Step 1: the Workshop link fills in the addon, its scenario, title, cover and (from its dependencies) the map. */
 export function WorkshopStep({
@@ -159,6 +159,11 @@ export function WorkshopStep({
           </div>
           <Authors authors={draft.authors} set={(authors) => set({ authors })} options={options} viewer={viewer} t={t} />
           <Tags tags={draft.tags} set={(tags) => set({ tags })} options={options} t={t} />
+          {/* A training: «Я приду!» instead of slots, no plan, out of the catalog (Mission.training). */}
+          <Check checked={draft.training} onChange={(training) => set({ training })}>
+            {t("editor.ws.training")}
+            <span className="block type-caption text-fg-tertiary">{t("editor.ws.trainingHint")}</span>
+          </Check>
         </>
       )}
     </div>

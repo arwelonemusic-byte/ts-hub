@@ -5,7 +5,7 @@ import type { Locale, T } from "@/lib/i18n";
 import { monthGrid, monthStart, USUAL_SLOTS, type MonthKey } from "@/lib/schedule";
 import { Dot } from "./Cards";
 
-type DayState = "default" | "muted" | "played" | "today" | "next" | "planned" | "open" | "mutedPlayed" | "mutedOpen";
+type DayState = "default" | "muted" | "played" | "today" | "next" | "nextTraining" | "planned" | "training" | "open" | "mutedPlayed" | "mutedOpen";
 
 /** Figma "Calendar day" (6:159) states → number style, cell style, dot asset. */
 const STYLE: Record<DayState, { num: string; cell: string; dot: string }> = {
@@ -14,7 +14,9 @@ const STYLE: Record<DayState, { num: string; cell: string; dot: string }> = {
   played: { num: "type-body-s text-fg-secondary", cell: "", dot: "dot-played" },
   today: { num: "type-label-s text-fg", cell: "bg-raised", dot: "dot-none" },
   next: { num: "type-label-s text-fg-accent", cell: "border border-line-accent bg-accent-subtle", dot: "dot-planned" },
+  nextTraining: { num: "type-label-s text-fg-accent", cell: "border border-line-accent bg-accent-subtle", dot: "dot-training" },
   planned: { num: "type-label-s text-fg", cell: "", dot: "dot-planned" },
+  training: { num: "type-label-s text-fg", cell: "", dot: "dot-training" },
   open: { num: "type-body-s text-fg-body", cell: "", dot: "dot-open" },
   mutedPlayed: { num: "type-body-s text-fg-faint", cell: "", dot: "dot-muted-played" },
   mutedOpen: { num: "type-body-s text-fg-faint", cell: "", dot: "dot-muted-open" },
@@ -24,9 +26,12 @@ function stateOf(day: string, inMonth: boolean, items: FeedItem[] | undefined, t
   const played = items?.some((i) => i.kind === "played");
   const ahead = items?.some((i) => i.kind !== "played");
   if (!inMonth) return played ? "mutedPlayed" : ahead ? "mutedOpen" : "muted";
-  if (day === nextDay) return "next";
+  // A day of trainings only gets the training dot; an op the same day wins.
+  const upcoming = items?.filter((i) => i.kind === "upcoming") ?? [];
+  const trainingOnly = upcoming.length > 0 && upcoming.every((i) => i.kind === "upcoming" && i.mission.training);
+  if (day === nextDay) return trainingOnly ? "nextTraining" : "next";
   if (day === today) return "today";
-  if (items?.some((i) => i.kind === "upcoming")) return "planned";
+  if (upcoming.length) return trainingOnly ? "training" : "planned";
   if (played) return "played";
   if (ahead) return "open";
   return "default";
@@ -124,6 +129,7 @@ export function FeedCalendar({
         {(
           [
             ["legend-planned", "calendar.legend.planned"],
+            ["legend-training", "calendar.legend.training"],
             ["legend-open", "calendar.legend.open"],
             ["legend-played", "calendar.legend.played"],
           ] as const

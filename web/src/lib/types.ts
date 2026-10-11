@@ -53,6 +53,11 @@ export interface Mission {
   noSlotting?: boolean;
   /** Hidden from the catalogue and the schedule dialog (a broken or retired mission); its games still show it. */
   archived?: boolean;
+  /**
+   * A training (Wednesday drills): its games say «Тренировка», take «Я приду!» instead of slots, need no plan, stay out
+   * of the catalog, and «Игра окончена» keeps only who came. Its template has no slots.
+   */
+  training?: boolean;
 }
 
 /** One squad of a mission's slot template — a line of the Discord bot's slot file. */
@@ -99,6 +104,8 @@ export interface EventBase {
 export interface UpcomingEvent extends EventBase {
   status: "upcoming";
   slots: Slot[];
+  /** «Я приду!»: members coming, in sign-up order. Only games without slots take them. */
+  rsvps: { name: string; discordId: string }[];
   /** The game's own plan (lib/plans). */
   plan: PlanRef | null;
 }

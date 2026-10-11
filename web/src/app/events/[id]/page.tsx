@@ -12,18 +12,19 @@ import {
   OpTotals,
   PlanPanel,
   PlanRow,
+  RsvpPanel,
   SlotsPanel,
 } from "@/components/event/Panels";
 import { buttonClass, ButtonLink, Eyebrow, Icon, ProgressBar } from "@/components/ui";
 import { getHubData } from "@/lib/data";
 import { duration, minutesBetween } from "@/lib/format";
-import type { Locale, T } from "@/lib/i18n";
+import { plural, type Locale, type T } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
 import { replayUrl, workshopUrl } from "@/lib/links";
 import { canAttachPlan, canDetachPlan } from "@/lib/plans";
 import { plannerEmbedUrl } from "@/lib/plans/planner";
 import { playerNames, slottingOpen, viewerSlot } from "@/lib/slots";
-import { LeaveSlotButton } from "@/components/event/SlotForms";
+import { LeaveSlotButton, RsvpButton } from "@/components/event/SlotForms";
 import { LiveRefresh } from "@/components/event/LiveRefresh";
 import { JumpLink } from "@/components/event/Jump";
 import { EventAdminMenu } from "@/components/schedule/Schedule";
@@ -102,29 +103,62 @@ function Upcoming({
   // Slotting closes when the game starts; from then on the admin finishes it («Игра окончена»).
   const started = !slottingOpen(ev);
   const attached = ev.plan;
+  // No slots (a training, or a mission without a slot template): players sign up with «Я приду!».
+  const rsvp = ev.slots.length === 0;
+  const coming = !!viewer && ev.rsvps.some((r) => r.discordId === viewer.discordId);
+  const training = !!ev.mission.training;
+  const rsvpErrors = { closed: t("rsvp.error.closed"), forbidden: t("rsvp.error.forbidden") };
   return (
     <>
       <Hero ev={ev} locale={locale} t={t}>
         <div className="flex gap-3">
-          <HeroBox>
-            <div className="flex items-baseline gap-1.5">
-              <span className="type-heading-l text-fg">{taken}</span>
-              <span className="type-body-s text-fg-secondary">{t("event.slotted", { max: ev.slots.length })}</span>
-            </div>
-            <ProgressBar value={taken} max={ev.slots.length} />
-          </HeroBox>
-          {/* Same look as a HeroBox, but it takes you to the Plan section. */}
-          <JumpLink target="plan" className="flex min-w-0 flex-1 flex-col gap-2 rounded-lg bg-inset px-4 py-3 hover:bg-raised">
-            <Eyebrow>{t("event.plan")}</Eyebrow>
-            <span className="flex items-center gap-1.5 type-label-l text-fg">
-              <Icon name={attached ? "check-circle" : "plan-pending"} />
-              {attached ? `${t("event.plan.ready")} · ${attached.code}` : t("event.plan.none")}
-            </span>
-          </JumpLink>
+          {rsvp ? (
+            <HeroBox>
+              <div className="flex items-baseline gap-1.5">
+                <span className="type-heading-l text-fg">{ev.rsvps.length}</span>
+                <span className="type-body-s text-fg-secondary">{plural(locale, "event.coming", ev.rsvps.length)}</span>
+              </div>
+            </HeroBox>
+          ) : (
+            <HeroBox>
+              <div className="flex items-baseline gap-1.5">
+                <span className="type-heading-l text-fg">{taken}</span>
+                <span className="type-body-s text-fg-secondary">{t("event.slotted", { max: ev.slots.length })}</span>
+              </div>
+              <ProgressBar value={taken} max={ev.slots.length} />
+            </HeroBox>
+          )}
+          {/* Same look as a HeroBox, but it takes you to the Plan section. A training has no plan. */}
+          {!training && (
+            <JumpLink target="plan" className="flex min-w-0 flex-1 flex-col gap-2 rounded-lg bg-inset px-4 py-3 hover:bg-raised">
+              <Eyebrow>{t("event.plan")}</Eyebrow>
+              <span className="flex items-center gap-1.5 type-label-l text-fg">
+                <Icon name={attached ? "check-circle" : "plan-pending"} />
+                {attached ? `${t("event.plan.ready")} · ${attached.code}` : t("event.plan.none")}
+              </span>
+            </JumpLink>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           {viewer?.isAdmin && started ? (
             <FinishGameButton eventId={ev.id} locale={locale} label={t("finish.button")} className={`${buttonClass("primary", "m")} flex-1`} />
+          ) : rsvp ? (
+            !viewer ? (
+              <a href="/api/auth/login" className={`${buttonClass("primary", "m")} flex-1`}>
+                {t("rsvp.come")}
+              </a>
+            ) : started && !viewer.isAdmin ? null : (
+              <RsvpButton
+                // A new button per kind: useActionState keeps the action it started with, so swapping kind in place
+                // would keep sending «Не приду».
+                key={coming ? "skip" : "come"}
+                kind={coming ? "skip" : "come"}
+                eventId={ev.id}
+                label={t(coming ? "rsvp.skip" : "rsvp.come")}
+                errors={rsvpErrors}
+                className={buttonClass(coming ? "danger" : "primary", "m")}
+              />
+            )
           ) : mySlot && (viewer!.isAdmin || slottingOpen(ev)) ? (
             <LeaveSlotButton eventId={ev.id} label={t("event.leaveSlot")} className={buttonClass("danger", "m")} />
           ) : (
@@ -169,19 +203,21 @@ function Upcoming({
         content={
           <>
             {ev.mission.briefing && <BriefingPanel b={ev.mission.briefing} t={t} />}
-            <PlanPanel
-              ev={ev}
-              embedUrl={ev.plan ? plannerEmbedUrl({ missionId: ev.mission.id, mapKey: ev.mission.mapKey, code: ev.plan.code }) : null}
-              signedIn={!!viewer}
-              canAttach={canAttachPlan(viewer, ev)}
-              canDetach={canDetachPlan(viewer, ev)}
-              t={t}
-            />
+            {!training && (
+              <PlanPanel
+                ev={ev}
+                embedUrl={ev.plan ? plannerEmbedUrl({ missionId: ev.mission.id, mapKey: ev.mission.mapKey, code: ev.plan.code }) : null}
+                signedIn={!!viewer}
+                canAttach={canAttachPlan(viewer, ev)}
+                canDetach={canDetachPlan(viewer, ev)}
+                t={t}
+              />
+            )}
           </>
         }
         aside={
           <>
-            <SlotsPanel ev={ev} viewer={viewer} players={players} t={t} />
+            {rsvp ? <RsvpPanel ev={ev} viewer={viewer} locale={locale} t={t} /> : <SlotsPanel ev={ev} viewer={viewer} players={players} t={t} />}
             <MissionPanel mission={ev.mission} history={history} locale={locale} t={t} />
           </>
         }
@@ -194,6 +230,7 @@ function Played({ ev, history, isAdmin, locale, t }: { ev: PastEvent; history: M
   const used = ev.planCode
     ? (history.plans.find((p) => p.code === ev.planCode) ?? { code: ev.planCode, author: ev.planAuthor ?? ev.platoonLeader ?? "—", createdAt: ev.startsAt })
     : null;
+  const training = !!ev.mission.training;
   return (
     <>
       <Hero ev={ev} locale={locale} t={t}>
@@ -231,28 +268,31 @@ function Played({ ev, history, isAdmin, locale, t }: { ev: PastEvent; history: M
           {isAdmin && <FinishGameButton eventId={ev.id} recompute locale={locale} label={t("finish.recompute")} className={buttonClass("secondary", "m")} />}
         </div>
       </Hero>
-      <OpTotals ev={ev} locale={locale} t={t} />
+      {/* A training keeps only who came (user decision 2026-10-11): no totals, rankings, awards or plan. */}
+      {!training && <OpTotals ev={ev} locale={locale} t={t} />}
       <Columns
         content={
           <>
-            <LeaderboardsPanel ev={ev} t={t} />
+            <LeaderboardsPanel ev={ev} t={t} attendanceOnly={training} />
             {ev.mission.briefing && (
               <Collapsible title={t("briefing.title")} t={t}>
                 <BriefingBody b={ev.mission.briefing} t={t} />
               </Collapsible>
             )}
-            <Collapsible title={t("plan.title")} t={t}>
-              {used ? (
-                <PlanRow plan={used} missionId={ev.mission.id} t={t} showGame={false} />
-              ) : (
-                <p className="type-body-m text-fg-secondary">{t("plan.noneLinked")}</p>
-              )}
-            </Collapsible>
+            {!training && (
+              <Collapsible title={t("plan.title")} t={t}>
+                {used ? (
+                  <PlanRow plan={used} missionId={ev.mission.id} t={t} showGame={false} />
+                ) : (
+                  <p className="type-body-m text-fg-secondary">{t("plan.noneLinked")}</p>
+                )}
+              </Collapsible>
+            )}
           </>
         }
         aside={
           <>
-            {ev.awards.length > 0 && <AwardsPanel awards={ev.awards} t={t} />}
+            {!training && ev.awards.length > 0 && <AwardsPanel awards={ev.awards} t={t} />}
             <MissionPanel mission={ev.mission} history={history} locale={locale} t={t} played />
           </>
         }

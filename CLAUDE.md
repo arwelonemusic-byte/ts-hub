@@ -158,6 +158,19 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   first post as a file so it renders large (edits keep it), then the slot card and «Записаться». `fitLimits` trims any
   template to Discord's limits and nobody else is pinged (`allowed_mentions`). Dev: no channel = off;
   `/api/dev/discord-post/<id>` returns the message JSON; `DISCORD_API_URL` points the sender at a stand-in for testing.
+- **Trainings and «Я приду!»** (user decisions 2026-10-11; migration 010). A mission's «Тренировка» checkbox
+  (`missions.training`, editor step 1) makes it a training: its games say «Тренировка» instead of «Operation» (hero,
+  mission page, Discord «Что | Тренировка …»), get no slots and no plan (scheduleGame copies no slot template; no
+  «Нарисовать план», `/plan/open` refuses), wear a blue chip and calendar dot (`--color-training` = the friendly blue,
+  `dot-training.svg`), stay out of the Миссии catalog (admins: `?training=1`, like the archive), and «Игра окончена»
+  stores `stats = NULL`: the played page shows only «Кто был», duration and the replay (no totals, rankings, awards or
+  plan, even for games finished before the flag). The flag only hides the mission's Markers.layer, planning and slot
+  template, never deletes them: unticking it gives them back. **Any game without slots** (a training or a mission with
+  no template) takes «Я приду!» / «Не приду» (`event_rsvps`, `comeToGame`/`skipGame` in `lib/slots/actions.ts`, until
+  the start; admins any time): the hero shows «N придут», the aside «Кто придёт», the feed «Придут N», the Discord card
+  «Придут: N — names» with an «Я приду» button and «Полный брифинг и запись». RSVPs count in `getEventVersion` (live
+  refresh) and call `refreshAnnouncement`; a played game's «из N записались» uses them. `RsvpButton` is keyed by kind:
+  useActionState keeps the action it started with.
 - **«Игроки»: in-game names → members** (`app/players`, `lib/roster/`, admins only — others get a 404 and no nav item;
   user decision 2026-10-11: matched by hand, not by players typing a code in game). Lists every name from played
   games' rosters, most recently played first, with the member it's matched to (`player_names`, migration 009: one

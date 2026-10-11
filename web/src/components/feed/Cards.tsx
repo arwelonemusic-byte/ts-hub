@@ -52,25 +52,29 @@ function Meta({ mission }: { mission: Upcoming["mission"] }) {
   );
 }
 
-/** Slots meter + plan status, side by side. */
+/** Slots meter (or the «Я приду!» count, for a game without slots) + plan status, side by side; a training has no plan. */
 function Status({ ev, t }: { ev: Upcoming; t: T }) {
+  const rsvp = ev.max === 0;
   return (
     <div className="flex w-full gap-3">
-      <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-lg bg-inset px-4 py-3">
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 rounded-lg bg-inset px-4 py-3">
         <div className="flex items-baseline justify-between">
-          <span className="type-eyebrow text-fg-tertiary">{t("feed.slots")}</span>
+          <span className="type-eyebrow text-fg-tertiary">{t(rsvp ? "feed.coming" : "feed.slots")}</span>
           <span className="type-body-s text-fg-secondary">
-            <span className="type-label-s text-fg">{ev.taken}</span> / {ev.max}
+            <span className="type-label-s text-fg">{rsvp ? ev.rsvps : ev.taken}</span>
+            {!rsvp && ` / ${ev.max}`}
           </span>
         </div>
-        <ProgressBar value={ev.taken} max={ev.max} />
+        {!rsvp && <ProgressBar value={ev.taken} max={ev.max} />}
       </div>
-      <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg bg-inset px-4 py-3">
-        <Icon name={ev.planReady ? "check-circle" : "plan-pending"} />
-        <span className={`type-label-s ${ev.planReady ? "text-fg-success" : "text-fg"}`}>
-          {t(ev.planReady ? "feed.plan.ready" : "feed.plan.awaiting")}
-        </span>
-      </div>
+      {!ev.mission.training && (
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg bg-inset px-4 py-3">
+          <Icon name={ev.planReady ? "check-circle" : "plan-pending"} />
+          <span className={`type-label-s ${ev.planReady ? "text-fg-success" : "text-fg"}`}>
+            {t(ev.planReady ? "feed.plan.ready" : "feed.plan.awaiting")}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -86,6 +90,7 @@ export function FeaturedCard({ ev, locale, t }: { ev: Upcoming; locale: Locale; 
       <div className="flex min-w-0 flex-1 flex-col gap-3.5 py-1 pr-2">
         <div className="flex flex-wrap items-center gap-3">
           <StatusChip tone="accent">{t("event.status.upcoming")}</StatusChip>
+          {ev.mission.training && <StatusChip tone="training">{t("event.kicker.training")}</StatusChip>}
           <span className="type-body-s text-fg-secondary">
             {eventDay(ev.startsAt, locale)} · {time(ev.startsAt)} {t("events.msk")}
           </span>
@@ -112,6 +117,7 @@ export function UpcomingCard({ ev, locale, t }: { ev: Upcoming; locale: Locale; 
       <Cover mission={ev.mission} sizes="288px" noCoverLabel={t("past.noCover")} className="w-full shrink-0 sm:w-[288px]" />
       <div className="flex min-w-0 flex-1 flex-col gap-2.5 py-1 pr-2">
         <div className="flex flex-wrap items-center gap-3">
+          {ev.mission.training && <StatusChip tone="training">{t("event.kicker.training")}</StatusChip>}
           <span className="type-label-s text-fg">
             {eventDay(ev.startsAt, locale)} · {time(ev.startsAt)} {t("events.msk")}
           </span>
@@ -130,7 +136,10 @@ export function PlayedRow({ ev, locale, t }: { ev: Played; locale: Locale; t: T 
     <article className="relative flex min-w-0 flex-1 items-center gap-4 rounded-xl bg-inset p-3 ring-line-strong hover:ring-1">
       <Cover mission={ev.mission} sizes="112px" noCoverLabel="" rounded="rounded-md" className="w-28 shrink-0" />
       <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-        <StatusChip tone="neutral">{t("event.status.past")}</StatusChip>
+        <span className="flex gap-1.5">
+          <StatusChip tone="neutral">{t("event.status.past")}</StatusChip>
+          {ev.mission.training && <StatusChip tone="training">{t("event.kicker.training")}</StatusChip>}
+        </span>
         <Link href={`/events/${ev.id}`} className="truncate type-heading-xs text-fg after:absolute after:inset-0">
           {ev.mission.name}
         </Link>

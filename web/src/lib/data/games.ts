@@ -49,7 +49,7 @@ function group<T extends { event_id: string }>(rows: T[]): Map<string, T[]> {
 /** Every game but the cancelled ones, soonest first. */
 const loadGames = cache(async (): Promise<HubEvent[]> => {
   const db = await getDb();
-  const [events, slots, attendance, replays, missions] = await Promise.all([
+  const [events, slots, attendance, replays, rsvps, missions] = await Promise.all([
     db.query(
       `SELECT e.id, e.mission_id, e.starts_at, e.extra, e.status, h.display_name AS host_name,
               pl.display_name AS platoon_leader, e.started_at, e.ended_at, e.plan_code, e.stats,
@@ -84,11 +84,17 @@ const loadGames = cache(async (): Promise<HubEvent[]> => {
     db.query("SELECT event_id, replay_code FROM event_replays ORDER BY event_id, part") as Promise<
       { event_id: string; replay_code: string }[]
     >,
+    db.query(
+      `SELECT r.event_id, p.display_name AS name, p.discord_id
+       FROM event_rsvps r JOIN players p ON p.id = r.player_id
+       ORDER BY r.event_id, r.created_at`,
+    ) as Promise<{ event_id: string; name: string; discord_id: string }[]>,
     missionMap(),
   ]);
   const slotsOf = group(slots);
   const attendanceOf = group(attendance);
   const replaysOf = group(replays);
+  const rsvpsOf = group(rsvps);
 
   return events.map((e): HubEvent => {
     const mission = missions.get(e.mission_id);
@@ -122,7 +128,8 @@ const loadGames = cache(async (): Promise<HubEvent[]> => {
             createdAt: iso(e.plan_attached_at ?? e.starts_at),
           }
         : null;
-      return { ...base, status: "upcoming", slots: gameSlots, plan };
+      const coming = (rsvpsOf.get(e.id) ?? []).map((r) => ({ name: r.name, discordId: r.discord_id }));
+      return { ...base, status: "upcoming", slots: gameSlots, rsvps: coming, plan };
     }
 
     const stats = e.stats ?? { totals: { deaths: 0 }, leaderboards: { aiKills: [], deaths: [] }, awards: [], friendlyFire: [] };
@@ -133,7 +140,8 @@ const loadGames = cache(async (): Promise<HubEvent[]> => {
       startedAt: iso(e.started_at ?? e.starts_at),
       endedAt: iso(e.ended_at ?? e.started_at ?? e.starts_at),
       // Slots exist only for games scheduled in the hub, and count only if people slotted there.
-      slotted: gameSlots.filter((s) => s.playerName).length || null,
+      // A game without slots counts its «Я приду!».
+      slotted: gameSlots.filter((s) => s.playerName).length || (rsvpsOf.get(e.id) ?? []).length || null,
       attended: players.filter((a) => a.attended).length,
       replayCodes: (replaysOf.get(e.id) ?? []).map((r) => r.replay_code),
       planCode: e.plan_code,
@@ -181,7 +189,8 @@ export const gamesData: HubData = {
     const [row] = await db.query(
       `SELECT md5(e.status || '|' || coalesce(e.plan_code, '') || '|' || coalesce(
                 (SELECT string_agg(s.position || ':' || s.group_id || ':' || s.group_name || ':' || s.role || ':' || coalesce(s.player_id::text, s.player_name, ''), ',' ORDER BY s.position)
-                 FROM event_slots s WHERE s.event_id = e.id), '')) AS v
+                 FROM event_slots s WHERE s.event_id = e.id), '') || '|' || coalesce(
+                (SELECT string_agg(r.player_id::text, ',' ORDER BY r.created_at) FROM event_rsvps r WHERE r.event_id = e.id), '')) AS v
        FROM events e WHERE e.id = $1`,
       [id],
     );

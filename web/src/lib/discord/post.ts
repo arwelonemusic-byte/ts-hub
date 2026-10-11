@@ -74,6 +74,8 @@ export async function postGame(eventId: string): Promise<PostGame | null> {
       slotCount: ev.slots.length,
       plan: ev.plan ? { code: ev.plan.code, title: ev.plan.title, author: ev.plan.author } : null,
       pingRoles: pingRoles(),
+      training: !!ev.mission.training,
+      rsvps: ev.rsvps.map((r) => r.name),
     };
   }
   if (ev) {
@@ -88,6 +90,8 @@ export async function postGame(eventId: string): Promise<PostGame | null> {
       plan: null,
       attended: ev.attended,
       pingRoles: pingRoles(),
+      training: !!ev.mission.training,
+      rsvps: [],
     };
   }
   // Cancelled games aren't in the hub's game lists any more.
@@ -107,6 +111,8 @@ export async function postGame(eventId: string): Promise<PostGame | null> {
     slotCount: 0,
     plan: null,
     pingRoles: pingRoles(),
+    training: !!mission.training,
+    rsvps: [],
   };
 }
 

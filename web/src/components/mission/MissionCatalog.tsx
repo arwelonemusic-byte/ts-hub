@@ -15,10 +15,12 @@ export function MissionCatalog({ missions, initial, locale }: { missions: Catalo
   const update = (patch: Partial<CatalogQuery>) => {
     const next = { ...query, ...patch };
     setQuery(next);
-    // The admins' archive view (?archive=1) stays the archive view while filtering.
-    const archive = new URLSearchParams(window.location.search).get("archive") === "1";
+    // The admins' archive view (?archive=1) and trainings view (?training=1) stay what they are while filtering.
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get("archive") === "1" ? "archive=1" : params.get("training") === "1" ? "training=1" : null;
+    const archive = !!view;
     const search = catalogSearch(next);
-    window.history.replaceState(null, "", archive ? `${search || "?"}${search ? "&" : ""}archive=1` : search || window.location.pathname);
+    window.history.replaceState(null, "", archive ? `${search || "?"}${search ? "&" : ""}${view}` : search || window.location.pathname);
   };
 
   const shown = filterCatalog(missions, query);

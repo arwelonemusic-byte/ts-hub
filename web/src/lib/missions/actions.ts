@@ -97,22 +97,22 @@ export async function saveMission(input: MissionDraft): Promise<SaveResult> {
     id, d.name, d.mapKey, mapLabel(d.mapKey), cover, workshopPage(d.workshopGuid), d.workshopGuid, d.scenarioId,
     // An object, not a JSON string: the driver encodes jsonb itself (a string would be stored double-encoded).
     // No squads = played without slotting.
-    briefing, d.tags, d.planning, d.squads.length === 0, player,
+    briefing, d.tags, d.planning, d.squads.length === 0, player, d.training,
   ];
   await db.transaction(async (tx) => {
     if (existing) {
       await tx.query(
         `UPDATE missions SET name = $2, map_key = $3, map_label = $4, cover_url = $5, workshop_url = $6, addon_guid = $7,
            scenario_id = $8, briefing = $9::jsonb, tags = $10::text[], planning = $11, no_slotting = $12, updated_by = $13,
-           updated_at = NOW(), hub_edited_at = NOW()
+           training = $14, updated_at = NOW(), hub_edited_at = NOW()
          WHERE id = $1`,
         row,
       );
     } else {
       await tx.query(
         `INSERT INTO missions (id, name, map_key, map_label, cover_url, workshop_url, addon_guid, scenario_id, briefing, tags,
-                               planning, no_slotting, created_by, updated_by, hub_edited_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::text[], $11, $12, $13, $13, NOW())`,
+                               planning, no_slotting, created_by, updated_by, training, hub_edited_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::text[], $11, $12, $13, $13, $14, NOW())`,
         row,
       );
     }

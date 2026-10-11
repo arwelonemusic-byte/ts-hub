@@ -156,6 +156,8 @@ export function BriefingStep({
         </button>
       </section>
 
+      {/* A training needs no plan, so no Markers.layer. */}
+      {!draft.training && (
       <section className="flex flex-col gap-3 rounded-xl bg-inset p-4">
         <h3 className="type-label-m text-fg">Markers.layer</h3>
         <Check checked={!draft.planning} onChange={(off) => set({ planning: !off })}>
@@ -182,6 +184,7 @@ export function BriefingStep({
           </div>
         )}
       </section>
+      )}
     </div>
   );
 }

@@ -7,9 +7,10 @@ import type { DiscordMessage } from "./api";
  * Galaxy's layout (2026-10-09), after the announcements posted by hand until now:
  *   message text  # Что | Operation <name> / # Когда | <date> / За кого, Против кого / the briefing's first
  *                 paragraph / # Полный брифинг и слоты (link) / @Анонсы @Reforger
+ *                 (a training: «Тренировка <name>»; a game without slots: «… и запись»)
  *   image         the mission's cover, attached to the message so it renders large
  *   card          mission name, countdown, map, author, then a block per squad (✅ taken / ⬜ free)
- *   button        «Записаться» → the game's page
+ *   button        «Записаться» → the game's page («Я приду» when the game has no slots: the card lists who's coming)
  * Discord always draws them in that order (text, attachments, card, buttons). The image goes up with the first post
  * only; edits keep it.
  *
@@ -50,6 +51,10 @@ export interface PostGame {
   plan: { code: string; title?: string; author: string } | null;
   /** A played game: how many played. */
   attended?: number;
+  /** A training (Mission.training): «Тренировка» instead of «Operation», no plan. */
+  training: boolean;
+  /** «Я приду!»: who's coming, in sign-up order (games without slots). */
+  rsvps: string[];
   /** Roles pinged when the post goes up (DISCORD_ANNOUNCE_PING_ROLES): @Анонсы, @Reforger in #анонсы. */
   pingRoles: string[];
 }
@@ -98,8 +103,8 @@ function teaser(sections: PostGame["mission"]["briefing"]): string | null {
  * character itself, since Discord turns ":point_right:" into an emoji only as a person types it.
  */
 function bigLink(g: PostGame): string | null {
-  if (g.status === "scheduled") return `# 👉 [Полный брифинг и слоты](<${g.url}#briefing>)`;
-  if (g.status === "played") return `# 👉 [Итоги игры](<${g.url}>)`;
+  if (g.status === "scheduled") return `# 👉 [Полный брифинг и ${g.squads.length ? "слоты" : "запись"}](<${g.url}#briefing>)`;
+  if (g.status === "played") return `# 👉 [${g.training ? "Итоги тренировки" : "Итоги игры"}](<${g.url}>)`;
   return null;
 }
 
@@ -115,7 +120,7 @@ function header(g: PostGame, unix: number): string {
   const intro = teaser(g.mission.briefing);
   const link = bigLink(g);
   return [
-    `# Что | Operation ${plain(g.mission.name)}`,
+    `# Что | ${g.training ? "Тренировка" : "Operation"} ${plain(g.mission.name)}`,
     `# Когда | <t:${unix}:F>`,
     ...(sideLines.length ? ["", ...sideLines] : []),
     ...(intro ? ["", plain(intro)] : []),
@@ -150,7 +155,12 @@ export function renderGamePost(g: PostGame): GamePost {
           color: GREY,
           title: g.mission.name,
           url: g.url,
-          description: [`**Игра сыграна**${g.attended ? ` · играло ${g.attended}` : ""}`, ...about].filter(Boolean).join("\n"),
+          description: [
+            g.training ? `**Тренировка прошла**${g.attended ? ` · было ${g.attended}` : ""}` : `**Игра сыграна**${g.attended ? ` · играло ${g.attended}` : ""}`,
+            ...about,
+          ]
+            .filter(Boolean)
+            .join("\n"),
         },
       ],
       components: [{ type: 1, components: [{ type: 2, style: 5, label: "Итоги", url: g.url }] }],
@@ -165,12 +175,15 @@ export function renderGamePost(g: PostGame): GamePost {
         title: g.mission.name,
         url: g.url,
         description: [`<t:${unix}:R>`, ...about, g.plan ? `План: ${g.plan.code}` : null].filter(Boolean).join("\n"),
-        fields: g.squads.map((sq) => ({
-          name: [sq.groupId, sq.name].filter(Boolean).join(" "),
-          value: sq.slots.map((s) => (s.player ? `✅ ${s.role} — **${s.player}**` : `⬜ ${s.role}`)).join("\n"),
-        })),
+        fields: g.squads.length
+          ? g.squads.map((sq) => ({
+              name: [sq.groupId, sq.name].filter(Boolean).join(" "),
+              value: sq.slots.map((s) => (s.player ? `✅ ${s.role} — **${s.player}**` : `⬜ ${s.role}`)).join("\n"),
+            }))
+          : // No slots: who pressed «Я приду!».
+            [{ name: `Придут: ${g.rsvps.length}`, value: g.rsvps.length ? g.rsvps.map(plain).join(", ") : "Пока никто" }],
       },
     ],
-    components: [{ type: 1, components: [{ type: 2, style: 5, label: "Записаться", url: g.url }] }],
+    components: [{ type: 1, components: [{ type: 2, style: 5, label: g.squads.length ? "Записаться" : "Я приду", url: g.url }] }],
   };
 }

@@ -25,6 +25,7 @@ const EMPTY: MissionDraft = {
   planning: true,
   markersLayer: null,
   squads: [],
+  training: false,
 };
 
 export interface EditorTarget {
@@ -169,12 +170,15 @@ export function MissionEditor({
         />
       )}
       {step === "briefing" && <BriefingStep draft={draft} set={set} hadLayer={!!editing?.hasMarkersLayer} t={t} />}
-      {step === "slots" && (
-        <div className="flex flex-col gap-5">
-          <SquadsEditor squads={draft.squads} setSquads={(squads) => set({ squads })} roles={options.roles} mode="mission" locale={locale} t={t} />
-          {editing && draft.squads.length > 0 && <p className="type-caption text-fg-tertiary">{t("editor.slots.editNote")}</p>}
-        </div>
-      )}
+      {step === "slots" &&
+        (draft.training ? (
+          <p className="rounded-xl bg-inset p-4 type-body-m text-fg-secondary">{t("editor.slots.training")}</p>
+        ) : (
+          <div className="flex flex-col gap-5">
+            <SquadsEditor squads={draft.squads} setSquads={(squads) => set({ squads })} roles={options.roles} mode="mission" locale={locale} t={t} />
+            {editing && draft.squads.length > 0 && <p className="type-caption text-fg-tertiary">{t("editor.slots.editNote")}</p>}
+          </div>
+        ))}
     </DialogShell>
   );
 }

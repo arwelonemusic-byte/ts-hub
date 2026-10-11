@@ -26,8 +26,11 @@ export default async function MissionsPage({ searchParams }: PageProps<"/mission
     getViewer(),
   ]);
   const archiveView = !!viewer?.isAdmin && sp.archive === "1";
-  const missions = all.filter((m) => !!m.archived === archiveView);
+  // Training missions stay out of the catalog; admins reach them through ?training=1, like the archive.
+  const trainingView = !!viewer?.isAdmin && !archiveView && sp.training === "1";
+  const missions = all.filter((m) => !!m.archived === archiveView && (archiveView || !!m.training === trainingView));
   const archived = viewer?.isAdmin ? all.filter((m) => m.archived).length : 0;
+  const trainings = viewer?.isAdmin ? all.filter((m) => m.training && !m.archived).length : 0;
   const options = canAddMission(viewer) && !archiveView ? await editorOptions() : null;
 
   return (
@@ -37,16 +40,26 @@ export default async function MissionsPage({ searchParams }: PageProps<"/mission
         <div className="flex w-full max-w-[1216px] flex-col gap-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="flex flex-col gap-2">
-              {archiveView && (
+              {(archiveView || trainingView) && (
                 <Link href="/missions" className="flex h-8 items-center gap-1.5 self-start type-label-s text-fg-secondary hover:text-fg">
                   <Icon name="chevron-left" />
                   {t("missionPage.back")}
                 </Link>
               )}
-              <h1 className="type-display-page text-fg">{archiveView ? t("catalog.archive.title") : t("nav.missions")}</h1>
+              <h1 className="type-display-page text-fg">
+                {archiveView ? t("catalog.archive.title") : trainingView ? t("catalog.training.title") : t("nav.missions")}
+              </h1>
               <p className="type-body-l text-fg-secondary">
                 {plural(locale, archiveView ? "catalog.archive.total" : "catalog.total", missions.length)}
-                {!archiveView && archived > 0 && (
+                {!archiveView && !trainingView && trainings > 0 && (
+                  <>
+                    {" · "}
+                    <Link href="/missions?training=1" className="underline-offset-2 hover:text-fg hover:underline">
+                      {plural(locale, "catalog.training.link", trainings)}
+                    </Link>
+                  </>
+                )}
+                {!archiveView && !trainingView && archived > 0 && (
                   <>
                     {" · "}
                     <Link href="/missions?archive=1" className="underline-offset-2 hover:text-fg hover:underline">

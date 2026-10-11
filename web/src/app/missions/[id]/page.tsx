@@ -59,7 +59,13 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
           </div>
           <aside className="flex shrink-0 flex-col gap-4 lg:w-[360px]">
             <MissionPanel mission={mission} history={history} locale={locale} t={t} onMissionPage />
-            <MissionSlotsPanel squads={mission.squads} noSlotting={mission.noSlotting} locale={locale} t={t} />
+            {/* A training's games take «Я приду!», whatever template the mission keeps. */}
+            <MissionSlotsPanel
+              squads={mission.training ? undefined : mission.squads}
+              noSlotting={mission.training || mission.noSlotting}
+              locale={locale}
+              t={t}
+            />
           </aside>
         </div>
       </main>
@@ -110,7 +116,7 @@ function Hero({
             {mission.archived && <StatusChip tone="neutral">{t("missionPage.archived")}</StatusChip>}
           </span>
           <div className="flex flex-col">
-            <span className="type-display-kicker text-fg-label">{t("event.kicker")}</span>
+            <span className="type-display-kicker text-fg-label">{t(mission.training ? "event.kicker.training" : "event.kicker")}</span>
             <h1 className="type-display-event text-fg">{mission.name}</h1>
           </div>
           <div className="flex flex-col gap-2 type-body-m text-fg-label">
@@ -140,7 +146,7 @@ function Hero({
           <div className="flex flex-wrap gap-2">
             {canSchedule && (
               <ScheduleButton
-                missions={[{ id: mission.id, name: mission.name, mapLabel: mission.mapLabel, coverUrl: mission.coverUrl }]}
+                missions={[{ id: mission.id, name: mission.name, mapLabel: mission.mapLabel, coverUrl: mission.coverUrl, training: !!mission.training }]}
                 initial={{ missionId: mission.id }}
                 locale={locale}
                 label={t("schedule.button")}
@@ -152,7 +158,7 @@ function Hero({
               <Icon name={canSchedule ? "external" : "external-dark"} />
             </ButtonLink>
             {/* Starts a new plan of the viewer's own (app/plan/open). A POST, so only a click creates one. */}
-            {mission.planning !== false && (
+            {mission.planning !== false && !mission.training && (
               <form action="/plan/open" method="post" target="_blank">
                 <input type="hidden" name="mission" value={mission.id} />
                 <button type="submit" className={buttonClass("secondary", "m")}>
@@ -211,7 +217,15 @@ function UpcomingRow({ ev, locale, t }: { ev: UpcomingEvent; locale: Locale; t: 
           <span className="type-heading-xs text-fg">{eventDay(ev.startsAt, locale)}</span>
         </div>
         <span className="type-body-s text-fg-secondary">
-          <span className="type-label-s text-fg">{taken}</span> {t("missionPage.slotted", { max: ev.slots.length })}
+          {ev.slots.length ? (
+            <>
+              <span className="type-label-s text-fg">{taken}</span> {t("missionPage.slotted", { max: ev.slots.length })}
+            </>
+          ) : (
+            <>
+              <span className="type-label-s text-fg">{ev.rsvps.length}</span> {plural(locale, "event.coming", ev.rsvps.length)}
+            </>
+          )}
         </span>
       </div>
       {/* The whole row is the link; this only looks like the button. */}

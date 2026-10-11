@@ -33,6 +33,11 @@ export interface MissionDraft {
   markersLayer?: string | null;
   /** Slot template, HQ first. None = played without slotting (RSVP only). */
   squads: MissionSquad[];
+  /**
+   * A training (Mission.training): its games take «Я приду!» and have no plan. The Markers.layer, planning flag and
+   * slot template are kept, just not used, so unticking it gives them back.
+   */
+  training: boolean;
   /** Take the cover from the Workshop again (editing; a new mission always does). */
   refreshCover?: boolean;
 }
@@ -131,6 +136,7 @@ export function normalizeDraft(d: MissionDraft): MissionDraft {
         .map((s) => ({ title: clip(s.title, LIMITS.sectionTitle), body: (s.body ?? "").replace(/\r\n?/g, "\n").trim().slice(0, LIMITS.sectionBody) }))
         .filter((s) => s.title || s.body),
     },
+    training: !!d.training,
     markersLayer: d.planning ? d.markersLayer : null,
     squads: d.squads
       .map((sq) => ({
@@ -156,7 +162,8 @@ export function checkDraft(d: MissionDraft, mapKeys: readonly string[], hasLayer
   if (d.authors.length > LIMITS.authors) return "authors";
   if (d.tags.length > LIMITS.tags) return "tags";
   if (d.briefing.sections.length > LIMITS.sections || d.briefing.sections.some((s) => !s.title || !s.body)) return "briefing";
-  if (d.planning) {
+  // A training needs no plan, so no Markers.layer either.
+  if (d.planning && !d.training) {
     if (typeof d.markersLayer === "string" && (d.markersLayer.length > LIMITS.layer || d.markersLayer.includes("\0"))) return "layer";
     if (d.markersLayer === null || (d.markersLayer === undefined && !hasLayer)) return "layerMissing";
   }

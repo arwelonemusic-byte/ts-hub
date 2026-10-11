@@ -39,11 +39,14 @@ export async function scheduleGame(_prev: ScheduleState, form: FormData): Promis
       "INSERT INTO events (id, mission_id, starts_at, extra, status) VALUES ($1, $2, $3, $4, 'scheduled')",
       [id, mission.id, startsAt.toISOString(), !isUsualSlot(startsAt)],
     );
-    await tx.query(
-      `INSERT INTO event_slots (event_id, position, group_id, group_name, role, required_role)
-       SELECT $1, position, group_id, group_name, role, required_role FROM mission_slots WHERE mission_id = $2`,
-      [id, mission.id],
-    );
+    // A training takes «Я приду!»: its game gets no slots, whatever template the mission keeps.
+    if (!mission.training) {
+      await tx.query(
+        `INSERT INTO event_slots (event_id, position, group_id, group_name, role, required_role)
+         SELECT $1, position, group_id, group_name, role, required_role FROM mission_slots WHERE mission_id = $2`,
+        [id, mission.id],
+      );
+    }
   });
   revalidatePath("/events");
   revalidatePath(`/missions/${mission.id}`);

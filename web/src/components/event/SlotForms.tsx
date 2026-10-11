@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
-import { assignSlot, clearSlot, leaveSlot, takeSlot, type SlotState } from "@/lib/slots/actions";
+import { assignSlot, clearSlot, comeToGame, leaveSlot, skipGame, takeSlot, type RsvpState, type SlotState } from "@/lib/slots/actions";
 import { buttonClass } from "../ui";
 
 /** Error texts by SlotState error; "{name}" is replaced with the role or player name. */
@@ -156,5 +156,31 @@ export function SlotAdminMenu({
         </div>
       )}
     </div>
+  );
+}
+
+/** «Я приду!» / «Не приду» on a game without slots (comeToGame / skipGame). */
+export function RsvpButton({
+  kind,
+  eventId,
+  label,
+  errors,
+  className,
+}: {
+  kind: "come" | "skip";
+  eventId: string;
+  label: string;
+  errors: Record<NonNullable<RsvpState>["error"], string>;
+  className: string;
+}) {
+  const [state, action, pending] = useActionState(kind === "come" ? comeToGame : skipGame, null);
+  return (
+    <form action={action} className="flex flex-1 flex-col gap-1">
+      <input type="hidden" name="event" value={eventId} />
+      <button type="submit" disabled={pending} className={`${className} w-full disabled:opacity-60`}>
+        {label}
+      </button>
+      {state && <span className="type-caption text-fg-danger">{errors[state.error]}</span>}
+    </form>
   );
 }

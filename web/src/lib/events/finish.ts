@@ -28,20 +28,26 @@ export interface ReplayCandidate extends ReplayMatch {
 }
 
 /** A game the admin may finish (scheduled, started) or recompute (played). */
-async function finishable(eventId: string): Promise<{ id: string; missionId: string; status: string; startsAt: string; planCode: string | null } | FinishError> {
+async function finishable(
+  eventId: string,
+): Promise<{ id: string; missionId: string; status: string; startsAt: string; planCode: string | null; training: boolean } | FinishError> {
   const viewer = await getViewer();
   if (!viewer?.isAdmin) return "forbidden";
-  const [ev] = (await (await getDb()).query("SELECT id, mission_id, status, starts_at, plan_code FROM events WHERE id = $1", [eventId])) as {
+  const [ev] = (await (await getDb()).query(
+    "SELECT e.id, e.mission_id, e.status, e.starts_at, e.plan_code, m.training FROM events e JOIN missions m ON m.id = e.mission_id WHERE e.id = $1",
+    [eventId],
+  )) as {
     id: string;
     mission_id: string;
     status: string;
     starts_at: string | Date;
     plan_code: string | null;
+    training: boolean;
   }[];
   if (!ev || ev.status === "cancelled") return "invalid";
   const startsAt = new Date(ev.starts_at).toISOString();
   if (ev.status === "scheduled" && Date.parse(startsAt) > Date.now()) return "notYet";
-  return { id: ev.id, missionId: ev.mission_id, status: ev.status, startsAt, planCode: ev.plan_code };
+  return { id: ev.id, missionId: ev.mission_id, status: ev.status, startsAt, planCode: ev.plan_code, training: ev.training };
 }
 
 /** Recordings around the game's time, newest first, with the suggested ones marked; `current` = the game's replays, if played. */
@@ -144,7 +150,8 @@ export async function finishGame(eventId: string, codes: string[]): Promise<{ er
                                        ORDER BY position LIMIT 1), platoon_leader_id)
        WHERE id = $1`,
       // An object, not a JSON string: the driver encodes jsonb itself.
-      [ev.id, new Date(r.startedAt).toISOString(), new Date(r.endedAt).toISOString(), r.planCode, r.stats, player],
+      // A training keeps only who came (user decision 2026-10-11): no totals, rankings or awards.
+      [ev.id, new Date(r.startedAt).toISOString(), new Date(r.endedAt).toISOString(), r.planCode, ev.training ? null : r.stats, player],
     );
     await tx.query("DELETE FROM event_attendance WHERE event_id = $1", [ev.id]);
     for (const name of r.roster) {

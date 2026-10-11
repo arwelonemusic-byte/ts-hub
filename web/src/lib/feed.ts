@@ -9,7 +9,7 @@ import { replayUrl } from "@/lib/links";
 import { addMonths, monthOf, monthStart, mskDayKey, usualSlotsFrom, type MonthKey } from "@/lib/schedule";
 import type { ISODate, Mission } from "@/lib/types";
 
-type CardMission = Pick<Mission, "name" | "mapLabel" | "coverUrl" | "authors">;
+type CardMission = Pick<Mission, "name" | "mapLabel" | "coverUrl" | "authors" | "training">;
 
 export type FeedItem =
   | {
@@ -19,6 +19,8 @@ export type FeedItem =
       mission: CardMission;
       taken: number;
       max: number;
+      /** «Я приду!» count, for a game without slots (max 0). */
+      rsvps: number;
       planReady: boolean;
     }
   | {
@@ -69,7 +71,13 @@ export async function getFeedMeta(now: Date): Promise<FeedMeta> {
   };
 }
 
-const card = (m: Mission): CardMission => ({ name: m.name, mapLabel: m.mapLabel, coverUrl: m.coverUrl, authors: m.authors });
+const card = (m: Mission): CardMission => ({
+  name: m.name,
+  mapLabel: m.mapLabel,
+  coverUrl: m.coverUrl,
+  authors: m.authors,
+  ...(m.training ? { training: true } : {}),
+});
 
 /** Months `from`..`to` inclusive, each with its items in time order. */
 export async function getFeedMonths(from: MonthKey, to: MonthKey, meta: FeedMeta): Promise<FeedMonth[]> {
@@ -90,6 +98,7 @@ export async function getFeedMonths(from: MonthKey, to: MonthKey, meta: FeedMeta
           mission: card(e.mission),
           taken: e.slots.filter((s) => s.playerName).length,
           max: e.slots.length,
+          rsvps: e.rsvps.length,
           planReady: !!e.plan,
         }
       : {

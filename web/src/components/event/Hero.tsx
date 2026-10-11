@@ -57,7 +57,7 @@ export function Hero({ ev, locale, t, children }: { ev: HubEvent; locale: Locale
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="type-display-kicker text-fg-label">{t("event.kicker")}</span>
+            <span className="type-display-kicker text-fg-label">{t(ev.mission.training ? "event.kicker.training" : "event.kicker")}</span>
             <h1 className="type-display-event text-fg">{m.name}</h1>
           </div>
           <div className="flex flex-col gap-2">

@@ -614,7 +614,32 @@ function Board({ title, rows, medals = false }: { title: string; rows: Leaderboa
   );
 }
 
-export function LeaderboardsPanel({ ev, t }: { ev: PastEvent; t: T }) {
+/** «Кто придёт» on a game without slots: the members who pressed «Я приду!», in sign-up order. */
+export function RsvpPanel({ ev, viewer, locale, t }: { ev: UpcomingEvent; viewer: Viewer | null; locale: Locale; t: T }) {
+  return (
+    // «Я приду!» and links to #slots land here, as on a slotted game.
+    <section id="slots" className="flex scroll-mt-24 flex-col gap-4 rounded-xl bg-inset p-5 lg:scroll-mt-[72px]">
+      <div className="flex items-baseline justify-between">
+        <h2 className="type-heading-xs text-fg">{t("rsvp.title")}</h2>
+        <span className="type-caption text-fg-secondary">{plural(locale, "rsvp.count", ev.rsvps.length)}</span>
+      </div>
+      {ev.rsvps.length > 0 ? (
+        <div className="flex flex-wrap gap-1.5">
+          {ev.rsvps.map((r) => (
+            <Tag key={r.discordId} outline={r.discordId === viewer?.discordId}>
+              {r.name}
+            </Tag>
+          ))}
+        </div>
+      ) : (
+        <p className="type-body-s text-fg-secondary">{t("rsvp.none")}</p>
+      )}
+    </section>
+  );
+}
+
+/** Who played, rankings and friendly fire; a training (`attendanceOnly`) shows only who came. */
+export function LeaderboardsPanel({ ev, t, attendanceOnly }: { ev: PastEvent; t: T; attendanceOnly?: boolean }) {
   const players = ev.attendance
     .filter((a) => a.attended)
     .map((a) => a.playerName)
@@ -623,7 +648,7 @@ export function LeaderboardsPanel({ ev, t }: { ev: PastEvent; t: T }) {
   const ff = ev.friendlyFireIncidents ?? [];
   return (
     <section className="flex flex-col gap-6 rounded-xl bg-surface p-6">
-      <h2 className="type-heading-m text-fg">{t("boards.title")}</h2>
+      <h2 className="type-heading-m text-fg">{t(attendanceOnly ? "boards.came" : "boards.title")}</h2>
       <div className="flex flex-col gap-2">
         <Eyebrow>{t("boards.players")}</Eyebrow>
         <div className="flex flex-wrap gap-1.5">
@@ -632,13 +657,13 @@ export function LeaderboardsPanel({ ev, t }: { ev: PastEvent; t: T }) {
           ))}
         </div>
       </div>
-      {ev.leaderboards && (
+      {ev.leaderboards && !attendanceOnly && (
         <div className="flex flex-col gap-8 md:flex-row">
           <Board title={t("boards.aiKills")} rows={ev.leaderboards.aiKills} medals />
           <Board title={t("boards.deaths")} rows={ev.leaderboards.deaths} />
         </div>
       )}
-      {ff.length > 0 && (
+      {ff.length > 0 && !attendanceOnly && (
         <div className="flex flex-col gap-1">
           <Eyebrow className="text-fg-danger">{t("boards.friendlyFire")}</Eyebrow>
           {/* Plain rows (user decision 2026-10-10): the replay link lives in the hero («Смотреть повтор»). */}

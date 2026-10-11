@@ -103,3 +103,31 @@ export async function clearSlot(_prev: SlotState, form: FormData): Promise<SlotS
   revalidatePath(`/events/${c.ev.id}`);
   return null;
 }
+
+export type RsvpState = { error: "closed" | "forbidden" } | null;
+
+/** «Я приду!»: the viewer is coming to a game without slots (a training, or a mission with no slot template). */
+export async function comeToGame(_prev: RsvpState, form: FormData): Promise<RsvpState> {
+  const c = await context(form);
+  if (!c || c.ev.slots.length > 0) return { error: "forbidden" };
+  if (!c.viewer.isAdmin && !slottingOpen(c.ev)) return { error: "closed" };
+  const player = await playerIdOf(c.viewer);
+  if (!player) return { error: "forbidden" };
+  await (await getDb()).query("INSERT INTO event_rsvps (event_id, player_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", [c.ev.id, player]);
+  refreshAnnouncement(c.ev.id);
+  revalidatePath(`/events/${c.ev.id}`);
+  return null;
+}
+
+/** «Не приду»: the viewer is off the list again, until the game starts. */
+export async function skipGame(_prev: RsvpState, form: FormData): Promise<RsvpState> {
+  const c = await context(form);
+  if (!c) return { error: "forbidden" };
+  if (!c.viewer.isAdmin && !slottingOpen(c.ev)) return { error: "closed" };
+  const player = await playerIdOf(c.viewer);
+  if (!player) return { error: "forbidden" };
+  await (await getDb()).query("DELETE FROM event_rsvps WHERE event_id = $1 AND player_id = $2", [c.ev.id, player]);
+  refreshAnnouncement(c.ev.id);
+  revalidatePath(`/events/${c.ev.id}`);
+  return null;
+}
