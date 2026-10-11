@@ -163,7 +163,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   games' rosters, most recently played first, with the member it's matched to (`player_names`, migration 009: one
   member per name, several names per member) or a suggestion from `lib/roster/match.ts`: the same Bohemia account as an
   already matched name (a rename), else a nickname/username equal or close once clan tags in [], case, punctuation
-  and Cyrillic vs Latin are ignored (a nickname's part in round brackets counts on its own: "Smoker (OnlineKiller)").
+  and Cyrillic vs Latin are ignored (a nickname's part in round brackets counts on its own: "Smoker (OnlineKiller)";
+  names are also compared with the tags kept: "BS_ANR" = "[BS] ANR"). Members who lacked @Reforger when the member
+  list was read aren't in `players` until they log in; an admin adds one by Discord ID (2026-10-11: [RTT] J.A.N.).
   «Привязать точные совпадения» takes the sure ones (same account, or exactly one equal nickname) in one go;
   «Другой…» picks any member. Account IDs come from the recordings' `player_join.playerGuid` and are stored per game
   in `event_attendance.account_id` at «Игра окончена» (games finished before 2026-10-11 get them on «Пересчитать»);

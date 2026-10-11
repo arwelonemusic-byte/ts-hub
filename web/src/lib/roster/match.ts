@@ -33,10 +33,13 @@ export function nameKey(s: string): string {
   return slugify(s.replace(/\[[^\]]*\]|\([^)]*\)|\{[^}]*\}|<[^>]*>/g, " ")).replace(/-/g, "");
 }
 
-/** What a member can be matched by: their nickname, each part of it in round brackets, their username. */
+/** The whole name, clan tags included: "BS_ANR" in game is "[BS] ANR" in Discord. */
+const fullKey = (s: string) => slugify(s).replace(/-/g, "");
+
+/** What a member can be matched by: their nickname with and without clan tags, each part in round brackets, their username. */
 function memberKeys(m: MemberLite): string[] {
   const inBrackets = [...m.name.matchAll(/\(([^)]*)\)/g)].map((x) => nameKey(x[1]));
-  return [nameKey(m.name), ...inBrackets, ...(m.username ? [nameKey(m.username)] : [])].filter(Boolean);
+  return [nameKey(m.name), fullKey(m.name), ...inBrackets, ...(m.username ? [nameKey(m.username)] : [])].filter(Boolean);
 }
 
 function distance(a: string, b: string): number {
@@ -74,11 +77,11 @@ export function suggest(
     const owner = accountOwners.get(a);
     if (owner) return { memberId: owner.memberId, reason: "account", via: owner.name, others: 0 };
   }
-  const key = nameKey(name);
-  if (!key) return null;
+  const keys = [...new Set([nameKey(name), fullKey(name)].filter(Boolean))];
+  if (!keys.length) return null;
   let best: { score: number; ids: string[] } | null = null;
   for (const m of members) {
-    const scores = memberKeys(m).map((k) => closeness(key, k)).filter((s): s is number => s !== null);
+    const scores = memberKeys(m).flatMap((k) => keys.map((key) => closeness(key, k))).filter((s): s is number => s !== null);
     if (!scores.length) continue;
     const score = Math.min(...scores);
     if (!best || score < best.score) best = { score, ids: [m.id] };
