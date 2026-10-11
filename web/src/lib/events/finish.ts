@@ -133,7 +133,10 @@ export async function finishGame(eventId: string, codes: string[]): Promise<{ er
   await db.transaction(async (tx) => {
     // The platoon leader is whoever sat in the game's PL slot (games slotted in the hub); else it stays as it was.
     await tx.query(
+      // SET reads the row as it was, so plan_code below is still the attached code: whoever attached it stays its
+      // author only if the game played that very plan.
       `UPDATE events SET status = 'played', started_at = $2, ended_at = $3, plan_code = COALESCE($4, plan_code),
+         plan_attached_by = CASE WHEN $4::text IS NULL OR $4::text = plan_code THEN plan_attached_by END,
          stats = $5::jsonb, finished_at = NOW(), finished_by = $6, updated_at = NOW(),
          platoon_leader_id = COALESCE((SELECT player_id FROM event_slots
                                        WHERE event_id = $1 AND player_id IS NOT NULL

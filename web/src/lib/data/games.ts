@@ -137,6 +137,7 @@ const loadGames = cache(async (): Promise<HubEvent[]> => {
       attended: players.filter((a) => a.attended).length,
       replayCodes: (replaysOf.get(e.id) ?? []).map((r) => r.replay_code),
       planCode: e.plan_code,
+      planAuthor: e.plan_attached_by,
       stats: { ...stats.totals, topAiKills: stats.leaderboards.aiKills[0] ?? null },
       friendlyFireIncidents: stats.friendlyFire,
       awards: stats.awards,
@@ -159,7 +160,7 @@ function gamePlans(games: HubEvent[], missionId: string): PlanRef[] {
   return games
     .filter(isPast)
     .filter((e) => e.mission.id === missionId && e.planCode)
-    .map((e) => ({ code: e.planCode!, author: e.platoonLeader ?? "—", createdAt: e.startsAt, event: { id: e.id, startsAt: e.startsAt } }));
+    .map((e) => ({ code: e.planCode!, author: e.planAuthor ?? e.platoonLeader ?? "—", createdAt: e.startsAt, event: { id: e.id, startsAt: e.startsAt } }));
 }
 
 const newestFirst = (a: HubEvent, b: HubEvent) => b.startsAt.localeCompare(a.startsAt);

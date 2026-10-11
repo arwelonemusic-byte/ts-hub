@@ -192,7 +192,7 @@ function Upcoming({
 
 function Played({ ev, history, isAdmin, locale, t }: { ev: PastEvent; history: MissionHistory; isAdmin: boolean; locale: Locale; t: T }) {
   const used = ev.planCode
-    ? (history.plans.find((p) => p.code === ev.planCode) ?? { code: ev.planCode, author: ev.platoonLeader ?? "—", createdAt: ev.startsAt })
+    ? (history.plans.find((p) => p.code === ev.planCode) ?? { code: ev.planCode, author: ev.planAuthor ?? ev.platoonLeader ?? "—", createdAt: ev.startsAt })
     : null;
   return (
     <>

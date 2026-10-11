@@ -153,6 +153,12 @@ export interface PastEvent extends EventBase {
   /** Several codes when a server restart split the op. */
   replayCodes: string[];
   planCode: string | null;
+  /**
+   * Who brought that plan: the member who attached it to the game («Прикрепить план»). A game's «Нарисовать план»
+   * pushes aren't hub plan versions, so the planner can't tell who drew them; «Игра окончена» forgets the attacher
+   * when the game played another plan than the attached one.
+   */
+  planAuthor: string | null;
   stats: {
     deaths: number;
     shots?: number;
