@@ -109,6 +109,16 @@ function bigLink(g: PostGame): string | null {
 }
 
 /**
+ * «Что»: "Operation <name>" for an op, "Тренировка <name>" for a training, unless its name already says so (the
+ * training mission is called «Тренировка»: no «Тренировка Тренировка»).
+ */
+function what(g: PostGame): string {
+  const name = plain(g.mission.name);
+  if (!g.training) return `Operation ${name}`;
+  return /трениров|training/i.test(g.mission.name) ? name : `Тренировка ${name}`;
+}
+
+/**
  * The message text: what and when, the sides, the briefing's start with a link to the rest, the pings. It ends with
  * an invisible line (Discord drops trailing blank lines) so the cover sits a little below the text.
  */
@@ -120,7 +130,7 @@ function header(g: PostGame, unix: number): string {
   const intro = teaser(g.mission.briefing);
   const link = bigLink(g);
   return [
-    `# Что | ${g.training ? "Тренировка" : "Operation"} ${plain(g.mission.name)}`,
+    `# Что | ${what(g)}`,
     `# Когда | <t:${unix}:F>`,
     ...(sideLines.length ? ["", ...sideLines] : []),
     ...(intro ? ["", plain(intro)] : []),
