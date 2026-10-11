@@ -490,7 +490,8 @@ export function MissionPanel({
   /** A played game's page (Figma 24:3241): the mission's tags instead of its GUID and scenario. The mission page shows them under the title. */
   played?: boolean;
 }) {
-  const planning = (
+  // «Для плана»: trainings have no plans, so no line at all.
+  const planning = mission.training ? null : (
     <Fact label={t("mission.planning")}>
       {mission.planning === false ? (
         <span className="text-fg-secondary">{t("mission.noPlanning")}</span>

@@ -55,7 +55,8 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
           <div className="flex min-w-0 flex-1 flex-col gap-4">
             {mission.briefing && <BriefingPanel b={mission.briefing} t={t} />}
             <Games games={games} locale={locale} t={t} />
-            <Plans missionId={mission.id} history={history} viewerId={viewer?.discordId} isAdmin={isAdmin} t={t} />
+            {/* Trainings have no plans. */}
+            {!mission.training && <Plans missionId={mission.id} history={history} viewerId={viewer?.discordId} isAdmin={isAdmin} t={t} />}
           </div>
           <aside className="flex shrink-0 flex-col gap-4 lg:w-[360px]">
             <MissionPanel mission={mission} history={history} locale={locale} t={t} onMissionPage />
