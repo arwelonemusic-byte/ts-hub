@@ -46,4 +46,4 @@ events it was part of · times played · `Markers.layer` (needed for planning)
 1. Mission authors: co-authors and external Workshop authors → M:N (drawn that way above).
 2. Can one event night run two missions? (It happened: 22 Sep 2026, Troubled Waters + Marching Fire.) If yes, Event → Mission becomes 1..*. For now each mission is its own event, so that evening is two games.
 3. Keep every `/syncplan` in a session, or last-wins? Every sync → Replay ↔ Plan becomes M:N.
-4. Identity: Discord account ↔ Reforger `playerGuid` mapping; `player_join` is sometimes dropped.
+4. Identity: Discord account ↔ Reforger `playerGuid` mapping; `player_join` is sometimes dropped. **Decided 2026-10-11:** an admin matches in-game names to members by hand on «Игроки» (`player_names`); account IDs (`event_attendance.account_id`, recorded since 2026-10-09) suggest the member for a renamed player.

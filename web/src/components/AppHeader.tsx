@@ -14,7 +14,8 @@ export async function AppHeader({ active }: { active: "events" | "missions" | "p
   const nav: NavItem[] = [
     { key: "events", href: "/events" },
     { key: "missions", href: "/missions" },
-    // «Игроки» is hidden until the players page exists: { key: "players", href: "/players" },
+    // «Игроки» is the admins' name matching for now (app/players); everyone gets it once player profiles exist.
+    ...(viewer?.isAdmin ? [{ key: "players", href: "/players" }] : []),
     { key: "planner", href: PLANNER_URL, external: true },
     { key: "training", href: TRAINING_URL, external: true },
     { key: "builder", href: BUILDER_URL, external: true },

@@ -144,7 +144,9 @@ export async function finishGame(eventId: string, codes: string[]): Promise<{ er
       [ev.id, new Date(r.startedAt).toISOString(), new Date(r.endedAt).toISOString(), r.planCode, r.stats, player],
     );
     await tx.query("DELETE FROM event_attendance WHERE event_id = $1", [ev.id]);
-    for (const name of r.roster) await tx.query("INSERT INTO event_attendance (event_id, player_name) VALUES ($1, $2)", [ev.id, name]);
+    for (const name of r.roster) {
+      await tx.query("INSERT INTO event_attendance (event_id, player_name, account_id) VALUES ($1, $2, $3)", [ev.id, name, r.accounts[name] ?? null]);
+    }
     await tx.query("DELETE FROM event_replays WHERE event_id = $1", [ev.id]);
     for (const [i, code] of r.replays.entries()) {
       await tx.query("INSERT INTO event_replays (replay_code, event_id, part) VALUES ($1, $2, $3)", [code, ev.id, i + 1]);

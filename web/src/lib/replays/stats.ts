@@ -42,6 +42,8 @@ interface ReplayStats {
   lastT: number;
   durationMs: number;
   playerNames: Map<number, string>;
+  /** playerId → Bohemia account ID (the join's playerGuid; empty in recordings before 2026-10-09). */
+  playerAccounts: Map<number, string>;
   totalShotsPlayers: number;
   totalShotsAi: number;
   totalPlayerDeaths: number;
@@ -76,9 +78,16 @@ function computeStats(replay: Replay): ReplayStats {
   const events = replay.events;
   const phantoms = phantomsOf(events);
   const playerNames = new Map<number, string>();
+  const playerAccounts = new Map<number, string>();
   const charOwner = new Map<number, number>();
   for (const e of events) {
-    if (e.type === "player_join") playerNames.set(num(e.playerId), String(e.name));
+    if (e.type === "player_join") {
+      playerNames.set(num(e.playerId), String(e.name));
+      // The join is sent twice since 2026-10-09: at connect (no ID yet) and once Bohemia's backend has verified the
+      // player (with it). Workbench and Peer Tool sessions make up IDs starting 00bbbddd-.
+      const guid = typeof e.playerGuid === "string" ? e.playerGuid : "";
+      if (guid && !guid.startsWith("00bbbddd-")) playerAccounts.set(num(e.playerId), guid);
+    }
     else if (e.type === "possess" && num(e.charId) !== 0) charOwner.set(num(e.charId), num(e.playerId));
   }
   const isPlayer = (pid: number | undefined): pid is number => pid !== undefined && playerNames.has(pid);
@@ -182,6 +191,7 @@ function computeStats(replay: Replay): ReplayStats {
     lastT,
     durationMs: Math.max(0, lastT - firstJoinT),
     playerNames,
+    playerAccounts,
     totalShotsPlayers,
     totalShotsAi,
     totalPlayerDeaths,
@@ -222,6 +232,8 @@ export interface GameResult {
   planCode: string | null;
   /** In-game names, sorted. */
   roster: string[];
+  /** In-game name → Bohemia account ID, for the names whose recording carried one. */
+  accounts: Record<string, string>;
   replays: string[];
   stats: {
     totals: { deaths: number; shots: number; aiShots: number; grenades: number; rockets: number; knockdowns: number; aiKilled: number; friendlyFire: number };
@@ -331,6 +343,7 @@ export function toGameResult(replays: Replay[]): GameResult {
     endedAt: last.startedAt * 1000 + last.lastT,
     planCode: [...list].reverse().find((s) => s.planCode)?.planCode ?? null,
     roster: sortedNames,
+    accounts: Object.fromEntries(list.flatMap((s) => [...s.playerAccounts].flatMap(([pid, id]) => (s.playerNames.has(pid) ? [[s.playerNames.get(pid)!, id]] : [])))),
     replays: list.map((s) => s.code),
     durationMs: sum((s) => s.durationMs),
     stats: {

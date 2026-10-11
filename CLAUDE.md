@@ -158,6 +158,16 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   first post as a file so it renders large (edits keep it), then the slot card and «Записаться». `fitLimits` trims any
   template to Discord's limits and nobody else is pinged (`allowed_mentions`). Dev: no channel = off;
   `/api/dev/discord-post/<id>` returns the message JSON; `DISCORD_API_URL` points the sender at a stand-in for testing.
+- **«Игроки»: in-game names → members** (`app/players`, `lib/roster/`, admins only — others get a 404 and no nav item;
+  user decision 2026-10-11: matched by hand, not by players typing a code in game). Lists every name from played
+  games' rosters, most recently played first, with the member it's matched to (`player_names`, migration 009: one
+  member per name, several names per member) or a suggestion from `lib/roster/match.ts`: the same Bohemia account as an
+  already matched name (a rename), else a nickname/username equal or close once clan tags in [], case, punctuation
+  and Cyrillic vs Latin are ignored (a nickname's part in round brackets counts on its own: "Smoker (OnlineKiller)").
+  «Привязать точные совпадения» takes the sure ones (same account, or exactly one equal nickname) in one go;
+  «Другой…» picks any member. Account IDs come from the recordings' `player_join.playerGuid` and are stored per game
+  in `event_attendance.account_id` at «Игра окончена» (games finished before 2026-10-11 get them on «Пересчитать»);
+  they never reach the browser. Player profiles will read attendance through `player_names`.
 - **Finishing a game** («Игра окончена», `lib/events/finish.ts`, admins): from a game's start its hero button becomes
   «Игра окончена». The dialog lists the planner's recordings around the game's time and ticks the game's own
   (`lib/replays/match.ts`): the world file is the scenario's (`Another_Castle.conf` → `Another_Castle`; a shared `TS_Mission`
