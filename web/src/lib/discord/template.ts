@@ -148,9 +148,9 @@ function header(g: PostGame, unix: number): string {
   ].join("\n");
 }
 
-/** The thread under the post that gets the plans. Thread names are plain text (no markdown), at most 100 characters. */
+/** The thread under the post that gets the plans (and the talk about them). Thread names are plain text (no markdown), at most 100 characters. */
 export function planThreadName(g: PostGame): string {
-  return `Планы · ${g.training ? g.mission.name : `Operation ${g.mission.name}`}`.slice(0, 100);
+  return `Обсуждение | ${g.training ? g.mission.name : `Operation ${g.mission.name}`}`.slice(0, 100);
 }
 
 /** A plan attached to the game, posted in that thread; null when the game has none. Pings nobody. */

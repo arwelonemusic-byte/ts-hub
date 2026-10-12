@@ -161,7 +161,7 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   **Plan thread** (user decision 2026-10-12): every new plan attached to an announced game (not the same code pasted
   again) is a message in a thread under its post, «<who> прикрепил новый план — `CODE`» with an «Открыть в
   Планировщике» link button (the hub's `/plan/open?mission=…&code=…`, view-only, no plan key). The first one starts the
-  thread («Планы · Operation …», archives after a quiet week; a new plan reopens it); a plan attached before the post
+  thread («Обсуждение | Operation …», archives after a quiet week; a new plan reopens it); a plan attached before the post
   goes up starts it when the post does. `announcePlan` in post.ts, look in template.ts (`renderPlanNotice`,
   `planThreadName`). Thread id = the post's id, so nothing is stored. The bot needs Create Public Threads and Send
   Messages in Threads in the channel; without them the attach still works and the error is only logged.
