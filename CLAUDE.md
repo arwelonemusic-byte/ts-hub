@@ -165,6 +165,13 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   goes up starts it when the post does. `announcePlan` in post.ts, look in template.ts (`renderPlanNotice`,
   `planThreadName`). Thread id = the post's id, so nothing is stored. The bot needs Create Public Threads and Send
   Messages in Threads in the channel; without them the attach still works and the error is only logged.
+  **Rate limits** (2026-10-12): #анонсы is an Announcement channel and the posts are published (crossposted), so
+  Discord sometimes holds an edit off for minutes. `discordRequest` sits out a wait up to 5 s and throws
+  `DiscordRateLimited` for a longer one; `refreshAnnouncement` then edits after the wait, rendering the game as it is
+  by then (every change meanwhile in one edit). It used to sleep holding the edit it had already rendered, so the post
+  lagged ~10 minutes and then showed old slots. Each 429 is logged (`[discord] … rate limited for N s`). On server
+  start `src/instrumentation.ts` runs `resyncAnnouncements`, so an edit pending at a deploy isn't lost (an up-to-date
+  post costs no Discord call).
 - **Trainings and «Я приду!»** (user decisions 2026-10-11; migration 010). A mission's «Тренировка» checkbox
   (`missions.training`, editor step 1) makes it a training: its games say «Тренировка» instead of «Operation» (hero,
   mission page, Discord «Что | Тренировка …»), get no slots and no plan (scheduleGame copies no slot template; no

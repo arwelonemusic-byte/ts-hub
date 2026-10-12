@@ -4,7 +4,7 @@ import { getDb } from "../db";
 import { planOpenHref, workshopUrl } from "../links";
 import { squadsOf } from "../squads";
 import type { Mission } from "../types";
-import { DiscordError, discordRequest, type DiscordEmbed, type DiscordFile, type DiscordMessage } from "./api";
+import { DiscordError, DiscordRateLimited, discordRequest, type DiscordEmbed, type DiscordFile, type DiscordMessage } from "./api";
 import { planThreadName, renderGamePost, renderPlanNotice, type PostGame } from "./template";
 
 /*
@@ -225,7 +225,7 @@ export function postAnnouncement(eventId: string): Promise<AnnounceResult> {
       return { error: "discord" } as const;
     }
     // A plan attached before the post goes up starts its thread now.
-    if (game.plan) await postPlanNotice(eventId, game.plan.code).catch((err) => console.error(`[discord] plan thread for ${eventId} failed:`, err));
+    if (game.plan) await postPlanNotice(eventId, game.plan.code).catch(planNoticeFailed(eventId, game.plan.code));
     return (await announcement(eventId))!;
   });
 }
@@ -233,8 +233,14 @@ export function postAnnouncement(eventId: string): Promise<AnnounceResult> {
 /** Someone attached plan `code` to the game: say so in the thread under its post (if it has one). Never throws. */
 export function announcePlan(eventId: string, code: string): void {
   if (!announceConfigured()) return;
-  serial(eventId, () => postPlanNotice(eventId, code)).catch((err) => console.error(`[discord] plan notice for ${eventId} failed:`, err));
+  serial(eventId, () => postPlanNotice(eventId, code)).catch(planNoticeFailed(eventId, code));
 }
+
+const planNoticeFailed = (eventId: string, code: string) => (err: unknown) => {
+  // Rate limited: again later (it skips itself if the plan was replaced by then).
+  if (err instanceof DiscordRateLimited) setTimeout(() => announcePlan(eventId, code), err.retryAfterMs);
+  else console.error(`[discord] plan notice for ${eventId} failed:`, err);
+};
 
 const isDiscord = (err: unknown, code: number) => err instanceof DiscordError && err.code === code;
 
@@ -270,15 +276,31 @@ async function postPlanNotice(eventId: string, code: string): Promise<void> {
 }
 
 /** The game changed: bring its post (if it has one) up to date a moment from now. Never throws. */
-export function refreshAnnouncement(eventId: string): void {
+export function refreshAnnouncement(eventId: string, delayMs = EDIT_DELAY_MS): void {
   if (!announceConfigured()) return;
   const q = queues.get(eventId) ?? { chain: Promise.resolve() };
   queues.set(eventId, q);
-  if (q.timer) return; // an edit is already coming and will read the latest state
+  if (q.timer) return; // an edit is already coming (or waiting out a rate limit) and will read the latest state
   q.timer = setTimeout(() => {
     q.timer = undefined;
-    serial(eventId, () => editPost(eventId)).catch((err) => console.error(`[discord] updating ${eventId} failed:`, err));
-  }, EDIT_DELAY_MS);
+    serial(eventId, () => editPost(eventId)).catch((err) => {
+      // Discord wants a long pause: edit then, with the game as it is by then (every change meanwhile in one edit).
+      if (err instanceof DiscordRateLimited) refreshAnnouncement(eventId, err.retryAfterMs);
+      else console.error(`[discord] updating ${eventId} failed:`, err);
+    });
+  }, delayMs);
+}
+
+/**
+ * The server just started (a deploy): an edit that was due when it stopped would wait for the game's next change, so
+ * check every announced upcoming game. A post that's up to date costs no Discord call (discord_hash).
+ */
+export async function resyncAnnouncements(): Promise<void> {
+  if (!announceConfigured()) return;
+  const rows = (await (await getDb()).query(
+    "SELECT id FROM events WHERE status = 'scheduled' AND discord_message_id IS NOT NULL ORDER BY starts_at",
+  )) as { id: string }[];
+  rows.forEach((r, i) => refreshAnnouncement(r.id, EDIT_DELAY_MS + i * 1000));
 }
 
 async function editPost(eventId: string): Promise<void> {
