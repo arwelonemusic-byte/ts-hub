@@ -158,6 +158,13 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   first post as a file so it renders large (edits keep it), then the slot card and «Записаться». `fitLimits` trims any
   template to Discord's limits and nobody else is pinged (`allowed_mentions`). Dev: no channel = off;
   `/api/dev/discord-post/<id>` returns the message JSON; `DISCORD_API_URL` points the sender at a stand-in for testing.
+  **Plan thread** (user decision 2026-10-12): every new plan attached to an announced game (not the same code pasted
+  again) is a message in a thread under its post, «<who> прикрепил новый план — `CODE`» with an «Открыть в
+  Планировщике» link button (the hub's `/plan/open?mission=…&code=…`, view-only, no plan key). The first one starts the
+  thread («Планы · Operation …», archives after a quiet week; a new plan reopens it); a plan attached before the post
+  goes up starts it when the post does. `announcePlan` in post.ts, look in template.ts (`renderPlanNotice`,
+  `planThreadName`). Thread id = the post's id, so nothing is stored. The bot needs Create Public Threads and Send
+  Messages in Threads in the channel; without them the attach still works and the error is only logged.
 - **Trainings and «Я приду!»** (user decisions 2026-10-11; migration 010). A mission's «Тренировка» checkbox
   (`missions.training`, editor step 1) makes it a training: its games say «Тренировка» instead of «Operation» (hero,
   mission page, Discord «Что | Тренировка …»), get no slots and no plan (scheduleGame copies no slot template; no

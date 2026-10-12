@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getHubData } from "../data";
 import { getDb } from "../db";
-import { refreshAnnouncement } from "../discord/post";
+import { announcePlan, refreshAnnouncement } from "../discord/post";
 import { playerIdOf } from "../players";
 import { getViewer } from "../viewer";
 import { canAttachPlan, canDetachPlan } from "./index";
@@ -36,6 +36,8 @@ export async function attachPlan(_prev: AttachState, form: FormData): Promise<At
   );
   if (!hit.length) return { error: "taken", code };
   refreshAnnouncement(ev.id);
+  // A new plan (not the same code pasted again) gets a message in the thread under the game's Discord post.
+  if (ev.plan?.code !== code) announcePlan(ev.id, code);
   revalidatePath(`/events/${ev.id}`);
   return null;
 }

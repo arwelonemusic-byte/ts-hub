@@ -14,6 +14,10 @@ import type { DiscordMessage } from "./api";
  * Discord always draws them in that order (text, attachments, card, buttons). The image goes up with the first post
  * only; edits keep it.
  *
+ * Plans (2026-10-12): each plan attached to the game is a message in a thread under the post, «<who> прикрепил новый
+ * план — CODE» with an «Открыть в Планировщике» button. The thread starts with the first one (renderPlanNotice,
+ * planThreadName).
+ *
  * Discord renders `<t:UNIX:F>` (a full date) and `<t:UNIX:R>` ("через 2 дня") in each reader's own language and time
  * zone, in the message text, a card's description or a field, not in a card's title or footer. Limits (post.ts trims to
  * them anyway): message text 2000; card title 256, description 4096, 25 fields of name 256 / value 1024, 6000 in all.
@@ -48,7 +52,8 @@ export interface PostGame {
   }[];
   slotted: number;
   slotCount: number;
-  plan: { code: string; title?: string; author: string } | null;
+  /** The attached plan: `author` is whoever attached it, `url` opens it in the planner (through the hub). */
+  plan: { code: string; title?: string; author: string; url: string } | null;
   /** A played game: how many played. */
   attended?: number;
   /** A training (Mission.training): «Тренировка» instead of «Operation», no plan. */
@@ -141,6 +146,21 @@ function header(g: PostGame, unix: number): string {
     ...(g.pingRoles.length ? ["", g.pingRoles.map((id) => `<@&${id}>`).join(" ")] : []),
     "\u200b",
   ].join("\n");
+}
+
+/** The thread under the post that gets the plans. Thread names are plain text (no markdown), at most 100 characters. */
+export function planThreadName(g: PostGame): string {
+  return `Планы · ${g.training ? g.mission.name : `Operation ${g.mission.name}`}`.slice(0, 100);
+}
+
+/** A plan attached to the game, posted in that thread; null when the game has none. Pings nobody. */
+export function renderPlanNotice(g: PostGame): DiscordMessage | null {
+  if (!g.plan) return null;
+  return {
+    content: `${plain(g.plan.author)} прикрепил новый план — \`${g.plan.code}\``,
+    components: [{ type: 1, components: [{ type: 2, style: 5, label: "Открыть в Планировщике", url: g.plan.url }] }],
+    allowed_mentions: { parse: [] },
+  };
 }
 
 export function renderGamePost(g: PostGame): GamePost {

@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
 import { getHubData } from "../data";
 import { getDb } from "../db";
-import { workshopUrl } from "../links";
+import { planOpenHref, workshopUrl } from "../links";
 import { squadsOf } from "../squads";
 import type { Mission } from "../types";
 import { DiscordError, discordRequest, type DiscordEmbed, type DiscordFile, type DiscordMessage } from "./api";
-import { renderGamePost, type PostGame } from "./template";
+import { planThreadName, renderGamePost, renderPlanNotice, type PostGame } from "./template";
 
 /*
  * A game's announcement in Discord (user decisions 2026-10-09): the hub drives slotting and the Discord post only
@@ -17,6 +17,9 @@ import { renderGamePost, type PostGame } from "./template";
  * Send Messages and Embed Links there. Without both env vars the feature is off (dev): nothing is sent.
  * The look is lib/discord/template.ts. A post deleted in Discord stays deleted: the next edit finds it gone and
  * clears its ids, and the game's page offers «Анонс в Дискорд» again.
+ *
+ * Plans go to a thread under the post (announcePlan): the first one attached starts it, each later one is a new
+ * message there. The bot needs Create Public Threads and Send Messages in Threads in the channel for that.
  */
 
 const channel = () => process.env.DISCORD_ANNOUNCE_CHANNEL_ID || null;
@@ -72,7 +75,9 @@ export async function postGame(eventId: string): Promise<PostGame | null> {
       squads,
       slotted: ev.slots.filter((s) => s.playerName).length,
       slotCount: ev.slots.length,
-      plan: ev.plan ? { code: ev.plan.code, title: ev.plan.title, author: ev.plan.author } : null,
+      plan: ev.plan
+        ? { code: ev.plan.code, title: ev.plan.title, author: ev.plan.author, url: absolute(planOpenHref(ev.plan, ev.mission.id))! }
+        : null,
       pingRoles: pingRoles(),
       training: !!ev.mission.training,
       rsvps: ev.rsvps.map((r) => r.name),
@@ -219,8 +224,49 @@ export function postAnnouncement(eventId: string): Promise<AnnounceResult> {
       console.error(`[discord] posting ${eventId} failed:`, err);
       return { error: "discord" } as const;
     }
+    // A plan attached before the post goes up starts its thread now.
+    if (game.plan) await postPlanNotice(eventId, game.plan.code).catch((err) => console.error(`[discord] plan thread for ${eventId} failed:`, err));
     return (await announcement(eventId))!;
   });
+}
+
+/** Someone attached plan `code` to the game: say so in the thread under its post (if it has one). Never throws. */
+export function announcePlan(eventId: string, code: string): void {
+  if (!announceConfigured()) return;
+  serial(eventId, () => postPlanNotice(eventId, code)).catch((err) => console.error(`[discord] plan notice for ${eventId} failed:`, err));
+}
+
+const isDiscord = (err: unknown, code: number) => err instanceof DiscordError && err.code === code;
+
+async function postPlanNotice(eventId: string, code: string): Promise<void> {
+  const row = await postRow(eventId);
+  if (!row?.discord_message_id || !row.discord_channel_id) return;
+  const game = await postGame(eventId);
+  // Replaced again since (the newer plan's notice is next in line), detached, or the game is over.
+  if (game?.status !== "scheduled" || game.plan?.code !== code) return;
+  const notice = renderPlanNotice(game)!;
+  // A thread started from a message has the message's id.
+  const thread = row.discord_message_id;
+  const send = () => discordRequest("POST", `/channels/${thread}/messages`, notice);
+  try {
+    await send();
+  } catch (err) {
+    if (isDiscord(err, 10003)) {
+      // Unknown Channel: no thread yet (the first plan), or someone deleted it.
+      try {
+        await discordRequest("POST", `/channels/${row.discord_channel_id}/messages/${thread}/threads`, {
+          name: planThreadName(game),
+          auto_archive_duration: 10080, // a week without messages; a new plan reopens it
+        });
+      } catch (e) {
+        if (!isDiscord(e, 160004)) throw e; // 160004: the message has a thread already
+      }
+    } else if (isDiscord(err, 50083)) {
+      // Archived after a quiet week.
+      await discordRequest("PATCH", `/channels/${thread}`, { archived: false });
+    } else throw err;
+    await send();
+  }
 }
 
 /** The game changed: bring its post (if it has one) up to date a moment from now. Never throws. */
