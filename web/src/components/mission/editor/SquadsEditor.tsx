@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { plural, type Locale, type T } from "@/lib/i18n";
 import type { EditableSlot, EditableSquad } from "@/lib/squads";
 import { buttonClass } from "../../ui";
@@ -20,7 +21,8 @@ const fresh = (slots: EditableSlot[]): EditableSlot[] => slots.map((s) => ({ rol
  *   without slotting.
  * - `game`: a scheduled game's own slots (user decisions 2026-10-09). A slot that exists can be renamed,
  *   never deleted, and keeps its required role; squads (new or duplicated) and slots are only added, at the
- *   end. Additions can still be taken back before saving.
+ *   end. Additions can still be taken back before saving. Slots, old and new, are dragged into order inside
+ *   their squad by the handle on the left (2026-10-12), whoever is in one moving with it.
  */
 export function SquadsEditor({
   squads,
@@ -40,6 +42,22 @@ export function SquadsEditor({
   const game = mode === "game";
   const setSquad = (i: number, patch: Partial<EditableSquad>) => setSquads(squads.map((sq, j) => (j === i ? { ...sq, ...patch } : sq)));
   const total = squads.reduce((n, sq) => n + sq.slots.length, 0);
+
+  // Dragging a slot by its handle: the handle keeps the pointer, and the slot moves through its squad's list as the
+  // pointer passes the middle of each other row.
+  const rows = useRef(new Map<string, HTMLDivElement>());
+  const [drag, setDrag] = useState<{ squad: number; at: number } | null>(null);
+  const moveSlot = (i: number, from: number, to: number) => {
+    const slots = [...squads[i].slots];
+    const [s] = slots.splice(from, 1);
+    slots.splice(to, 0, s);
+    setSquad(i, { slots });
+  };
+  const dropAt = (i: number, from: number, y: number) =>
+    squads[i].slots.filter((_, k) => {
+      const r = k !== from && rows.current.get(`${i}:${k}`)?.getBoundingClientRect();
+      return !!r && r.top + r.height / 2 < y;
+    }).length;
 
   return (
     <div className="flex flex-col gap-5">
@@ -90,8 +108,52 @@ export function SquadsEditor({
             <div className="flex flex-col gap-1.5 border-t border-line pt-2">
               {sq.slots.map((s, k) => {
                 const setSlot = (patch: Partial<EditableSlot>) => setSquad(i, { slots: sq.slots.map((x, j) => (j === k ? { ...x, ...patch } : x)) });
+                const dragged = drag?.squad === i && drag.at === k;
                 return (
-                  <div key={k} className="flex items-center gap-1">
+                  <div
+                    key={k}
+                    ref={(el) => {
+                      if (el) rows.current.set(`${i}:${k}`, el);
+                      else rows.current.delete(`${i}:${k}`);
+                    }}
+                    className={`flex items-center gap-1 rounded-lg ${dragged ? "bg-raised ring-1 ring-line-accent" : ""}`}
+                  >
+                    {game && (
+                      <button
+                        type="button"
+                        aria-label={t("editor.slots.drag")}
+                        title={t("editor.slots.drag")}
+                        disabled={sq.slots.length < 2}
+                        onPointerDown={(e) => {
+                          if (e.button !== 0) return;
+                          e.preventDefault();
+                          e.currentTarget.setPointerCapture(e.pointerId);
+                          setDrag({ squad: i, at: k });
+                        }}
+                        onPointerMove={(e) => {
+                          if (drag?.squad !== i) return;
+                          const to = dropAt(i, drag.at, e.clientY);
+                          if (to === drag.at) return;
+                          moveSlot(i, drag.at, to);
+                          setDrag({ squad: i, at: to });
+                        }}
+                        onPointerUp={() => setDrag(null)}
+                        onPointerCancel={() => setDrag(null)}
+                        onKeyDown={(e) => {
+                          const to = k + (e.key === "ArrowUp" ? -1 : e.key === "ArrowDown" ? 1 : 0);
+                          if (to === k || to < 0 || to >= sq.slots.length) return;
+                          e.preventDefault();
+                          moveSlot(i, k, to);
+                          // Rows are keyed by place, so the focus would stay put: follow the slot.
+                          setTimeout(() => rows.current.get(`${i}:${to}`)?.querySelector("button")?.focus());
+                        }}
+                        className="flex h-9 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-fg-tertiary hover:text-fg active:cursor-grabbing disabled:cursor-default disabled:opacity-30"
+                      >
+                        <svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor" aria-hidden>
+                          {[3, 8, 13].flatMap((y) => [2.5, 7.5].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.25" />))}
+                        </svg>
+                      </button>
+                    )}
                     <TextInput dense value={s.role} onChange={(e) => setSlot({ role: e.target.value })} placeholder={t("editor.slots.rolePh")} aria-label={t("editor.slots.role")} />
                     {s.key ? (
                       // An existing game slot keeps its role (and whoever is in it).

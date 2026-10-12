@@ -138,7 +138,10 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   (`editGameSlots`, user decisions 2026-10-09): existing slots can be renamed (callsigns and squad names too) but
   not deleted, and keep their required role and whoever is in them; new slots and squads (added or duplicated) go
   at the end and take the next positions. A slot's position is its identity (slot actions post it), so it never
-  changes. The page shows squads HQ (1'6) first, then in the game's own order (`lib/squads.ts`).
+  changes. The page shows squads HQ (1'6) first, then in the game's own order (`lib/squads.ts`). Slots, existing
+  and new, are dragged into order inside their squad by a handle (or ↑/↓ on it; user request 2026-10-12, not
+  between squads); whoever is in a slot moves with it. The order is `event_slots.sort_order` (migration 011,
+  NULL = position order), never the position, so a page left open still takes the slot it shows.
   An open usual slot also has «Отменить» (no game that day): `skipped_slots` (migration 004) holds called-off slot times
   and the feed and calendar leave them out for good (`listSkippedSlots`); scheduling a game then still shows it. No undo UI.
 - **Scheduled game pages stay live** (`components/event/LiveRefresh.tsx`): while the tab is visible it polls

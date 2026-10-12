@@ -109,6 +109,7 @@ export type GameSlotsState = { error: "forbidden" | "invalid" | "stale" | "group
  * 2026-10-09). An existing slot (`key` = its position) can be renamed and its squad's callsign and name
  * changed, but it is never deleted and keeps its required role; whoever is in it stays. New slots and
  * squads get the next positions, so a page left open never takes a slot by a position that moved.
+ * The order is the editor's (slots dragged inside a squad, 2026-10-12): `sort_order`, not the position.
  */
 export async function editGameSlots(eventId: string, input: EditableSquad[]): Promise<GameSlotsState> {
   const viewer = await getViewer();
@@ -140,21 +141,19 @@ export async function editGameSlots(eventId: string, input: EditableSquad[]): Pr
 
   await db.transaction(async (tx) => {
     let next = Math.max(-1, ...rows.map((r) => r.position)) + 1;
+    let order = 0;
     for (const sq of squads) {
       for (const s of sq.slots) {
         if (s.key) {
-          // Renames only: the required role and whoever is in the slot stay as they are.
-          await tx.query("UPDATE event_slots SET group_id = $3, group_name = $4, role = $5 WHERE event_id = $1 AND position = $2", [
-            eventId,
-            existing.get(s.key),
-            sq.groupId,
-            sq.name,
-            s.role,
-          ]);
+          // Renamed or moved: the required role and whoever is in the slot stay as they are.
+          await tx.query(
+            "UPDATE event_slots SET group_id = $3, group_name = $4, role = $5, sort_order = $6 WHERE event_id = $1 AND position = $2",
+            [eventId, existing.get(s.key), sq.groupId, sq.name, s.role, order++],
+          );
         } else {
           await tx.query(
-            "INSERT INTO event_slots (event_id, position, group_id, group_name, role, required_role) VALUES ($1, $2, $3, $4, $5, $6)",
-            [eventId, next++, sq.groupId, sq.name, s.role, s.requiredRole],
+            "INSERT INTO event_slots (event_id, position, group_id, group_name, role, required_role, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+            [eventId, next++, sq.groupId, sq.name, s.role, s.requiredRole, order++],
           );
         }
       }

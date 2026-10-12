@@ -65,7 +65,7 @@ const loadGames = cache(async (): Promise<HubEvent[]> => {
       `SELECT s.event_id, s.position, s.group_id, s.group_name, s.role, s.required_role,
               COALESCE(p.display_name, s.player_name) AS player_name, p.discord_id AS player_discord_id
        FROM event_slots s LEFT JOIN players p ON p.id = s.player_id
-       ORDER BY s.event_id, s.position`,
+       ORDER BY s.event_id, COALESCE(s.sort_order, s.position), s.position`,
     ) as Promise<
       {
         event_id: string;
@@ -188,7 +188,7 @@ export const gamesData: HubData = {
     const db = await getDb();
     const [row] = await db.query(
       `SELECT md5(e.status || '|' || coalesce(e.plan_code, '') || '|' || coalesce(
-                (SELECT string_agg(s.position || ':' || s.group_id || ':' || s.group_name || ':' || s.role || ':' || coalesce(s.player_id::text, s.player_name, ''), ',' ORDER BY s.position)
+                (SELECT string_agg(s.position || ':' || s.group_id || ':' || s.group_name || ':' || s.role || ':' || coalesce(s.player_id::text, s.player_name, ''), ',' ORDER BY COALESCE(s.sort_order, s.position), s.position)
                  FROM event_slots s WHERE s.event_id = e.id), '') || '|' || coalesce(
                 (SELECT string_agg(r.player_id::text, ',' ORDER BY r.created_at) FROM event_rsvps r WHERE r.event_id = e.id), '')) AS v
        FROM events e WHERE e.id = $1`,

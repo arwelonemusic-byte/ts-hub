@@ -147,7 +147,7 @@ export async function finishGame(eventId: string, codes: string[]): Promise<{ er
          platoon_leader_id = COALESCE((SELECT player_id FROM event_slots
                                        WHERE event_id = $1 AND player_id IS NOT NULL
                                          AND lower(replace(coalesce(required_role, ''), ' ', '')) = 'pl'
-                                       ORDER BY position LIMIT 1), platoon_leader_id)
+                                       ORDER BY COALESCE(sort_order, position), position LIMIT 1), platoon_leader_id)
        WHERE id = $1`,
       // An object, not a JSON string: the driver encodes jsonb itself.
       // A training keeps only who came (user decision 2026-10-11): no totals, rankings or awards.
