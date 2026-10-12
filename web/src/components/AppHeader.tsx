@@ -3,9 +3,11 @@ import Link from "next/link";
 import { ENABLED_LOCALES } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
 import { BUILDER_URL, PLANNER_URL, TRAINING_URL } from "@/lib/links";
+import { SERVER_INFO } from "@/lib/server-status";
 import { getViewer } from "@/lib/viewer";
 import { LanguageToggle } from "./LanguageToggle";
 import { NavMenu, type NavItem } from "./NavMenu";
+import { ServerStatus } from "./ServerStatus";
 import { buttonClass, Icon } from "./ui";
 
 /** Figma "App header" (8:180): brand · centred nav · account. */
@@ -70,6 +72,23 @@ export async function AppHeader({ active }: { active: "events" | "missions" | "p
         )}
         <NavMenu items={nav} labels={{ open: t("nav.menu"), close: t("nav.menuClose") }} />
       </div>
+      {/* Members of the Discord: the game server's status, fixed to the bottom-right corner of every page. */}
+      {viewer?.inGuild && (
+        <ServerStatus
+          info={SERVER_INFO}
+          labels={{
+            up: t("server.up"),
+            down: t("server.down"),
+            name: t("server.name"),
+            password: t("server.password"),
+            ip: t("server.ip"),
+            port: t("server.port"),
+            collapse: t("server.collapse"),
+            copyHint: t("mission.copyHint"),
+            copied: t("mission.copied"),
+          }}
+        />
+      )}
     </header>
   );
 }

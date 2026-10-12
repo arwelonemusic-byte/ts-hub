@@ -13,6 +13,8 @@ export interface Viewer {
   isAdmin: boolean;
   /** @mission officer: adds missions to the catalogue and edits their own. */
   isMissionMaker: boolean;
+  /** Still on the Discord server: false once the bot finds they've left (the login cookie lives on for a week). */
+  inGuild: boolean;
   /** A dev stand-in, not a real login (see below). */
   dev?: boolean;
 }
@@ -65,6 +67,7 @@ async function devViewer(): Promise<Viewer | null> {
     roles,
     isAdmin: DEV_ADMINS.has(name),
     isMissionMaker: roles.some((r) => roleKey(r) === roleKey(MISSION_MAKER_ROLE)),
+    inGuild: true,
     dev: true,
   };
 }
@@ -74,22 +77,27 @@ async function devViewer(): Promise<Viewer | null> {
  * holds them as of login; the Training Portal refreshes its copy the same way). Falls back to the login's.
  */
 const ROLES_TTL_MS = 10 * 60_000;
-const roleCache = ((globalThis as unknown as { __tsHubRoles?: Map<string, { at: number; roles: string[] }> }).__tsHubRoles ??= new Map());
+interface Membership {
+  roles: string[];
+  inGuild: boolean;
+}
+const roleCache = ((globalThis as unknown as { __tsHubRoles?: Map<string, { at: number } & Membership> }).__tsHubRoles ??= new Map());
 
-async function currentRoles(userId: string, atLogin: string[]): Promise<string[]> {
+async function currentRoles(userId: string, atLogin: string[]): Promise<Membership> {
   const hit = roleCache.get(userId);
-  if (hit && Date.now() - hit.at < ROLES_TTL_MS) return hit.roles;
+  if (hit && Date.now() - hit.at < ROLES_TTL_MS) return hit;
   const member = await fetchGuildMemberByBot(userId);
   // Left the server: no roles. Discord not answering: the login's roles, asked again next time.
-  const roles = member === "NOT_IN_GUILD" ? [] : member ? mapRoleIdsToNames(member.roles) : atLogin;
-  if (member) roleCache.set(userId, { at: Date.now(), roles });
-  return roles;
+  const inGuild = member !== "NOT_IN_GUILD";
+  const roles = !inGuild ? [] : member ? mapRoleIdsToNames(member.roles) : atLogin;
+  if (member) roleCache.set(userId, { at: Date.now(), roles, inGuild });
+  return { roles, inGuild };
 }
 
 export async function getViewer(): Promise<Viewer | null> {
   const session = await getSession();
   if (session) {
-    const roles = await currentRoles(session.userId, session.roles);
+    const { roles, inGuild } = await currentRoles(session.userId, session.roles);
     return {
       discordId: session.userId,
       name: session.displayName,
@@ -97,6 +105,7 @@ export async function getViewer(): Promise<Viewer | null> {
       roles,
       isAdmin: ADMIN_IDS.includes(session.userId) || roles.some((r) => ADMIN_ROLES.includes(r)),
       isMissionMaker: roles.some((r) => roleKey(r) === roleKey(MISSION_MAKER_ROLE)),
+      inGuild,
     };
   }
   return DEV_VIEWER ? devViewer() : null;

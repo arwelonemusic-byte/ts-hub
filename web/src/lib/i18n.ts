@@ -558,6 +558,14 @@ const RU: Dict = {
 
   "collapse.show": "Показать",
   "collapse.hide": "Скрыть",
+
+  "server.up": "Сервер запущен",
+  "server.down": "Сервер отдыхает",
+  "server.name": "Сервер",
+  "server.password": "Пароль",
+  "server.ip": "IP",
+  "server.port": "Порт",
+  "server.collapse": "Свернуть",
 };
 
 export const STRINGS: Record<Locale, Dict> = { en: EN, ru: RU };
