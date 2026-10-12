@@ -219,9 +219,17 @@ export function PlanRow({
           ))}
         </span>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <ButtonLink href={planOpenHref(plan, missionId)} external size="s">
-          {t(own ? "plan.editShort" : "plan.openInPlanner")}
+          {own ? (
+            t("plan.editShort")
+          ) : (
+            // A phone has no room for «Открыть в Планировщике» next to «Открепить».
+            <>
+              <span className="sm:hidden">{t("plan.openShort")}</span>
+              <span className="hidden sm:inline">{t("plan.openInPlanner")}</span>
+            </>
+          )}
           <Icon name="external" />
         </ButtonLink>
         {children}

@@ -272,6 +272,7 @@ const RU: Dict = {
   "plan.editShort": "Редактировать",
   "plan.forGame": "к игре {date}",
   "plan.openInPlanner": "Открыть в Планировщике",
+  "plan.openShort": "Открыть",
   "plan.noneLinked": "К этой игре план не привязан.",
 
   "slots.title": "Слоты",

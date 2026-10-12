@@ -157,20 +157,23 @@ export function UpcomingCard({ ev, locale, t, signedIn }: { ev: Upcoming; locale
   );
 }
 
-/** Figma "Played row" (13:75). The title link stretches over the row; the replay button sits above it. */
+/**
+ * Figma "Played row" (13:75). The title link stretches over the row; the replay button sits above it. On a phone
+ * they stack: cover, text, then the button.
+ */
 export function PlayedRow({ ev, locale, t }: { ev: Played; locale: Locale; t: T }) {
   return (
-    <article className="relative flex min-w-0 flex-1 items-center gap-4 rounded-xl bg-inset p-3 ring-line-strong hover:ring-1">
-      <Cover mission={ev.mission} sizes="112px" noCoverLabel="" rounded="rounded-md" className="w-28 shrink-0" />
+    <article className="relative flex min-w-0 flex-1 flex-col gap-3 rounded-xl bg-inset p-3 ring-line-strong hover:ring-1 sm:flex-row sm:items-center sm:gap-4">
+      <Cover mission={ev.mission} sizes="(min-width: 640px) 112px, 100vw" noCoverLabel="" rounded="rounded-md" className="w-full shrink-0 sm:w-28" />
       <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-        <span className="flex gap-1.5">
+        <span className="flex flex-wrap gap-1.5">
           <StatusChip tone="neutral">{t("event.status.past")}</StatusChip>
           {ev.mission.training && <StatusChip tone="training">{t("event.kicker.training")}</StatusChip>}
         </span>
-        <Link href={`/events/${ev.id}`} className="truncate type-heading-xs text-fg after:absolute after:inset-0">
+        <Link href={`/events/${ev.id}`} className="max-w-full truncate type-heading-xs text-fg after:absolute after:inset-0">
           {ev.mission.name}
         </Link>
-        <span className="truncate type-caption text-fg-secondary">
+        <span className="max-w-full truncate type-caption text-fg-secondary">
           {ev.mission.mapLabel} · {plural(locale, "feed.players", ev.attended)} · {duration(ev.durationMin, locale)}
         </span>
       </div>
@@ -179,7 +182,7 @@ export function PlayedRow({ ev, locale, t }: { ev: Played; locale: Locale; t: T 
           href={ev.replayHref}
           target="_blank"
           rel="noreferrer"
-          className={`${buttonClass("secondary", "m")} relative z-10 hidden sm:inline-flex`}
+          className={`${buttonClass("secondary", "m")} relative z-10 w-full sm:w-auto`}
         >
           <Icon name="play-light" />
           {t("feed.replay")}
@@ -192,25 +195,29 @@ export function PlayedRow({ ev, locale, t }: { ev: Played; locale: Locale; t: T 
 /**
  * Figma "Open slot" (13:347): a usual slot with no mission picked yet. An admin gets «Отменить» (no
  * game that day) and «Создать игру» (the schedule dialog) on the right on hover, always where there's
- * no hover.
+ * no hover. On a phone the buttons go under the text, side by side.
  */
 export function OpenSlot({ t, onSchedule, onSkip }: { t: T; onSchedule?: () => void; onSkip?: () => void }) {
   const reveal = "opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100";
   return (
-    <div className="group flex h-[76px] min-w-0 flex-1 items-center gap-4 rounded-xl border border-dashed border-line-strong px-5 py-4">
+    <div className="group flex min-w-0 flex-1 flex-col gap-3 rounded-xl border border-dashed border-line-strong px-5 py-4 sm:h-[76px] sm:flex-row sm:items-center sm:gap-4">
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="type-label-m text-fg-label">{t("feed.open.title")}</span>
-        <span className="truncate type-caption text-fg-tertiary">{t("feed.open.detail")}</span>
+        <span className="type-caption text-fg-tertiary sm:truncate">{t("feed.open.detail")}</span>
       </div>
-      {onSkip && (
-        <button type="button" onClick={onSkip} className={`${buttonClass("secondary", "s")} ${reveal}`}>
-          {t("feed.open.skip")}
-        </button>
-      )}
-      {onSchedule && (
-        <button type="button" onClick={onSchedule} className={`${buttonClass("primary", "s")} ${reveal}`}>
-          {t("feed.open.create")}
-        </button>
+      {(onSkip || onSchedule) && (
+        <div className="flex gap-2 sm:contents">
+          {onSkip && (
+            <button type="button" onClick={onSkip} className={`${buttonClass("secondary", "s")} ${reveal} flex-1 sm:flex-none`}>
+              {t("feed.open.skip")}
+            </button>
+          )}
+          {onSchedule && (
+            <button type="button" onClick={onSchedule} className={`${buttonClass("primary", "s")} ${reveal} flex-1 sm:flex-none`}>
+              {t("feed.open.create")}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
