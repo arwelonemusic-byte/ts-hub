@@ -606,15 +606,16 @@ function Board({ title, rows, medals = false }: { title: string; rows: Leaderboa
       <div className="flex flex-col">
         {rows.map((r) => {
           const rank = rows.findIndex((x) => x.value === r.value) + 1;
+          const zero = r.value === 0;
           return (
           <div key={r.playerName} className="flex h-10 items-center gap-3 border-t border-line">
-            {medals && rank <= 3 ? (
+            {medals && rank <= 3 && !zero ? (
               <Image src={`/icons/${MEDALS[rank - 1]}.svg`} alt={String(rank)} width={18} height={18} className="shrink-0" />
             ) : (
               <span className="w-[18px] shrink-0 type-code text-fg-tertiary">{rank}</span>
             )}
-            <span className="min-w-0 flex-1 truncate type-label-m text-fg">{r.playerName}</span>
-            <span className="type-heading-xxs text-fg">{r.value}</span>
+            <span className={`min-w-0 flex-1 truncate type-label-m ${zero ? "text-fg-secondary" : "text-fg"}`}>{r.playerName}</span>
+            <span className={`type-heading-xxs ${zero ? "text-fg-secondary" : "text-fg"}`}>{r.value}</span>
           </div>
           );
         })}
@@ -655,6 +656,11 @@ export function LeaderboardsPanel({ ev, t, attendanceOnly }: { ev: PastEvent; t:
     // Code-point order, as in the design: plain names, then clan-tagged ([BS], [En-Y]…), then Cyrillic.
     .sort();
   const ff = ev.friendlyFireIncidents ?? [];
+  // Everyone who played is on «Убийства ботов» (user request 2026-10-13): those with none at the end, by name.
+  const aiKills = ev.leaderboards && [
+    ...ev.leaderboards.aiKills,
+    ...players.filter((p) => !ev.leaderboards!.aiKills.some((r) => r.playerName === p)).map((playerName) => ({ playerName, value: 0 })),
+  ];
   return (
     <section className="flex flex-col gap-6 rounded-xl bg-surface p-6">
       <h2 className="type-heading-m text-fg">{t(attendanceOnly ? "boards.came" : "boards.title")}</h2>
@@ -668,7 +674,7 @@ export function LeaderboardsPanel({ ev, t, attendanceOnly }: { ev: PastEvent; t:
       </div>
       {ev.leaderboards && !attendanceOnly && (
         <div className="flex flex-col gap-8 md:flex-row">
-          <Board title={t("boards.aiKills")} rows={ev.leaderboards.aiKills} medals />
+          <Board title={t("boards.aiKills")} rows={aiKills!} medals />
           <Board title={t("boards.deaths")} rows={ev.leaderboards.deaths} />
         </div>
       )}
