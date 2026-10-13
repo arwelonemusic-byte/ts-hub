@@ -600,9 +600,20 @@ const MEDALS = ["medal-gold", "medal-silver", "medal-bronze"];
 
 /** Competition ranking: ties share a rank (1, 2, 2, 4). With `medals`, ranks 1–3 get a medal instead of the number. */
 /** `of`: a second number after the value (AI kills / shots fired). */
-function Board({ title, rows, medals = false }: { title: string; rows: (LeaderboardEntry & { of?: number })[]; medals?: boolean }) {
+function Board({
+  title,
+  rows,
+  medals = false,
+  fill = true,
+}: {
+  title: string;
+  rows: (LeaderboardEntry & { of?: number })[];
+  medals?: boolean;
+  /** Takes an equal share of a row of boards; off for boards stacked in a column. */
+  fill?: boolean;
+}) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-1">
+    <div className={`flex min-w-0 flex-col gap-1 ${fill ? "flex-1" : ""}`}>
       <Eyebrow>{title}</Eyebrow>
       <div className="flex flex-col">
         {rows.map((r) => {
@@ -684,8 +695,8 @@ export function LeaderboardsPanel({ ev, t, attendanceOnly }: { ev: PastEvent; t:
           <Board title={t(shots ? "boards.aiKillsShots" : "boards.aiKills")} rows={aiKills} medals />
           {/* The kills list holds everyone, so deaths and knockouts share the other column. */}
           <div className="flex min-w-0 flex-1 flex-col gap-8">
-            <Board title={t("boards.deaths")} rows={boards.deaths} />
-            {boards.knockouts && boards.knockouts.length > 0 && <Board title={t("boards.knockouts")} rows={boards.knockouts} />}
+            <Board title={t("boards.deaths")} rows={boards.deaths} fill={false} />
+            {boards.knockouts && boards.knockouts.length > 0 && <Board title={t("boards.knockouts")} rows={boards.knockouts} fill={false} />}
           </div>
         </div>
       )}
