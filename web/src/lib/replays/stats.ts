@@ -28,6 +28,11 @@ export interface Replay {
 const PHANTOM_RADIUS_M = 5;
 /** «Я ненадолго» counts only a re-death within 5 minutes. */
 const QUICK_TURNAROUND_MAX_MS = 5 * 60 * 1000;
+/**
+ * «Неприкасаемые»: in the op for at least half its time (user decision 2026-10-13; was 10+ shots, which left out a PL
+ * who never fired). The Python report (ts-ops-planner tools/replay-stats) still uses the 10 shots.
+ */
+const UNTOUCHABLE_MIN_SHARE = 0.5;
 
 const num = (v: unknown) => (typeof v === "number" ? v : Number(v) || 0);
 /** The recorder writes booleans as "true"/"false" on some builds. */
@@ -55,6 +60,8 @@ interface ReplayStats {
   incaps: Map<number, number>;
   revives: Map<number, number>;
   deathTimes: Map<number, number[]>;
+  /** playerId → ms in the op: their first body to the last sign of any of their bodies, within the op's time. */
+  playTime: Map<number, number>;
   aiKills: Map<string, number>;
   teamKills: { killer: string; victim: string | null }[];
   firstDeath: [number, number] | null;
@@ -164,6 +171,22 @@ function computeStats(replay: Replay): ReplayStats {
     }
   }
 
+  // Time in the op: from a player's first body to the last event of any of their bodies (a body keeps reporting its
+  // position while it exists, dead or alive). Someone who left and came back counts the gap too.
+  const firstSeen = new Map<number, number>();
+  const lastSeen = new Map<number, number>();
+  for (const e of events) {
+    let pid: number | undefined;
+    if (e.type === "possess" && num(e.charId) !== 0) pid = num(e.playerId);
+    else if (e.type === "shot") pid = charOwner.get(num(e.shooterCharId));
+    else if (e.type === "move" || e.type === "damage_state" || e.type === "char_delete") pid = charOwner.get(num(e.charId));
+    if (!isPlayer(pid)) continue;
+    if (e.t < (firstSeen.get(pid) ?? Infinity)) firstSeen.set(pid, e.t);
+    if (e.t > (lastSeen.get(pid) ?? -Infinity)) lastSeen.set(pid, e.t);
+  }
+  const playTime = new Map<number, number>();
+  for (const [pid, from] of firstSeen) playTime.set(pid, Math.max(0, Math.min(lastT, lastSeen.get(pid)!) - Math.max(firstJoinT, from)));
+
   // Kills (the mod's `kill` events) attribute AI kills and team kills to named players.
   const aiKills = new Map<string, number>();
   const teamKills: ReplayStats["teamKills"] = [];
@@ -203,6 +226,7 @@ function computeStats(replay: Replay): ReplayStats {
     incaps,
     revives,
     deathTimes,
+    playTime,
     aiKills,
     teamKills,
     firstDeath,
@@ -267,12 +291,13 @@ export function toGameResult(replays: Replay[]): GameResult {
     return out;
   };
   const names = new Set(list.flatMap((s) => [...s.playerNames.values()]));
-  const shots = byName((s) => s.shots);
   const grenades = byName((s) => s.grenades);
   const rockets = byName((s) => s.rockets);
   const deaths = byName((s) => s.deaths);
   const incaps = byName((s) => s.incaps);
   const revives = byName((s) => s.revives);
+  const playTime = byName((s) => s.playTime);
+  const opMs = list.reduce((n, s) => n + s.durationMs, 0);
   const aiKills = new Map<string, number>();
   for (const s of list) for (const [n, v] of s.aiKills) inc(aiKills, n, v);
   const teamKills = list.flatMap((s) => s.teamKills);
@@ -325,7 +350,9 @@ export function toGameResult(replays: Replay[]): GameResult {
   if (hitYourOwn) add("hitYourOwn", [hitYourOwn.playerName], `${hitYourOwn.value} ${plural(hitYourOwn.value, "случай", "случая", "случаев")} дружественного огня`);
 
   const sortedNames = [...names].sort();
-  const untouchables = sortedNames.filter((n) => (shots.get(n) ?? 0) >= 10 && !incaps.get(n) && !deaths.get(n));
+  const untouchables = sortedNames.filter(
+    (n) => (playTime.get(n) ?? 0) >= UNTOUCHABLE_MIN_SHARE * opMs && !incaps.get(n) && !deaths.get(n),
+  );
   if (untouchables.length) add("untouchables", untouchables, "Ни нокаута, ни смерти");
 
   const diehard = new Map<string, number>();
