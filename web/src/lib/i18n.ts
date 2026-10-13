@@ -381,6 +381,8 @@ const RU: Dict = {
   "boards.players": "Участники",
   "boards.aiKills": "Убийства ботов",
   "boards.deaths": "Смерти",
+  "boards.knockouts": "Нокауты",
+  "boards.aiKillsShots": "Убийства ботов / выстрелы",
   "boards.friendlyFire": "Огонь по своим",
 
   "awards.title": "Ачивки",

@@ -181,7 +181,8 @@ export interface PastEvent extends EventBase {
   };
   friendlyFireIncidents?: FriendlyFireIncident[];
   awards: Award[];
-  leaderboards?: { aiKills: LeaderboardEntry[]; deaths: LeaderboardEntry[] };
+  /** knockouts and shots: games finished or back-filled since 2026-10-13. */
+  leaderboards?: { aiKills: LeaderboardEntry[]; deaths: LeaderboardEntry[]; knockouts?: LeaderboardEntry[]; shots?: LeaderboardEntry[] };
   attendance: AttendanceEntry[];
 }
 

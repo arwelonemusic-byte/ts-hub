@@ -599,7 +599,8 @@ export function OpTotals({ ev, locale, t }: { ev: PastEvent; locale: Locale; t: 
 const MEDALS = ["medal-gold", "medal-silver", "medal-bronze"];
 
 /** Competition ranking: ties share a rank (1, 2, 2, 4). With `medals`, ranks 1–3 get a medal instead of the number. */
-function Board({ title, rows, medals = false }: { title: string; rows: LeaderboardEntry[]; medals?: boolean }) {
+/** `of`: a second number after the value (AI kills / shots fired). */
+function Board({ title, rows, medals = false }: { title: string; rows: (LeaderboardEntry & { of?: number })[]; medals?: boolean }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1">
       <Eyebrow>{title}</Eyebrow>
@@ -615,7 +616,10 @@ function Board({ title, rows, medals = false }: { title: string; rows: Leaderboa
               <span className="w-[18px] shrink-0 type-code text-fg-tertiary">{rank}</span>
             )}
             <span className={`min-w-0 flex-1 truncate type-label-m ${zero ? "text-fg-secondary" : "text-fg"}`}>{r.playerName}</span>
-            <span className={`type-heading-xxs ${zero ? "text-fg-secondary" : "text-fg"}`}>{r.value}</span>
+            <span className={`type-heading-xxs ${zero ? "text-fg-secondary" : "text-fg"}`}>
+              {r.value}
+              {r.of !== undefined && <span className="text-fg-tertiary">/{r.of}</span>}
+            </span>
           </div>
           );
         })}
@@ -656,11 +660,14 @@ export function LeaderboardsPanel({ ev, t, attendanceOnly }: { ev: PastEvent; t:
     // Code-point order, as in the design: plain names, then clan-tagged ([BS], [En-Y]…), then Cyrillic.
     .sort();
   const ff = ev.friendlyFireIncidents ?? [];
-  // Everyone who played is on «Убийства ботов» (user request 2026-10-13): those with none at the end, by name.
-  const aiKills = ev.leaderboards && [
-    ...ev.leaderboards.aiKills,
-    ...players.filter((p) => !ev.leaderboards!.aiKills.some((r) => r.playerName === p)).map((playerName) => ({ playerName, value: 0 })),
-  ];
+  // Everyone who played is on «Убийства ботов» (user request 2026-10-13): those with none at the end, by name. With
+  // shots stored (games since 2026-10-13, older ones back-filled), each row reads kills/shots.
+  const boards = ev.leaderboards;
+  const shots = boards?.shots && new Map(boards.shots.map((r) => [r.playerName, r.value]));
+  const aiKills = boards && [
+    ...boards.aiKills,
+    ...players.filter((p) => !boards.aiKills.some((r) => r.playerName === p)).map((playerName) => ({ playerName, value: 0 })),
+  ].map((r) => (shots ? { ...r, of: shots.get(r.playerName) ?? 0 } : r));
   return (
     <section className="flex flex-col gap-6 rounded-xl bg-surface p-6">
       <h2 className="type-heading-m text-fg">{t(attendanceOnly ? "boards.came" : "boards.title")}</h2>
@@ -672,10 +679,14 @@ export function LeaderboardsPanel({ ev, t, attendanceOnly }: { ev: PastEvent; t:
           ))}
         </div>
       </div>
-      {ev.leaderboards && !attendanceOnly && (
+      {boards && aiKills && !attendanceOnly && (
         <div className="flex flex-col gap-8 md:flex-row">
-          <Board title={t("boards.aiKills")} rows={aiKills!} medals />
-          <Board title={t("boards.deaths")} rows={ev.leaderboards.deaths} />
+          <Board title={t(shots ? "boards.aiKillsShots" : "boards.aiKills")} rows={aiKills} medals />
+          {/* The kills list holds everyone, so deaths and knockouts share the other column. */}
+          <div className="flex min-w-0 flex-1 flex-col gap-8">
+            <Board title={t("boards.deaths")} rows={boards.deaths} />
+            {boards.knockouts && boards.knockouts.length > 0 && <Board title={t("boards.knockouts")} rows={boards.knockouts} />}
+          </div>
         </div>
       )}
       {ff.length > 0 && !attendanceOnly && (

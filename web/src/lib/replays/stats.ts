@@ -261,7 +261,8 @@ export interface GameResult {
   replays: string[];
   stats: {
     totals: { deaths: number; shots: number; aiShots: number; grenades: number; rockets: number; knockdowns: number; aiKilled: number; friendlyFire: number };
-    leaderboards: { aiKills: LeaderboardEntry[]; deaths: LeaderboardEntry[] };
+    /** knockouts and shots (per player, 2026-10-13): «Нокауты», and the shots behind «Убийства ботов» N/shots. */
+    leaderboards: { aiKills: LeaderboardEntry[]; deaths: LeaderboardEntry[]; knockouts: LeaderboardEntry[]; shots: LeaderboardEntry[] };
     awards: Award[];
     friendlyFire: { shooter: string; victim: string }[];
   };
@@ -296,6 +297,7 @@ export function toGameResult(replays: Replay[]): GameResult {
   const deaths = byName((s) => s.deaths);
   const incaps = byName((s) => s.incaps);
   const revives = byName((s) => s.revives);
+  const shots = byName((s) => s.shots);
   const playTime = byName((s) => s.playTime);
   const opMs = list.reduce((n, s) => n + s.durationMs, 0);
   const aiKills = new Map<string, number>();
@@ -384,7 +386,7 @@ export function toGameResult(replays: Replay[]): GameResult {
         aiKilled: sum((s) => s.totalAiDeaths),
         friendlyFire: teamKills.length,
       },
-      leaderboards: { aiKills: ranked(aiKills), deaths: ranked(deaths) },
+      leaderboards: { aiKills: ranked(aiKills), deaths: ranked(deaths), knockouts: ranked(incaps), shots: ranked(shots) },
       awards,
       friendlyFire: teamKills.map((k) => ({ shooter: k.killer, victim: k.victim ?? "союзный ИИ" })),
     },

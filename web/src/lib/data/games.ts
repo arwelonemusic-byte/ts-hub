@@ -16,7 +16,7 @@ const GAME_MS = 4 * 3600_000;
 /** events.stats, as data/events/build_past_events.py writes it. */
 interface GameStats {
   totals: Omit<PastEvent["stats"], "topAiKills">;
-  leaderboards: { aiKills: LeaderboardEntry[]; deaths: LeaderboardEntry[] };
+  leaderboards: { aiKills: LeaderboardEntry[]; deaths: LeaderboardEntry[]; knockouts?: LeaderboardEntry[]; shots?: LeaderboardEntry[] };
   awards: Award[];
   friendlyFire: PastEvent["friendlyFireIncidents"];
 }
