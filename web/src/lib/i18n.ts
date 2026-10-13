@@ -382,7 +382,9 @@ const RU: Dict = {
   "boards.aiKills": "Убийства ботов",
   "boards.deaths": "Смерти",
   "boards.knockouts": "Нокауты",
-  "boards.aiKillsShots": "Убийства ботов / выстрелы",
+  "boards.card.kills": "Убийства",
+  "boards.card.shots": "Выстрелы",
+  "boards.card.ratio": "Соотношение",
   "boards.friendlyFire": "Огонь по своим",
 
   "awards.title": "Ачивки",

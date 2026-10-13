@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { number, shortDate } from "@/lib/format";
 import { plural, type Locale, type T } from "@/lib/i18n";
 import { squadsOf } from "@/lib/squads";
@@ -599,18 +599,27 @@ export function OpTotals({ ev, locale, t }: { ev: PastEvent; locale: Locale; t: 
 const MEDALS = ["medal-gold", "medal-silver", "medal-bronze"];
 
 /** Competition ranking: ties share a rank (1, 2, 2, 4). With `medals`, ranks 1–3 get a medal instead of the number. */
-/** `of`: a second number after the value (AI kills / shots fired). */
+/** «Соотношение» on the kills card: the share of shots that killed, "4,9%"; a dash with no shots. */
+const killRatio = (kills: number, shots: number) =>
+  shots ? `${(Math.round((kills / shots) * 1000) / 10).toLocaleString("ru-RU")}%` : "—";
+
+/**
+ * `of` with `detail`: the value opens a card on hover (or a tap, or focus) with the kills, the shots fired and their
+ * ratio (AI kills, user decision 2026-10-13: the shots out of the row itself).
+ */
 function Board({
   title,
   rows,
   medals = false,
   fill = true,
+  detail,
 }: {
   title: string;
   rows: (LeaderboardEntry & { of?: number })[];
   medals?: boolean;
   /** Takes an equal share of a row of boards; off for boards stacked in a column. */
   fill?: boolean;
+  detail?: { kills: string; shots: string; ratio: string };
 }) {
   return (
     <div className={`flex min-w-0 flex-col gap-1 ${fill ? "flex-1" : ""}`}>
@@ -627,10 +636,33 @@ function Board({
               <span className="w-[18px] shrink-0 type-code text-fg-tertiary">{rank}</span>
             )}
             <span className={`min-w-0 flex-1 truncate type-label-m ${zero ? "text-fg-secondary" : "text-fg"}`}>{r.playerName}</span>
-            <span className={`type-heading-xxs ${zero ? "text-fg-secondary" : "text-fg"}`}>
-              {r.value}
-              {r.of !== undefined && <span className="text-fg-tertiary">/{r.of}</span>}
-            </span>
+            {detail && r.of !== undefined ? (
+              <div className="group relative">
+                <button
+                  type="button"
+                  className={`cursor-default type-heading-xxs underline decoration-line-strong decoration-dotted underline-offset-4 ${zero ? "text-fg-secondary" : "text-fg"}`}
+                >
+                  {r.value}
+                </button>
+                <div
+                  role="tooltip"
+                  className="pointer-events-none absolute top-full right-0 z-20 mt-1.5 hidden w-max grid-cols-[auto_auto] gap-x-4 gap-y-1 rounded-lg bg-raised px-3 py-2.5 shadow-floating ring-1 ring-line-strong group-focus-within:grid group-hover:grid"
+                >
+                  {[
+                    [detail.kills, String(r.value)],
+                    [detail.shots, String(r.of)],
+                    [detail.ratio, killRatio(r.value, r.of)],
+                  ].map(([label, value]) => (
+                    <Fragment key={label}>
+                      <span className="type-caption text-fg-tertiary">{label}</span>
+                      <span className="text-right type-label-s text-fg">{value}</span>
+                    </Fragment>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <span className={`type-heading-xxs ${zero ? "text-fg-secondary" : "text-fg"}`}>{r.value}</span>
+            )}
           </div>
           );
         })}
@@ -672,7 +704,7 @@ export function LeaderboardsPanel({ ev, t, attendanceOnly }: { ev: PastEvent; t:
     .sort();
   const ff = ev.friendlyFireIncidents ?? [];
   // Everyone who played is on «Убийства ботов» (user request 2026-10-13): those with none at the end, by name. With
-  // shots stored (games since 2026-10-13, older ones back-filled), each row reads kills/shots.
+  // shots stored (games since 2026-10-13, older ones back-filled), each kill count opens a card with the shots.
   const boards = ev.leaderboards;
   const shots = boards?.shots && new Map(boards.shots.map((r) => [r.playerName, r.value]));
   const aiKills = boards && [
@@ -692,7 +724,12 @@ export function LeaderboardsPanel({ ev, t, attendanceOnly }: { ev: PastEvent; t:
       </div>
       {boards && aiKills && !attendanceOnly && (
         <div className="flex flex-col gap-8 md:flex-row">
-          <Board title={t(shots ? "boards.aiKillsShots" : "boards.aiKills")} rows={aiKills} medals />
+          <Board
+            title={t("boards.aiKills")}
+            rows={aiKills}
+            medals
+            detail={{ kills: t("boards.card.kills"), shots: t("boards.card.shots"), ratio: t("boards.card.ratio") }}
+          />
           {/* The kills list holds everyone, so deaths and knockouts share the other column. */}
           <div className="flex min-w-0 flex-1 flex-col gap-8">
             <Board title={t("boards.deaths")} rows={boards.deaths} fill={false} />
