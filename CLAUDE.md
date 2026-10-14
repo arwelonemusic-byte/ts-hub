@@ -173,8 +173,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   `DiscordRateLimited` for a longer one; `refreshAnnouncement` then edits after the wait, rendering the game as it is
   by then (every change meanwhile in one edit). It used to sleep holding the edit it had already rendered, so the post
   lagged ~10 minutes and then showed old slots. Each 429 is logged (`[discord] … rate limited for N s`). On server
-  start `src/instrumentation.ts` runs `resyncAnnouncements`, so an edit pending at a deploy isn't lost (an up-to-date
-  post costs no Discord call).
+  start `src/instrumentation.ts` runs `resyncAnnouncements` (announced upcoming games and every announced game of the
+  past week), so an edit pending at a deploy isn't lost and a game changed in the database by hand gets its post
+  updated on the next start (an up-to-date post costs no Discord call).
 - **«Комментарии»** (`components/event/Comments.tsx`, `lib/discord/comments.ts`; user request 2026-10-14) is the plan
   thread under the game's announcement, read and written in the hub: a section after Plan on upcoming and played game
   pages. Members only (signed in and on the server); others get a login prompt. A game that isn't announced has no
@@ -195,7 +196,8 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   «Нарисовать план», `/plan/open` refuses), wear a blue chip and calendar dot (`--color-training` = the friendly blue,
   `dot-training.svg`), stay out of the Миссии catalog (admins: `?training=1`, like the archive), and «Игра окончена»
   stores `stats = NULL`: the played page shows only «Кто был», duration and the replay (no totals, rankings, awards or
-  plan, even for games finished before the flag). The flag only hides the mission's Markers.layer, planning and slot
+  plan, even for games finished before the flag). A game finished without a recording (the 14 Oct training ran
+  without the TS Replay mod and was set to played by hand, 2026-10-14) shows no replay button, duration or «Кто был». The flag only hides the mission's Markers.layer, planning and slot
   template, never deletes them: unticking it gives them back. **Any game without slots** (a training or a mission with
   no template) takes «Я приду!» / «Не приду» (`event_rsvps`, `comeToGame`/`skipGame` in `lib/slots/actions.ts`, until
   the start; admins any time): the hero shows «N придут», the aside «Кто придёт», the feed «Придут N», the Discord card

@@ -262,30 +262,40 @@ function Played({
     ? (history.plans.find((p) => p.code === ev.planCode) ?? { code: ev.planCode, author: ev.planAuthor ?? ev.platoonLeader ?? "—", createdAt: ev.startsAt })
     : null;
   const training = !!ev.mission.training;
+  // A game finished without a recording (a training played without the TS Replay mod; finished by hand) has no
+  // replay, no times and no roster until someone lists who came: none of those are shown.
+  const recorded = ev.replayCodes.length > 0;
+  const known = ev.attendance.some((a) => a.attended);
   return (
     <>
       <Hero ev={ev} locale={locale} t={t}>
-        <div className="flex gap-3">
-          <HeroBox>
-            <Eyebrow>{t("event.attended")}</Eyebrow>
-            <div className="flex items-baseline gap-1.5">
-              <span className="type-heading-l text-fg">{ev.attended}</span>
-              {ev.slotted !== null && (
-                <span className="type-body-s text-fg-secondary">{t("event.ofSlotted", { n: ev.slotted })}</span>
-              )}
-            </div>
-            {ev.slotted !== null && <ProgressBar value={ev.attended} max={ev.slotted} tone="success" />}
-          </HeroBox>
-          <HeroBox>
-            <Eyebrow>{t("event.duration")}</Eyebrow>
-            <span className="type-heading-xl text-fg">{duration(minutesBetween(ev.startedAt, ev.endedAt), locale)}</span>
-          </HeroBox>
-        </div>
+        {(recorded || known) && (
+          <div className="flex gap-3">
+            <HeroBox>
+              <Eyebrow>{t("event.attended")}</Eyebrow>
+              <div className="flex items-baseline gap-1.5">
+                <span className="type-heading-l text-fg">{ev.attended}</span>
+                {ev.slotted !== null && (
+                  <span className="type-body-s text-fg-secondary">{t("event.ofSlotted", { n: ev.slotted })}</span>
+                )}
+              </div>
+              {ev.slotted !== null && <ProgressBar value={ev.attended} max={ev.slotted} tone="success" />}
+            </HeroBox>
+            {recorded && (
+              <HeroBox>
+                <Eyebrow>{t("event.duration")}</Eyebrow>
+                <span className="type-heading-xl text-fg">{duration(minutesBetween(ev.startedAt, ev.endedAt), locale)}</span>
+              </HeroBox>
+            )}
+          </div>
+        )}
         <div className="flex flex-wrap gap-2">
-          <ButtonLink href={replayUrl(ev.replayCodes[0], ev)} external variant="primary" className="flex-1">
-            <Icon name="play" />
-            {t("event.watchReplay")}
-          </ButtonLink>
+          {recorded && (
+            <ButtonLink href={replayUrl(ev.replayCodes[0], ev)} external variant="primary" className="flex-1">
+              <Icon name="play" />
+              {t("event.watchReplay")}
+            </ButtonLink>
+          )}
           {/* A server restart splits an op into several replays. */}
           {ev.replayCodes.slice(1).map((c, i) => (
             <ButtonLink key={c} href={replayUrl(c, ev)} external>
@@ -307,7 +317,7 @@ function Played({
       <Columns
         content={
           <>
-            <LeaderboardsPanel ev={ev} t={t} attendanceOnly={training} />
+            {(known || !training) && <LeaderboardsPanel ev={ev} t={t} attendanceOnly={training} />}
             {ev.mission.briefing && (
               <Collapsible title={t("briefing.title")} t={t}>
                 <BriefingBody b={ev.mission.briefing} t={t} />

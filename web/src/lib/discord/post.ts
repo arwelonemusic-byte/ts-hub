@@ -310,12 +310,14 @@ export function refreshAnnouncement(eventId: string, delayMs = EDIT_DELAY_MS): v
 
 /**
  * The server just started (a deploy): an edit that was due when it stopped would wait for the game's next change, so
- * check every announced upcoming game. A post that's up to date costs no Discord call (discord_hash).
+ * check every announced upcoming game, and those of the past week (finished or cancelled just before the deploy, or
+ * changed in the database by hand). A post that's up to date costs no Discord call (discord_hash).
  */
 export async function resyncAnnouncements(): Promise<void> {
   if (!announceConfigured()) return;
   const rows = (await (await getDb()).query(
-    "SELECT id FROM events WHERE status = 'scheduled' AND discord_message_id IS NOT NULL ORDER BY starts_at",
+    `SELECT id FROM events WHERE discord_message_id IS NOT NULL AND (status = 'scheduled' OR starts_at > NOW() - INTERVAL '7 days')
+     ORDER BY starts_at`,
   )) as { id: string }[];
   rows.forEach((r, i) => refreshAnnouncement(r.id, EDIT_DELAY_MS + i * 1000));
 }
