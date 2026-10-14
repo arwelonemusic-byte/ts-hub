@@ -31,6 +31,8 @@ import { EventAdminMenu } from "@/components/schedule/Schedule";
 import { FinishGameButton } from "@/components/event/FinishGameDialog";
 import { AnnounceButton } from "@/components/event/AnnounceButton";
 import { announcement } from "@/lib/discord/post";
+import { getComments, type Comments } from "@/lib/discord/comments";
+import { CommentsPanel } from "@/components/event/Comments";
 import { slotRoles } from "@/lib/missions";
 import type { MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer, type Viewer } from "@/lib/viewer";
@@ -41,7 +43,8 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
   const data = getHubData();
   const [ev, { locale, t }, viewer] = await Promise.all([data.getEvent(id, new Date()), getT(), getViewer()]);
   if (!ev) notFound();
-  const [history, players, version, roles, announced] = await Promise.all([
+  const now = new Date();
+  const [history, players, version, roles, announced, comments] = await Promise.all([
     data.getMissionHistory(ev.mission.id),
     // Names for an admin's «Посадить» picker.
     ev.status === "upcoming" && viewer?.isAdmin ? playerNames() : null,
@@ -50,6 +53,8 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
     ev.status === "upcoming" && viewer?.isAdmin ? slotRoles() : null,
     // Its Discord announcement («Анонс в Дискорд»), for an admin's link to it.
     ev.status === "upcoming" && viewer?.isAdmin ? announcement(ev.id) : null,
+    // «Комментарии»: its Discord thread, for members only.
+    viewer?.inGuild ? getComments(ev.id) : null,
   ]);
 
   return (
@@ -57,11 +62,11 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
       <AppHeader active="events" />
       <main className="relative flex flex-col items-center gap-6 overflow-clip px-4 pb-16 pt-6 md:px-8">
         <Backdrop coverUrl={ev.mission.coverUrl} />
-        {ev.status === "upcoming" && version && <LiveRefresh eventId={ev.id} version={version} />}
+        {ev.status === "upcoming" && version && <LiveRefresh url={`/api/events/${encodeURIComponent(ev.id)}/version`} version={version} />}
         {ev.status === "upcoming" ? (
-          <Upcoming ev={ev} history={history} viewer={viewer} players={players} roles={roles ?? []} announced={announced} locale={locale} t={t} />
+          <Upcoming ev={ev} history={history} viewer={viewer} players={players} roles={roles ?? []} announced={announced} comments={comments} now={now} locale={locale} t={t} />
         ) : (
-          <Played ev={ev} history={history} isAdmin={!!viewer?.isAdmin} locale={locale} t={t} />
+          <Played ev={ev} history={history} viewer={viewer} comments={comments} now={now} locale={locale} t={t} />
         )}
       </main>
     </>
@@ -84,6 +89,8 @@ function Upcoming({
   players,
   roles,
   announced,
+  comments,
+  now,
   locale,
   t,
 }: {
@@ -95,6 +102,9 @@ function Upcoming({
   announced: { url: string } | null;
   /** Required roles for slots an admin adds. */
   roles: string[];
+  /** Its Discord thread; null for someone not signed in. */
+  comments: Comments | null;
+  now: Date;
   locale: Locale;
   t: T;
 }) {
@@ -213,6 +223,7 @@ function Upcoming({
                 t={t}
               />
             )}
+            <CommentsPanel eventId={ev.id} comments={comments} viewer={viewer} now={now} locale={locale} t={t} />
           </>
         }
         aside={
@@ -226,7 +237,24 @@ function Upcoming({
   );
 }
 
-function Played({ ev, history, isAdmin, locale, t }: { ev: PastEvent; history: MissionHistory; isAdmin: boolean; locale: Locale; t: T }) {
+function Played({
+  ev,
+  history,
+  viewer,
+  comments,
+  now,
+  locale,
+  t,
+}: {
+  ev: PastEvent;
+  history: MissionHistory;
+  viewer: Viewer | null;
+  comments: Comments | null;
+  now: Date;
+  locale: Locale;
+  t: T;
+}) {
+  const isAdmin = !!viewer?.isAdmin;
   const used = ev.planCode
     ? (history.plans.find((p) => p.code === ev.planCode) ?? { code: ev.planCode, author: ev.planAuthor ?? ev.platoonLeader ?? "—", createdAt: ev.startsAt })
     : null;
@@ -288,6 +316,7 @@ function Played({ ev, history, isAdmin, locale, t }: { ev: PastEvent; history: M
                 )}
               </Collapsible>
             )}
+            <CommentsPanel eventId={ev.id} comments={comments} viewer={viewer} now={now} locale={locale} t={t} />
           </>
         }
         aside={

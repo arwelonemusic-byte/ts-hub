@@ -175,6 +175,20 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   lagged ~10 minutes and then showed old slots. Each 429 is logged (`[discord] … rate limited for N s`). On server
   start `src/instrumentation.ts` runs `resyncAnnouncements`, so an edit pending at a deploy isn't lost (an up-to-date
   post costs no Discord call).
+- **«Комментарии»** (`components/event/Comments.tsx`, `lib/discord/comments.ts`; user request 2026-10-14) is the plan
+  thread under the game's announcement, read and written in the hub: a section after Plan on upcoming and played game
+  pages. Members only (signed in and on the server); others get a login prompt. A game that isn't announced has no
+  thread, so the section says the discussion opens with the announcement. The bot reads the thread's last 100 messages
+  at most every 10 s per game (shared by all viewers); the section polls `/api/events/<id>/comments` and re-renders
+  when they change. A member's comment goes out through the channel's «TS Hub» webhook under their name and avatar
+  (Discord tags it APP; nobody pinged), so the bot needs **Manage Webhooks** in #анонсы (granted 2026-10-14); the
+  first comment starts the thread (`inThread` in post.ts, shared with the plan notices). Members' text written in
+  Discord reaches the hub only with the app's **Message Content intent** (Developer Portal → Bot), REST reads included:
+  without it those messages arrive empty and show «Это сообщение можно посмотреть только в Discord». Discord markdown
+  is drawn by `lib/discord/markdown.ts` + `DiscordText.tsx`. Bot messages (plan notices) are drawn as a line.
+  **Dev:** `npm run dev:discord` runs `next dev` against a local stand-in for Discord's REST API
+  (`scripts/discord-stand-in.mjs`, state in `.data/discord-stand-in.json`): announce, plan notices and comments work
+  end to end; `POST :3099/dev/say` writes as a Discord member.
 - **Trainings and «Я приду!»** (user decisions 2026-10-11; migration 010). A mission's «Тренировка» checkbox
   (`missions.training`, editor step 1) makes it a training: its games say «Тренировка» instead of «Operation» (hero,
   mission page, Discord «Что | Тренировка …»), get no slots and no plan (scheduleGame copies no slot template; no

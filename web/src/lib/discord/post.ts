@@ -20,6 +20,7 @@ import { planThreadName, renderGamePost, renderPlanNotice, type PostGame } from 
  *
  * Plans go to a thread under the post (announcePlan): the first one attached starts it, each later one is a new
  * message there. The bot needs Create Public Threads and Send Messages in Threads in the channel for that.
+ * The game page's «Комментарии» read and write the same thread (comments.ts).
  */
 
 const channel = () => process.env.DISCORD_ANNOUNCE_CHANNEL_ID || null;
@@ -242,37 +243,53 @@ const planNoticeFailed = (eventId: string, code: string) => (err: unknown) => {
   else console.error(`[discord] plan notice for ${eventId} failed:`, err);
 };
 
-const isDiscord = (err: unknown, code: number) => err instanceof DiscordError && err.code === code;
+export const isDiscord = (err: unknown, code: number) => err instanceof DiscordError && err.code === code;
 
-async function postPlanNotice(eventId: string, code: string): Promise<void> {
+/** The announced game's post, whose thread holds the plans and the comments; null when it isn't announced. */
+export async function threadOf(eventId: string): Promise<{ channel: string; thread: string } | null> {
   const row = await postRow(eventId);
-  if (!row?.discord_message_id || !row.discord_channel_id) return;
-  const game = await postGame(eventId);
-  // Replaced again since (the newer plan's notice is next in line), detached, or the game is over.
-  if (game?.status !== "scheduled" || game.plan?.code !== code) return;
-  const notice = renderPlanNotice(game)!;
+  if (!row?.discord_message_id || !row.discord_channel_id) return null;
   // A thread started from a message has the message's id.
-  const thread = row.discord_message_id;
-  const send = () => discordRequest("POST", `/channels/${thread}/messages`, notice);
+  return { channel: row.discord_channel_id, thread: row.discord_message_id };
+}
+
+/** The thread's page in Discord. */
+export const threadUrl = (thread: string) => `https://discord.com/channels/${process.env.DISCORD_GUILD_ID}/${thread}`;
+
+/**
+ * `send` something to the thread under the game's post. When there's no thread yet (the first plan or comment), or
+ * someone deleted it, it starts one; when it was archived after a quiet week, it reopens it; then it sends again.
+ */
+export async function inThread<T>(at: { channel: string; thread: string }, game: PostGame, send: () => Promise<T>): Promise<T> {
   try {
-    await send();
+    return await send();
   } catch (err) {
     if (isDiscord(err, 10003)) {
-      // Unknown Channel: no thread yet (the first plan), or someone deleted it.
+      // Unknown Channel: no thread.
       try {
-        await discordRequest("POST", `/channels/${row.discord_channel_id}/messages/${thread}/threads`, {
+        await discordRequest("POST", `/channels/${at.channel}/messages/${at.thread}/threads`, {
           name: planThreadName(game),
-          auto_archive_duration: 10080, // a week without messages; a new plan reopens it
+          auto_archive_duration: 10080, // a week without messages; a new plan or comment reopens it
         });
       } catch (e) {
         if (!isDiscord(e, 160004)) throw e; // 160004: the message has a thread already
       }
     } else if (isDiscord(err, 50083)) {
       // Archived after a quiet week.
-      await discordRequest("PATCH", `/channels/${thread}`, { archived: false });
+      await discordRequest("PATCH", `/channels/${at.thread}`, { archived: false });
     } else throw err;
-    await send();
+    return await send();
   }
+}
+
+async function postPlanNotice(eventId: string, code: string): Promise<void> {
+  const at = await threadOf(eventId);
+  if (!at) return;
+  const game = await postGame(eventId);
+  // Replaced again since (the newer plan's notice is next in line), detached, or the game is over.
+  if (game?.status !== "scheduled" || game.plan?.code !== code) return;
+  const notice = renderPlanNotice(game)!;
+  await inThread(at, game, () => discordRequest("POST", `/channels/${at.thread}/messages`, notice));
 }
 
 /** The game changed: bring its post (if it has one) up to date a moment from now. Never throws. */

@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 /**
- * Keeps a scheduled game's page current while it's open: every few seconds (only while the
- * tab is visible) it asks whether the game's slots or plan changed, and re-renders the page
- * when they did. The new render brings the new `version`, which restarts the loop.
+ * Keeps a game's page current while it's open: every few seconds (only while the tab is visible) it
+ * asks `url` for the version of what it shows (a scheduled game's slots and plan, the comments), and
+ * re-renders the page when it changed. The new render brings the new `version`, which restarts the loop.
  */
-export function LiveRefresh({ eventId, version, everyMs = 5000 }: { eventId: string; version: string; everyMs?: number }) {
+export function LiveRefresh({ url, version, everyMs = 5000 }: { url: string; version: string; everyMs?: number }) {
   const router = useRouter();
   useEffect(() => {
     let stopped = false;
@@ -19,7 +19,7 @@ export function LiveRefresh({ eventId, version, everyMs = 5000 }: { eventId: str
       if (stopped || busy || document.visibilityState !== "visible") return;
       busy = true;
       try {
-        const res = await fetch(`/api/events/${encodeURIComponent(eventId)}/version`, { cache: "no-store" });
+        const res = await fetch(url, { cache: "no-store" });
         if (res.ok) {
           const { version: now } = (await res.json()) as { version: string };
           if (!stopped && now !== version) router.refresh();
@@ -43,6 +43,6 @@ export function LiveRefresh({ eventId, version, everyMs = 5000 }: { eventId: str
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [eventId, version, everyMs, router]);
+  }, [url, version, everyMs, router]);
   return null;
 }

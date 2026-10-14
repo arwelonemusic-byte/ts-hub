@@ -81,3 +81,35 @@ export function number(n: number, l: Locale): string {
 export function minutesBetween(a: string, b: string): number {
   return Math.round((new Date(b).getTime() - new Date(a).getTime()) / 60_000);
 }
+
+/** "2026-10-14": the day in Moscow, to tell days apart. */
+export function mskDay(iso: string | Date): string {
+  return fmt("en", { year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso)).replace(/(\d+)\/(\d+)\/(\d+)/, "$3-$1-$2");
+}
+
+/** "14 окт." / "14 окт. 2025" (a year only when it isn't this one). */
+export function shortDay(iso: string, now: Date, l: Locale): string {
+  const d = new Date(iso);
+  const sameYear = fmt("en", { year: "numeric" }).format(d) === fmt("en", { year: "numeric" }).format(now);
+  return fmt(l, { day: "numeric", month: "short", ...(sameYear ? {} : { year: "numeric" }) }).format(d).replace(/\s*г\.$/, "");
+}
+
+/** Discord's `<t:unix:style>` the way Discord shows it (styles t T d D f F R), in Moscow time. */
+export function discordTimestamp(unix: number, style: string, now: Date, l: Locale): string {
+  const d = new Date(unix * 1000);
+  if (style === "R") {
+    const s = Math.round((d.getTime() - now.getTime()) / 1000);
+    const steps: [Intl.RelativeTimeFormatUnit, number][] = [["year", 31536000], ["month", 2592000], ["day", 86400], ["hour", 3600], ["minute", 60], ["second", 1]];
+    const [unit, size] = steps.find(([, n]) => Math.abs(s) >= n) ?? ["second", 1];
+    return new Intl.RelativeTimeFormat(tag(l), { numeric: "auto" }).format(Math.round(s / size), unit);
+  }
+  const opts: Record<string, Intl.DateTimeFormatOptions> = {
+    t: { hour: "2-digit", minute: "2-digit", hourCycle: "h23" },
+    T: { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" },
+    d: { day: "2-digit", month: "2-digit", year: "numeric" },
+    D: { day: "numeric", month: "long", year: "numeric" },
+    f: { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" },
+    F: { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" },
+  };
+  return fmt(l, opts[style] ?? opts.f).format(d);
+}
