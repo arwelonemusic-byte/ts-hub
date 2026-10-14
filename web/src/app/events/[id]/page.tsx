@@ -176,10 +176,13 @@ function Upcoming({
               {t("event.slotIn")}
             </JumpLink>
           )}
-          <ButtonLink href={workshopUrl(ev.mission)} external>
-            {t("event.workshop")}
-            <Icon name="external-trailing" />
-          </ButtonLink>
+          {/* No Workshop button on a training (user request 2026-10-14). */}
+          {!training && (
+            <ButtonLink href={workshopUrl(ev.mission)} external>
+              {t("event.workshop")}
+              <Icon name="external-trailing" />
+            </ButtonLink>
+          )}
           {viewer?.isAdmin &&
             (announced ? (
               <ButtonLink href={announced.url} external>
@@ -289,10 +292,13 @@ function Played({
               {t("past.part", { n: i + 2 })}
             </ButtonLink>
           ))}
-          <ButtonLink href={workshopUrl(ev.mission)} external>
-            {t("event.workshop")}
-            <Icon name="external-trailing" />
-          </ButtonLink>
+          {/* No Workshop button on a training (user request 2026-10-14). */}
+          {!training && (
+            <ButtonLink href={workshopUrl(ev.mission)} external>
+              {t("event.workshop")}
+              <Icon name="external-trailing" />
+            </ButtonLink>
+          )}
           {isAdmin && <FinishGameButton eventId={ev.id} recompute locale={locale} label={t("finish.recompute")} className={buttonClass("secondary", "m")} />}
         </div>
       </Hero>
