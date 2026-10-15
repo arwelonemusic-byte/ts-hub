@@ -35,7 +35,7 @@ function enterable(state, h, unit) {
   const others = unitsAt(state, h).filter((u) => u.id !== unit.id);
   if (others.some((u) => u.side !== unit.side)) return 'там противник: штурм — это движение на один гекс';
   if (others.some((u) => u.kind === unit.kind)) {
-    return unit.kind === 'leader' ? 'в гексе уже есть КО' : 'в гексе уже есть своя группа';
+    return unit.kind === 'leader' ? 'в гексе уже есть SL' : 'в гексе уже есть своя группа';
   }
   return null;
 }

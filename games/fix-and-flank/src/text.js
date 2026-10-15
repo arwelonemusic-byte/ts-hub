@@ -51,14 +51,14 @@ export const PHASE = { movement: 'Движение', firefight: 'Огонь', ra
 export const phaseName = (p) => PHASE[p] ?? p;
 
 // Soldiers by role, short (unit cards, counters): a fireteam, the SL, the HMG crew.
-export const ROLE = { TL: 'КГ', AR: 'П', GRN: 'Г', RFL: 'С', SL: 'КО', GNR: 'Н', AG: 'ПН', AMMO: 'ПБ' };
+export const ROLE = { TL: 'КГ', AR: 'П', GRN: 'Г', RFL: 'С', SL: 'SL', GNR: 'Н', AG: 'ПН', AMMO: 'ПБ' };
 export const ROLE_FULL = {
   TL: 'командир группы', AR: 'пулемётчик', GRN: 'гранатомётчик', RFL: 'стрелок', SL: 'командир отделения',
   GNR: 'наводчик', AG: 'помощник наводчика', AMMO: 'подносчик',
 };
 
-// A unit by name: the SL is «КО»; teams keep their call signs (ALPHA, BRAVO...).
-export const unitName = (u) => (u.kind === 'leader' ? 'КО' : u.team);
+// A unit by name: «SL» for the squad leader; teams keep their call signs (ALPHA, BRAVO...).
+export const unitName = (u) => (u.kind === 'leader' ? 'SL' : u.team);
 // A unit's kind in words: a fireteam, the SL, a unit type (balance.unitTypes) by its English name.
 const TYPE_NAMES = { 'HMG team': 'расчёт пулемёта' };
 export const typeName = (name) => TYPE_NAMES[name] ?? name;

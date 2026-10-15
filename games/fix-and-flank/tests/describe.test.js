@@ -26,9 +26,9 @@ test('the rally phase is previewed with its odds', () => {
   const s = squad();
   s.units[1].status = 'pinned';
   s.units[1].pos = H(3, 4); // 2 hexes from the SL
-  assert.equal(rallyPreview(s, s.units[1]), 'Восстановление: ALPHA нужно 3+ на кубике, чтобы стать «подавлена»: 4 из 6 (67%; КО в 2 гексах).');
+  assert.equal(rallyPreview(s, s.units[1]), 'Восстановление: ALPHA нужно 3+ на кубике, чтобы стать «подавлена»: 4 из 6 (67%; SL в 2 гексах).');
   s.units[1].pos = H(3, 6);
-  assert.match(rallyPreview(s, s.units[1]), /ALPHA — «подавлена», без броска \(КО рядом\)/);
+  assert.match(rallyPreview(s, s.units[1]), /ALPHA — «подавлена», без броска \(SL рядом\)/);
   assert.equal(rallyPreview(s, s.units[0]), null, 'not suppressed');
 });
 
@@ -37,9 +37,9 @@ test('log lines report the dice and the phases', () => {
   s.units[1].status = 'pinned';
   const r = commitOrders(toPhase(s, 'firefight'), [], createRng(4));
   const e = r.events.find((x) => x.type === 'rally');
-  assert.match(eventText(r.state, e), new RegExp(`ALPHA: бросок ${e.roll} на восстановление \\(нужно 2\\+, КО в 1 гексе\\)`));
+  assert.match(eventText(r.state, e), new RegExp(`ALPHA: бросок ${e.roll} на восстановление \\(нужно 2\\+, SL в 1 гексе\\)`));
   const lines = r.events.map((x) => passText(s, x, 'BLUFOR') ?? eventText(r.state, x, 'BLUFOR')).filter(Boolean);
-  assert.ok(lines.includes('BLUFOR КО не стреляет.'), lines.join(' | '));
+  assert.ok(lines.includes('BLUFOR SL не стреляет.'), lines.join(' | '));
   assert.ok(lines.includes('Фаза «Восстановление» (BLUFOR).'));
   assert.ok(lines.includes('Фаза «Ход противника» (OPFOR).'));
 });

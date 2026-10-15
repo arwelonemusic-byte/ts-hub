@@ -23,7 +23,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const roles = (list) => list.map((r) => ROLE_FULL[r] ?? r).join(', ');
 const hexesAway = (n) => `в ${count(n, 'гексе', 'гексах', 'гексах')}`;
 
-// A unit with its side: «OPFOR ALPHA», «BLUFOR КО».
+// A unit with its side: «OPFOR ALPHA», «BLUFOR SL».
 export function unitName(u) {
   return `${u.side} ${shortName(u)}`;
 }
@@ -52,7 +52,7 @@ function holdWord(state, name = currentPhase(state).name) {
 }
 
 function leaderNote(state, r) {
-  return r.leader === null ? 'КО нет' : `${shortName(state.units[r.leader])} ${hexesAway(r.distance)}`;
+  return r.leader === null ? 'SL нет' : `${shortName(state.units[r.leader])} ${hexesAway(r.distance)}`;
 }
 
 // What the rally phase will do for a suppressed or pinned unit, or null.
@@ -62,7 +62,7 @@ export function rallyPreview(state, u) {
   const to = statusText(u, betterStatus(u.status));
   const name = shortName(u);
   if (r.auto) return `Восстановление: ${name} — «${to}», без броска (${shortName(state.units[r.leader])} рядом).`;
-  if (r.blocked) return `Восстановление: ${name} не придёт в себя — противник рядом, а КО нет.`;
+  if (r.blocked) return `Восстановление: ${name} не придёт в себя — противник рядом, а SL нет.`;
   return `Восстановление: ${name} нужно ${r.need}+ на кубике, чтобы стать «${to}»: ${inSix(r.need)} (${pct(chanceAtLeast(r.need))}; ${leaderNote(state, r)}).`;
 }
 
@@ -199,7 +199,7 @@ export function eventText(state, e, viewer = null) {
     case 'fire':
       return fireText(state, e, null);
     case 'rally':
-      if (e.blocked) return `${unitName(u)} не может прийти в себя: противник рядом, КО нет. По-прежнему ${statusText(u, e.from)}.`;
+      if (e.blocked) return `${unitName(u)} не может прийти в себя: противник рядом, SL нет. По-прежнему ${statusText(u, e.from)}.`;
       if (e.auto) return `${unitName(u)} приходит в себя рядом с ${shortName(state.units[e.leader])}: теперь ${statusText(u, e.to)}.`;
       return `${unitName(u)}: бросок ${e.roll} на восстановление (нужно ${e.need}+, ${leaderNote(state, e)}): ${e.success ? `теперь ${statusText(u, e.to)}` : `по-прежнему ${statusText(u, e.from)}`}.`;
     case 'recover':

@@ -181,7 +181,7 @@ export function drawFire(ctx, cam, from, to, color, alpha = 1, tag = null) {
 
 // The label next to a counter: the team's letter, or the leader's name (SL).
 export function counterLabel(unit) {
-  return unit.kind === 'leader' ? 'КО' : unit.team.charAt(0); // the SL is «КО», a team its call sign's letter
+  return unit.kind === 'leader' ? 'SL' : unit.team.charAt(0); // «SL» for the squad leader, a team its call sign's letter
 }
 
 // A bang: a starburst on a hex that is fired on, popping in and fading.
