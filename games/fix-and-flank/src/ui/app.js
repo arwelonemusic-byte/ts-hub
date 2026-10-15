@@ -24,6 +24,16 @@ import { assaultFigures, assaultSummary, eventText, fireFigures, fireSummary, ph
 import { agree, diceText, FEATURE, menText, ROLE, sideName, statusText, TERRAIN, turnsText, typeName, unitName as shortName } from '../text.js';
 
 const PLAYER_SIDE = 'BLUFOR';
+// The turn's phases as the player sees them (user request 2026-10-15): a key for the colour (ui.css --ph-*) and an
+// icon each. Movement an arching arrow, like the move arrows; fire and the enemy's turn a rifle; recovery a cross.
+const PHASE_KEY = { movement: 'movement', firefight: 'firefight', rally: 'rally', 'enemy action': 'enemy' };
+const PHASE_ICON = { movement: 'move', firefight: 'weapon', rally: 'health', enemy: 'weapon' };
+const ICONS = {
+  move: { stroke: ['M4 19.5Q7.5 7 19 8.5', 'M14.8 4.6l4.4 3.9-3.6 4.4'] },
+  weapon: { fill: ['M1.5 8.7 6 8v3.4l-4 1.2z', 'M6 7.6h10v3.4H6z', 'M16 8.5h7V10h-7z', 'M9.4 6.2h3v1.4h-3z', 'M10.6 11H13l.8 4.6-2.2.4z', 'M7 11h1.9l-.6 3.6H6.4z'] },
+  health: { fill: ['M9.5 3h5v6.5H21v5h-6.5V21h-5v-6.5H3v-5h6.5z'] },
+  chevron: { stroke: ['M9 6l6 6-6 6'] },
+};
 // Pointer cursors over the board: a scope (fire) and an arrow onto a hex (move), hotspot where they point.
 const svgCursor = (svg, x, y, fallback) => `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${x} ${y}, ${fallback}`;
 const CURSOR = {
@@ -538,21 +548,28 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     return phaseLabel(currentPhase(s).name);
   }
 
-  // Header: the turn's phases, the current one lit.
+  // Header: the turn's phases as steps, the current one in its colour.
   function renderPhases() {
     const s = app.state;
-    const spans = s.balance.turn.phases.map((p, i) => {
-      const el = document.createElement('span');
-      el.textContent = phaseLabel(p.name);
-      el.title = `${p.side}${p.automatic ? ', автоматически' : ''}`;
-      const cls = [];
-      if (p.side !== PLAYER_SIDE) cls.push('enemy');
-      if (i < s.phase || s.result) cls.push('done');
-      if (i === s.phase && s.activeSide !== null) cls.push('now');
-      el.className = cls.join(' ');
-      return el;
+    const steps = [];
+    s.balance.turn.phases.forEach((p, i) => {
+      const key = PHASE_KEY[p.name] ?? p.name;
+      const step = el('span', `step${i === s.phase && s.activeSide !== null && !s.result ? ' now' : ''}`);
+      step.dataset.phase = key;
+      step.title = `${p.side}${p.automatic ? ', автоматически' : ''}`;
+      step.append(icon(PHASE_ICON[key]), document.createTextNode(phaseLabel(p.name)));
+      if (i) steps.push(icon('chevron', 'chev'));
+      steps.push(step);
     });
-    $('phases').replaceChildren(...spans);
+    $('phases').replaceChildren(...steps);
+  }
+
+  // The phase the panel shows: its outline and its title's icon («won» / «lost» once the mission is over).
+  function panelPhase() {
+    const s = app.state;
+    if (s.result) return s.result.winner === PLAYER_SIDE ? 'won' : 'lost';
+    if (s.activeSide !== PLAYER_SIDE) return 'enemy';
+    return PHASE_KEY[currentPhase(s).name] ?? '';
   }
 
   const el = (tag, cls, text) => {
@@ -567,6 +584,15 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
     return e;
   };
+
+  // An icon from ICONS, in the text's colour.
+  function icon(name, cls = '') {
+    const svg = svgEl('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true', ...(cls ? { class: cls } : {}) });
+    const look = ICONS[name] ?? {};
+    for (const d of look.fill ?? []) svg.append(svgEl('path', { d, fill: 'currentColor' }));
+    for (const d of look.stroke ?? []) svg.append(svgEl('path', { d, fill: 'none', stroke: 'currentColor', 'stroke-width': 2.2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    return svg;
+  }
 
   // A small counter for the roster: the NATO frame with the infantry X and the echelon mark.
   function chip(u) {
@@ -620,11 +646,14 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   function render() {
     const s = app.state;
     $('mission').textContent = s.map.name;
-    $('phaseName').textContent = phaseTitle();
+    const shown = panelPhase();
+    $('phaseName').replaceChildren(...(PHASE_ICON[shown] ? [icon(PHASE_ICON[shown])] : []), document.createTextNode(phaseTitle()));
     $('phaseKicker').textContent = app.replay && !s.result
       ? `Повтор · ${app.replay.player} · ход ${s.turn}`
       : s.result ? 'Задача завершена' : planning() ? `Ваши приказы · ход ${s.turn}` : s.activeSide === PLAYER_SIDE ? 'Приказы выполняются' : 'Ход противника';
     $('phaseCard').className = `panel thin ${s.result ? (s.result.winner === PLAYER_SIDE ? 'won' : 'lost') : ''}`;
+    if (shown) $('phaseCard').dataset.phase = shown;
+    else delete $('phaseCard').dataset.phase;
     renderPhases();
     const ready = planning() ? myUnits().length : 0;
     $('progress').style.width = `${ready ? (100 * Math.min(app.plan.length, ready)) / ready : 0}%`;
