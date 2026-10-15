@@ -648,9 +648,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     $('mission').textContent = s.map.name;
     const shown = panelPhase();
     $('phaseName').replaceChildren(...(PHASE_ICON[shown] ? [icon(PHASE_ICON[shown])] : []), document.createTextNode(phaseTitle()));
-    $('phaseKicker').textContent = app.replay && !s.result
-      ? `Повтор · ${app.replay.player} · ход ${s.turn}`
-      : s.result ? 'Задача завершена' : planning() ? `Ваши приказы · ход ${s.turn}` : s.activeSide === PLAYER_SIDE ? 'Приказы выполняются' : 'Ход противника';
+    $('phaseKicker').textContent = `Ход ${s.turn}`; // the contact pill beside it (user request 2026-10-15)
     $('phaseCard').className = `panel thin ${s.result ? (s.result.winner === PLAYER_SIDE ? 'won' : 'lost') : ''}`;
     if (shown) $('phaseCard').dataset.phase = shown;
     else delete $('phaseCard').dataset.phase;
@@ -668,8 +666,10 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     $('view').classList.toggle('on', app.view);
     const contacts = knownEnemies(s, PLAYER_SIDE);
     const sp = contacts.filter((c) => c.level === 'spotted').length;
-    $('turn').textContent = `${s.turn}`;
-    $('contacts').textContent = (contacts.length ? `обнаружено: ${sp} · предполагаемых: ${contacts.length - sp}` : 'Контакта нет') + (app.reveal ? ' · отладка: показан весь OPFOR' : '');
+    // Short enough to sit beside «Ход N»: a count that is 0 is left out.
+    const suspectedN = contacts.length - sp;
+    const known = [sp ? `обнаружено: ${sp}` : '', suspectedN ? `${sp ? 'предп.' : 'предполагаемых'}: ${suspectedN}` : ''].filter(Boolean).join(' · ');
+    $('contacts').textContent = (known || 'Контакта нет') + (app.reveal ? ' · отладка: показан весь OPFOR' : '');
     $('contacts').classList.toggle('hot', contacts.length > 0);
     $('preview').textContent = hint(sel);
     $('message').textContent = app.message;
