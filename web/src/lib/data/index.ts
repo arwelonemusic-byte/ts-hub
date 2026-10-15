@@ -1,4 +1,5 @@
 import type { HubEvent, Mission, MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
+import { fixAndFlankData, type FixAndFlankData } from "./fixAndFlank";
 import { gamesData } from "./games";
 
 /**
@@ -33,4 +34,9 @@ export interface HubData {
 
 export function getHubData(): HubData {
   return gamesData;
+}
+
+/** «Мини-игры» → Fix and Flank: its maps, runs and comments (fixAndFlank.ts; mock data until its tables exist). */
+export function getFixAndFlankData(): FixAndFlankData {
+  return fixAndFlankData;
 }

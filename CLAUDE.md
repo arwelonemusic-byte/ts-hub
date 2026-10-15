@@ -12,6 +12,8 @@ data when it's at hand; otherwise fill gaps with plausible mock values instead o
 - `db/` — PostgreSQL: `migrations/` (built tables), `seed/` (catalogue), `schema.sql` (draft of the tables not built yet).
   See `db/README.md`; in dev the app uses PGlite in `web/.data/` with nothing to install.
 - `deploy/` — the box's unit, Caddy block, deploy script and one-time setup (`deploy/README.md`).
+- `games/fix-and-flank/` — the Fix and Flank mini-game (plain JS, no build step; its own `CLAUDE.md`, tests and docs),
+  moved in with its history on 2026-10-15. The hub serves it; see «Мини-игры» below.
 - `design/events-page/` — Claude Design canvas sources. Figma: https://www.figma.com/design/0RmVKOte1DraFYjN1vY0m9/TS-Hub
 
 ```bash
@@ -293,6 +295,20 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   the header shows "dev" next to the name. Roles: `viewer.roles` (names via `DISCORD_ROLE_MAP`), `hasRole`,
   `isMissionMaker` (@mission officer), `isAdmin` (`HUB_ADMIN_IDS` / `HUB_ADMIN_ROLES`).
   Admins are the Discord user IDs in `HUB_ADMIN_IDS` (production: Galaxy) and/or the role names in `HUB_ADMIN_ROLES`.
+- **«Мини-игры» → Fix & Flank** (user decisions 2026-10-15, sketches in the conversation; **scaffold, mock data**). The
+  header's «Мини-игры» is a menu (`NavDropdown`; a labelled group in `NavMenu`) with one game. `app/games/fix-and-flank`:
+  the game's page (cover, Играть → a map picker with search, author and sort; Создать карту → the editor; «Карты» with
+  Свежие / Популярные / Мои tabs; «Активность»), and `maps/[id]`: the map turning in 3D (the game's `preview` page in an
+  iframe), plays and record, «Рейтинг» (each player's best win, top 10, **turns only**), «Комментарии» (the hub's own,
+  composer on top). The game is served as it is from `games/fix-and-flank` by `app/games/fix-and-flank/[...path]`
+  (`/play`, `/editor`, `/preview` and the files they load; nothing else of the folder) and loads a hub map with
+  `?src=/api/games/fix-and-flank/maps/<id>`. **Members only** (`viewer.inGuild`): signed out goes to the login.
+  Published maps are locked (no edits: they'd void runs and records); drafts are their author's; publishing needs only
+  a valid map (no clear check). Runs are seed + orders, replayed on the server through the game's sim to get the
+  result (so records can't be faked) and played back for «Повтор». Data: `getFixAndFlankData()` (`lib/data/fixAndFlank.ts`)
+  over `fix-and-flank-mock.json` (made with the game's map generator; stills in `public/fix-and-flank/`) until the
+  `fnf_*` tables drafted in `db/schema.sql` are built. Not done yet: saving and publishing maps from the editor, recording
+  runs, replays, comments, the game's UI in Russian.
 
 ## Decided (2026-10-09)
 

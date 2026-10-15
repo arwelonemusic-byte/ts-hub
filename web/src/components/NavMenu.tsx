@@ -10,6 +10,8 @@ export interface NavItem {
   label: string;
   external?: boolean;
   active?: boolean;
+  /** A menu of pages (desktop: NavDropdown; here: a labelled group). */
+  children?: NavItem[];
 }
 
 /**
@@ -53,19 +55,36 @@ export function NavMenu({ items, labels }: { items: NavItem[]; labels: { open: s
         <nav id="nav-menu" className="absolute inset-x-0 top-full border-b border-line bg-surface px-4 py-2 shadow-floating md:px-6">
           {items.map((n, i) => [
             n.external && !items[i - 1]?.external && <div key="divider" aria-hidden className="mx-3.5 my-2 h-px bg-line-strong" />,
-            <Link
-              key={n.key}
-              href={n.href}
-              {...(n.external ? { target: "_blank", rel: "noreferrer" } : {})}
-              onClick={() => setOpen(false)}
-              aria-current={n.active ? "page" : undefined}
-              className={`flex h-12 items-center gap-1.5 rounded-lg px-3.5 type-label-s ${
-                n.active ? "bg-raised text-fg" : "text-fg-secondary hover:text-fg"
-              }`}
-            >
-              {n.label}
-              {n.external && <Icon name="external-ff" />}
-            </Link>,
+            n.children ? (
+              <div key={n.key} className="flex flex-col">
+                <span className="flex h-9 items-end px-3.5 pb-1 type-eyebrow text-fg-tertiary">{n.label}</span>
+                {n.children.map((c) => (
+                  <Link
+                    key={c.key}
+                    href={c.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={c.active ? "page" : undefined}
+                    className={`flex h-12 items-center rounded-lg px-3.5 type-label-s ${c.active ? "bg-raised text-fg" : "text-fg-secondary hover:text-fg"}`}
+                  >
+                    {c.label}
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <Link
+                key={n.key}
+                href={n.href}
+                {...(n.external ? { target: "_blank", rel: "noreferrer" } : {})}
+                onClick={() => setOpen(false)}
+                aria-current={n.active ? "page" : undefined}
+                className={`flex h-12 items-center gap-1.5 rounded-lg px-3.5 type-label-s ${
+                  n.active ? "bg-raised text-fg" : "text-fg-secondary hover:text-fg"
+                }`}
+              >
+                {n.label}
+                {n.external && <Icon name="external-ff" />}
+              </Link>
+            ),
           ])}
         </nav>
       )}

@@ -2,20 +2,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { ENABLED_LOCALES } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
+import { FNF_HOME } from "@/lib/fix-and-flank/game";
 import { BUILDER_URL, PLANNER_URL, TRAINING_URL } from "@/lib/links";
 import { SERVER_INFO } from "@/lib/server-status";
 import { getViewer } from "@/lib/viewer";
 import { LanguageToggle } from "./LanguageToggle";
+import { NavDropdown } from "./NavDropdown";
 import { NavMenu, type NavItem } from "./NavMenu";
 import { ServerStatus } from "./ServerStatus";
 import { buttonClass, Icon } from "./ui";
 
 /** Figma "App header" (8:180): brand · centred nav · account. */
-export async function AppHeader({ active }: { active: "events" | "missions" | "players" }) {
+export async function AppHeader({ active }: { active: "events" | "missions" | "games" | "players" }) {
   const [{ locale, t }, viewer] = await Promise.all([getT(), getViewer()]);
+  // «Мини-игры» is a menu: one game for now (user request 2026-10-15).
+  const games: NavItem[] = [{ key: "fixAndFlank", href: FNF_HOME, label: t("nav.fixAndFlank"), active: active === "games" }];
   const nav: NavItem[] = [
     { key: "events", href: "/events" },
     { key: "missions", href: "/missions" },
+    { key: "games", href: FNF_HOME, children: games },
     // «Игроки» is the admins' name matching for now (app/players); everyone gets it once player profiles exist.
     ...(viewer?.isAdmin ? [{ key: "players", href: "/players" }] : []),
     { key: "planner", href: PLANNER_URL, external: true },
@@ -32,19 +37,23 @@ export async function AppHeader({ active }: { active: "events" | "missions" | "p
         {nav.map((n, i) => [
           // A hairline between the hub's own sections and the other TS apps.
           n.external && !nav[i - 1]?.external && <span key="divider" aria-hidden className="mx-2 h-5 w-px bg-line-strong" />,
-          <Link
-            key={n.key}
-            href={n.href}
-            {...(n.external ? { target: "_blank", rel: "noreferrer" } : {})}
-            aria-current={n.active ? "page" : undefined}
-            className={`flex h-11 items-center gap-1.5 rounded-lg px-3.5 type-label-s ${
-              n.active ? "bg-raised text-fg" : "text-fg-secondary hover:text-fg"
-            }`}
-          >
-            {n.label}
-            {/* The other TS apps open in a new tab; the icon (62% white) matches the nav's text. */}
-            {n.external && <Icon name="external-ff" />}
-          </Link>,
+          n.children ? (
+            <NavDropdown key={n.key} item={n} />
+          ) : (
+            <Link
+              key={n.key}
+              href={n.href}
+              {...(n.external ? { target: "_blank", rel: "noreferrer" } : {})}
+              aria-current={n.active ? "page" : undefined}
+              className={`flex h-11 items-center gap-1.5 rounded-lg px-3.5 type-label-s ${
+                n.active ? "bg-raised text-fg" : "text-fg-secondary hover:text-fg"
+              }`}
+            >
+              {n.label}
+              {/* The other TS apps open in a new tab; the icon (62% white) matches the nav's text. */}
+              {n.external && <Icon name="external-ff" />}
+            </Link>
+          ),
         ])}
       </nav>
       <div className="flex items-center gap-3 justify-self-end">
