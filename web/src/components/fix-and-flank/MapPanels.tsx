@@ -40,7 +40,13 @@ export function LeaderboardPanel({ runs, canWatch, now, locale, t }: { runs: Fnf
                   {shortDay(r.finishedAt, now, locale)}, {time(r.finishedAt)}
                 </span>
               </span>
-              <span className="shrink-0 type-heading-xxs text-fg">{plural(locale, "fnf.turns", r.turns)}</span>
+              <span className="shrink-0 type-heading-xxs text-fg">
+                {plural(locale, "fnf.turns", r.turns)}
+                {/* Losses beside the turns (user request 2026-10-15); the ranking is turns only. */}
+                {r.losses !== null && (
+                  <span className="text-fg-tertiary"> / {r.losses ? plural(locale, "fnf.losses", r.losses) : t("fnf.noLosses")}</span>
+                )}
+              </span>
               {canWatch ? (
                 <a href={gameUrl("play", { replay: r.runId })} className={buttonClass("secondary", "s")}>
                   <Icon name="play-light" />

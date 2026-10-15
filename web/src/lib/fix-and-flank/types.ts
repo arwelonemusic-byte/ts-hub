@@ -27,6 +27,8 @@ export interface FnfRun {
   rank: number;
   player: string;
   turns: number;
+  /** BLUFOR's men lost; null for a run finished before losses were kept and not worked out since (other rules). */
+  losses: number | null;
   finishedAt: string;
   /** For «Повтор»: a run is its map, seed and orders, which the game plays back. */
   runId: string;

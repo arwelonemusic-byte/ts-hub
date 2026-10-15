@@ -15,9 +15,15 @@ const t = makeT("ru"); // the game reads these, and the game is Russian only
 type MapJson = Record<string, unknown> & { name?: string; width?: number; height?: number };
 type Model = Record<string, unknown>;
 
+interface RunUnit {
+  side: string;
+  soldiers: unknown[];
+}
+
 interface RunState {
   result: { winner: string; why: string } | null;
   turn: number;
+  units: RunUnit[];
 }
 
 interface GameRules {
@@ -27,6 +33,7 @@ interface GameRules {
   parseMap(json: MapJson, balance: unknown): unknown;
   playRun(run: { balance: unknown; map: unknown; seed: number; commits: unknown[] }): { state: RunState; used: number };
   readCommits(input: unknown): { commits: unknown[] } | { error: string };
+  unitType(balance: unknown, unit: RunUnit): { roles: unknown[] };
   fromMapJson(json: MapJson): Model;
   toMapJson(m: Model, balance: unknown): MapJson;
   problems(m: Model, balance: unknown): string[];
@@ -40,8 +47,9 @@ const load = (rel: string) => import(/* webpackIgnore: true */ /* turbopackIgnor
 
 function gameRules(): Promise<GameRules> {
   rules ??= (async () => {
-    const [map, model, run, balanceText, version] = await Promise.all([
+    const [map, state, model, run, balanceText, version] = await Promise.all([
       load("src/sim/map.js"),
+      load("src/sim/state.js"),
       load("src/editor/model.js"),
       load("src/ai/run.js"),
       readFile(path.join(GAME_DIR, "data", "balance.json"), "utf8"),
@@ -53,6 +61,7 @@ function gameRules(): Promise<GameRules> {
       parseMap: map.parseMap,
       playRun: run.playRun,
       readCommits: run.readCommits,
+      unitType: state.unitType,
       fromMapJson: model.fromMapJson,
       toMapJson: model.toMapJson,
       problems: model.problems,
@@ -84,9 +93,14 @@ export async function gameVersion(): Promise<string> {
 
 /**
  * A run played through on the server, from the map, the seed and BLUFOR's commits as the browser sent them (the AI
- * plays OPFOR again): who won and on which turn. An error when the commits aren't a run or the game didn't end.
+ * plays OPFOR again): who won, on which turn, and how many of BLUFOR's men were lost (the full squad less who is left,
+ * as the game's debrief counts them). An error when the commits aren't a run or the game didn't end.
  */
-export async function replayRun(mapJson: unknown, seed: number, commitsInput: unknown): Promise<{ result: "won" | "lost"; turns: number; commits: unknown[] } | { error: string }> {
+export async function replayRun(
+  mapJson: unknown,
+  seed: number,
+  commitsInput: unknown,
+): Promise<{ result: "won" | "lost"; turns: number; losses: number; commits: unknown[] } | { error: string }> {
   const r = await gameRules();
   const read = r.readCommits(commitsInput);
   if ("error" in read) return { error: read.error };
@@ -95,7 +109,9 @@ export async function replayRun(mapJson: unknown, seed: number, commitsInput: un
     const { state, used } = r.playRun({ balance: r.balance, map, seed, commits: read.commits });
     if (!state.result) return { error: t("fnf.err.runNoEnd") };
     if (used !== read.commits.length) return { error: t("fnf.err.runAfterEnd") };
-    return { result: state.result.winner === "BLUFOR" ? "won" : "lost", turns: state.turn, commits: read.commits };
+    const squad = state.units.filter((u) => u.side === "BLUFOR");
+    const losses = squad.reduce((n, u) => n + r.unitType(r.balance, u).roles.length - u.soldiers.length, 0);
+    return { result: state.result.winner === "BLUFOR" ? "won" : "lost", turns: state.turn, losses, commits: read.commits };
   } catch (err) {
     return { error: format(t("fnf.err.runBroken"), { why: (err as Error).message }) };
   }

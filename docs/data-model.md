@@ -63,7 +63,7 @@ erDiagram
 
 - A map is a draft (its author's only, editable) until published; then it's locked for good, so its runs and record stay comparable.
 - A run is a seed plus BLUFOR's orders (OPFOR's come from the AI). The hub hands out the seed when the run starts; at the end the game is deterministic, so the server replays the orders to get the result and turns (records can't be faked) and «Повтор» plays them back. A run keeps a hash of the rules it was played under. An unfinished run (result NULL) counts for nothing.
-- The leaderboard is each player's best win on a map, fewest turns first, top 10. Losses don't count toward the ranking. «Популярные» sorts by finished runs.
+- The leaderboard is each player's best win on a map, fewest turns first, top 10. Losses don't count toward the ranking; each run keeps them (`fnf_runs.losses`, BLUFOR's men lost, worked out by the server's replay) and the leaderboard shows them beside the turns. «Популярные» sorts by finished runs.
 - «Активность» is derived: runs (won, lost, a new record) and maps members published.
 - A map that came with the game (Trench Line) has no author row: `author_label` credits the game's authors.
 - Playing and publishing are for members of the Discord (`viewer.inGuild`).

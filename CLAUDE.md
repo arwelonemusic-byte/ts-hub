@@ -304,7 +304,7 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   the game's page (cover with the title on it, Играть → a map picker with search, author and sort; Создать карту → the
   editor; «Карты» with Свежие / Популярные / Мои карты tabs and the maps' cards on the page itself, not in a panel, each
   with «Вы играли» once the viewer has finished a run on it (`MapCard`, the user's design); «Активность»), and `maps/[id]`: the map turning in 3D (the game's `preview` page in an
-  iframe), plays and record, «Рейтинг» (each player's best win, top 10, **turns only**), «Комментарии» (the hub's own,
+  iframe), plays and record, «Рейтинг» (each player's best win, top 10, **turns only**; the run's losses shown beside, «25 ходов / 4 потери»), «Комментарии» (the hub's own,
   composer on top). The game is served as it is from `games/fix-and-flank` by `app/games/fix-and-flank/[...path]`
   (`/play`, `/editor`, `/preview` and the files they load; nothing else of the folder) and loads a hub map with
   `?src=/api/games/fix-and-flank/maps/<id>`. **Members only** (`viewer.inGuild`): signed out goes to the login.

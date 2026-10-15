@@ -72,13 +72,32 @@ export async function finishRun(runId: string, playerId: string, commits: unknow
     [run.map_id, playerId, runId],
   );
   const rows = await db.query(
-    `UPDATE fnf_runs SET orders = $2::jsonb, result = $3, turns = $4, finished_at = NOW() WHERE id = $1 AND result IS NULL RETURNING id`,
-    [runId, JSON.stringify(end.commits), end.result, end.turns],
+    `UPDATE fnf_runs SET orders = $2::jsonb, result = $3, turns = $4, losses = $5, finished_at = NOW() WHERE id = $1 AND result IS NULL RETURNING id`,
+    [runId, JSON.stringify(end.commits), end.result, end.turns, end.losses],
   );
   if (!rows.length) return { error: t("fnf.err.runDone"), status: 409 };
   const won = end.result === "won";
   const beats = (v: unknown) => v === null || v === undefined || end.turns < Number(v);
   return { ok: { result: end.result, turns: end.turns, record: won && beats(best?.any), personalBest: won && beats(best?.mine) } };
+}
+
+/**
+ * Losses of runs finished before they were kept (migration 013), worked out by playing the runs again; only runs played
+ * under the rules the hub has now, since under other rules a replay may go differently. Run on server start.
+ */
+export async function fillLosses(): Promise<void> {
+  const db = await getDb();
+  const rows = await db.query(
+    `SELECT r.id, r.seed, r.orders, r.turns, m.json FROM fnf_runs r JOIN fnf_maps m ON m.id = r.map_id
+     WHERE r.result IS NOT NULL AND r.losses IS NULL AND r.game_version = $1`,
+    [await gameVersion()],
+  );
+  for (const r of rows) {
+    const parse = (v: unknown) => (typeof v === "string" ? JSON.parse(v) : v);
+    const end = await replayRun(parse(r.json), Number(r.seed), parse(r.orders));
+    if ("error" in end || end.turns !== Number(r.turns)) continue;
+    await db.query(`UPDATE fnf_runs SET losses = $2 WHERE id = $1 AND losses IS NULL`, [r.id, end.losses]);
+  }
 }
 
 /** A finished run, to play back («Повтор»). */

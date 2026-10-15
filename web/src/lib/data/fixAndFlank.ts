@@ -97,7 +97,7 @@ export const fixAndFlankData: FixAndFlankData = {
     const db = await getDb();
     const rows = await db.query(
       `SELECT * FROM (
-         SELECT DISTINCT ON (r.player_id) r.id, p.display_name, r.turns, r.finished_at
+         SELECT DISTINCT ON (r.player_id) r.id, p.display_name, r.turns, r.losses, r.finished_at
          FROM fnf_runs r JOIN players p ON p.id = r.player_id
          WHERE r.map_id = $1 AND r.result = 'won'
          ORDER BY r.player_id, r.turns, r.finished_at
@@ -109,6 +109,7 @@ export const fixAndFlankData: FixAndFlankData = {
       rank: rows.findIndex((x) => Number(x.turns) === Number(r.turns)) + 1 || i + 1,
       player: String(r.display_name),
       turns: Number(r.turns),
+      losses: r.losses === null || r.losses === undefined ? null : Number(r.losses),
       finishedAt: iso(r.finished_at),
       runId: String(r.id),
     }));
