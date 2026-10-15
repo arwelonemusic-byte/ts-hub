@@ -3,7 +3,8 @@
 //   published maps are locked for good (the editor);
 // - runs: a game on a published map is recorded there: the hub hands out the
 //   seed, takes BLUFOR's orders at the end and plays them through itself for the
-//   result (the game; src/ai/run.js), and serves finished runs for «Повтор».
+//   result (the game; src/ai/run.js), and serves finished runs for «Повтор»;
+// - comments: the debrief of such a game can leave one on the map.
 // Served on its own (npm start) there is no hub: the editor keeps maps in this
 // browser (store.js) and games aren't recorded.
 
@@ -61,4 +62,5 @@ export const hub = {
   save: (id, body) => call('PUT', hubSrc(id), body), // { name, json, thumb? } → { id }
   publish: (id, body) => call('POST', `${hubSrc(id)}/publish`, body), // → { id }
   remove: (id) => call('DELETE', hubSrc(id)),
+  comment: (id, body) => call('POST', `${hubSrc(id)}/comments`, { body }), // a comment on a published map → { id }
 };

@@ -343,7 +343,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   patient cheat could search orders offline; server-side dice per commit would close that.
   **Comments** on a map (`lib/fix-and-flank/actions.ts`, user request 2026-10-15): the hub's own `fnf_comments`, written
   with the event page's `CommentForm` (it takes its server action and hidden fields as props), members only, on a
-  published map, 2000 characters at most, newest first. «Удалить» for the author or an admin sets `deleted_at`.
+  published map, 2000 characters at most, newest first. «Удалить» for the author or an admin sets `deleted_at`. The game's debrief after a real game can leave one too
+  («Оставить комментарий (необязательно)»): `POST /api/games/fix-and-flank/maps/<id>/comments {body}`, the same rules
+  (`addMapComment` in `lib/fix-and-flank/comments.ts`, shared with the page's server action).
   The game and its editor are in Russian (`games/fix-and-flank/src/text.js`); the API's messages to them are `fnf.err.*`
   keys in `lib/i18n.ts`, fixed to RU. Not done yet: an admin's way to take a map down (`hidden_at` is there).
 

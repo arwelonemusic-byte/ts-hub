@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db";
 import { playerIdOf } from "@/lib/players";
 import { getViewer } from "@/lib/viewer";
-import { FNF_COMMENT_MAX, mapPageUrl } from "./game";
+import { addMapComment } from "./comments";
+import { mapPageUrl } from "./game";
 
 /**
  * «Комментарии» on a Fix & Flank map (user request 2026-10-15): the hub's own (fnf_comments), not a Discord thread.
@@ -20,18 +21,8 @@ export async function postMapComment(_prev: MapCommentState, form: FormData): Pr
   const viewer = await getViewer();
   const playerId = viewer?.inGuild ? await playerIdOf(viewer) : null;
   if (!playerId) return { error: "forbidden", text };
-  if (!text) return { error: "empty", text };
-  if (text.length > FNF_COMMENT_MAX) return { error: "tooLong", text };
-  const db = await getDb();
-  // Only on a published map that's up: a draft is its author's alone.
-  const rows = await db.query(
-    `INSERT INTO fnf_comments (map_id, player_id, body)
-     SELECT id, $2, $3 FROM fnf_maps WHERE id = $1 AND published_at IS NOT NULL AND hidden_at IS NULL RETURNING id`,
-    [mapId, playerId, text],
-  );
-  if (!rows.length) return { error: "gone", text };
-  revalidatePath(mapPageUrl(mapId));
-  return null;
+  const out = await addMapComment(mapId, playerId, text);
+  return "error" in out ? { error: out.error, text } : null;
 }
 
 /** «Удалить» under a comment: its author's, or any for an admin. */

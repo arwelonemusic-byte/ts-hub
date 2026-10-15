@@ -16,7 +16,7 @@ import { canActivate, currentPhase, unitType, unitsAt } from '../sim/state.js';
 import { chooseOrders } from '../ai/basic.js';
 import { COLORS, counterLabel, drawFire, drawHexMarks, drawPath, drawSuspected } from '../render/hexmap.js';
 import { createWorld } from '../render/world3d.js';
-import { hubHome, hubIdOf, hubMapPage, servedByHub } from '../hub.js';
+import { hub, hubHome, hubIdOf, hubMapPage, servedByHub } from '../hub.js';
 import { positionAlong } from './anim.js';
 import { createDiceTray } from './dice.js';
 import { assaultFigures, assaultSummary, eventText, fireFigures, fireSummary, phaseLabel, previewAction, rallyPreview, unitName } from './describe.js';
@@ -34,6 +34,7 @@ const DICE_HOLD_MS = 800;   // the settled roll stays on screen this long
 const RALLY_ROLL_MS = 700;
 const RALLY_HOLD_MS = 500;
 const BANG_MS = 900;        // a bang marker's life
+const COMMENT_MAX = 2000;   // the hub's limit for a comment on a map (FNF_COMMENT_MAX)
 const STEP_GAP_MS = 120;    // between steps without moves
 const AI_DELAY_MS = 450;    // pause before OPFOR commits, so it can be followed
 const REPLAY_PAUSE_MS = 900; // «Повтор»: pause before the player's next recorded commit
@@ -80,6 +81,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     unrecorded,
     runNote: '',       // what the hub said about the finished run, for the debrief
     runRecorded: false, // the hub took the run: it can be played back («Повтор»)
+    comment: { text: '', sent: false, error: '' }, // the debrief's comment on the map (a real game in the hub)
     finishing: null,   // the run being sent to the hub
   };
   const canvas = $('board');
@@ -918,6 +920,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   window.addEventListener('keydown', (e) => {
     const k = e.key.toLowerCase();
     if (app.modal) {
+      if (e.target instanceof HTMLTextAreaElement && k !== 'escape') return; // typing a comment in the debrief
       if (k === 'escape' || k === 'enter' || k === ' ') {
         e.preventDefault();
         closeModal();
@@ -1047,17 +1050,80 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       facts([['Ход', `${s.turn}`], ['Осталось бойцов', `${men} из ${full}`]]),
     ];
     if (note) body.push(Object.assign(el('p', 'runNote', note), { id: 'runNote' }));
+    const mapId = realGameMap();
+    if (mapId) body.push(commentBox(mapId));
     // Then (user decisions 2026-10-15): back to the editor after a playtest (or a game run on its own), back to the hub
     // after a game there (the map's page, where the run shows in «Рейтинг»); «Повтор» of a recorded run once the hub
     // has it; and again: a recorded run with new dice from the hub, any other game with new dice of its own.
-    const go = (href) => () => {
-      location.href = href;
+    // Moving on sends a comment typed but not sent; if it can't go, the debrief stays with the error.
+    const onward = (fn) => async () => {
+      if (mapId && !(await sendComment(mapId))) return;
+      fn();
     };
+    const go = (href) => onward(() => {
+      location.href = href;
+    });
     const buttons = [['Посмотреть карту', false, null], editable ? ['Обратно в редактор', false, go($('editBtn').href)] : ['Обратно в Хаб', false, go(hubBack())]];
     if (app.recorder) buttons.push(['Повтор', false, go(`?${new URLSearchParams({ replay: app.recorder.id })}`), 'replayBtn']);
-    buttons.push(app.replay ? ['Смотреть снова', true, () => location.reload()] : ['Ещё раз', true, app.recorder ? () => location.reload() : newDice]);
+    buttons.push(app.replay ? ['Смотреть снова', true, () => location.reload()] : ['Ещё раз', true, onward(app.recorder ? () => location.reload() : newDice)]);
     openModal(dialog(app.replay ? 'Повтор' : 'Итоги', s.map.name, body, buttons));
     showReplayButton();
+  }
+
+  // The hub map of a real game (a published map in the hub, not a playtest or a replay), or null.
+  function realGameMap() {
+    return servedByHub() && !app.replay && !here.has('playtest') ? hubIdOf(here.get('src') ?? '') : null;
+  }
+
+  // «Оставить комментарий (необязательно)» after a real game (user request 2026-10-15): a comment on the map, as on
+  // its page in the hub. The text is kept while the debrief is closed and opened again.
+  function commentBox(mapId) {
+    const box = el('div', 'comment');
+    if (app.comment.sent) {
+      box.append(el('p', 'sent', 'Комментарий отправлен, он на странице карты.'));
+      return box;
+    }
+    const label = el('label', '', 'Оставить комментарий (необязательно)');
+    const area = el('textarea');
+    area.id = label.htmlFor = 'debriefComment';
+    area.rows = 3;
+    area.maxLength = COMMENT_MAX;
+    area.value = app.comment.text;
+    const status = el('span', `status${app.comment.error ? ' bad' : ''}`, app.comment.error);
+    const send = el('button', 'btn', 'Отправить');
+    send.disabled = !area.value.trim();
+    area.oninput = () => {
+      app.comment.text = area.value;
+      send.disabled = !area.value.trim();
+    };
+    send.onclick = async () => {
+      send.disabled = true;
+      if (await sendComment(mapId)) box.replaceWith(commentBox(mapId));
+      else send.disabled = false;
+    };
+    const row = el('div', 'row');
+    row.append(status, send);
+    box.append(label, area, row);
+    return box;
+  }
+
+  // Send the comment typed, if any. False when it couldn't go (the debrief shows why).
+  async function sendComment(mapId) {
+    const text = app.comment.text.trim();
+    if (!text || app.comment.sent) return true;
+    try {
+      await hub.comment(mapId, text);
+      app.comment = { text: '', sent: true, error: '' };
+      return true;
+    } catch (err) {
+      app.comment.error = `Не отправлен: ${err.message}`;
+      const status = document.querySelector('#modal .comment .status');
+      if (status) {
+        status.textContent = app.comment.error;
+        status.className = 'status bad';
+      }
+      return false;
+    }
   }
 
   // The hub page this game came from: its map's page, or the game's page when there is no hub map.
