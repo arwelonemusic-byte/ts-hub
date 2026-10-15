@@ -63,6 +63,9 @@ kbd {
 .brand img { display: block; width: 31px; height: 24px; flex: none; }
 .brand .app { font: 500 16px/20px var(--slab); color: var(--fg); white-space: nowrap; }
 .brand .sep { width: 1px; height: 20px; background: var(--line-strong); flex: none; }
+.brand .home { display: flex; align-items: center; gap: 12px; flex: none; color: inherit; text-decoration: none; }
+.brand .home[href] { cursor: pointer; }
+.brand .home[href]:hover .app { text-decoration: underline; text-underline-offset: 3px; }
 #mission { margin: 0; font: 500 14px/20px var(--sans); color: var(--secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #phases { display: flex; gap: 4px; padding: 4px; background: var(--inset); border-radius: 8px; }
 #phases span {

@@ -1122,6 +1122,23 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
 
   $('helpBtn').onclick = showHelp;
 
+  // The brand leads to the game's page in the hub (user request 2026-10-15); a game under way asks first, as leaving
+  // loses it. Run on its own there is no game page, and the brand stays a title.
+  const underWay = () => !app.replay && !app.state.result && (app.state !== initialState || app.plan.length > 0);
+  if (servedByHub()) {
+    $('home').href = hubHome;
+    $('home').onclick = (e) => {
+      if (!underWay()) return;
+      e.preventDefault();
+      openModal(dialog('Выход', 'Выйти из игры?', [el('p', '', 'Игра ещё не закончена: если выйти сейчас, её прогресс будет потерян.')], [
+        ['Остаться', false, null],
+        ['Выйти', true, () => {
+          location.href = hubHome;
+        }],
+      ]));
+    };
+  }
+
   // ---- dialogs: help, debrief ----
 
   function openModal(dialog) {
