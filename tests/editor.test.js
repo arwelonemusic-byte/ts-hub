@@ -5,7 +5,7 @@ import { parseMap, sideFeature, terrainName } from '../src/sim/map.js';
 import { createState } from '../src/sim/state.js';
 import {
   clone, deployment, drawEdges, edgeKey, edgePath, eraseEdge, fromMapJson, graph, moveObjective, nearestVertex,
-  newModel, paint, problems, randomize, resize, toggleEnemy, toggleParapet, toMapJson,
+  newModel, paint, problems, randomize, resize, toggleEnemy, toggleParapet, toMapJson, upgradeMapJson,
 } from '../src/editor/model.js';
 import { H, balance, loadJson } from './helpers.js';
 
@@ -131,4 +131,18 @@ test('enemy teams toggle, up to four, and the one on the objective moves with it
   assert.ok(!m.enemies.some((e) => e.col === before.col && e.row === before.row));
   m.enemies = [];
   assert.match(problems(m, balance).join(' '), /at least one OPFOR team/);
+});
+
+test('maps saved while there was a turn limit lose it, and the brief the editor wrote loses "within N turns"', () => {
+  const old = toMapJson(newModel(), balance);
+  old.mission = { ...old.mission, turns: 12, brief: 'Take and hold the objective at 5,1 within 12 turns. 2 OPFOR fireteams defend the area.' };
+  const up = upgradeMapJson(old);
+  assert.equal(up.mission.turns, undefined);
+  assert.equal(up.mission.brief, 'Take and hold the objective at 5,1. 2 OPFOR fireteams defend the area.');
+  assert.equal(fromMapJson(old).brief, '', 'opened in the editor, the brief is written again from the map');
+  const own = { ...old, mission: { ...old.mission, brief: 'Hold the farm for 12 turns.' } };
+  assert.equal(upgradeMapJson(own).mission.brief, 'Hold the farm for 12 turns.', 'a brief someone wrote is kept');
+  assert.equal(fromMapJson(own).brief, 'Hold the farm for 12 turns.');
+  const current = toMapJson(newModel(), balance);
+  assert.equal(upgradeMapJson(current), current, 'a current map is left alone');
 });

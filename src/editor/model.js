@@ -346,6 +346,19 @@ export function defaultBrief(m) {
   return `Take and hold the objective at ${o}. ${n === 1 ? 'One OPFOR fireteam defends' : `${n} OPFOR fireteams defend`} the area.`;
 }
 
+// A brief the editor wrote itself (defaultBrief), also as it read while maps
+// had a turn limit ("... at 5,1 within 12 turns. ...").
+const AUTO_BRIEF = /^Take and hold the objective at \d+,\d+(?: within \d+ turns)?\. (?:One OPFOR fireteam defends|\d+ OPFOR fireteams defend) the area\.$/;
+
+// A map saved before the turn limit went: the limit goes, and so does
+// "within N turns" from a brief the editor wrote. A brief someone wrote stays as it is.
+export function upgradeMapJson(json) {
+  if (json?.mission?.turns === undefined) return json;
+  const { turns, ...mission } = json.mission;
+  if (AUTO_BRIEF.test(mission.brief ?? '')) mission.brief = mission.brief.replace(/ within \d+ turns\./, '.');
+  return { ...json, mission };
+}
+
 // What stops the map from being played, in words. Empty: ready.
 export function problems(m, balance) {
   const out = [];
@@ -417,7 +430,8 @@ export function fromMapJson(json) {
   for (const r of json.rows) for (const c of r) terrain.push(legend[c] ?? 'open');
   const m = newModel({ width, height, name: json.name ?? 'Untitled' });
   m.description = json.description ?? '';
-  m.brief = json.mission?.brief ?? '';
+  const brief = json.mission?.brief ?? '';
+  m.brief = AUTO_BRIEF.test(brief) ? '' : brief; // the editor's own brief is written again from the map
   m.terrain = terrain;
   for (const entry of json.hexsides ?? []) {
     const hex = { col: entry.hex[0], row: entry.hex[1] };

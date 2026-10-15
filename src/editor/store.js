@@ -3,6 +3,8 @@
 // a saved map with ?map=local:<id>. Storage can be missing or full (private
 // windows, blocked site data): every call copes and says so by its result.
 
+import { upgradeMapJson } from './model.js';
+
 const LIBRARY = 'fixAndFlank.maps';   // { id: { json, saved } }
 const DRAFT = 'fixAndFlank.draft';    // { model, id, view }
 export const LOCAL = 'local:';        // ?map= prefix for a saved map
@@ -33,7 +35,8 @@ export function listMaps() {
 }
 
 export function loadMap(id) {
-  return (read(LIBRARY) ?? {})[id]?.json ?? null;
+  const json = (read(LIBRARY) ?? {})[id]?.json ?? null;
+  return json && upgradeMapJson(json); // saved by an earlier version
 }
 
 // Saves under id (a new one when missing); returns the id, or null when storage failed.
