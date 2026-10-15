@@ -25,7 +25,7 @@ async function loadMapJson(name, src) {
   }
   if (!name.startsWith(LOCAL)) return loadJson(`data/maps/${encodeURIComponent(name)}.json`);
   const json = loadMap(name.slice(LOCAL.length));
-  if (!json) throw new Error(`Map "${name.slice(LOCAL.length)}" is not saved in this browser`);
+  if (!json) throw new Error(`Карта «${name.slice(LOCAL.length)}» не сохранена в этом браузере`);
   return json;
 }
 
@@ -33,6 +33,7 @@ async function loadMapJson(name, src) {
 function recorderFor(runId) {
   const commits = [];
   return {
+    id: runId,
     commit: (orders) => commits.push(JSON.parse(JSON.stringify(orders))),
     finish: () => runs.finish(runId, commits),
   };
@@ -53,7 +54,7 @@ async function main() {
     const run = await runs.load(params.get('replay'));
     mapJson = await loadJson(hubSrc(run.mapId));
     seed = run.seed;
-    options.replay = { commits: run.commits, at: 0, player: run.player, result: run.result, turns: run.turns, sameRules: run.sameRules };
+    options.replay = { mapId: run.mapId, commits: run.commits, at: 0, player: run.player, result: run.result, turns: run.turns, sameRules: run.sameRules };
   } else {
     mapJson = await loadMapJson(params.get('map') ?? DEFAULT_MAP, src);
     const mapId = src && !params.has('playtest') ? hubIdOf(src) : null;

@@ -257,7 +257,8 @@ kbd {
 .dialog .body { display: flex; flex-direction: column; gap: 14px; padding: 0 24px 20px; font: 400 14px/22px var(--sans); color: var(--body); }
 .dialog .body p { margin: 0; }
 .dialog .body b { color: var(--fg); font-weight: 500; }
-.dialog footer { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--line); }
+.dialog footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--line); }
+.dialog footer .btn { height: 40px; } /* the primary one too: a row of buttons the same height */
 .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .facts div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; background: var(--inset); border-radius: 8px; }
 .facts b { font: 500 18px/24px var(--slab); }

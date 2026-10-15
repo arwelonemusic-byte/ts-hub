@@ -16,7 +16,7 @@ import { canActivate, currentPhase, unitType, unitsAt } from '../sim/state.js';
 import { chooseOrders } from '../ai/basic.js';
 import { COLORS, counterLabel, drawFire, drawHexMarks, drawPath, drawSuspected } from '../render/hexmap.js';
 import { createWorld } from '../render/world3d.js';
-import { servedByHub } from '../hub.js';
+import { hubHome, hubIdOf, hubMapPage, servedByHub } from '../hub.js';
 import { positionAlong } from './anim.js';
 import { createDiceTray } from './dice.js';
 import { assaultFigures, assaultSummary, eventText, fireFigures, fireSummary, phaseLabel, previewAction, rallyPreview, unitName } from './describe.js';
@@ -79,6 +79,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     replay,
     unrecorded,
     runNote: '',       // what the hub said about the finished run, for the debrief
+    runRecorded: false, // the hub took the run: it can be played back («Повтор»)
     finishing: null,   // the run being sent to the hub
   };
   const canvas = $('board');
@@ -349,6 +350,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   function finishRun() {
     app.finishing = app.recorder.finish().then(
       (r) => {
+        app.runRecorded = true;
         if (r.result === 'won') {
           const extra = r.record ? ' Новый рекорд карты!' : r.personalBest ? ' Ваш лучший результат на этой карте.' : '';
           app.runNote = `Засчитано: победа за ${turnsText(r.turns)}.${extra}`;
@@ -360,6 +362,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     ).then(() => {
       const note = document.getElementById('runNote');
       if (note) note.textContent = app.runNote;
+      showReplayButton();
     });
   }
 
@@ -996,8 +999,9 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     t.append(el('div', 'eyebrow', kicker), el('h2', '', title));
     head.append(t);
     const foot = el('footer');
-    for (const [label, primary, fn] of buttons) {
+    for (const [label, primary, fn, id] of buttons) {
       const b = el('button', primary ? 'btn primary' : 'btn', label);
+      if (id) b.id = id;
       if (primary) b.style.minWidth = '0';
       if (fn) b.onclick = fn;
       else b.dataset.close = '';
@@ -1011,6 +1015,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
 
   const facts = (pairs) => {
     const f = el('div', 'facts');
+    f.style.gridTemplateColumns = `repeat(${pairs.length}, minmax(0, 1fr))`;
     for (const [label, value] of pairs) {
       const c = el('div');
       c.append(el('span', 'eyebrow', label), el('b', '', value));
@@ -1030,25 +1035,44 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     const squad = s.units.filter((u) => u.side === PLAYER_SIDE);
     const men = squad.reduce((n, u) => n + u.soldiers.length, 0);
     const full = squad.reduce((n, u) => n + unitType(s.balance, u).roles.length, 0);
-    const reload = (seed) => {
+    const newDice = () => {
       const q = new URLSearchParams(location.search);
-      if (seed !== undefined) q.set('seed', String(seed));
+      q.set('seed', String(1 + Math.floor(Math.random() * 9999)));
       location.search = q.toString();
     };
     const note = app.recorder ? app.runNote || 'Прохождение засчитывается…' : app.unrecorded ? `Не засчитывается: ${app.unrecorded}` : '';
     const body = [
       el('div', `stamp ${won ? 'won' : 'lost'}`, won ? 'Задача выполнена' : 'Задача провалена'),
       el('p', '', `${s.result.why.charAt(0).toUpperCase()}${s.result.why.slice(1)}.`),
-      facts([['Ход', `${s.turn}`], ['Осталось бойцов', `${men} из ${full}`], ['Кубики', `сид ${s.seed ?? new URLSearchParams(location.search).get('seed') ?? 1}`]]),
+      facts([['Ход', `${s.turn}`], ['Осталось бойцов', `${men} из ${full}`]]),
     ];
     if (note) body.push(Object.assign(el('p', 'runNote', note), { id: 'runNote' }));
-    // A recorded run starts again with new dice from the hub (no «Same dice»: picking lucky dice isn't a run).
-    const buttons = app.replay
-      ? [['Посмотреть карту', false, null], ['Смотреть снова', true, () => location.reload()]]
-      : app.recorder
-        ? [['Посмотреть карту', false, null], ['Новая игра', true, () => location.reload()]]
-        : [['Посмотреть карту', false, null], ['Те же кубики', false, () => reload()], ['Новая игра', true, () => reload(1 + Math.floor(Math.random() * 9999))]];
+    // Then (user decisions 2026-10-15): back to the editor after a playtest (or a game run on its own), back to the hub
+    // after a game there (the map's page, where the run shows in «Рейтинг»); «Повтор» of a recorded run once the hub
+    // has it; and again: a recorded run with new dice from the hub, any other game with new dice of its own.
+    const go = (href) => () => {
+      location.href = href;
+    };
+    const buttons = [['Посмотреть карту', false, null], editable ? ['Обратно в редактор', false, go($('editBtn').href)] : ['Обратно в Хаб', false, go(hubBack())]];
+    if (app.recorder) buttons.push(['Повтор', false, go(`?${new URLSearchParams({ replay: app.recorder.id })}`), 'replayBtn']);
+    buttons.push(app.replay ? ['Смотреть снова', true, () => location.reload()] : ['Ещё раз', true, app.recorder ? () => location.reload() : newDice]);
     openModal(dialog(app.replay ? 'Повтор' : 'Итоги', s.map.name, body, buttons));
+    showReplayButton();
+  }
+
+  // The hub page this game came from: its map's page, or the game's page when there is no hub map.
+  function hubBack() {
+    const id = app.replay?.mapId ?? hubIdOf(here.get('src') ?? '');
+    return id ? hubMapPage(id) : hubHome;
+  }
+
+  // «Повтор» waits for the hub to take the run, and goes when it couldn't.
+  function showReplayButton() {
+    const b = document.getElementById('replayBtn');
+    if (!b) return;
+    b.disabled = !app.runRecorded;
+    b.hidden = !!app.runNote && !app.runRecorded;
+    b.title = app.runRecorded ? 'Посмотреть это прохождение с начала' : 'Будет доступен, когда прохождение засчитают';
   }
 
 
