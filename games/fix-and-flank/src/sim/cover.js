@@ -11,6 +11,7 @@
 
 import { key, sidesFacing } from './hex.js';
 import { sideFeature, terrainName, terrainOf } from './map.js';
+import { FEATURE, sideName, terrainIn } from '../text.js';
 
 // { casualtyOn, source: 'terrain' | 'hexside', feature, side, terrain, sides }
 export function coverAgainst(map, balance, targetHex, from) {
@@ -26,7 +27,7 @@ export function coverAgainst(map, balance, targetHex, from) {
   return { ...best, sides, hex: key(targetHex) };
 }
 
-// "behind a parapet (SE side)" / "in woods"
+// «за бруствером (сторона ЮВ)» / «в лесу»
 export function describeCover(c) {
-  return c.source === 'hexside' ? `behind a ${c.feature} (${c.side} side)` : `in ${c.terrain}`;
+  return c.source === 'hexside' ? `${FEATURE[c.feature]?.behind ?? c.feature} (сторона ${sideName(c.side)})` : terrainIn(c.terrain);
 }

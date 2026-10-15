@@ -19,6 +19,7 @@ import { createWorld } from '../render/world3d.js';
 import { positionAlong } from './anim.js';
 import { createDiceTray } from './dice.js';
 import { assaultFigures, assaultSummary, eventText, fireFigures, fireSummary, phaseLabel, previewAction, rallyPreview, unitName } from './describe.js';
+import { agree, count, diceText, FEATURE, menText, ROLE, sideName, statusText, TERRAIN, turnsText, typeName, unitName as shortName } from '../text.js';
 
 const PLAYER_SIDE = 'BLUFOR';
 const CLICK_SLOP_PX = 4;
@@ -38,11 +39,11 @@ const REPLAY_PAUSE_MS = 900; // «Повтор»: pause before the player's next
 const FIT_GAP = 16;          // px between the fitted map and the floating panels
 const HINT_ROOM = 48;        // px kept clear above the action bar for the hint
 const TERRAIN_NOTES = {
-  open: 'Open ground', road: 'Farm track', scrub: 'Scrub and brambles', woods: 'Woodland',
-  rubble: 'Shelled ruin', building: 'Farm buildings', trench: 'Dug-in trench line', water: 'Pond and stream',
+  open: 'Открытая местность', road: 'Полевая дорога', scrub: 'Кустарник и бурьян', woods: 'Лесной массив',
+  rubble: 'Разрушенные постройки', building: 'Хозяйственные постройки', trench: 'Окопы', water: 'Пруд и ручей',
 };
-const MOVE_TEXT = { normal: 'Normal', rough: 'Rough: ends a fast move', impassable: 'Impassable' };
-const COVER = { 4: 'No cover', 5: 'Light cover', 6: 'Hard cover' }; // by the roll a hit needs to become a casualty
+const MOVE_TEXT = { normal: 'Обычное', rough: 'Трудное: прерывает перебежку', impassable: 'Непроходимо' };
+const COVER = { 4: 'Без укрытия', 5: 'Лёгкое укрытие', 6: 'Надёжное укрытие' }; // by the roll a hit needs to become a casualty
 const HOVER = { color: 'rgba(255, 255, 255, 0.9)', width: 2.5 }; // the hovered hex on the ground
 
 const $ = (id) => document.getElementById(id);
@@ -203,10 +204,10 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       const shooter = state.units[e.unit];
       const target = e.target === null ? null : state.units[e.target];
       const known = target && (target.side === PLAYER_SIDE || e.aimed || state.contacts[PLAYER_SIDE]?.[target.id]?.level === 'spotted');
-      const rows = [{ label: `To hit · needs ${e.tn}+`, values: e.dice, need: e.tn }];
-      if (known && e.casualtyRolls.length) rows.push({ label: `Casualties · needs ${e.casualtyOn}+`, values: e.casualtyRolls.map((c) => c.roll), need: e.casualtyOn });
+      const rows = [{ label: `Попадание · нужно ${e.tn}+`, values: e.dice, need: e.tn }];
+      if (known && e.casualtyRolls.length) rows.push({ label: `Потери · нужно ${e.casualtyOn}+`, values: e.casualtyRolls.map((c) => c.roll), need: e.casualtyOn });
       return {
-        title: `${unitName(shooter)} ${e.aimed ? 'fires on' : 'puts suppressive fire on'} ${key(e.hex)}`,
+        title: `${unitName(shooter)} ${e.aimed ? 'ведёт огонь по' : 'ведёт огонь на подавление по'} ${key(e.hex)}`,
         rows, result: fireSummary(state, e, PLAYER_SIDE), rollMs: DICE_ROLL_MS, staggerMs: DICE_STAGGER_MS,
       };
     }
@@ -214,21 +215,21 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       const a = state.units[e.unit];
       const d = state.units[e.defender];
       return {
-        title: `${unitName(a)} assaults ${unitName(d)} at ${key(e.hex)}`,
+        title: `${unitName(a)} штурмует ${unitName(d)} на ${key(e.hex)}`,
         rows: [
-          { label: `${unitName(a)} · needs ${e.attackTn}+`, values: e.attackRolls, need: e.attackTn },
+          { label: `${unitName(a)} · нужно ${e.attackTn}+`, values: e.attackRolls, need: e.attackTn },
           e.defendRolls.length
-            ? { label: `${unitName(d)} · needs ${e.defendTn}+`, values: e.defendRolls, need: e.defendTn }
-            : { label: unitName(d), values: [], note: 'pinned: cannot shoot back' },
+            ? { label: `${unitName(d)} · нужно ${e.defendTn}+`, values: e.defendRolls, need: e.defendTn }
+            : { label: unitName(d), values: [], note: `${statusText(d, 'pinned')}: ответить не может` },
         ],
         result: assaultSummary(state, e), rollMs: DICE_ROLL_MS, staggerMs: 0,
       };
     }
     const u = state.units[e.unit];
     return {
-      title: `${unitName(u)} rallies`,
-      rows: [{ label: `Needs ${e.need}+`, values: [e.roll], need: e.need }],
-      result: e.success ? `Now ${e.to}.` : `Still ${e.from}.`, rollMs: RALLY_ROLL_MS, staggerMs: 0,
+      title: `${unitName(u)}: восстановление`,
+      rows: [{ label: `Нужно ${e.need}+`, values: [e.roll], need: e.need }],
+      result: e.success ? `Теперь ${statusText(u, e.to)}.` : `По-прежнему ${statusText(u, e.from)}.`, rollMs: RALLY_ROLL_MS, staggerMs: 0,
     };
   }
 
@@ -319,7 +320,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     if (!planning()) return;
     const bad = checkPlan(app.state, app.plan).filter((c) => !c.ok);
     if (bad.length) {
-      app.message = `Fix or clear these orders first: ${bad.map((c) => `${unit(c.action.unit).team} (${c.reason})`).join('; ')}.`;
+      app.message = `Сначала исправьте или снимите эти приказы: ${bad.map((c) => `${shortName(unit(c.action.unit))} (${c.reason})`).join('; ')}.`;
       render();
       return;
     }
@@ -336,7 +337,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     if (app.state.result || app.state.activeSide !== PLAYER_SIDE) return;
     const orders = app.replay.commits[app.replay.at++];
     if (!orders) {
-      app.message = 'The recording ends here.';
+      app.message = 'Запись на этом заканчивается.';
       render();
       return;
     }
@@ -348,12 +349,12 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     app.finishing = app.recorder.finish().then(
       (r) => {
         if (r.result === 'won') {
-          const extra = r.record ? ' A new record for this map!' : r.personalBest ? ' Your best on this map so far.' : '';
-          app.runNote = `Recorded: won in ${r.turns} turn${r.turns === 1 ? '' : 's'}.${extra}`;
-        } else app.runNote = 'Recorded as a failed attempt.';
+          const extra = r.record ? ' Новый рекорд карты!' : r.personalBest ? ' Ваш лучший результат на этой карте.' : '';
+          app.runNote = `Засчитано: победа за ${turnsText(r.turns)}.${extra}`;
+        } else app.runNote = 'Засчитано как неудачная попытка.';
       },
       (err) => {
-        app.runNote = `This run wasn't recorded: ${err.message}`;
+        app.runNote = `Прохождение не засчитано: ${err.message}`;
       },
     ).then(() => {
       const note = document.getElementById('runNote');
@@ -393,35 +394,37 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   function orderLine(u) {
     const i = orderIndex(u.id);
     if (!canActivate(app.state, u)) {
-      return rallyPreview(app.state, u) ?? (u.moved ? 'moved: cannot fire this turn' : reloading(u) ? `reloading: cannot fire ${u.fired ? 'next' : 'this'} turn` : '');
+      return rallyPreview(app.state, u) ?? (u.moved ? `${movedWord(u)}: в этот ход не стреляет` : reloading(u) ? `перезарядка: не стреляет ${u.fired ? 'в следующий ход' : 'в этот ход'}` : '');
     }
-    if (i === -1) return firefight() ? 'no order: holds fire' : 'no order: holds';
+    if (i === -1) return firefight() ? 'нет приказа: не стреляет' : 'нет приказа: на месте';
     const check = checkPlan(app.state, app.plan)[i];
-    return check.ok ? `${i + 1}. ${previewAction(projectedFor(u.id), app.plan[i]).replace(new RegExp(`^${u.team} `), '')}` : `${i + 1}. NOT POSSIBLE: ${check.reason}`;
+    return check.ok ? `${i + 1}. ${previewAction(projectedFor(u.id), app.plan[i]).replace(new RegExp(`^${shortName(u)} `), '')}` : `${i + 1}. ${NOT_POSSIBLE}: ${check.reason}`;
   }
 
   // Still reloading on its side's next turn (the HMG after firing). Every unit's
   // reload runs until its side's next turn starts; only one that lasts longer is shown.
   const reloading = (u) => (u.fired ? u.reload > 1 : u.reload > 0);
+  const movedWord = (u) => agree(u, { team: 'двигалась', leader: 'двигался' });
+  const NOT_POSSIBLE = 'НЕВОЗМОЖНО';
   const firefight = () => !(currentPhase(app.state).actions ?? []).includes('move');
 
   function activeText() {
     const s = app.state;
     if (s.result) {
-      return `${s.result.why.charAt(0).toUpperCase()}${s.result.why.slice(1)}. The debrief has a new game.`;
+      return `${s.result.why.charAt(0).toUpperCase()}${s.result.why.slice(1)}. В итогах — новая игра.`;
     }
-    if (!planning()) return app.aiPending || s.activeSide !== PLAYER_SIDE ? 'OPFOR is acting.' : 'Carrying out orders.';
+    if (!planning()) return app.aiPending || s.activeSide !== PLAYER_SIDE ? 'Действует OPFOR.' : 'Приказы выполняются.';
     const total = myUnits().length;
     if (firefight()) {
-      return `${total} unit${total === 1 ? '' : 's'} that did not move can fire. ${app.plan.length} of ${total} have a target; the rest hold fire.`;
+      return `Стрелять могут ${count(total, 'подразделение', 'подразделения', 'подразделений')}, которые не двигались. Цель есть у ${app.plan.length} из ${total}; остальные не стреляют.`;
     }
-    return `Give move orders, then commit. A unit that moves cannot fire this turn. ${app.plan.length} of ${total} have an order; the rest hold.`;
+    return `Отдайте приказы на движение и выполните их. Кто двигался, в этот ход не стреляет. Приказ есть у ${app.plan.length} из ${total}; остальные остаются на месте.`;
   }
 
   function phaseTitle() {
     const s = app.state;
-    if (s.result) return s.result.winner === PLAYER_SIDE ? 'Mission accomplished' : 'Mission failed';
-    if (s.activeSide !== PLAYER_SIDE) return 'Enemy action';
+    if (s.result) return s.result.winner === PLAYER_SIDE ? 'Задача выполнена' : 'Задача провалена';
+    if (s.activeSide !== PLAYER_SIDE) return 'Ход противника';
     return phaseLabel(currentPhase(s).name);
   }
 
@@ -431,7 +434,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     const spans = s.balance.turn.phases.map((p, i) => {
       const el = document.createElement('span');
       el.textContent = phaseLabel(p.name);
-      el.title = `${p.side}${p.automatic ? ', automatic' : ''}`;
+      el.title = `${p.side}${p.automatic ? ', автоматически' : ''}`;
       const cls = [];
       if (p.side !== PLAYER_SIDE) cls.push('enemy');
       if (i < s.phase || s.result) cls.push('done');
@@ -472,7 +475,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     return svg;
   }
 
-  const ROLE_NAMES = { TL: 'TL', AR: 'AR', GRN: 'GR', RFL: 'RFL', SL: 'SL' };
+  const ROLE_NAMES = ROLE; // short role labels (text.js)
 
   function unitCard(s, u) {
     const b = el('button', 'unit');
@@ -481,7 +484,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     b.disabled = !ready;
     if (!ready) b.classList.add('idle');
     const who = el('div');
-    const name = el('div', 'name', u.kind === 'leader' ? 'Squad leader' : u.team);
+    const name = el('div', 'name', u.kind === 'leader' ? 'Командир отделения' : u.team);
     const roles = el('div', 'roles');
     const roster = unitType(s.balance, u).roles;
     for (const r of roster) {
@@ -490,14 +493,15 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       span.append(el('i', alive ? 'on' : ''), document.createTextNode(ROLE_NAMES[r] ?? r));
       roles.append(span);
     }
-    if (u.exposed) roles.append(el('span', 'exposed', 'exposed'));
+    if (u.exposed) roles.append(el('span', 'exposed', 'на виду'));
     who.append(name, roles);
     // Once the mission is over only a lasting state is worth a tag.
     const status = u.status !== 'ok' ? u.status : s.result ? '' : u.moved ? 'moved' : reloading(u) ? 'reloading' : 'ready';
-    const tag = el('span', `chip status ${status}`, status);
+    const label = { moved: movedWord(u), reloading: 'перезарядка', ready: agree(u, { team: 'готова', leader: 'готов' }) }[status] ?? (status ? statusText(u, status) : '');
+    const tag = el('span', `chip status ${status}`, label);
     tag.hidden = !status;
     const order = el('div', 'order', u.status === 'eliminated' || s.result ? '' : orderLine(u));
-    if (order.textContent.includes('NOT POSSIBLE')) order.classList.add('bad');
+    if (order.textContent.includes(NOT_POSSIBLE)) order.classList.add('bad');
     b.append(chip(u), who, tag, order);
     b.onclick = () => select(u.id);
     return b;
@@ -508,8 +512,8 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     $('mission').textContent = s.map.name;
     $('phaseName').textContent = phaseTitle();
     $('phaseKicker').textContent = app.replay && !s.result
-      ? `Replay · ${app.replay.player} · turn ${s.turn}`
-      : s.result ? 'Mission over' : planning() ? `Your orders · turn ${s.turn}` : s.activeSide === PLAYER_SIDE ? 'Carrying out orders' : 'Enemy turn';
+      ? `Повтор · ${app.replay.player} · ход ${s.turn}`
+      : s.result ? 'Задача завершена' : planning() ? `Ваши приказы · ход ${s.turn}` : s.activeSide === PLAYER_SIDE ? 'Приказы выполняются' : 'Ход противника';
     $('phaseCard').className = `panel thin ${s.result ? (s.result.winner === PLAYER_SIDE ? 'won' : 'lost') : ''}`;
     $('active').textContent = activeText();
     renderPhases();
@@ -522,12 +526,12 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     $('hold').disabled = !planning() || !sel || orderIndex(sel.id) === -1;
     $('clear').disabled = !planning() || !app.plan.length;
     $('commit').disabled = !planning() && !s.result;
-    $('commitLabel').textContent = s.result ? 'Debrief' : firefight() ? 'Commit fire' : 'Commit moves';
+    $('commitLabel').textContent = s.result ? 'Итоги' : firefight() ? 'Открыть огонь' : 'Выполнить движение';
     $('view').classList.toggle('on', app.view);
     const contacts = knownEnemies(s, PLAYER_SIDE);
     const sp = contacts.filter((c) => c.level === 'spotted').length;
     $('turn').textContent = `${s.turn}`;
-    $('contacts').textContent = (contacts.length ? `${sp} spotted · ${contacts.length - sp} suspected` : 'No contact') + (app.reveal ? ' · debug: all OPFOR shown' : '');
+    $('contacts').textContent = (contacts.length ? `обнаружено: ${sp} · предполагаемых: ${contacts.length - sp}` : 'Контакта нет') + (app.reveal ? ' · отладка: показан весь OPFOR' : '');
     $('contacts').classList.toggle('hot', contacts.length > 0);
     $('preview').textContent = hint(sel);
     $('message').textContent = app.message;
@@ -567,27 +571,28 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     const show = id !== null && id !== app.selected && app.pointer && !app.pointer.dragging;
     tip.hidden = !show;
     if (!show) return;
-    tip.replaceChildren(el('b', '', unit(id).team), document.createTextNode('click to select'));
+    tip.replaceChildren(el('b', '', shortName(unit(id))), document.createTextNode('нажмите, чтобы выбрать'));
     tip.style.left = `${app.pointer.x + TIP_OFFSET.x}px`;
     tip.style.top = `${app.pointer.y + TIP_OFFSET.y}px`;
   }
 
   function hint(u) {
     if (!planning()) return '';
-    if (!u) return 'Click one of your units (its counter or its soldiers) to select it.';
-    const deselect = ' Right click to deselect.';
+    if (!u) return 'Нажмите на своё подразделение (фишку или бойцов), чтобы выбрать его.';
+    const deselect = ' Правая кнопка снимает выбор.';
+    const chosen = `${agree(u, { team: 'Выбрана', leader: 'Выбран' })} ${shortName(u)}`;
     if (firefight()) {
-      return `${u.team} selected (${fireDiceText(u)}). Point at a hex to see the odds; click to fire. Blue ring: spotted enemy (aimed fire). Red ring, in the next hex: assault. Elsewhere in the shaded area: suppressive fire.${deselect}`;
+      return `${chosen} (${fireDiceText(u)}). Наведите на гекс, чтобы увидеть шансы; нажмите, чтобы открыть огонь. Синее кольцо: обнаруженный противник (прицельный огонь). Красное кольцо в соседнем гексе: штурм. В остальной закрашенной зоне: огонь на подавление.${deselect}`;
     }
-    const lead = u.kind === 'leader' ? ' Teams in his hex rally for sure in the rally phase; further away the roll must beat the distance to him. To join a team, click its hex beside its counter.' : '';
+    const lead = u.kind === 'leader' ? ' Группы в его гексе наверняка придут в себя в фазе восстановления; дальше бросок должен превысить расстояние до него. Чтобы встать к группе, нажмите на её гекс рядом с фишкой.' : '';
     const o = options();
-    const assault = o.assault.length ? ' Red ring: assault the enemy there (point at it for the odds).' : '';
+    const assault = o.assault.length ? ' Красное кольцо: штурм противника (наведите, чтобы увидеть шансы).' : '';
     const type = unitType(app.state.balance, u);
-    const moves = type.fastMove ? 'Click a blue hex to move 1 hex, a yellow hex to fast move 2.' : `Click a blue hex to move 1 hex (the ${type.name} cannot fast move).`;
-    return `${u.team} selected. ${moves}${assault}${lead}${deselect}`;
+    const moves = type.fastMove ? 'Синий гекс — движение на 1 гекс, жёлтый — перебежка на 2.' : `Синий гекс — движение на 1 гекс (${typeName(type.name)} не делает перебежек).`;
+    return `${chosen}. ${moves}${assault}${lead}${deselect}`;
   }
 
-  const fireDiceText = (u) => { const n = fireDice(app.state.balance, u); return `${n} ${n === 1 ? 'die' : 'dice'}`; };
+  const fireDiceText = (u) => diceText(fireDice(app.state.balance, u));
 
   // The hex card, docked bottom right: what the hex under the pointer is,
   // what stands there and, with a unit selected, what an order there would
@@ -601,7 +606,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     const k = h ? [key(h), app.selected, app.plan.length, app.state.turn, app.state.phase, app.playing].join('|') : 'none';
     if (k === cardKey) return;
     cardKey = k;
-    card.replaceChildren(...(h ? hexCard(h) : [el('div', 'eyebrow', 'Hex'), el('p', 'hc-empty', 'Point at a hex to see its ground, its cover and who is there.')]));
+    card.replaceChildren(...(h ? hexCard(h) : [el('div', 'eyebrow', 'Гекс'), el('p', 'hc-empty', 'Наведите на гекс: местность, укрытие и кто там.')]));
   }
 
   function hexCard(h) {
@@ -612,24 +617,24 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     const swatch = el('span', 'hc-swatch');
     swatch.style.background = COLORS.terrain[t];
     const title = el('div', 'hc-title');
-    title.append(el('b', '', t.charAt(0).toUpperCase() + t.slice(1)), el('span', '', `${TERRAIN_NOTES[t] ?? ''} · ${s.balance.map.hexMeters} m hex`));
+    title.append(el('b', '', TERRAIN[t]?.name ?? t), el('span', '', `${TERRAIN_NOTES[t] ?? ''} · гекс ${s.balance.map.hexMeters} м`));
     head.append(swatch, title, el('span', 'hc-coord', key(h)));
 
     const tags = el('div', 'hc-tags');
     const tag = (text, tone = '') => tags.append(el('span', `chip ${tone}`, text));
-    const cover = COVER[info.casualtyOn] ?? `Casualties on ${info.casualtyOn}+`;
+    const cover = COVER[info.casualtyOn] ?? `Потери на ${info.casualtyOn}+`;
     tag(cover, info.casualtyOn >= 6 ? 'good' : info.casualtyOn === 5 ? 'warn' : '');
-    if (info.concealing) tag('Concealing', 'good');
-    if (info.blocksLos) tag('Blocks sight');
-    if (info.move === 'rough') tag('Rough', 'warn');
-    if (info.move === 'impassable') tag('Impassable', 'bad');
+    if (info.concealing) tag('Скрывает', 'good');
+    if (info.blocksLos) tag('Закрывает обзор');
+    if (info.move === 'rough') tag('Трудно пройти', 'warn');
+    if (info.move === 'impassable') tag('Непроходимо', 'bad');
 
     const rows = el('dl', 'hc-rows');
     const row = (label, value) => rows.append(el('dt', '', label), el('dd', '', value));
-    row('Movement', MOVE_TEXT[info.move] ?? info.move);
-    row('Casualties', `on ${info.casualtyOn}+`);
-    row('Concealment', info.concealing ? 'Yes' : 'None');
-    row('Line of sight', info.blocksLos ? 'Blocked' : 'Clear');
+    row('Движение', MOVE_TEXT[info.move] ?? info.move);
+    row('Потери', `на ${info.casualtyOn}+`);
+    row('Скрытность', info.concealing ? 'Да' : 'Нет');
+    row('Обзор', info.blocksLos ? 'Закрыт' : 'Открыт');
     const out = [head, tags, rows];
 
     const sides = Object.entries(s.map.sides[key(h)] ?? {});
@@ -638,7 +643,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       for (const [side, f] of sides) {
         const hs = s.balance.hexsides[f];
         const line = el('div');
-        line.append(el('i', 'side'), el('span', '', `${f.charAt(0).toUpperCase() + f.slice(1)} on the ${side} side: casualties on ${hs.casualtyOn}+ from there${hs.blocksLos ? ', blocks sight' : ''}`));
+        line.append(el('i', 'side'), el('span', '', `${FEATURE[f]?.name ?? f} на стороне ${sideName(side)}: потери на ${hs.casualtyOn}+ с той стороны${hs.blocksLos ? ', закрывает обзор' : ''}`));
         list.append(line);
       }
       out.push(list);
@@ -651,12 +656,12 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       for (const u of here) {
         const line = el('div');
         const men = u.soldiers.length;
-        line.append(el('i', u.side), el('span', '', `${unitName(u)} · ${men} ${men === 1 ? 'man' : 'men'} · ${u.status}${u.moved ? ' · moved' : ''}`));
+        line.append(el('i', u.side), el('span', '', `${unitName(u)} · ${menText(men)} · ${statusText(u)}${u.moved ? ` · ${movedWord(u)}` : ''}`));
         list.append(line);
       }
       if (suspect) {
         const line = el('div');
-        line.append(el('i', 'suspect'), el('span', '', 'Suspected enemy (last known position)'));
+        line.append(el('i', 'suspect'), el('span', '', 'Предполагаемый противник (последняя известная позиция)'));
         list.append(line);
       }
       out.push(list);
@@ -673,9 +678,9 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     const p = projectedFor(order.unit);
     const u = p.units[order.unit];
     const assault = assaultVia(p, order);
-    const kind = order.type === 'fire' ? 'Fire' : order.type === 'fastMove' ? 'Fast move' : assault ? 'Assault' : 'Move';
+    const kind = order.type === 'fire' ? 'Огонь' : order.type === 'fastMove' ? 'Перебежка' : assault ? 'Штурм' : 'Движение';
     const box = el('div', 'hc-order');
-    box.append(el('div', 'eyebrow', `Click: ${kind} · ${unitName(u)}`));
+    box.append(el('div', 'eyebrow', `Нажатие: ${kind} · ${unitName(u)}`));
     const stats = (pairs) => {
       const g = el('div', 'hc-stats');
       for (const [label, value] of pairs) {
@@ -689,16 +694,16 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     const a = assault ? assaultFigures(p, u, h) : null;
     if (f) {
       box.append(
-        el('div', 'hc-what', f.target ? `Aimed fire on ${f.target}` : 'Suppressive fire: no spotted enemy there'),
-        stats([['dice', `${f.dice}`], ['to hit', `${f.tn}+`], ['any hit', f.anyHit], ['to pin', f.pin]]),
-        el('div', 'hc-note', `Target number: ${f.mods}.`),
-        el('div', 'hc-note', `Casualties on ${f.casualtyOn}+ (${f.cover}), expected ${f.expected}.${f.target ? '' : ' Odds for a full team, if one is there.'}`),
+        el('div', 'hc-what', f.target ? `Прицельный огонь по ${f.target}` : 'Огонь на подавление: обнаруженного противника там нет'),
+        stats([['кубики', `${f.dice}`], ['попадание', `${f.tn}+`], ['хоть одно', f.anyHit], ['прижать', f.pin]]),
+        el('div', 'hc-note', `Сложность: ${f.mods}.`),
+        el('div', 'hc-note', `Потери на ${f.casualtyOn}+ (${f.cover}), в среднем ${f.expected}.${f.target ? '' : ' Шансы для полной группы, если она там.'}`),
       );
     } else if (a) {
       box.append(
-        el('div', 'hc-what', `Assault ${a.defender} (${a.status})`),
-        stats([['dice', `${a.dice}`], ['to hit', `${a.tn}+`], ['enemy dice', a.defendDice ? `${a.defendDice} on ${a.defendTn}+` : 'none'], ['take hex', a.take]]),
-        el('div', 'hc-note', `Otherwise ${u.team} falls back pinned.${a.wiped ? ` ${a.wiped} that it is wiped out.` : ''} Expected losses: ${u.team} ${a.losses}, enemy ${a.kills}.`),
+        el('div', 'hc-what', `Штурм: ${a.defender} (${a.status})`),
+        stats([['кубики', `${a.dice}`], ['попадание', `${a.tn}+`], ['кубики врага', a.defendDice ? `${a.defendDice} на ${a.defendTn}+` : 'нет'], ['взять гекс', a.take]]),
+        el('div', 'hc-note', `Иначе ${shortName(u)} откатится, ${statusText(u, 'pinned')}.${a.wiped ? ` ${a.wiped}, что ${agree(u, { team: 'её', leader: 'его' })} уничтожат.` : ''} Ожидаемые потери: ${shortName(u)} ${a.losses}, противник ${a.kills}.`),
       );
     } else {
       box.append(el('div', '', previewAction(p, order)));
@@ -720,7 +725,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       draw(now);
     } catch (err) {
       console.error(err);
-      $('message').textContent = `Display error: ${err.message}`;
+      $('message').textContent = `Ошибка отображения: ${err.message}`;
     }
     requestAnimationFrame(frame);
   }
@@ -885,8 +890,8 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     if (app.selected !== null) {
       const why = firefight() ? validateAction(projectedFor(app.selected), { type: 'fire', unit: app.selected, target: h }).reason : null;
       app.message = firefight()
-        ? `Cannot fire there: ${why}. Right click to deselect.`
-        : 'That hex is out of reach. Blue: move, yellow: fast move. Right click to deselect.';
+        ? `Туда стрелять нельзя: ${why}. Правая кнопка снимает выбор.`
+        : 'До этого гекса не добраться. Синий — движение, жёлтый — перебежка. Правая кнопка снимает выбор.';
       render();
     }
   });
@@ -1019,11 +1024,11 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     if (s.map.description) body.push(el('p', '', s.map.description));
     if (m?.brief) body.push(el('div', 'callout', m.brief));
     body.push(facts([
-      ['Objective', s.map.objective ? s.map.objective.join(',') : 'None'],
-      ['To win', m ? 'Hold it at a turn end' : 'Sandbox: no end'],
-      ['Squad', `${squad.length} units · ${squad.reduce((n, u) => n + u.soldiers.length, 0)} men`],
+      ['Объект', s.map.objective ? s.map.objective.join(',') : 'Нет'],
+      ['Победа', m ? 'Удержать его к концу хода' : 'Полигон: без конца'],
+      ['Отделение', `${count(squad.length, 'подразделение', 'подразделения', 'подразделений')} · ${menText(squad.reduce((n, u) => n + u.soldiers.length, 0))}`],
     ]));
-    openModal(dialog('Mission briefing', s.map.name, body, [['How to play', false, showHelp], ['Begin', true, closeModal]]));
+    openModal(dialog('Брифинг', s.map.name, body, [['Как играть', false, showHelp], ['Начать', true, closeModal]]));
   }
 
   function showHelp() {
@@ -1042,30 +1047,30 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       if (seed !== undefined) q.set('seed', String(seed));
       location.search = q.toString();
     };
-    const note = app.recorder ? app.runNote || 'Recording the run…' : app.unrecorded ? `Not recorded: ${app.unrecorded}` : '';
+    const note = app.recorder ? app.runNote || 'Прохождение засчитывается…' : app.unrecorded ? `Не засчитывается: ${app.unrecorded}` : '';
     const body = [
-      el('div', `stamp ${won ? 'won' : 'lost'}`, won ? 'Mission accomplished' : 'Mission failed'),
+      el('div', `stamp ${won ? 'won' : 'lost'}`, won ? 'Задача выполнена' : 'Задача провалена'),
       el('p', '', `${s.result.why.charAt(0).toUpperCase()}${s.result.why.slice(1)}.`),
-      facts([['Turn', `${s.turn}`], ['Men left', `${men} of ${full}`], ['Dice', `Seed ${s.seed ?? new URLSearchParams(location.search).get('seed') ?? 1}`]]),
+      facts([['Ход', `${s.turn}`], ['Осталось бойцов', `${men} из ${full}`], ['Кубики', `сид ${s.seed ?? new URLSearchParams(location.search).get('seed') ?? 1}`]]),
     ];
     if (note) body.push(Object.assign(el('p', 'runNote', note), { id: 'runNote' }));
     // A recorded run starts again with new dice from the hub (no «Same dice»: picking lucky dice isn't a run).
     const buttons = app.replay
-      ? [['Look at the map', false, null], ['Watch again', true, () => location.reload()]]
+      ? [['Посмотреть карту', false, null], ['Смотреть снова', true, () => location.reload()]]
       : app.recorder
-        ? [['Look at the map', false, null], ['New game', true, () => location.reload()]]
-        : [['Look at the map', false, null], ['Same dice', false, () => reload()], ['New game', true, () => reload(1 + Math.floor(Math.random() * 9999))]];
-    openModal(dialog(app.replay ? 'Replay' : 'Debrief', s.map.name, body, buttons));
+        ? [['Посмотреть карту', false, null], ['Новая игра', true, () => location.reload()]]
+        : [['Посмотреть карту', false, null], ['Те же кубики', false, () => reload()], ['Новая игра', true, () => reload(1 + Math.floor(Math.random() * 9999))]];
+    openModal(dialog(app.replay ? 'Повтор' : 'Итоги', s.map.name, body, buttons));
   }
 
 
   const brief = app.state.map.mission?.brief;
-  const goal = app.state.map.objective ? `Objective hex ${app.state.map.objective.join(',')}` : 'No objective';
+  const goal = app.state.map.objective ? `Объект: гекс ${app.state.map.objective.join(',')}` : 'Объекта нет';
   $('objective').replaceChildren(el('b', '', goal), document.createElement('br'), document.createTextNode(brief ?? ''));
   if (app.replay) {
     const r = app.replay;
-    app.message = `Replay of ${r.player}'s run: ${r.result === 'won' ? `won in ${r.turns} turns` : 'a failed attempt'}.`
-      + (r.sameRules ? '' : ' The game\'s rules have changed since, so it may not play out the same.');
+    app.message = `Повтор прохождения ${r.player}: ${r.result === 'won' ? `победа за ${turnsText(r.turns)}` : 'неудачная попытка'}.`
+      + (r.sameRules ? '' : ' С тех пор правила игры менялись, повтор может пойти иначе.');
   }
   render();
   renderHover();

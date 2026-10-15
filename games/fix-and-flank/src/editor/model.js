@@ -18,6 +18,7 @@
 // }
 
 import { SIDES, corners, distance, hexAt, neighborOn, sidesFacing } from '../sim/hex.js';
+import { count } from '../text.js';
 import { createRng } from '../sim/rng.js';
 
 export const TERRAINS = ['open', 'road', 'scrub', 'woods', 'rubble', 'building', 'trench', 'water'];
@@ -56,7 +57,7 @@ const same = (a, b) => a && b && a.col === b.col && a.row === b.row;
 export const inside = (m, h) => !!h && h.col >= 0 && h.row >= 0 && h.col < m.width && h.row < m.height;
 export const terrainAt = (m, h) => m.terrain[h.row * m.width + h.col];
 
-export function newModel({ name = 'New map' } = {}) {
+export function newModel({ name = 'Новая карта' } = {}) {
   const { width, height } = SIZE;
   const mid = Math.floor(width / 2);
   return {
@@ -484,7 +485,7 @@ export function moveObjective(m, hex) {
 // hold the objective (user decision 2026-10-15).
 export function missionBrief(m) {
   const n = m.enemies.length;
-  return `Take and hold the objective at ${m.objective.col},${m.objective.row}. ${n === 1 ? 'One OPFOR fireteam defends' : `${n} OPFOR fireteams defend`} the area.`;
+  return `Захватить и удержать объект на ${m.objective.col},${m.objective.row}. ${n === 1 ? 'Его обороняет одна группа OPFOR' : `Его обороняют ${count(n, 'группа', 'группы', 'групп')} OPFOR`}.`;
 }
 
 // A brief the editor wrote itself (missionBrief), also as it read while maps
@@ -508,16 +509,16 @@ export function upgradeMapJson(json) {
 // What stops the map from being played, in words. Empty: ready.
 export function problems(m, balance) {
   const out = [];
-  if (!inside(m, m.objective)) out.push('Place the objective.');
-  else if (!passable(m, balance, m.objective)) out.push('The objective is on ground nobody can enter.');
+  if (!inside(m, m.objective)) out.push('Поставьте объект.');
+  else if (!passable(m, balance, m.objective)) out.push('Объект стоит там, куда не пройти.');
   const squad = Object.values(formation(m.start));
-  if (!squad.every((h) => inside(m, h))) out.push('Place the BLUFOR start: the squad does not fit on the map there.');
-  else if (!squad.every((h) => passable(m, balance, h))) out.push('A BLUFOR unit would start on ground nobody can enter.');
-  if (!m.enemies.length) out.push('Place at least one OPFOR team.');
+  if (!squad.every((h) => inside(m, h))) out.push('Поставьте старт BLUFOR: там отделение не помещается на карте.');
+  else if (!squad.every((h) => passable(m, balance, h))) out.push('Подразделение BLUFOR начало бы там, куда не пройти.');
+  if (!m.enemies.length) out.push('Поставьте хотя бы одну группу OPFOR.');
   m.enemies.forEach((e, i) => {
-    if (!passable(m, balance, e)) out.push(`OPFOR ${ENEMY_TEAMS[i]} is on ground nobody can enter.`);
+    if (!passable(m, balance, e)) out.push(`OPFOR ${ENEMY_TEAMS[i]} стоит там, куда не пройти.`);
   });
-  if (squad.some((h) => m.enemies.some((e) => same(e, h)))) out.push('An OPFOR team stands where BLUFOR starts.');
+  if (squad.some((h) => m.enemies.some((e) => same(e, h)))) out.push('Группа OPFOR стоит там, где начинает BLUFOR.');
   return out;
 }
 
@@ -551,7 +552,7 @@ export function toMapJson(m, balance) {
   }
   m.enemies.forEach((e, i) => units.push({ side: 'OPFOR', team: ENEMY_TEAMS[i], pos: [e.col, e.row] }));
   return {
-    name: m.name || 'Untitled',
+    name: m.name || 'Без названия',
     description: m.description,
     mission: { attacker: 'BLUFOR', defender: 'OPFOR', brief: missionBrief(m) },
     width: m.width,
@@ -574,7 +575,7 @@ export function fromMapJson(json) {
   const legend = json.legend ?? LEGEND;
   const terrain = [];
   for (const r of json.rows) for (const c of r) terrain.push(legend[c] ?? 'open');
-  const m = newModel({ name: json.name ?? 'Untitled' });
+  const m = newModel({ name: json.name ?? 'Без названия' });
   m.description = json.description ?? '';
   m.width = json.width;
   m.height = json.height;

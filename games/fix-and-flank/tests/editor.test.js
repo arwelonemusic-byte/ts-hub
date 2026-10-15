@@ -39,11 +39,11 @@ test('the squad starts in its formation: ALPHA and BRAVO side by side, the SL be
   assert.deepEqual(map.units.filter((u) => u.side === 'BLUFOR').map((u) => `${u.team} ${u.pos}`), ['ALPHA 6,12', 'BRAVO 7,12', 'SL 6,13']);
   paint(m, [H(7, 12)], 'water');
   assert.equal(deployment(m, balance), null);
-  assert.match(problems(m, balance).join(' '), /BLUFOR unit would start on ground nobody can enter/);
+  assert.match(problems(m, balance).join(' '), /Подразделение BLUFOR начало бы там, куда не пройти/);
   paint(m, [H(7, 12)], 'open');
   toggleEnemy(m, H(6, 13));
   assert.equal(deployment(m, balance), null);
-  assert.match(problems(m, balance).join(' '), /OPFOR team stands where BLUFOR starts/);
+  assert.match(problems(m, balance).join(' '), /Группа OPFOR стоит там, где начинает BLUFOR/);
 });
 
 test('placing the start: the formation centered nearest the pointer, always on the map', () => {
@@ -185,7 +185,7 @@ test('enemy teams toggle, up to four, and the one on the objective moves with it
   assert.ok(m.enemies.some((e) => e.col === 5 && e.row === 5));
   assert.ok(!m.enemies.some((e) => e.col === before.col && e.row === before.row));
   m.enemies = [];
-  assert.match(problems(m, balance).join(' '), /at least one OPFOR team/);
+  assert.match(problems(m, balance).join(' '), /хотя бы одну группу OPFOR/);
 });
 
 test('maps saved while there was a turn limit lose it, and the brief the editor wrote loses "within N turns"', () => {
@@ -206,10 +206,10 @@ test('maps saved while there was a turn limit lose it, and the brief the editor 
 test('every map from the editor has one mission, take and hold the objective, and always an objective', () => {
   const json = loadJson('data/maps/trenchline.json');
   const out = toMapJson(fromMapJson(json), balance);
-  assert.equal(out.mission.brief, 'Take and hold the objective at 6,3. One OPFOR fireteam defends the area.', 'Trench Line\'s own brief is not kept');
+  assert.equal(out.mission.brief, 'Захватить и удержать объект на 6,3. Его обороняет одна группа OPFOR.', 'Trench Line\'s own brief is not kept');
   assert.deepEqual(out.objective, [6, 3]);
   const m = fromMapJson({ ...json, objective: null });
   assert.deepEqual(m.objective, H(6, 3), 'a map without one gets it under its first OPFOR team');
   m.enemies.push(H(2, 2));
-  assert.equal(toMapJson(m, balance).mission.brief, 'Take and hold the objective at 6,3. 2 OPFOR fireteams defend the area.');
+  assert.equal(toMapJson(m, balance).mission.brief, 'Захватить и удержать объект на 6,3. Его обороняют 2 группы OPFOR.');
 });

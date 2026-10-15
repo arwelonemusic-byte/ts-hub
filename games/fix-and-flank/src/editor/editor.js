@@ -7,6 +7,7 @@
 import { toScreen } from '../render/camera.js';
 import { COLORS, drawHexMarks } from '../render/hexmap.js';
 import { mapStill } from '../render/still.js';
+import { TERRAIN } from '../text.js';
 import { createWorld } from '../render/world3d.js';
 import { center, corners, hexAt, SIDES } from '../sim/hex.js';
 import { parseMap } from '../sim/map.js';
@@ -32,14 +33,14 @@ const HUB_SAVE_DELAY_MS = 1500;             // an open hub draft saves itself th
 const ARROW_PAN_PX = 140;                   // an arrow key pans the view this far
 const ARROWS = { ArrowLeft: [ARROW_PAN_PX, 0], ArrowRight: [-ARROW_PAN_PX, 0], ArrowUp: [0, ARROW_PAN_PX], ArrowDown: [0, -ARROW_PAN_PX] };
 const TOAST_MS = 2600;
-const BUILT_IN = [['trenchline', 'Mission 1: Trench Line']]; // not the training ground: a 12 x 12 sandbox with no mission
+const BUILT_IN = [['trenchline', 'Миссия 1: Trench Line']]; // not the training ground: a 12 x 12 sandbox with no mission
 const TERRAIN_KEYS = '12345678';
 const TOOL_KEYS = { w: 'wall', h: 'hedge', p: 'parapet', x: 'erase', b: 'start', o: 'objective', f: 'enemy' };
 const INK = {
   start: '#5996dc', objective: '#f4db50', enemy: '#e25a55', brush: '#ffffff', label: '#ffffff', under: 'rgba(13, 15, 17, 0.7)',
   wall: '#f3eee2', hedge: '#8fe36b', remove: '#f26f63', parapet: '#e8c77e', corner: 'rgba(255, 255, 255, 0.75)',
 };
-const LABELS = { open: 'Grass', road: 'Road', scrub: 'Scrub', woods: 'Woods', rubble: 'Rubble', building: 'Building', trench: 'Trench', water: 'Water' };
+const LABELS = Object.fromEntries(Object.entries(TERRAIN).map(([k, t]) => [k, t.name])); // the palette's names (text.js)
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => {
@@ -51,7 +52,7 @@ const el = (tag, cls, text) => {
 
 async function loadJson(path) {
   const res = await fetch(path);
-  if (!res.ok) throw new Error(`Failed to load ${path}: ${res.status}`);
+  if (!res.ok) throw new Error(`Не удалось загрузить ${path}: ${res.status}`);
   return res.json();
 }
 
@@ -59,7 +60,7 @@ async function loadJson(path) {
 async function openNamed(name) {
   if (name.startsWith(LOCAL)) {
     const json = loadMap(name.slice(LOCAL.length));
-    if (!json) throw new Error(`Map "${name.slice(LOCAL.length)}" is not saved in this browser`);
+    if (!json) throw new Error(`Карта «${name.slice(LOCAL.length)}» не сохранена в этом браузере`);
     return json;
   }
   return loadJson(`data/maps/${encodeURIComponent(name)}.json`);
@@ -176,9 +177,9 @@ async function main() {
   function renderHubState() {
     if (!ed.hub) return;
     const s = $('hubState');
-    const text = { none: 'Not in the hub yet', saving: 'Saving…', saved: 'Draft saved', unsaved: 'Unsaved changes', error: 'Not saved' }[ed.hubState];
+    const text = { none: 'Ещё не в хабе', saving: 'Сохраняем…', saved: 'Черновик сохранён', unsaved: 'Есть несохранённое', error: 'Не сохранено' }[ed.hubState];
     s.textContent = text;
-    s.title = ed.hubError || (ed.hubId ? 'Only you see your drafts until you publish them.' : 'Save draft keeps it in the hub.');
+    s.title = ed.hubError || (ed.hubId ? 'Черновики видите только вы, пока не опубликуете.' : '«Сохранить черновик» сохранит карту в хабе.');
     s.className = ed.hubState === 'error' ? 'bad' : '';
   }
 
@@ -205,12 +206,12 @@ async function main() {
         else ed.hubId = (await hub.create(body)).id;
         if (ed.model === model) saveDraft({ model: ed.model, id: ed.id, hubId: ed.hubId });
         setHubState(ed.model === model ? 'saved' : 'unsaved');
-        if (!quiet) toast('Draft saved in the hub. Only you see it until you publish it.');
+        if (!quiet) toast('Черновик сохранён в хабе. Пока вы его не опубликуете, его видите только вы.');
         return true;
       } catch (err) {
         if (err.status === 404 || err.status === 409) ed.hubId = null; // deleted or published elsewhere: this is a new map now
         setHubState('error', err.message);
-        if (!quiet) toast(`Could not save the draft: ${err.message}`, true);
+        if (!quiet) toast(`Не удалось сохранить черновик: ${err.message}`, true);
         return false;
       }
     });
@@ -320,26 +321,26 @@ async function main() {
 
   $('mapName').oninput = () => {
     ed.model.name = $('mapName').value;
-    document.title = `${ed.model.name || 'Untitled'} · Map editor · Fix and Flank`;
+    document.title = `${ed.model.name || 'Без названия'} · Редактор карт · Fix and Flank`;
     saveSoon();
   };
 
   $('randomize').onclick = () => {
     edit((m) => randomize(m, 1 + Math.floor(Math.random() * 1e9)));
-    toast('New random map. Ctrl+Z brings the old one back.');
+    toast('Новая случайная карта. Ctrl+Z вернёт прежнюю.');
   };
   $('undo').onclick = undo;
   $('redo').onclick = redo;
 
   const HELP = {
-    terrain: () => `Paint ${LABELS[ed.terrain].toLowerCase()}: click or drag over hexes. Keys 1–8 pick terrain. Right drag or arrows move the view, middle drag or Q/E turns it, wheel zooms.`,
-    wall: () => (ed.chain ? 'Click another corner: the wall runs along the hex edges to it. Right click or Esc to stop. Drawing over a wall takes it off.' : 'Click a hex corner to start a wall.'),
-    hedge: () => (ed.chain ? 'Click another corner: the hedge runs along the hex edges to it. Right click or Esc to stop. Drawing over a hedge takes it off.' : 'Click a hex corner to start a hedge.'),
-    parapet: () => 'Click near a side of a hex: a parapet just inside it, covering that side. Click again to take it off.',
-    erase: () => 'Click or drag over hex edges to clear their walls, hedges and parapets.',
-    start: () => 'Point where the squad should start: ALPHA and BRAVO side by side, the squad leader behind them. Click to place it there.',
-    objective: () => 'Click a hex for the objective. An OPFOR team holding the old one moves with it.',
-    enemy: () => `Click a hex to place an OPFOR fireteam (up to ${ENEMY_TEAMS.length}); click one to remove it.`,
+    terrain: () => `Рисуем: ${TERRAIN[ed.terrain].word}. Нажмите или проведите по гексам. Клавиши 1–8 выбирают местность. Правая кнопка или стрелки двигают вид, средняя кнопка или Q/E поворачивают, колесо — масштаб.`,
+    wall: () => (ed.chain ? 'Нажмите на другой угол: стена пройдёт к нему по краям гексов. Правая кнопка или Esc — закончить. Повторная стена по тем же краям снимает её.' : 'Нажмите на угол гекса, чтобы начать стену.'),
+    hedge: () => (ed.chain ? 'Нажмите на другой угол: изгородь пройдёт к нему по краям гексов. Правая кнопка или Esc — закончить. Повторная изгородь по тем же краям снимает её.' : 'Нажмите на угол гекса, чтобы начать изгородь.'),
+    parapet: () => 'Нажмите у стороны гекса: бруствер встанет внутри гекса и прикроет эту сторону. Ещё одно нажатие снимает его.',
+    erase: () => 'Нажмите или проведите по краям гексов, чтобы убрать стены, изгороди и брустверы.',
+    start: () => 'Наведите туда, где начнёт отделение: ALPHA и BRAVO рядом, командир отделения позади. Нажмите, чтобы поставить.',
+    objective: () => 'Нажмите на гекс объекта. Группа OPFOR, державшая прежний объект, перейдёт вместе с ним.',
+    enemy: () => `Нажмите на гекс, чтобы поставить группу OPFOR (до ${ENEMY_TEAMS.length}); нажатие на группу убирает её.`,
   };
 
   function renderPanel() {
@@ -354,9 +355,9 @@ async function main() {
     const issues = problems(m, balance);
     const check = $('check');
     check.className = issues.length ? 'bad' : 'ready';
-    check.replaceChildren(el('i'), document.createTextNode(issues.length ? `${issues[0]}${issues.length > 1 ? ` (+${issues.length - 1} more)` : ''}` : 'Ready to play'));
+    check.replaceChildren(el('i'), document.createTextNode(issues.length ? `${issues[0]}${issues.length > 1 ? ` (и ещё ${issues.length - 1})` : ''}` : 'Можно играть'));
     check.title = issues.join('\n');
-    document.title = `${m.name || 'Untitled'} · Map editor · Fix and Flank`;
+    document.title = `${m.name || 'Без названия'} · Редактор карт · Fix and Flank`;
   }
 
   // ---- menu, play ----
@@ -382,19 +383,19 @@ async function main() {
     }
     const mine = listMaps();
     const rows = [
-      item('New map', () => replaceModel(newModel())),
-      item('Save to My maps', saveToLibrary, ed.id ? 'saved before' : ''),
+      item('Новая карта', () => replaceModel(newModel())),
+      item('Сохранить в «Мои карты»', saveToLibrary, ed.id ? 'уже сохранялась' : ''),
       el('hr'),
-      el('div', 'eyebrow', 'My maps'),
+      el('div', 'eyebrow', 'Мои карты'),
     ];
-    if (!mine.length) rows.push(el('div', 'empty', 'Nothing saved yet. Play or Save puts the map here.'));
+    if (!mine.length) rows.push(el('div', 'empty', 'Пока ничего нет. «Играть» или «Сохранить» кладут карту сюда.'));
     for (const s of mine) {
       const b = item(s.name, () => replaceModel(fromMapJson(loadMap(s.id)), s.id));
       const del = el('span', 'del', '×');
-      del.title = 'Delete from My maps';
+      del.title = 'Удалить из «Моих карт»';
       del.onclick = (e) => {
         e.stopPropagation();
-        if (!confirm(`Delete "${s.name}" from My maps?`)) return;
+        if (!confirm(`Удалить «${s.name}» из «Моих карт»?`)) return;
         deleteMap(s.id);
         if (ed.id === s.id) ed.id = null;
         openMenu();
@@ -402,9 +403,9 @@ async function main() {
       b.append(del);
       rows.push(b);
     }
-    rows.push(el('hr'), el('div', 'eyebrow', 'Start from a mission'));
+    rows.push(el('hr'), el('div', 'eyebrow', 'Начать с миссии'));
     for (const [file, name] of BUILT_IN) rows.push(item(name, async () => replaceModel(fromMapJson(await loadJson(`data/maps/${file}.json`)))));
-    rows.push(el('hr'), item('Import a map file…', () => $('importFile').click(), '.json'), item('Export this map', exportJson, '.json'));
+    rows.push(el('hr'), item('Загрузить файл карты…', () => $('importFile').click(), '.json'), item('Выгрузить эту карту', exportJson, '.json'));
     menu.replaceChildren(...rows);
     menu.hidden = false;
     $('mapsBtn').setAttribute('aria-expanded', 'true');
@@ -414,25 +415,25 @@ async function main() {
     const drafts = ed.hub.maps.filter((x) => x.status === 'draft');
     const published = ed.hub.maps.filter((x) => x.status === 'published');
     const rows = [
-      item('New map', () => replaceModel(newModel())),
-      item('Save draft', () => saveToHub({ thumb: true }), ed.hubId ? 'in the hub' : 'not yet'),
+      item('Новая карта', () => replaceModel(newModel())),
+      item('Сохранить черновик', () => saveToHub({ thumb: true }), ed.hubId ? 'в хабе' : 'ещё нет'),
       el('hr'),
-      el('div', 'eyebrow', 'My drafts'),
+      el('div', 'eyebrow', 'Мои черновики'),
     ];
-    if (!drafts.length) rows.push(el('div', 'empty', 'No drafts yet. Save draft keeps the map in the hub, for you only.'));
+    if (!drafts.length) rows.push(el('div', 'empty', 'Черновиков пока нет. «Сохранить черновик» сохранит карту в хабе, видимой только вам.'));
     for (const d of drafts) {
       const b = item(d.name, async () => {
         try {
           replaceModel(fromMapJson(await hub.load(d.id)), null, d.id);
         } catch (err) {
-          toast(`Could not open the draft: ${err.message}`, true);
+          toast(`Не удалось открыть черновик: ${err.message}`, true);
         }
-      }, d.id === ed.hubId ? 'open' : '');
+      }, d.id === ed.hubId ? 'открыт' : '');
       const del = el('span', 'del', '×');
-      del.title = 'Delete this draft';
+      del.title = 'Удалить черновик';
       del.onclick = async (e) => {
         e.stopPropagation();
-        if (!confirm(`Delete the draft "${d.name}"? This can't be undone.`)) return;
+        if (!confirm(`Удалить черновик «${d.name}»? Это нельзя отменить.`)) return;
         try {
           await hub.remove(d.id);
           if (ed.hubId === d.id) {
@@ -442,19 +443,19 @@ async function main() {
           await refreshHubMaps();
           openMenu();
         } catch (err) {
-          toast(`Could not delete the draft: ${err.message}`, true);
+          toast(`Не удалось удалить черновик: ${err.message}`, true);
         }
       };
       b.append(del);
       rows.push(b);
     }
     if (published.length) {
-      rows.push(el('hr'), el('div', 'eyebrow', 'Published (locked)'));
-      for (const p of published) rows.push(item(p.name, () => { location.href = hubMapPage(p.id); }, 'its page'));
+      rows.push(el('hr'), el('div', 'eyebrow', 'Опубликованные (не меняются)'));
+      for (const p of published) rows.push(item(p.name, () => { location.href = hubMapPage(p.id); }, 'страница'));
     }
-    rows.push(el('hr'), el('div', 'eyebrow', 'Start from a mission'));
+    rows.push(el('hr'), el('div', 'eyebrow', 'Начать с миссии'));
     for (const [file, name] of BUILT_IN) rows.push(item(name, async () => replaceModel(fromMapJson(await loadJson(`data/maps/${file}.json`)))));
-    rows.push(el('hr'), item('Import a map file…', () => $('importFile').click(), '.json'), item('Export this map', exportJson, '.json'));
+    rows.push(el('hr'), item('Загрузить файл карты…', () => $('importFile').click(), '.json'), item('Выгрузить эту карту', exportJson, '.json'));
     menu.replaceChildren(...rows);
     menu.hidden = false;
     $('mapsBtn').setAttribute('aria-expanded', 'true');
@@ -484,12 +485,12 @@ async function main() {
   function saveToLibrary() {
     const id = saveMap(toMapJson(ed.model, balance), ed.id);
     if (!id) {
-      toast('Could not save: this browser blocks site storage.', true);
+      toast('Не удалось сохранить: этот браузер не даёт сайту хранить данные.', true);
       return null;
     }
     ed.id = id;
     saveDraft({ model: ed.model, id });
-    toast(`Saved "${ed.model.name || 'Untitled'}" to My maps.`);
+    toast(`«${ed.model.name || 'Без названия'}» сохранена в «Мои карты».`);
     return id;
   }
 
@@ -511,9 +512,9 @@ async function main() {
       const json = JSON.parse(await file.text());
       parseMap(json, balance); // a map the game can read, or an error saying why not
       replaceModel(fromMapJson(json));
-      toast(`Imported "${json.name ?? file.name}".`);
+      toast(`Загружена «${json.name ?? file.name}».`);
     } catch (err) {
-      toast(`Not a map file: ${err.message}`, true);
+      toast(`Это не файл карты: ${err.message}`, true);
     }
   };
 
@@ -525,7 +526,7 @@ async function main() {
       return;
     }
     if (!(await saveToHub({ quiet: true, thumb: true }))) {
-      toast(`Could not save the draft: ${ed.hubError}`, true);
+      toast(`Не удалось сохранить черновик: ${ed.hubError}`, true);
       return;
     }
     location.href = `index.html?${new URLSearchParams({ src: hubSrc(ed.hubId), playtest: '1' })}`;
@@ -536,10 +537,10 @@ async function main() {
     const issues = problems(ed.model, balance);
     const name = ed.model.name.trim();
     if (issues.length || !name) {
-      toast(issues.length ? issues.join(' ') : 'Give the map a name first.', true);
+      toast(issues.length ? issues.join(' ') : 'Сначала дайте карте название.', true);
       return;
     }
-    if (!confirm(`Publish "${name}"?\n\nEveryone in the hub can play it then. A published map can't be changed any more, so its runs and records stay comparable.`)) return;
+    if (!confirm(`Опубликовать «${name}»?\n\nКарта станет доступна всем в хабе. Опубликованную карту больше нельзя менять — так прохождения и рекорды остаются сравнимыми.`)) return;
     $('publish').disabled = true;
     try {
       if (!ed.hubId && !(await saveToHub({ quiet: true }))) throw new Error(ed.hubError);
@@ -551,7 +552,7 @@ async function main() {
       saveDraft({ model: newModel(), id: null, hubId: null }); // back in the editor: a new map
       location.href = hubMapPage(id);
     } catch (err) {
-      toast(`Could not publish: ${err.message}`, true);
+      toast(`Не удалось опубликовать: ${err.message}`, true);
       $('publish').disabled = false;
     }
   };
@@ -659,7 +660,7 @@ async function main() {
           const path = edgePath(edgeGraph, ed.chain, h.vertex.key);
           let result = null;
           if (path?.length) edit((mm) => { result = drawEdges(mm, path, ed.tool); });
-          if (result === 'removed') toast(`${ed.tool === 'wall' ? 'Wall' : 'Hedge'} taken off.`);
+          if (result === 'removed') toast(`${ed.tool === 'wall' ? 'Стена снята' : 'Изгородь снята'}.`);
           ed.chain = h.vertex.key;
         }
         renderPanel();
@@ -671,7 +672,7 @@ async function main() {
       case 'start': {
         if (!h.start) return;
         const squad = Object.values(formation(h.start));
-        if (m.enemies.some((e) => squad.some((x) => x.col === e.col && x.row === e.row))) toast('An OPFOR team stands there.', true);
+        if (m.enemies.some((e) => squad.some((x) => x.col === e.col && x.row === e.row))) toast('Там стоит группа OPFOR.', true);
         else edit((mm) => { mm.start = { ...h.start }; });
         return;
       }
@@ -682,7 +683,7 @@ async function main() {
         if (!h.hex) return;
         let r = null;
         edit((mm) => { r = toggleEnemy(mm, h.hex); });
-        if (r === 'full') toast(`Up to ${ENEMY_TEAMS.length} OPFOR teams.`, true);
+        if (r === 'full') toast(`Не больше ${ENEMY_TEAMS.length} групп OPFOR.`, true);
         return;
       }
       default:
@@ -931,7 +932,7 @@ async function main() {
       world.render(now, { counters, rosterOf, bangs: [], shots: [], sig: marksSig(), paint: paintMarks });
     } catch (err) {
       console.error(err);
-      $('status').textContent = `Display error: ${err.message}`;
+      $('status').textContent = `Ошибка отображения: ${err.message}`;
     }
     requestAnimationFrame(frame);
   }
@@ -942,14 +943,14 @@ async function main() {
     $('play').hidden = true;
     const brand = document.querySelector('.brand');
     brand.classList.add('home');
-    brand.title = 'Fix & Flank in the hub';
+    brand.title = 'Fix & Flank в хабе';
     brand.onclick = () => {
       location.href = hubHome;
     };
     renderHubState();
     if (ed.hubState === 'unsaved') saveToHub({ quiet: true });
   } else if (hubLink?.error) {
-    toast(`Maps stay in this browser: ${hubLink.error}`, true);
+    toast(`Карты хранятся в этом браузере: ${hubLink.error}`, true);
   }
 
   renderPanel();
@@ -960,5 +961,5 @@ async function main() {
 
 main().catch((err) => {
   console.error(err);
-  document.getElementById('status').textContent = `Error: ${err.message}`;
+  document.getElementById('status').textContent = `Ошибка: ${err.message}`;
 });

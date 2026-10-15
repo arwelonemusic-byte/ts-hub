@@ -61,7 +61,7 @@ function hexPath(ctx, cam, h, inset = 0) {
   ctx.closePath();
 }
 
-// The objective: a dashed outline inside its hex, labelled OBJ.
+// The objective: a dashed outline inside its hex, labelled «ОБЪ» (объект).
 export function drawObjective(ctx, cam, objective, color = COLORS.objective) {
   const c = toScreen(cam, center(objective).x, center(objective).y);
   ctx.strokeStyle = color;
@@ -74,7 +74,7 @@ export function drawObjective(ctx, cam, objective, color = COLORS.objective) {
   ctx.font = `700 ${Math.round(cam.scale * 0.34)}px ${FONT}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText('OBJ', c.x, c.y - cam.scale * 0.6);
+  ctx.fillText('ОБЪ', c.x, c.y - cam.scale * 0.6);
 }
 
 // Suspected contacts: a dashed red outline with a question mark, at hex centers.
@@ -181,7 +181,7 @@ export function drawFire(ctx, cam, from, to, color, alpha = 1, tag = null) {
 
 // The label next to a counter: the team's letter, or the leader's name (SL).
 export function counterLabel(unit) {
-  return unit.kind === 'leader' ? unit.team : unit.team.charAt(0);
+  return unit.kind === 'leader' ? 'КО' : unit.team.charAt(0); // the SL is «КО», a team its call sign's letter
 }
 
 // A bang: a starburst on a hex that is fired on, popping in and fading.

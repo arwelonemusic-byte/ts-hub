@@ -19,6 +19,7 @@ import { distance, same } from './hex.js';
 import { lineOfSight } from './los.js';
 import { inBounds } from './map.js';
 import { isSuppressed, unitType, unitsAt } from './state.js';
+import { hexes, unitName } from '../text.js';
 
 export function fireDice(balance, unit) {
   return unit.soldiers.reduce((n, role) => n + (balance.fire.diceByRole[role] ?? 1), 0);
@@ -39,16 +40,16 @@ export function rangeMod(balance, range, shooter = { kind: 'team', type: null })
 export function fireSolution(state, shooter, hex, opts = {}) {
   const { balance, map } = state;
   const f = balance.fire;
-  if (!hex || !inBounds(map, hex)) return { ok: false, reason: 'off the map' };
-  if (same(shooter.pos, hex)) return { ok: false, reason: 'cannot fire at its own hex' };
+  if (!hex || !inBounds(map, hex)) return { ok: false, reason: 'за краем карты' };
+  if (same(shooter.pos, hex)) return { ok: false, reason: 'нельзя стрелять по своему гексу' };
   const range = distance(shooter.pos, hex);
   const rmod = rangeMod(balance, range, shooter);
   const maxRange = unitType(balance, shooter).maxRangeHexes;
-  if (range > maxRange || rmod === null) return { ok: false, reason: `out of range (${maxRange} hexes)` };
+  if (range > maxRange || rmod === null) return { ok: false, reason: `слишком далеко (дальность ${hexes(maxRange)})` };
   const los = lineOfSight(map, balance, shooter.pos, hex);
-  if (!los.clear) return { ok: false, reason: `no line of sight (${los.reason})` };
+  if (!los.clear) return { ok: false, reason: `не видно (${los.reason})` };
   const here = unitsAt(state, hex);
-  if (here.some((u) => u.side === shooter.side)) return { ok: false, reason: 'friendly unit in that hex' };
+  if (here.some((u) => u.side === shooter.side)) return { ok: false, reason: 'там свои' };
   const enemies = here.filter((u) => u.side !== shooter.side);
   const target = enemies.find((u) => u.kind === 'team') ?? enemies[0] ?? null;
   const contacts = state.contacts?.[shooter.side] ?? {};
@@ -56,13 +57,13 @@ export function fireSolution(state, shooter, hex, opts = {}) {
 
   const cover = coverAgainst(map, balance, hex, shooter.pos);
   const mods = [];
-  if (rmod) mods.push({ why: `range ${range} hexes`, mod: rmod });
+  if (rmod) mods.push({ why: `дальность ${hexes(range)}`, mod: rmod });
   const cmod = f.coverMod[String(cover.casualtyOn)] ?? 0;
   if (cmod) mods.push({ why: describeCover(cover), mod: cmod });
-  if (aimed && target.exposed) mods.push({ why: 'target exposed', mod: f.exposedMod });
-  if (isSuppressed(shooter)) mods.push({ why: 'shooter suppressed', mod: f.suppressedShooterMod });
-  if (!aimed) mods.push({ why: 'no spotted enemy: suppressive fire', mod: f.blindMod });
-  if (opts.split && f.splitMod) mods.push({ why: 'split fire', mod: f.splitMod });
+  if (aimed && target.exposed) mods.push({ why: 'цель на виду', mod: f.exposedMod });
+  if (isSuppressed(shooter)) mods.push({ why: 'стрелки подавлены', mod: f.suppressedShooterMod });
+  if (!aimed) mods.push({ why: 'противник не обнаружен: огонь на подавление', mod: f.blindMod });
+  if (opts.split && f.splitMod) mods.push({ why: 'огонь разделён', mod: f.splitMod });
   const rawTn = mods.reduce((t, m) => t + m.mod, f.baseTn);
   const tn = Math.min(f.maxTn, Math.max(f.minTn, rawTn));
   return { ok: true, hex: { ...hex }, range, dice: opts.dice ?? fireDice(balance, shooter), tn, rawTn, mods, cover, aimed, target: target?.id ?? null };
@@ -74,12 +75,12 @@ export function fireSolution(state, shooter, hex, opts = {}) {
 // target gets the larger half.
 // Returns { ok, reason } or { ok: true, dice: [first, second] }.
 export function splitFire(state, shooter, first, second) {
-  if (!(state.balance.fire.splitSides ?? []).includes(shooter.side)) return { ok: false, reason: `${shooter.side} cannot split its fire` };
+  if (!(state.balance.fire.splitSides ?? []).includes(shooter.side)) return { ok: false, reason: `${shooter.side} не делит огонь` };
   const enemyNext = state.units.some((u) => u.side !== shooter.side && u.status !== 'eliminated' && distance(u.pos, shooter.pos) === 1);
-  if (enemyNext) return { ok: false, reason: `${shooter.team} has an enemy next to it and cannot split its fire` };
-  if (same(first, second)) return { ok: false, reason: 'split fire needs two different hexes' };
+  if (enemyNext) return { ok: false, reason: `${unitName(shooter)}: противник рядом, огонь не разделить` };
+  if (same(first, second)) return { ok: false, reason: 'для разделения огня нужны два разных гекса' };
   const n = fireDice(state.balance, shooter);
-  if (n < 2) return { ok: false, reason: `${shooter.team} has too few dice to split` };
+  if (n < 2) return { ok: false, reason: `${unitName(shooter)}: слишком мало кубиков, чтобы делить огонь` };
   return { ok: true, dice: [Math.ceil(n / 2), Math.floor(n / 2)] };
 }
 

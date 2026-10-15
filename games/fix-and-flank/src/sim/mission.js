@@ -12,6 +12,7 @@
 
 import { same } from './hex.js';
 import { isActive } from './state.js';
+import { turnsText } from '../text.js';
 
 const teams = (state, side) => state.units.filter((u) => u.side === side && u.kind === 'team' && isActive(u));
 
@@ -19,8 +20,8 @@ const teams = (state, side) => state.units.filter((u) => u.side === side && u.ki
 export function eliminationResult(state) {
   const m = state.map.mission;
   if (!m) return null;
-  if (!teams(state, m.defender).length) return { winner: m.attacker, why: `all ${m.defender} fireteams eliminated` };
-  if (!teams(state, m.attacker).length) return { winner: m.defender, why: `all ${m.attacker} fireteams eliminated` };
+  if (!teams(state, m.defender).length) return { winner: m.attacker, why: `все группы ${m.defender} уничтожены` };
+  if (!teams(state, m.attacker).length) return { winner: m.defender, why: `все группы ${m.attacker} уничтожены` };
   return null;
 }
 
@@ -31,11 +32,11 @@ export function turnEndResult(state) {
   if (!m) return null;
   const obj = { col: state.map.objective[0], row: state.map.objective[1] };
   const holder = teams(state, m.attacker).find((u) => same(u.pos, obj));
-  if (holder) return { winner: m.attacker, why: `${m.attacker} ${holder.team} holds the objective` };
+  if (holder) return { winner: m.attacker, why: `${m.attacker} ${holder.team} удерживает объект` };
   state.stalledTurns = state.attackerCouldAct ? 0 : state.stalledTurns + 1;
   state.attackerCouldAct = false;
   const n = state.balance.turn.stalemateTurns;
-  if (state.stalledTurns >= n) return { winner: m.defender, why: `${m.attacker}'s attack stalled: no unit could act for ${n} turns` };
+  if (state.stalledTurns >= n) return { winner: m.defender, why: `атака ${m.attacker} захлебнулась: никто не мог действовать ${turnsText(n)} подряд` };
   return null;
 }
 

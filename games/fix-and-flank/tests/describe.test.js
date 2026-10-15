@@ -4,6 +4,7 @@ import { applyAction } from '../src/sim/actions.js';
 import { createRng } from '../src/sim/rng.js';
 import { commitOrders } from '../src/sim/orders.js';
 import { eventText, passText, previewAction, rallyPreview } from '../src/ui/describe.js';
+import { hitsText } from '../src/text.js';
 import { H, makeState, open, toPhase, unit } from './helpers.js';
 
 function squad() {
@@ -14,20 +15,20 @@ function squad() {
 
 test('previews say what will happen, with the odds for dice', () => {
   const s = squad();
-  assert.match(previewAction(s, { type: 'move', unit: 1, to: H(3, 4) }), /ALPHA moves 1 hex to 3,4 \(open\)/);
-  assert.match(previewAction(s, { type: 'fastMove', unit: 1, path: [H(3, 4), H(3, 3)] }), /fast moves 2 hexes .* Exposed until its next turn/);
-  assert.equal(previewAction(s, { type: 'pass', unit: 1 }), 'ALPHA holds.');
+  assert.match(previewAction(s, { type: 'move', unit: 1, to: H(3, 4) }), /ALPHA выдвигается на 1 гекс: 3,4 \(поле\)/);
+  assert.match(previewAction(s, { type: 'fastMove', unit: 1, path: [H(3, 4), H(3, 3)] }), /перебежку на 2 гекса: .* До своего следующего хода на виду/);
+  assert.equal(previewAction(s, { type: 'pass', unit: 1 }), 'ALPHA остаётся на месте.');
   s.units[1].status = 'pinned';
-  assert.match(previewAction(s, { type: 'move', unit: 1, to: H(3, 4) }), /cannot do that, ALPHA is pinned and cannot move/);
+  assert.match(previewAction(s, { type: 'move', unit: 1, to: H(3, 4) }), /так нельзя — ALPHA прижата и не может двигаться/);
 });
 
 test('the rally phase is previewed with its odds', () => {
   const s = squad();
   s.units[1].status = 'pinned';
   s.units[1].pos = H(3, 4); // 2 hexes from the SL
-  assert.equal(rallyPreview(s, s.units[1]), 'Rally phase: ALPHA needs 3+ on a d6 to become suppressed, 4 in 6 (67%; SL 2 hexes away).');
+  assert.equal(rallyPreview(s, s.units[1]), 'Восстановление: ALPHA нужно 3+ на кубике, чтобы стать «подавлена»: 4 из 6 (67%; КО в 2 гексах).');
   s.units[1].pos = H(3, 6);
-  assert.match(rallyPreview(s, s.units[1]), /rallies to suppressed \(SL is with it\)/);
+  assert.match(rallyPreview(s, s.units[1]), /ALPHA — «подавлена», без броска \(КО рядом\)/);
   assert.equal(rallyPreview(s, s.units[0]), null, 'not suppressed');
 });
 
@@ -36,11 +37,11 @@ test('log lines report the dice and the phases', () => {
   s.units[1].status = 'pinned';
   const r = commitOrders(toPhase(s, 'firefight'), [], createRng(4));
   const e = r.events.find((x) => x.type === 'rally');
-  assert.match(eventText(r.state, e), new RegExp(`ALPHA rolls ${e.roll} to rally \\(needs 2\\+, SL 1 hex away\\)`));
+  assert.match(eventText(r.state, e), new RegExp(`ALPHA: бросок ${e.roll} на восстановление \\(нужно 2\\+, КО в 1 гексе\\)`));
   const lines = r.events.map((x) => passText(s, x, 'BLUFOR') ?? eventText(r.state, x, 'BLUFOR')).filter(Boolean);
-  assert.ok(lines.includes('BLUFOR SL holds fire.'), lines.join(' | '));
-  assert.ok(lines.includes('Rally phase (BLUFOR).'));
-  assert.ok(lines.includes('Enemy action phase (OPFOR).'));
+  assert.ok(lines.includes('BLUFOR КО не стреляет.'), lines.join(' | '));
+  assert.ok(lines.includes('Фаза «Восстановление» (BLUFOR).'));
+  assert.ok(lines.includes('Фаза «Ход противника» (OPFOR).'));
 });
 
 
@@ -53,16 +54,16 @@ test('the log only tells BLUFOR what it knows', () => {
   const r = applyAction(s, { type: 'move', unit: 1, to: H(4, 0) }, createRng(1));
   for (const e of r.events) {
     const line = eventText(r.state, e, 'BLUFOR') ?? '';
-    assert.ok(!/OPFOR ALPHA moves/.test(line), line);
+    assert.ok(!/OPFOR ALPHA выдвигается/.test(line), line);
   }
   assert.equal(passText(s, { type: 'activated', action: 'pass', unit: 1 }, 'BLUFOR'), null);
 });
 
 test('the move preview warns when the destination is in view of a known enemy', () => {
   const s = makeState(open(8, 6), [unit('BLUFOR', 'ALPHA', 3, 5), unit('OPFOR', 'ALPHA', 3, 0)]);
-  assert.match(previewAction(s, { type: 'move', unit: 0, to: H(3, 4) }), /Ends in view of enemy at 3,0: will be seen/);
+  assert.match(previewAction(s, { type: 'move', unit: 0, to: H(3, 4) }), /Будет на виду \(противник на 3,0\): заметят/);
   const hidden = makeState(['........', '........', '........', '...:....', '........', '........'], [unit('BLUFOR', 'ALPHA', 3, 4), unit('OPFOR', 'ALPHA', 3, 0)]);
-  assert.match(previewAction(hidden, { type: 'move', unit: 0, to: H(3, 3) }), /concealed: seen only if one is adjacent/);
+  assert.match(previewAction(hidden, { type: 'move', unit: 0, to: H(3, 3) }), /но в укрытии: заметят, только если противник рядом/);
 });
 
 // ---- fire ----
@@ -73,13 +74,13 @@ const PARAPETS = [{ hex: [3, 2], sides: ['SW', 'SE'], feature: 'parapet' }];
 test('the fire preview gives dice, TN with its reasons, and the exact odds', () => {
   const s = toPhase(makeState(open(8, 6), [unit('BLUFOR', 'ALPHA', 3, 5), unit('OPFOR', 'ALPHA', 3, 1)]), 'firefight');
   const line = previewAction(s, { type: 'fire', unit: 0, target: H(3, 1) });
-  assert.equal(line, 'ALPHA fires on OPFOR ALPHA at 3,1 (open): 5 dice, hit on 5+ (4 base, +1 range 4 hexes). 87% at least one hit, 54% to pin. Casualties on 4+ (open), expected 0.83.');
+  assert.equal(line, 'ALPHA ведёт огонь по OPFOR ALPHA на 3,1 (поле): 5 кубиков, попадание на 5+ (4 база, +1 дальность 4 гекса). 87% — хотя бы одно попадание, 54% — прижать. Потери на 4+ (поле), в среднем 0.83.');
 });
 
 test('suppressive fire preview names nobody', () => {
   const s = toPhase(makeState(TRENCH, [unit('BLUFOR', 'ALPHA', 3, 5), unit('OPFOR', 'ALPHA', 3, 2)], 1, PARAPETS), 'firefight');
   const line = previewAction(s, { type: 'fire', unit: 0, target: H(3, 2) });
-  assert.match(line, /^ALPHA puts suppressive fire on 3,2 \(trench\), no spotted enemy there: 5 dice, hit on 6\+/);
+  assert.match(line, /^ALPHA ведёт огонь на подавление по 3,2 \(окоп\), обнаруженного противника там нет: 5 кубиков, попадание на 6\+/);
   assert.ok(!/OPFOR/.test(line));
 });
 
@@ -91,8 +92,8 @@ test('the log shows the dice, and the effect only on a target the player can see
     const e = r.events.find((x) => x.type === 'fire');
     if (!e.hits) continue;
     const line = eventText(r.state, e, 'BLUFOR');
-    assert.match(line, new RegExp(`^BLUFOR ALPHA puts suppressive fire on 3,2: needs 6\\+, rolled ${e.dice.join(' ')}: ${e.hits} hits?\\. No visible effect\\.$`));
-    assert.match(eventText(r.state, e, 'OPFOR'), /OPFOR ALPHA (suppressed|pinned)/, 'OPFOR knows it was hit');
+    assert.match(line, new RegExp(`^BLUFOR ALPHA ведёт огонь на подавление по 3,2: нужно 6\\+, выпало ${e.dice.join(' ')}: ${hitsText(e.hits)}\\. Видимого эффекта нет\\.$`));
+    assert.match(eventText(r.state, e, 'OPFOR'), /OPFOR ALPHA: (подавлена|прижата)/, 'OPFOR knows it was hit');
     checked++;
   }
   assert.equal(checked, 3);
@@ -100,13 +101,13 @@ test('the log shows the dice, and the effect only on a target the player can see
 
 test('whether the enemy can act in its phase is not shown to the player', () => {
   const e = { type: 'phase_start', name: 'enemy action', side: 'OPFOR', idle: true };
-  assert.equal(eventText(null, e, 'BLUFOR'), 'Enemy action phase (OPFOR).');
-  assert.equal(eventText(null, { ...e, side: 'BLUFOR', name: 'firefight' }, 'BLUFOR'), 'Firefight phase (BLUFOR): nobody can act.');
+  assert.equal(eventText(null, e, 'BLUFOR'), 'Фаза «Ход противника» (OPFOR).');
+  assert.equal(eventText(null, { ...e, side: 'BLUFOR', name: 'firefight' }, 'BLUFOR'), 'Фаза «Огонь» (BLUFOR): действовать некому.');
 });
 
 test('the split fire preview gives both halves with their own dice and odds', () => {
   const s = toPhase(makeState(open(8, 6), [unit('OPFOR', 'ALPHA', 3, 1), unit('BLUFOR', 'ALPHA', 3, 5), unit('BLUFOR', 'BRAVO', 6, 2)]), 'enemy action');
   const line = previewAction(s, { type: 'fire', unit: 0, target: H(3, 5), second: H(6, 2) });
-  assert.match(line, /^Split fire\. ALPHA fires on BLUFOR ALPHA at 3,5 \(open\): 3 dice, hit on 5\+/);
-  assert.match(line, /And fires on BLUFOR BRAVO at 6,2 \(open\): 2 dice/);
+  assert.match(line, /^Огонь разделён\. ALPHA ведёт огонь по BLUFOR ALPHA на 3,5 \(поле\): 3 кубика, попадание на 5\+/);
+  assert.match(line, /И ведёт огонь по BLUFOR BRAVO на 6,2 \(поле\): 2 кубика/);
 });

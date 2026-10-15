@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Map editor · Fix and Flank</title>
+  <title>Редактор карт · Fix and Flank</title>
   <link rel="icon" href="assets/icons/ts-mark.svg">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
   <link rel="stylesheet" href="assets/ui.css">
@@ -11,11 +11,14 @@
     /* Editor-only parts; the rest is assets/ui.css, shared with the game. */
     .brand .where { font: 500 14px/20px var(--sans); color: var(--secondary); white-space: nowrap; }
     #mapName {
-      width: min(380px, 34vw); height: 36px; padding: 0 12px; text-align: center;
+      width: min(320px, 22vw); height: 36px; padding: 0 12px; text-align: center;
       background: var(--inset); border: 1px solid var(--line); border-radius: 8px; color: var(--fg); font: 500 15px/20px var(--slab);
     }
     #mapName:focus { outline: none; border-color: var(--accent); }
     .bar .btn { height: 36px; }
+    /* The editor's bar: the right side takes what its buttons need (the hub's Russian labels are long), the name the rest. */
+    @media (min-width: 1101px) { .bar { grid-template-columns: auto minmax(0, 1fr) auto; } #mapName { justify-self: center; max-width: 100%; } }
+    .bar .right > * { flex: none; }
     .bar .btn.primary { min-width: 0; height: 36px; padding: 0 16px; font-size: 14px; }
 
     #tools {
@@ -77,65 +80,65 @@
       <img src="assets/icons/ts-mark.svg" alt="">
       <span class="app">Fix and Flank</span>
       <span class="sep"></span>
-      <span class="where">Map editor</span>
+      <span class="where">Редактор карт</span>
     </div>
-    <input id="mapName" maxlength="40" spellcheck="false" aria-label="Map name">
+    <input id="mapName" maxlength="40" spellcheck="false" aria-label="Название карты">
     <div class="right">
-      <button class="iconbtn" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
-      <button class="iconbtn" id="redo" title="Redo (Ctrl+Y)" aria-label="Redo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+      <button class="iconbtn" id="undo" title="Отменить (Ctrl+Z)" aria-label="Отменить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+      <button class="iconbtn" id="redo" title="Вернуть (Ctrl+Y)" aria-label="Вернуть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
       <div class="menuwrap">
-        <button class="btn" id="mapsBtn" aria-haspopup="true" aria-expanded="false">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        <button class="btn" id="mapsBtn" aria-haspopup="true" aria-expanded="false">Карты <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="menu thin" id="mapsMenu" hidden></div>
       </div>
       <!-- Served by the TS Hub: drafts are kept there and published from there (src/editor/hub.js). -->
       <span id="hubState" hidden></span>
-      <button class="btn" id="saveDraft" title="Keep this map as a draft in the hub (Ctrl+S). Only you see it until you publish it." hidden>Save draft</button>
-      <button class="btn" id="playtest" title="Play this draft yourself. Playtests aren't recorded." hidden><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>Playtest</button>
-      <button class="btn primary" id="publish" title="Put the map in the hub for everyone to play. A published map can't be changed any more." hidden>Publish</button>
-      <button class="btn primary" id="play" title="Play this map (saves it to My maps)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>Play</button>
+      <button class="btn" id="saveDraft" title="Сохранить карту черновиком в хабе (Ctrl+S). Пока вы её не опубликуете, её видите только вы." hidden>Сохранить</button>
+      <button class="btn" id="playtest" title="Сыграть черновик самому. Тестовые игры не засчитываются." hidden><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>Тест</button>
+      <button class="btn primary" id="publish" title="Выложить карту в хаб для всех. Опубликованную карту больше нельзя менять." hidden>Опубликовать</button>
+      <button class="btn primary" id="play" title="Сыграть эту карту (сохраняет её в «Мои карты»)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>Играть</button>
     </div>
   </header>
 
   <main class="stage" id="stage">
-    <canvas id="board" aria-label="Map"></canvas>
+    <canvas id="board" aria-label="Карта"></canvas>
 
     <aside class="panel thin" id="tools">
       <section>
-        <div class="eyebrow">Map</div>
-        <button class="btn block" id="randomize" title="A whole new random map (R): terrain, hedges and walls, the BLUFOR start and an OPFOR team on the objective. Everything on the map now goes; Ctrl+Z brings it back."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>Randomize</button>
+        <div class="eyebrow">Карта</div>
+        <button class="btn block" id="randomize" title="Совсем новая случайная карта (R): местность, изгороди и стены, старт BLUFOR и группа OPFOR на объекте. Всё, что есть на карте сейчас, пропадёт; Ctrl+Z вернёт."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>Случайная карта</button>
       </section>
 
       <section>
-        <div class="eyebrow">Terrain</div>
+        <div class="eyebrow">Местность</div>
         <div class="palette" id="palette"></div>
       </section>
 
       <section>
-        <div class="eyebrow">Hexsides</div>
+        <div class="eyebrow">Стороны гексов</div>
         <div class="row2" id="sideTools">
-          <button class="tool" data-tool="wall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7h18v12H3zM3 13h18M9 7v6M15 7v6M12 13v6M6 13v6M18 13v6"/></svg>Wall<kbd>W</kbd></button>
-          <button class="tool" data-tool="hedge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 18a4 4 0 0 1 3-6.5 4.5 4.5 0 0 1 8.5-1.5 4 4 0 0 1 6.5 3.5V18z"/></svg>Hedge<kbd>H</kbd></button>
-          <button class="tool" data-tool="parapet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="13" width="8" height="5" rx="2"/><rect x="13" y="13" width="8" height="5" rx="2"/><rect x="8" y="7" width="8" height="5" rx="2"/></svg>Parapet<kbd>P</kbd></button>
-          <button class="tool" data-tool="erase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4-4 11-11 7 7-8 8z"/><path d="M7 21h14M9 11l7 7"/></svg>Erase<kbd>X</kbd></button>
+          <button class="tool" data-tool="wall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7h18v12H3zM3 13h18M9 7v6M15 7v6M12 13v6M6 13v6M18 13v6"/></svg>Стена<kbd>W</kbd></button>
+          <button class="tool" data-tool="hedge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 18a4 4 0 0 1 3-6.5 4.5 4.5 0 0 1 8.5-1.5 4 4 0 0 1 6.5 3.5V18z"/></svg>Изгородь<kbd>H</kbd></button>
+          <button class="tool" data-tool="parapet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="13" width="8" height="5" rx="2"/><rect x="13" y="13" width="8" height="5" rx="2"/><rect x="8" y="7" width="8" height="5" rx="2"/></svg>Бруствер<kbd>P</kbd></button>
+          <button class="tool" data-tool="erase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4-4 11-11 7 7-8 8z"/><path d="M7 21h14M9 11l7 7"/></svg>Стереть<kbd>X</kbd></button>
         </div>
       </section>
 
       <section>
-        <div class="eyebrow">Forces</div>
+        <div class="eyebrow">Силы</div>
         <div class="col1" id="forceTools">
-          <button class="tool" data-tool="start"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="6" width="18" height="12" fill="#80e0ff" stroke="#0d0f11"/><path d="M3 6l18 12M21 6 3 18" stroke="#0d0f11"/></svg>BLUFOR start<kbd>B</kbd></button>
-          <button class="tool" data-tool="objective"><svg viewBox="0 0 24 24" fill="none" stroke="#f4db50" stroke-width="2" stroke-dasharray="3 2"><path d="M12 2 21 7v10l-9 5-9-5V7z"/></svg>Objective<kbd>O</kbd></button>
-          <button class="tool" data-tool="enemy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2 22 12 12 22 2 12z" fill="#ff8080" stroke="#0d0f11"/><path d="m8 8 8 8M16 8l-8 8" stroke="#0d0f11"/></svg>OPFOR team<kbd>F</kbd></button>
+          <button class="tool" data-tool="start"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="6" width="18" height="12" fill="#80e0ff" stroke="#0d0f11"/><path d="M3 6l18 12M21 6 3 18" stroke="#0d0f11"/></svg>Старт BLUFOR<kbd>B</kbd></button>
+          <button class="tool" data-tool="objective"><svg viewBox="0 0 24 24" fill="none" stroke="#f4db50" stroke-width="2" stroke-dasharray="3 2"><path d="M12 2 21 7v10l-9 5-9-5V7z"/></svg>Объект<kbd>O</kbd></button>
+          <button class="tool" data-tool="enemy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2 22 12 12 22 2 12z" fill="#ff8080" stroke="#0d0f11"/><path d="m8 8 8 8M16 8l-8 8" stroke="#0d0f11"/></svg>Группа OPFOR<kbd>F</kbd></button>
         </div>
       </section>
     </aside>
 
-    <div class="hud" id="hud" aria-label="Map controls">
-      <button id="zoomIn" title="Zoom in (wheel)" aria-label="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-      <button id="zoomOut" title="Zoom out (wheel)" aria-label="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
-      <button id="fitBtn" title="Fit the map (Home)" aria-label="Fit the map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
-      <button id="turnLeft" title="Turn the view (Q)" aria-label="Turn left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
-      <button id="turnRight" title="Turn the view (E)" aria-label="Turn right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button>
+    <div class="hud" id="hud" aria-label="Управление картой">
+      <button id="zoomIn" title="Приблизить (колесо)" aria-label="Приблизить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button id="zoomOut" title="Отдалить (колесо)" aria-label="Отдалить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+      <button id="fitBtn" title="Показать всю карту (Home)" aria-label="Показать всю карту"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      <button id="turnLeft" title="Повернуть вид (Q)" aria-label="Повернуть влево"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+      <button id="turnRight" title="Повернуть вид (E)" aria-label="Повернуть вправо"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button>
     </div>
 
     <div class="edock" id="dock">

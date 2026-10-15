@@ -1,5 +1,6 @@
 // Mission end conditions.
 import { test } from 'node:test';
+import { turnsText } from '../src/text.js';
 import assert from 'node:assert/strict';
 import { applyAction, validateAction } from '../src/sim/actions.js';
 import { commitOrders } from '../src/sim/orders.js';
@@ -20,7 +21,7 @@ test('holding the objective with a fireteam at the end of a turn wins', () => {
   s = commit(s, [{ type: 'move', unit: 0, to: H(3, 1) }]).state;
   assert.equal(s.result, null, 'not before the turn ends');
   const r = commit(s);
-  assert.deepEqual(r.state.result, { winner: 'BLUFOR', why: 'BLUFOR ALPHA holds the objective' });
+  assert.deepEqual(r.state.result, { winner: 'BLUFOR', why: 'BLUFOR ALPHA удерживает объект' });
   assert.ok(r.events.some((e) => e.type === 'game_over' && e.winner === 'BLUFOR'));
   assert.equal(r.state.activeSide, null);
 });
@@ -46,8 +47,8 @@ test('eliminating every enemy fireteam ends it at once; nothing more can be orde
   for (let seed = 1; seed <= 20; seed++) {
     const r = applyAction(s, { type: 'move', unit: 0, to: H(3, 2) }, createRng(seed));
     if (r.state.units[1].status !== 'eliminated') continue;
-    assert.deepEqual(r.state.result, { winner: 'BLUFOR', why: 'all OPFOR fireteams eliminated' });
-    assert.match(validateAction(r.state, { type: 'pass', unit: 0 }).reason, /mission is over/);
+    assert.deepEqual(r.state.result, { winner: 'BLUFOR', why: 'все группы OPFOR уничтожены' });
+    assert.match(validateAction(r.state, { type: 'pass', unit: 0 }).reason, /задача уже завершена/);
     assert.deepEqual(commit(r.state).events, [], 'committing after the end does nothing');
     return;
   }
@@ -90,7 +91,7 @@ test('an attack that cannot act for a few turns has stalled: the defender wins',
   t.units[0].status = 'pinned';
   for (let i = 0; i < 40 && !t.result; i++) t = commit(t).state; // OPFOR holds
   const n = balance.turn.stalemateTurns;
-  assert.deepEqual(t.result, { winner: 'OPFOR', why: `BLUFOR's attack stalled: no unit could act for ${n} turns` });
+  assert.deepEqual(t.result, { winner: 'OPFOR', why: `атака BLUFOR захлебнулась: никто не мог действовать ${turnsText(n)} подряд` });
   assert.equal(t.turn, n + 1, 'turn 1 counts as a turn it could act in');
 });
 

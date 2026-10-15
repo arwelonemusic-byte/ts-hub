@@ -18,12 +18,12 @@ test('open ground: clear, with the range in hexes', () => {
 test('woods in between block sight, and say where', () => {
   const r = los(makeMap(['...T....']), H(0, 0), H(7, 0));
   assert.equal(r.clear, false);
-  assert.equal(r.reason, 'woods at 3,0');
+  assert.equal(r.reason, 'лес на 3,0');
   assert.deepEqual(r.blockedAt, H(3, 0));
 });
 
 test('a building in between blocks sight', () => {
-  assert.equal(los(makeMap(['....B...']), H(0, 0), H(7, 0)).reason, 'building at 4,0');
+  assert.equal(los(makeMap(['....B...']), H(0, 0), H(7, 0)).reason, 'здание на 4,0');
 });
 
 test('scrub, rubble, trench and water do not block sight', () => {
@@ -45,7 +45,7 @@ test('adjacent hexes always see each other', () => {
 test('a hedge blocks sight across it, except for units at the hedge itself', () => {
   // Hedge on the edge between 3,0 and 4,0.
   const map = mapWith(['........'], [{ hex: [3, 0], sides: ['E'], feature: 'hedge' }]);
-  assert.match(los(map, H(0, 0), H(7, 0)).reason, /hedge between 3,0 and 4,0/);
+  assert.match(los(map, H(0, 0), H(7, 0)).reason, /изгородь между 3,0 и 4,0/);
   assert.equal(los(map, H(3, 0), H(7, 0)).clear, true, 'at the hedge, looking over it');
   assert.equal(los(map, H(0, 0), H(4, 0)).clear, true, 'seeing a unit at the hedge');
 });
@@ -70,7 +70,7 @@ test('a line along hex edges is clear if either way of drawing it is', () => {
 test('beyond the sight range there is no line of sight', () => {
   const n = balance.vision.maxRangeHexes + 2;
   const r = los(makeMap(['.'.repeat(n)]), H(0, 0), H(n - 1, 0));
-  assert.equal(r.reason, 'out of sight range');
+  assert.equal(r.reason, 'дальше предела видимости');
 });
 
 test('line of sight is symmetric on the training map', () => {

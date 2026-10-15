@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { applyAction } from '../src/sim/actions.js';
 import { coverAgainst, describeCover } from '../src/sim/cover.js';
+import { sideName } from '../src/text.js';
 import { neighborOn, opposite, sidesFacing } from '../src/sim/hex.js';
 import { parseMap, sideFeature } from '../src/sim/map.js';
 import { createRng } from '../src/sim/rng.js';
@@ -35,10 +36,10 @@ test('a trench with a parapet: hard to hurt from the front, only the trench from
   const front = coverAgainst(map, balance, H(3, 2), H(3, 5));
   assert.equal(front.casualtyOn, balance.hexsides.parapet.casualtyOn);
   assert.equal(front.source, 'hexside');
-  assert.equal(describeCover(front), `behind a parapet (${front.side} side)`);
+  assert.equal(describeCover(front), `за бруствером (сторона ${sideName(front.side)})`);
   const flank = coverAgainst(map, balance, H(3, 2), H(6, 2));
   assert.equal(flank.casualtyOn, balance.terrain.trench.casualtyOn);
-  assert.equal(describeCover(flank), 'in trench');
+  assert.equal(describeCover(flank), 'в окопе');
   const rear = coverAgainst(map, balance, H(3, 2), H(3, 0));
   assert.equal(rear.source, 'terrain');
   assert.ok(front.casualtyOn > flank.casualtyOn, 'flanking pays');
@@ -65,8 +66,8 @@ test('terrain cover still counts when it is better than the side feature', () =>
 });
 
 test('bad hexside entries are rejected', () => {
-  assert.throws(() => mapWith(['..'], [{ hex: [0, 0], sides: ['N'], feature: 'wall' }]), /unknown side 'N'/);
-  assert.throws(() => mapWith(['..'], [{ hex: [0, 0], sides: ['E'], feature: 'moat' }]), /unknown feature 'moat'/);
+  assert.throws(() => mapWith(['..'], [{ hex: [0, 0], sides: ['N'], feature: 'wall' }]), /неизвестная сторона «N»/);
+  assert.throws(() => mapWith(['..'], [{ hex: [0, 0], sides: ['E'], feature: 'moat' }]), /неизвестное препятствие «moat»/);
 });
 
 test('training map: the OPFOR trench faces south', () => {
@@ -81,10 +82,10 @@ test('a unit that moved this turn cannot fire until next turn', () => {
   let s = makeState(open(6, 6), [unit('BLUFOR', 'ALPHA', 2, 5), unit('OPFOR', 'ALPHA', 2, 0)]);
   assert.equal(mayFire(s.units[0]).ok, true);
   s = applyAction(s, { type: 'move', unit: 0, to: H(2, 4) }, createRng(1)).state;
-  assert.match(mayFire(s.units[0]).reason, /moved this turn/);
+  assert.match(mayFire(s.units[0]).reason, /в этот ход/);
   s = applyAction(s, { type: 'pass', unit: 1 }, createRng(1)).state; // turn ends
   assert.equal(s.turn, 2);
   assert.equal(mayFire(s.units[0]).ok, true);
   s.units[0].status = 'pinned';
-  assert.match(mayFire(s.units[0]).reason, /pinned and cannot fire/);
+  assert.match(mayFire(s.units[0]).reason, /прижата? и не может стрелять/);
 });

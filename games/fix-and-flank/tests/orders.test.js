@@ -60,14 +60,14 @@ test('planning flags orders that clash with earlier ones', () => {
   const plan = [move(0, 3, 5), move(1, 3, 5)];
   const c = checkPlan(s, plan);
   assert.equal(c[0].ok, true);
-  assert.match(c[1].reason, /friendly team/);
+  assert.match(c[1].reason, /своя группа/);
 });
 
 test('an order that has become impossible is skipped with the reason, and that unit holds', () => {
   const s = squad();
   const r = commit(s, [move(0, 3, 5), move(1, 3, 5)]);
   const rej = r.events.find((e) => e.type === 'rejected');
-  assert.match(rej.reason, /friendly team/);
+  assert.match(rej.reason, /своя группа/);
   assert.deepEqual(r.state.units[1].pos, s.units[1].pos);
   assert.ok(r.events.some((e) => e.type === 'activated' && e.unit === 1 && e.action === 'pass'), 'it held instead');
 });

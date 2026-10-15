@@ -1,6 +1,6 @@
 {
-  "name": "Training Area",
-  "description": "A dug-in OPFOR fireteam holds a trench line north of an open field, parapets facing south. Treelines on the east flank, a walled farm north-east, a hedge by the road.",
+  "name": "Полигон",
+  "description": "Окопавшаяся группа OPFOR держит траншею к северу от открытого поля, брустверы смотрят на юг. На восточном фланге — полосы деревьев, на северо-востоке — ферма за стеной, у дороги — живая изгородь.",
   "width": 12,
   "height": 12,
   "legend": { ".": "open", "=": "road", ":": "scrub", "T": "woods", "%": "rubble", "B": "building", "n": "trench", "~": "water" },

@@ -53,20 +53,20 @@ test('range bands: +1 from 4 hexes, +2 from 7, nothing beyond 10', () => {
   const s = makeState(open(14, 1), [unit('BLUFOR', 'ALPHA', 0, 0), unit('OPFOR', 'ALPHA', 13, 0)]);
   const at = (col) => fireSolution(s, s.units[0], H(col, 0));
   assert.equal(at(3).tn, 4 + 2, 'empty hex: +2 suppressive fire only');
-  assert.equal(mods(at(4))['range 4 hexes'], 1);
-  assert.equal(mods(at(7))['range 7 hexes'], 2);
-  assert.equal(mods(at(10))['range 10 hexes'], 2);
-  assert.match(at(11).reason, /out of range/);
+  assert.equal(mods(at(4))['дальность 4 гекса'], 1);
+  assert.equal(mods(at(7))['дальность 7 гексов'], 2);
+  assert.equal(mods(at(10))['дальность 10 гексов'], 2);
+  assert.match(at(11).reason, /слишком далеко/);
 });
 
 test('cover: a parapet facing the shooter is +2, the trench from the flank +1', () => {
   const s = trench();
   const front = fireSolution(s, s.units[0], H(3, 2));
-  assert.equal(mods(front)['behind a parapet (SE side)'], 2);
+  assert.equal(mods(front)['за бруствером (сторона ЮВ)'], 2);
   assert.equal(front.tn, 6);
   assert.equal(front.cover.casualtyOn, 6);
   const flank = fireSolution(s, s.units[1], H(3, 2));
-  assert.equal(mods(flank)['in trench'], 1);
+  assert.equal(mods(flank)['в окопе'], 1);
   assert.equal(flank.tn, 5);
   assert.equal(flank.cover.casualtyOn, 5);
 });
@@ -82,15 +82,15 @@ test('exposed target -1, suppressed shooter +1, suppressive fire +2, clamped to 
   delete t.contacts.BLUFOR[2]; // unseen in the trench
   const blind = fireSolution(t, t.units[0], H(3, 2));
   assert.equal(blind.aimed, false);
-  assert.equal(mods(blind)['no spotted enemy: suppressive fire'], 2);
+  assert.equal(mods(blind)['противник не обнаружен: огонь на подавление'], 2);
   assert.equal(blind.rawTn, 8);
   assert.equal(blind.tn, balance.fire.maxTn);
 });
 
 test('fire needs line of sight and no friendly in the hex; an adjacent spotted enemy is an assault', () => {
   const s = makeState(['...T....', '........'], [unit('BLUFOR', 'ALPHA', 0, 0), unit('BLUFOR', 'BRAVO', 1, 1), unit('OPFOR', 'ALPHA', 6, 0)]);
-  assert.match(fireSolution(s, s.units[0], H(6, 0)).reason, /no line of sight \(woods at 3,0\)/);
-  assert.match(fireSolution(s, s.units[0], H(1, 1)).reason, /friendly unit/);
+  assert.match(fireSolution(s, s.units[0], H(6, 0)).reason, /не видно \(лес на 3,0\)/);
+  assert.match(fireSolution(s, s.units[0], H(1, 1)).reason, /там свои/);
   const a = makeState(open(4, 2), [unit('BLUFOR', 'ALPHA', 1, 0), unit('OPFOR', 'ALPHA', 2, 0)]);
   assert.equal(assaultVia(a, fire(0, 2, 0)), 'fire');
   assert.equal(assaultVia(a, fire(0, 3, 0)), null, 'not adjacent: plain fire');
@@ -98,12 +98,12 @@ test('fire needs line of sight and no friendly in the hex; an adjacent spotted e
 
 test('fire is an order for the firefight and enemy action phases, for units that did not move and are not pinned', () => {
   const s = makeState(open(8, 8), [unit('BLUFOR', 'ALPHA', 3, 5), unit('BLUFOR', 'BRAVO', 5, 5), unit('OPFOR', 'ALPHA', 3, 2)]);
-  assert.match(validateAction(s, fire(0, 3, 2)).reason, /no firing in the movement phase/);
+  assert.match(validateAction(s, fire(0, 3, 2)).reason, /в фазе «Движение» нет огня/);
   const ff = commitOrders(s, [{ type: 'move', unit: 1, to: H(5, 4) }], createRng(1)).state;
   assert.equal(validateAction(ff, fire(0, 3, 2)).ok, true);
-  assert.match(validateAction(ff, fire(1, 3, 2)).reason, /already acted|moved/);
+  assert.match(validateAction(ff, fire(1, 3, 2)).reason, /уже действовал|двигал/);
   ff.units[0].status = 'pinned';
-  assert.match(validateAction(ff, fire(0, 3, 2)).reason, /pinned and cannot fire/);
+  assert.match(validateAction(ff, fire(0, 3, 2)).reason, /прижата? и не может стрелять/);
   const enemy = toPhase(makeState(open(8, 8), [unit('BLUFOR', 'ALPHA', 3, 5), unit('OPFOR', 'ALPHA', 3, 2)]), 'enemy action');
   assert.equal(validateAction(enemy, fire(1, 3, 5)).ok, true, 'OPFOR fires in its phase');
 });
@@ -236,7 +236,7 @@ test('firing gives the shooter away; it stays spotted while it stays put', () =>
   assert.equal(s.contacts.BLUFOR[1], undefined);
   s = toPhase(s, 'enemy action');
   const r = act(s, fire(1, 3, 4)); // suppressive fire short of ALPHA, so ALPHA can still act
-  assert.equal(r.events.find((e) => e.type === 'spotted' && e.side === 'BLUFOR').why, 'firing');
+  assert.equal(r.events.find((e) => e.type === 'spotted' && e.side === 'BLUFOR').why, 'ведёт огонь');
   assert.equal(r.state.contacts.BLUFOR[1].level, 'spotted');
   assert.equal(r.state.turn, 2);
   const ff = commitOrders(r.state, [], createRng(r.state.rngState)).state;
@@ -287,13 +287,13 @@ test('split fire: two hexes, the dice divided (larger half first), each rolled a
 
 test('split fire is for OPFOR only: BLUFOR cannot split', () => {
   const s = inOpen();
-  assert.match(validateAction(s, { type: 'fire', unit: 0, target: H(3, 2), second: H(4, 1) }).reason, /BLUFOR cannot split its fire/);
+  assert.match(validateAction(s, { type: 'fire', unit: 0, target: H(3, 2), second: H(4, 1) }).reason, /BLUFOR не делит огонь/);
 });
 
 test('split fire is refused with an enemy next to the shooter, on the same hex twice, or into an assault', () => {
   const near = opforFacingTwo([unit('BLUFOR', 'CHARLIE', 3, 2)]);
-  assert.match(validateAction(near, { type: 'fire', unit: 0, target: H(3, 5), second: H(6, 4) }).reason, /enemy next to it/);
-  assert.match(validateAction(near, { type: 'fire', unit: 0, target: H(3, 2), second: H(3, 5) }).reason, /cannot assault with split fire/);
+  assert.match(validateAction(near, { type: 'fire', unit: 0, target: H(3, 5), second: H(6, 4) }).reason, /противник рядом/);
+  assert.match(validateAction(near, { type: 'fire', unit: 0, target: H(3, 2), second: H(3, 5) }).reason, /нельзя штурмовать, разделив огонь/);
   const s = opforFacingTwo();
-  assert.match(validateAction(s, { type: 'fire', unit: 0, target: H(3, 5), second: H(3, 5) }).reason, /two different hexes/);
+  assert.match(validateAction(s, { type: 'fire', unit: 0, target: H(3, 5), second: H(3, 5) }).reason, /два разных гекса/);
 });

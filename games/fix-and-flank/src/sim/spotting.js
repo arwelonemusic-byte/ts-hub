@@ -36,11 +36,11 @@ export function spotReason(state, side, enemy) {
   for (const o of observers(state, side)) {
     const los = lineOfSight(map, balance, o.pos, enemy.pos);
     if (!los.clear) continue;
-    if (!concealed) return { by: o.id, why: 'in the open' };
-    if (distance(o.pos, enemy.pos) <= balance.vision.spotWithinHexes) return { by: o.id, why: 'close by' };
-    if (enemy.exposed) return { by: o.id, why: 'moving fast' };
-    if (enemy.fired) return { by: o.id, why: 'firing' };
-    if (stayedPut) kept ??= { by: o.id, why: 'known position' };
+    if (!concealed) return { by: o.id, why: 'на открытом месте' };
+    if (distance(o.pos, enemy.pos) <= balance.vision.spotWithinHexes) return { by: o.id, why: 'вблизи' };
+    if (enemy.exposed) return { by: o.id, why: 'на перебежке' };
+    if (enemy.fired) return { by: o.id, why: 'ведёт огонь' };
+    if (stayedPut) kept ??= { by: o.id, why: 'известная позиция' };
   }
   return kept;
 }
@@ -78,7 +78,7 @@ export function updateContacts(state, events) {
         const clearedHex = !same(current.pos, enemy.pos) && checksHex(state, side, current.pos);
         if (stale || clearedHex) {
           delete contacts[enemy.id];
-          events.push({ type: 'contact_dropped', side, unit: enemy.id, pos: { ...current.pos }, why: stale ? 'old' : 'hex is clear' });
+          events.push({ type: 'contact_dropped', side, unit: enemy.id, pos: { ...current.pos }, why: stale ? 'сведения устарели' : 'в гексе никого' });
         }
       }
     }

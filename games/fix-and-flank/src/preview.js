@@ -14,7 +14,7 @@ const FIT_PAD = 0.07;      // share of the smaller side kept clear around the fi
 
 async function loadJson(url) {
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to load ${url}: ${res.status}`);
+  if (!res.ok) throw new Error(`Не удалось загрузить ${url}: ${res.status}`);
   return res.json();
 }
 
@@ -22,7 +22,7 @@ function mapUrl(params) {
   const src = params.get('src');
   if (src) {
     const url = new URL(src, location.href);
-    if (url.origin !== location.origin) throw new Error('Maps load from this site only');
+    if (url.origin !== location.origin) throw new Error('Карты загружаются только с этого сайта');
     return url.href;
   }
   return `data/maps/${encodeURIComponent(params.get('map') ?? 'trenchline')}.json`;
@@ -56,5 +56,5 @@ async function main() {
 
 main().catch((err) => {
   console.error(err);
-  document.getElementById('status').textContent = `Error: ${err.message}`;
+  document.getElementById('status').textContent = `Ошибка: ${err.message}`;
 });

@@ -12,25 +12,25 @@ import { SIDES, key, neighborOn, opposite } from './hex.js';
 export function parseMap(json, balance) {
   const { name = 'Untitled', description = '', width, height, legend, rows, units = [], objective = null, hexsides = [], mission = null } = json;
   if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0) {
-    throw new Error(`Map size must be positive integers, got ${width} x ${height}`);
+    throw new Error(`Размер карты — целые положительные числа, а не ${width} x ${height}`);
   }
-  if (!Array.isArray(rows) || rows.length !== height) throw new Error(`Map has ${rows?.length} rows, expected ${height}`);
+  if (!Array.isArray(rows) || rows.length !== height) throw new Error(`Строк в карте ${rows?.length}, а нужно ${height}`);
   for (const [char, terrain] of Object.entries(legend ?? {})) {
-    if (!balance.terrain[terrain]) throw new Error(`Legend '${char}': unknown terrain '${terrain}'`);
+    if (!balance.terrain[terrain]) throw new Error(`Легенда «${char}»: неизвестная местность «${terrain}»`);
   }
   const terrain = [];
   rows.forEach((r, row) => {
     const chars = [...r];
-    if (chars.length !== width) throw new Error(`Row ${row} has ${chars.length} hexes, expected ${width}`);
+    if (chars.length !== width) throw new Error(`В строке ${row} гексов ${chars.length}, а нужно ${width}`);
     chars.forEach((c, col) => {
-      if (!legend[c]) throw new Error(`Unknown hex '${c}' at ${col},${row}`);
+      if (!legend[c]) throw new Error(`Неизвестный гекс «${c}» на ${col},${row}`);
       terrain.push(legend[c]);
     });
   });
   if (mission) {
     const [col, row] = Array.isArray(objective) ? objective : [];
     const onMap = Number.isInteger(col) && Number.isInteger(row) && col >= 0 && row >= 0 && col < width && row < height;
-    if (!onMap) throw new Error(`A mission needs an objective hex on the map, got ${JSON.stringify(objective)}`);
+    if (!onMap) throw new Error(`Задаче нужен гекс объекта на карте, а указан ${JSON.stringify(objective)}`);
   }
   const map = { name, description, width, height, terrain: Object.freeze(terrain), units: Object.freeze(units.map((u) => Object.freeze({ ...u }))), objective, mission: mission ? Object.freeze({ ...mission }) : null, sides: {} };
 
@@ -42,10 +42,10 @@ export function parseMap(json, balance) {
   for (const entry of hexsides) {
     const h = { col: entry.hex?.[0], row: entry.hex?.[1] };
     const f = balance.hexsides[entry.feature];
-    if (!f) throw new Error(`Hexside at ${key(h)}: unknown feature '${entry.feature}'`);
-    if (!inBounds(map, h)) throw new Error(`Hexside ${entry.feature} at ${key(h)} is off the map`);
+    if (!f) throw new Error(`Сторона гекса ${key(h)}: неизвестное препятствие «${entry.feature}»`);
+    if (!inBounds(map, h)) throw new Error(`Сторона гекса ${key(h)} (${entry.feature}) за краем карты`);
     for (const side of entry.sides ?? []) {
-      if (!SIDES.includes(side)) throw new Error(`Hexside at ${key(h)}: unknown side '${side}' (use ${SIDES.join(', ')})`);
+      if (!SIDES.includes(side)) throw new Error(`Сторона гекса ${key(h)}: неизвестная сторона «${side}» (можно ${SIDES.join(', ')})`);
       put(h, side, entry.feature);
       const n = neighborOn(h, side);
       if (f.shared && inBounds(map, n)) put(n, opposite(side), entry.feature);
@@ -58,11 +58,11 @@ export function parseMap(json, balance) {
   for (const u of units) {
     const [col, row] = u.pos ?? [];
     const h = { col, row };
-    if (!inBounds(map, h)) throw new Error(`${u.side} ${u.team} starts off the map`);
-    if (terrainOf(map, balance, h).move === 'impassable') throw new Error(`${u.side} ${u.team} starts on impassable ground at ${col},${row}`);
+    if (!inBounds(map, h)) throw new Error(`${u.side} ${u.team} начинает за краем карты`);
+    if (terrainOf(map, balance, h).move === 'impassable') throw new Error(`${u.side} ${u.team} начинает на непроходимой местности, ${col},${row}`);
     // One fireteam per hex, plus a leader.
     const slot = `${col},${row},${u.kind ?? 'team'}`;
-    if (taken.has(slot)) throw new Error(`Two units start on ${col},${row}`);
+    if (taken.has(slot)) throw new Error(`Два подразделения начинают на ${col},${row}`);
     taken.add(slot);
   }
   return Object.freeze(map);

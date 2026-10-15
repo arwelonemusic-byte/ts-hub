@@ -53,7 +53,7 @@ test('a fired unit is spotted in concealment (the fire flag is set by milestone 
   s.units[1].fired = true;
   const r = act(s, { type: 'pass', unit: 0 });
   assert.equal(contact(r.state, 'BLUFOR', 1).level, 'spotted');
-  assert.equal(r.events.find((e) => e.type === 'spotted').why, 'firing');
+  assert.equal(r.events.find((e) => e.type === 'spotted').why, 'ведёт огонь');
 });
 
 // One row: OPFOR in the open at 4,0 steps into the woods at 5,0.
@@ -76,7 +76,7 @@ test('a suspected hex is cleared when a unit gets close enough to see it is empt
   s = act(s, { type: 'move', unit: 1, to: H(5, 0) }).state; // suspected at 4,0; now turn 2
   const r = act(s, { type: 'fastMove', unit: 0, path: [H(2, 0), H(3, 0)] }); // next to 4,0
   assert.equal(contact(r.state, 'BLUFOR', 1), null);
-  assert.equal(r.events.find((e) => e.type === 'contact_dropped').why, 'hex is clear');
+  assert.equal(r.events.find((e) => e.type === 'contact_dropped').why, 'в гексе никого');
 });
 
 test('a suspected contact nobody checks is dropped after a few turns', () => {
@@ -89,7 +89,7 @@ test('a suspected contact nobody checks is dropped after a few turns', () => {
     s = r.state;
     dropped = r.events.find((e) => e.type === 'contact_dropped');
   }
-  assert.equal(dropped?.why, 'old');
+  assert.equal(dropped?.why, 'сведения устарели');
 });
 
 test('on the training map BLUFOR starts without contact; OPFOR sees the squad in the open', () => {
@@ -103,7 +103,7 @@ test('closing in on the dug-in team: spotted once adjacent', () => {
   assert.equal(contact(s, 'BLUFOR', 1), null);
   const r = act(s, { type: 'move', unit: 0, to: H(3, 1) });
   assert.equal(contact(r.state, 'BLUFOR', 1).level, 'spotted');
-  assert.equal(r.events.find((e) => e.type === 'spotted').why, 'close by');
+  assert.equal(r.events.find((e) => e.type === 'spotted').why, 'вблизи');
 });
 
 test('contacts replay identically', () => {

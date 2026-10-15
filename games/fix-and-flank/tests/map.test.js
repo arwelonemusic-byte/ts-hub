@@ -16,8 +16,8 @@ test('training map parses: 12 x 12 hexes, a BLUFOR squad with an HMG and a dug-i
 
 test('a mission cannot be without an objective hex on the map', () => {
   const base = { width: 2, height: 1, legend: LEGEND, rows: ['..'], mission: { attacker: 'BLUFOR', defender: 'OPFOR' } };
-  assert.throws(() => parseMap(base, balance), /mission needs an objective/);
-  assert.throws(() => parseMap({ ...base, objective: [2, 0] }, balance), /mission needs an objective/);
+  assert.throws(() => parseMap(base, balance), /нужен гекс объекта/);
+  assert.throws(() => parseMap({ ...base, objective: [2, 0] }, balance), /нужен гекс объекта/);
   assert.deepEqual(parseMap({ ...base, objective: [1, 0] }, balance).objective, [1, 0]);
   assert.equal(parseMap({ ...base, mission: null }, balance).objective, null, 'a sandbox map needs none');
 });
@@ -32,9 +32,9 @@ test('terrain lookups come from the balance table', () => {
 
 test('bad maps are rejected with a clear error', () => {
   const base = { width: 2, height: 1, legend: LEGEND };
-  assert.throws(() => parseMap({ ...base, rows: ['...'] }, balance), /Row 0 has 3 hexes/);
-  assert.throws(() => parseMap({ ...base, rows: ['.?'] }, balance), /Unknown hex '\?'/);
-  assert.throws(() => parseMap({ ...base, legend: { '.': 'lava' }, rows: ['..'] }, balance), /unknown terrain 'lava'/);
-  assert.throws(() => parseMap({ ...base, rows: ['.~'], units: [{ side: 'BLUFOR', team: 'A', pos: [1, 0] }] }, balance), /impassable/);
-  assert.throws(() => parseMap({ ...base, rows: ['..'], units: [{ side: 'B', team: 'A', pos: [0, 0] }, { side: 'B', team: 'C', pos: [0, 0] }] }, balance), /Two units/);
+  assert.throws(() => parseMap({ ...base, rows: ['...'] }, balance), /В строке 0 гексов 3/);
+  assert.throws(() => parseMap({ ...base, rows: ['.?'] }, balance), /Неизвестный гекс «\?»/);
+  assert.throws(() => parseMap({ ...base, legend: { '.': 'lava' }, rows: ['..'] }, balance), /неизвестная местность «lava»/);
+  assert.throws(() => parseMap({ ...base, rows: ['.~'], units: [{ side: 'BLUFOR', team: 'A', pos: [1, 0] }] }, balance), /непроходимой/);
+  assert.throws(() => parseMap({ ...base, rows: ['..'], units: [{ side: 'B', team: 'A', pos: [0, 0] }, { side: 'B', team: 'C', pos: [0, 0] }] }, balance), /Два подразделения/);
 });

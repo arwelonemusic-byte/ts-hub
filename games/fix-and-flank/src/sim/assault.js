@@ -18,6 +18,7 @@ import { rollD6 } from './dice.js';
 import { distance } from './hex.js';
 import { inBounds } from './map.js';
 import { isActive, isSuppressed, unitType, unitsAt } from './state.js';
+import { typeName } from '../text.js';
 
 const clamp = (balance, tn) => Math.min(balance.fire.maxTn, Math.max(balance.fire.minTn, tn));
 
@@ -44,10 +45,10 @@ export function assaultSolution(state, attacker, h) {
   const { balance, map } = state;
   const a = balance.assault;
   const enemies = enemiesAt(state, attacker, h);
-  if (!enemies.length) return { ok: false, reason: 'no enemy there' };
-  if (distance(attacker.pos, h) !== 1) return { ok: false, reason: 'an assault goes into the next hex' };
-  if (attacker.kind !== 'team') return { ok: false, reason: 'only a fireteam can assault' };
-  if (!unitType(balance, attacker).assault) return { ok: false, reason: `the ${unitType(balance, attacker).name} does not assault` };
+  if (!enemies.length) return { ok: false, reason: 'там нет противника' };
+  if (distance(attacker.pos, h) !== 1) return { ok: false, reason: 'штурмуют только соседний гекс' };
+  if (attacker.kind !== 'team') return { ok: false, reason: 'штурмуют только огневые группы' };
+  if (!unitType(balance, attacker).assault) return { ok: false, reason: `${typeName(unitType(balance, attacker).name)} не штурмует` };
   const defender = enemies.find((u) => u.kind === 'team') ?? enemies[0];
   const others = enemies.filter((u) => u.id !== defender.id).map((u) => u.id);
 
@@ -55,18 +56,18 @@ export function assaultSolution(state, attacker, h) {
   const attackMods = [];
   let attackTn = attackBase;
   if (isSuppressed(attacker)) {
-    attackMods.push({ why: 'attacker suppressed', mod: a.attackerSuppressedMod });
+    attackMods.push({ why: 'атакующие подавлены', mod: a.attackerSuppressedMod });
     attackTn += a.attackerSuppressedMod;
   }
   const cover = coverAgainst(map, balance, h, attacker.pos);
   const defendMods = [];
   let defendTn = a.defendTn;
   if (cover.casualtyOn >= a.dugInFrom) {
-    defendMods.push({ why: `dug in (${describeCover(cover)})`, mod: a.dugInMod });
+    defendMods.push({ why: `окопались (${describeCover(cover)})`, mod: a.dugInMod });
     defendTn += a.dugInMod;
   }
   if (defender.status === 'suppressed') {
-    defendMods.push({ why: 'defender suppressed', mod: a.defenderSuppressedMod });
+    defendMods.push({ why: 'обороняющиеся подавлены', mod: a.defenderSuppressedMod });
     defendTn += a.defenderSuppressedMod;
   }
   const pinned = defender.status === 'pinned';

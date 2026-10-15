@@ -22,20 +22,20 @@ test('it reaches further: no range penalty to 6 hexes, +1 to 12, nothing beyond'
   // HMG on row 0, a rifle team on row 1 at the same column; targets are row 0 and row 1 hexes the same distance away.
   const s = makeState(open(16, 2), [hmg(0, 0), unit('BLUFOR', 'ALPHA', 0, 1), unit('OPFOR', 'ALPHA', 15, 0)]);
   const shot = (u, col) => fireSolution(s, s.units[u], H(col, u === 0 ? 0 : 1));
-  assert.equal(shot(0, 6).mods.some((m) => m.why.startsWith('range')), false, 'HMG at 6 hexes');
-  assert.equal(shot(1, 6).mods.find((m) => m.why.startsWith('range')).mod, 1, 'a rifle team at 6 hexes');
-  assert.equal(shot(0, 12).mods.find((m) => m.why.startsWith('range')).mod, 1);
-  assert.match(shot(0, 13).reason, /out of range \(12 hexes\)/);
-  assert.match(shot(1, 11).reason, /out of range \(10 hexes\)/);
+  assert.equal(shot(0, 6).mods.some((m) => m.why.startsWith('дальность')), false, 'HMG at 6 hexes');
+  assert.equal(shot(1, 6).mods.find((m) => m.why.startsWith('дальность')).mod, 1, 'a rifle team at 6 hexes');
+  assert.equal(shot(0, 12).mods.find((m) => m.why.startsWith('дальность')).mod, 1);
+  assert.match(shot(0, 13).reason, /слишком далеко \(дальность 12 гексов\)/);
+  assert.match(shot(1, 11).reason, /слишком далеко \(дальность 10 гексов\)/);
 });
 
 test('it moves only one hex at a time, and never assaults', () => {
   const s = makeState(open(6, 6), [hmg(2, 4), unit('OPFOR', 'ALPHA', 2, 3)]);
-  assert.match(validateAction(s, { type: 'fastMove', unit: 0, path: [H(1, 4), H(0, 4)] }).reason, /HMG team cannot fast move/);
+  assert.match(validateAction(s, { type: 'fastMove', unit: 0, path: [H(1, 4), H(0, 4)] }).reason, /расчёт пулемёта не делает перебежек/);
   const o = moveOptions(s, s.units[0]);
   assert.ok(o.moves.length > 0, 'it can still move');
   assert.equal(o.fast.size, 0);
-  assert.match(validateAction(s, { type: 'move', unit: 0, to: H(2, 3) }).reason, /HMG team does not assault/);
+  assert.match(validateAction(s, { type: 'move', unit: 0, to: H(2, 3) }).reason, /расчёт пулемёта не штурмует/);
 });
 
 test('its crew is lost ammo bearer first, gunner last', () => {
@@ -58,7 +58,7 @@ test('it fires only every other turn', () => {
   while (s.turn === 1) s = commitOrders(s, [], createRng(s.rngState)).state;
   assert.equal(s.turn, 2);
   assert.equal(s.units[0].reload, 1, 'turn 2: still reloading');
-  assert.match(mayFire(s.units[0]).reason, /reloading/);
+  assert.match(mayFire(s.units[0]).reason, /перезаряжается/);
   const next = toPhase(s, 'firefight');
   assert.equal(next.turn, 3, 'turn 2 has no firefight for it; turn 3 does');
   assert.equal(validateAction(next, { type: 'fire', unit: 0, target: H(8, 1) }).ok, true);

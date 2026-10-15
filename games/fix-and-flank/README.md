@@ -97,7 +97,7 @@ How a turn flows: the UI collects a plan (one order per unit), checks it with `c
 - When balance feels off, change `balance.json`, not code, and re-run the balance test.
 - When a rule is ambiguous, pick the simplest option, write it in `docs/decisions.md`, continue.
 - No dependencies, frameworks or build step without asking. No network calls at runtime (fonts are bundled).
-- UI text: plain, infantry vocabulary, no filler.
+- UI text: Russian (words with grammar in `src/text.js`), plain, infantry vocabulary, no filler.
 - Small commits, one concern each.
 
 ## Balance

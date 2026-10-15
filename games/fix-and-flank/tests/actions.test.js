@@ -75,12 +75,12 @@ test('out of phase actions and second activations are rejected and change nothin
   const s = threeVsOne();
   let r = act(s, pass(3));
   assert.equal(r.events[0].type, 'rejected');
-  assert.match(r.events[0].reason, /movement phase \(BLUFOR\)/);
+  assert.match(r.events[0].reason, /фаза «Движение» \(BLUFOR\)/);
   assert.equal(r.state, s, 'state unchanged');
   r = act(act(s, pass(0)).state, pass(0));
-  assert.match(r.events[0].reason, /already acted in this phase/);
+  assert.match(r.events[0].reason, /уже действовал.? в этой фазе/);
   const ff = toPhase(s, 'firefight');
-  assert.match(validateAction(ff, move(0, 2, 7)).reason, /no moving in the firefight phase/);
+  assert.match(validateAction(ff, move(0, 2, 7)).reason, /в фазе «Огонь» нет движения/);
 });
 
 test('eliminated units are skipped; a side with nobody left loses its phases', () => {
@@ -98,15 +98,15 @@ test('move: one hex to an adjacent, enterable hex', () => {
   const r = act(s, move(0, 0, 2));
   assert.deepEqual(r.state.units[0].pos, H(0, 2));
   assert.deepEqual(r.events.find((e) => e.type === 'moved').to, H(0, 2));
-  assert.match(validateAction(s, move(0, 1, 1)).reason, /water is impassable/);
-  assert.match(validateAction(s, move(0, 2, 2)).reason, /friendly team/);
-  assert.match(validateAction(s, move(0, 3, 2)).reason, /is not next to/);
+  assert.match(validateAction(s, move(0, 1, 1)).reason, /не пройти: вода/);
+  assert.match(validateAction(s, move(0, 2, 2)).reason, /своя группа/);
+  assert.match(validateAction(s, move(0, 3, 2)).reason, /не рядом с/);
 });
 
 test('pinned teams cannot move: they have nothing to do in the movement phase', () => {
   const s = threeVsOne();
   s.units[0].status = 'pinned';
-  assert.match(validateAction(s, move(0, 2, 7)).reason, /pinned/);
+  assert.match(validateAction(s, move(0, 2, 7)).reason, /прижат/);
   assert.deepEqual(moveOptions(s, s.units[0]).moves, []);
   assert.deepEqual(waiting(s), [1, 2]);
 });
@@ -120,7 +120,7 @@ test('if no unit of the side can act, committing still moves the game on', () =>
 
 test('moving into the next hex with an enemy in it is an assault; a fast move cannot be', () => {
   const s = makeState(open(5, 4), [unit('BLUFOR', 'ALPHA', 0, 1), unit('OPFOR', 'ALPHA', 2, 1)]);
-  assert.match(validateAction(s, { type: 'fastMove', unit: 0, path: [H(1, 1), H(2, 1)] }).reason, /an assault is a 1-hex move/);
+  assert.match(validateAction(s, { type: 'fastMove', unit: 0, path: [H(1, 1), H(2, 1)] }).reason, /штурм — это движение на один гекс/);
   const t = makeState(open(4, 4), [unit('BLUFOR', 'ALPHA', 1, 1), unit('OPFOR', 'ALPHA', 2, 1)]);
   assert.equal(validateAction(t, move(0, 2, 1)).ok, true);
   assert.equal(act(t, move(0, 2, 1)).events[1].type, 'assault');
@@ -142,11 +142,11 @@ test('fast move: two hexes, exposed through the enemy action, cleared when its s
 
 test('fast move stops on entering rough terrain; no more than two hexes', () => {
   const s = makeState(['......', '..T...', '......', '......'], [unit('BLUFOR', 'ALPHA', 2, 3), unit('OPFOR', 'ALPHA', 5, 0)]);
-  assert.match(validateAction(s, { type: 'fastMove', unit: 0, path: [H(2, 2), H(2, 1), H(2, 0)] }).reason, /at most 2 hexes/);
+  assert.match(validateAction(s, { type: 'fastMove', unit: 0, path: [H(2, 2), H(2, 1), H(2, 0)] }).reason, /самое большее на 2 гекса/);
   // (2,2) -> woods at (2,1) as the last hex is fine
   assert.equal(validateAction(s, { type: 'fastMove', unit: 0, path: [H(2, 2), H(2, 1)] }).ok, true);
   const s2 = makeState(['......', '......', '..T...', '......'], [unit('BLUFOR', 'ALPHA', 2, 3), unit('OPFOR', 'ALPHA', 5, 0)]);
-  assert.match(validateAction(s2, { type: 'fastMove', unit: 0, path: [H(2, 2), H(2, 1)] }).reason, /entering woods ends a fast move/);
+  assert.match(validateAction(s2, { type: 'fastMove', unit: 0, path: [H(2, 2), H(2, 1)] }).reason, /в лесу перебежка заканчивается/);
 });
 
 test('move options: 6 neighbors for a move, more hexes for a fast move, rough terrain respected', () => {
@@ -206,9 +206,9 @@ function squad() {
 test('suppressed teams cannot move; pinned teams cannot either', () => {
   const s = squad();
   s.units[1].status = 'suppressed';
-  assert.match(validateAction(s, move(1, 2, 5)).reason, /suppressed and cannot move/);
+  assert.match(validateAction(s, move(1, 2, 5)).reason, /подавлена? и не может двигаться/);
   s.units[1].status = 'pinned';
-  assert.match(validateAction(s, move(1, 2, 5)).reason, /pinned and cannot move/);
+  assert.match(validateAction(s, move(1, 2, 5)).reason, /прижата? и не может двигаться/);
 });
 
 test('the SL is one man and can share a hex with one fireteam; two teams cannot share', () => {
@@ -219,13 +219,13 @@ test('the SL is one man and can share a hex with one fireteam; two teams cannot 
   const t = act(s, move(0, 3, 5)).state;
   assert.deepEqual(t.units[0].pos, t.units[1].pos);
   const u = makeState(open(8, 8), [unit('BLUFOR', 'ALPHA', 3, 5), unit('BLUFOR', 'BRAVO', 4, 5), unit('OPFOR', 'ALPHA', 3, 0)]);
-  assert.match(validateAction(u, move(1, 3, 5)).reason, /friendly team/);
+  assert.match(validateAction(u, move(1, 3, 5)).reason, /своя группа/);
 });
 
 test('rally is not an order any more: it is the rally phase', () => {
   const s = squad();
   s.units[1].status = 'pinned';
-  assert.match(validateAction(s, { type: 'rally', unit: 0, target: 1 }).reason, /unknown action/);
+  assert.match(validateAction(s, { type: 'rally', unit: 0, target: 1 }).reason, /неизвестный приказ/);
 });
 
 test('rally need: automatic with the SL, the roll must beat the distance to him, blocked next to an enemy', () => {

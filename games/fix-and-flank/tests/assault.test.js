@@ -40,16 +40,16 @@ test('a move or fire order into the next hex with an enemy is an assault', () =>
 
 test('only a fireteam assaults; a suppressed team cannot move in but can assault by fire; pinned cannot at all', () => {
   const s = makeState(open(6, 4), [unit('BLUFOR', 'SL', 2, 1, { kind: 'leader' }), unit('OPFOR', 'ALPHA', 3, 1)]);
-  assert.match(validateAction(s, move(0, 3, 1)).reason, /only a fireteam can assault/);
+  assert.match(validateAction(s, move(0, 3, 1)).reason, /штурмуют только огневые группы/);
   const t = closeIn();
   t.units[0].status = 'suppressed';
-  assert.match(validateAction(t, move(0, 3, 2)).reason, /suppressed and cannot move/);
+  assert.match(validateAction(t, move(0, 3, 2)).reason, /подавлена? и не может двигаться/);
   const ff = toPhase(closeIn(), 'firefight');
   ff.units[0].status = 'suppressed';
   assert.equal(validateAction(ff, fire(0, 3, 2)).ok, true);
   assert.equal(assaultSolution(ff, ff.units[0], H(3, 2)).attackTn, balance.assault.attackTn.ok + balance.assault.attackerSuppressedMod);
   ff.units[0].status = 'pinned';
-  assert.match(validateAction(ff, fire(0, 3, 2)).reason, /pinned and cannot fire/);
+  assert.match(validateAction(ff, fire(0, 3, 2)).reason, /прижата? и не может стрелять/);
 });
 
 test('target numbers: the attacker by the defender\'s state, the defender better dug in, worse suppressed, none if pinned', () => {
@@ -141,8 +141,8 @@ for (const [name, make] of CASES) {
     const odds = assaultOdds(sol);
     assert.ok(Math.abs(odds.take + odds.repulsed + odds.attackerDestroyed - 1) < 1e-12);
     const line = previewAction(s, move(0, 3, 2));
-    assert.ok(line.includes(`${pct(odds.take)} to take the hex`), line);
-    assert.ok(line.includes(`hit on ${sol.attackTn}+`), line);
+    assert.ok(line.includes(`${pct(odds.take)} — взять гекс`), line);
+    assert.ok(line.includes(`попадание на ${sol.attackTn}+`), line);
     let take = 0, aLoss = 0, dLoss = 0;
     const n = 4000;
     for (let i = 1; i <= n; i++) {
@@ -167,7 +167,7 @@ test('the fire preview shows the same exact odds the fire is rolled against', ()
     const sol = fireSolution(s, s.units[id], H(3, 2));
     const o = fireOdds({ dice: sol.dice, tn: sol.tn, casualtyOn: sol.cover.casualtyOn, pinAt: pinAt(balance, 'ok'), soldiers: 4 });
     const line = previewAction(s, fire(id, 3, 2));
-    assert.ok(line.includes(`hit on ${sol.tn}+`) && line.includes(`${pct(o.anyHit)} at least one hit`) && line.includes(`${pct(o.pin)} to pin`), line);
+    assert.ok(line.includes(`попадание на ${sol.tn}+`) && line.includes(`${pct(o.anyHit)} — хотя бы одно попадание`) && line.includes(`${pct(o.pin)} — прижать`), line);
     const e = act(s, fire(id, 3, 2)).events.find((x) => x.type === 'fire');
     assert.equal(e.tn, sol.tn);
     assert.equal(e.dice.length, sol.dice);

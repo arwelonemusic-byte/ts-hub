@@ -12,6 +12,7 @@
 
 import { distance, key, line, sidesFacing } from './hex.js';
 import { sideFeature, terrainName, terrainOf } from './map.js';
+import { featureWord, terrainWord } from '../text.js';
 
 // Check one drawn line; returns null if clear, else { at, reason }.
 function blockOnLine(map, balance, hexes) {
@@ -28,10 +29,10 @@ function blockOnLine(map, balance, hexes) {
     for (const e of edge) {
       const f = sideFeature(map, e.owner, e.side);
       if (f && balance.hexsides[f].blocksLos && !e.isEnd && !edge.some((x) => x.isEnd && sideFeature(map, x.owner, x.side) === f)) {
-        return { at: h, reason: `${f} between ${key(prev)} and ${key(h)}` };
+        return { at: h, reason: `${featureWord(f)} между ${key(prev)} и ${key(h)}` };
       }
     }
-    if (i < last && terrainOf(map, balance, h).blocksLos) return { at: h, reason: `${terrainName(map, h)} at ${key(h)}` };
+    if (i < last && terrainOf(map, balance, h).blocksLos) return { at: h, reason: `${terrainWord(terrainName(map, h))} на ${key(h)}` };
   }
   return null;
 }
@@ -39,7 +40,7 @@ function blockOnLine(map, balance, hexes) {
 // { clear, reason, blockedAt, range } from hex a to hex b.
 export function lineOfSight(map, balance, a, b) {
   const range = distance(a, b);
-  if (range > balance.vision.maxRangeHexes) return { clear: false, reason: 'out of sight range', blockedAt: null, range };
+  if (range > balance.vision.maxRangeHexes) return { clear: false, reason: 'дальше предела видимости', blockedAt: null, range };
   // Always draw from the same end (rounding on exact edge ties is not
   // perfectly symmetric in floating point), so a -> b equals b -> a.
   const [p, q] = a.row < b.row || (a.row === b.row && a.col <= b.col) ? [a, b] : [b, a];

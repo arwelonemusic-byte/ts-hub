@@ -24,41 +24,42 @@ import { eliminationResult, endGame } from './mission.js';
 import { advance } from './phases.js';
 import { updateContacts } from './spotting.js';
 import { canActivate, cloneState, currentPhase, isActive, isSuppressed, mayFire, unitType, unitsAt } from './state.js';
+import { agree, hexes, phaseName, statusText, terrainIn, terrainWord, typeName, unitName } from '../text.js';
 
 export const ACTION_TYPES = ['move', 'fastMove', 'fire', 'pass'];
-const ACTION_NAMES = { move: 'moving', fastMove: 'fast moving', fire: 'firing' };
+const ACTION_NAMES = { move: 'движения', fastMove: 'перебежек', fire: 'огня' }; // «в фазе … нет …»
 
 function enterable(state, h, unit) {
-  if (!inBounds(state.map, h)) return 'off the map';
-  if (terrainOf(state.map, state.balance, h).move === 'impassable') return `${terrainName(state.map, h)} is impassable`;
+  if (!inBounds(state.map, h)) return 'за краем карты';
+  if (terrainOf(state.map, state.balance, h).move === 'impassable') return `не пройти: ${terrainWord(terrainName(state.map, h))}`;
   const others = unitsAt(state, h).filter((u) => u.id !== unit.id);
-  if (others.some((u) => u.side !== unit.side)) return 'enemy in that hex: an assault is a 1-hex move';
+  if (others.some((u) => u.side !== unit.side)) return 'там противник: штурм — это движение на один гекс';
   if (others.some((u) => u.kind === unit.kind)) {
-    return unit.kind === 'leader' ? 'hex already holds a leader' : 'hex already holds a friendly team';
+    return unit.kind === 'leader' ? 'в гексе уже есть КО' : 'в гексе уже есть своя группа';
   }
   return null;
 }
 
 // { ok, reason } for an action in the current state.
 export function validateAction(state, action) {
-  if (!ACTION_TYPES.includes(action?.type)) return { ok: false, reason: `unknown action '${action?.type}'` };
+  if (!ACTION_TYPES.includes(action?.type)) return { ok: false, reason: `неизвестный приказ «${action?.type}»` };
   const unit = state.units[action.unit];
-  if (!unit) return { ok: false, reason: 'no such unit' };
-  if (state.result) return { ok: false, reason: 'the mission is over' };
+  if (!unit) return { ok: false, reason: 'нет такого подразделения' };
+  if (state.result) return { ok: false, reason: 'задача уже завершена' };
   const phase = currentPhase(state);
-  if (unit.side !== phase.side) return { ok: false, reason: `it is the ${phase.name} phase (${phase.side})` };
-  if (!isActive(unit)) return { ok: false, reason: `${unit.team} is eliminated` };
-  if (unit.activated) return { ok: false, reason: `${unit.team} has already acted in this phase` };
+  if (unit.side !== phase.side) return { ok: false, reason: `сейчас фаза «${phaseName(phase.name)}» (${phase.side})` };
+  if (!isActive(unit)) return { ok: false, reason: `${unitName(unit)} ${statusText(unit, 'eliminated')}` };
+  if (unit.activated) return { ok: false, reason: `${unitName(unit)} уже ${agree(unit, { team: 'действовала', leader: 'действовал' })} в этой фазе` };
   if (action.type === 'pass') return { ok: true };
-  if (!(phase.actions ?? []).includes(action.type)) return { ok: false, reason: `no ${ACTION_NAMES[action.type]} in the ${phase.name} phase` };
+  if (!(phase.actions ?? []).includes(action.type)) return { ok: false, reason: `в фазе «${phaseName(phase.name)}» нет ${ACTION_NAMES[action.type]}` };
 
   const via = assaultVia(state, action);
-  if (via === 'move' && isSuppressed(unit)) return { ok: false, reason: `${unit.team} is ${unit.status} and cannot move` };
+  if (via === 'move' && isSuppressed(unit)) return { ok: false, reason: `${unitName(unit)} ${statusText(unit)} и не может двигаться` };
   if (via === 'fire') {
     const may = mayFire(unit);
     if (!may.ok) return may;
   }
-  if (via && action.second) return { ok: false, reason: 'cannot assault with split fire' };
+  if (via && action.second) return { ok: false, reason: 'нельзя штурмовать, разделив огонь' };
   if (via) {
     const sol = assaultSolution(state, unit, via === 'move' ? action.to : action.target);
     return sol.ok ? { ok: true } : { ok: false, reason: sol.reason };
@@ -66,25 +67,25 @@ export function validateAction(state, action) {
   if (action.type === 'fire') {
     const may = mayFire(unit);
     if (!may.ok) return may;
-    if (action.second && assaultVia(state, { type: 'fire', unit: unit.id, target: action.second })) return { ok: false, reason: 'cannot assault with split fire' };
+    if (action.second && assaultVia(state, { type: 'fire', unit: unit.id, target: action.second })) return { ok: false, reason: 'нельзя штурмовать, разделив огонь' };
     const bad = fireSolutions(state, unit, action).find((sol) => !sol.ok);
     return bad ? { ok: false, reason: bad.reason } : { ok: true };
   }
-  if (isSuppressed(unit)) return { ok: false, reason: `${unit.team} is ${unit.status} and cannot move` };
-  if (action.type === 'fastMove' && !unitType(state.balance, unit).fastMove) return { ok: false, reason: `the ${unitType(state.balance, unit).name} cannot fast move` };
+  if (isSuppressed(unit)) return { ok: false, reason: `${unitName(unit)} ${statusText(unit)} и не может двигаться` };
+  if (action.type === 'fastMove' && !unitType(state.balance, unit).fastMove) return { ok: false, reason: `${typeName(unitType(state.balance, unit).name)} не делает перебежек` };
   const path = action.type === 'move' ? [action.to] : action.path;
-  if (!Array.isArray(path) || path.length === 0) return { ok: false, reason: 'no destination' };
-  if (action.type === 'move' && path.length !== 1) return { ok: false, reason: 'a move is one hex' };
+  if (!Array.isArray(path) || path.length === 0) return { ok: false, reason: 'не указано, куда' };
+  if (action.type === 'move' && path.length !== 1) return { ok: false, reason: 'движение — на один гекс' };
   const max = state.balance.movement.fastMoveHexes;
-  if (path.length > max) return { ok: false, reason: `a fast move is at most ${max} hexes` };
+  if (path.length > max) return { ok: false, reason: `перебежка — самое большее на ${hexes(max)}` };
   let from = unit.pos;
   for (const [i, h] of path.entries()) {
-    if (!inBounds(state.map, h) || !adjacent(from, h)) return { ok: false, reason: `${key(h)} is not next to ${key(from)}` };
+    if (!inBounds(state.map, h) || !adjacent(from, h)) return { ok: false, reason: `${key(h)} не рядом с ${key(from)}` };
     const why = enterable(state, h, unit);
     if (why) return { ok: false, reason: why };
     const rough = terrainOf(state.map, state.balance, h).move === 'rough';
     if (action.type === 'fastMove' && rough && i < path.length - 1) {
-      return { ok: false, reason: `entering ${terrainName(state.map, h)} ends a fast move` };
+      return { ok: false, reason: `${terrainIn(terrainName(state.map, h))} перебежка заканчивается` };
     }
     from = h;
   }

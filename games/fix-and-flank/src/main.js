@@ -11,7 +11,7 @@ const DEFAULT_SEED = 1;
 
 async function loadJson(path) {
   const res = await fetch(path);
-  if (!res.ok) throw new Error(`Failed to load ${path}: ${res.status}`);
+  if (!res.ok) throw new Error(`Не удалось загрузить ${path}: ${res.status}`);
   return res.json();
 }
 
@@ -20,7 +20,7 @@ async function loadJson(path) {
 async function loadMapJson(name, src) {
   if (src) {
     const url = new URL(src, location.href);
-    if (url.origin !== location.origin) throw new Error('Maps load from this site only');
+    if (url.origin !== location.origin) throw new Error('Карты загружаются только с этого сайта');
     return loadJson(url.href);
   }
   if (!name.startsWith(LOCAL)) return loadJson(`data/maps/${encodeURIComponent(name)}.json`);
@@ -73,5 +73,5 @@ async function main() {
 
 main().catch((err) => {
   console.error(err);
-  document.getElementById('status').textContent = `Error: ${err.message}`;
+  document.getElementById('status').textContent = `Ошибка: ${err.message}`;
 });

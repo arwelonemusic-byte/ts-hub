@@ -1,6 +1,7 @@
 // Game state shape.
 
 import { updateContacts } from './spotting.js';
+import { agree, statusText, unitName } from '../text.js';
 //
 // state = {
 //   turn,                 1-based
@@ -123,10 +124,10 @@ export function betterStatus(status) {
 
 // A unit that moved this turn cannot fire, and a pinned unit cannot shoot back.
 export function mayFire(unit) {
-  if (unit.status === 'eliminated') return { ok: false, reason: `${unit.team} is eliminated` };
-  if (unit.status === 'pinned') return { ok: false, reason: `${unit.team} is pinned and cannot fire` };
-  if (unit.moved) return { ok: false, reason: `${unit.team} moved this turn and cannot fire` };
-  if (unit.reload > 0) return { ok: false, reason: `${unit.team} is reloading and fires again next turn` };
+  if (unit.status === 'eliminated') return { ok: false, reason: `${unitName(unit)} ${statusText(unit, 'eliminated')}` };
+  if (unit.status === 'pinned') return { ok: false, reason: `${unitName(unit)} ${statusText(unit, 'pinned')} и не может стрелять` };
+  if (unit.moved) return { ok: false, reason: `${unitName(unit)} ${agree(unit, { team: 'двигалась', leader: 'двигался' })} в этот ход и не может стрелять` };
+  if (unit.reload > 0) return { ok: false, reason: `${unitName(unit)} перезаряжается и выстрелит в следующий ход` };
   return { ok: true };
 }
 
