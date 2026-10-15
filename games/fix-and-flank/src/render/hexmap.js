@@ -114,18 +114,6 @@ export function drawHexMarks(ctx, cam, marks) {
 }
 
 // A planned path: hex centers joined by a line.
-export function drawPath(ctx, cam, from, path, color) {
-  ctx.strokeStyle = color;
-  ctx.lineWidth = Math.max(2, cam.scale * 0.08);
-  ctx.beginPath();
-  [from, ...path].forEach((h, i) => {
-    const c = center(h);
-    const p = toScreen(cam, c.x, c.y);
-    i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y);
-  });
-  ctx.stroke();
-}
-
 // Fire marker: crosshair (ring, four ticks, center dot) of radius r at (x, y).
 function crosshair(ctx, x, y, r, color, width) {
   ctx.strokeStyle = color;

@@ -15,15 +15,21 @@ import { knownEnemies } from '../sim/spotting.js';
 import { canActivate, currentPhase, unitType, unitsAt } from '../sim/state.js';
 import { chooseOrders } from '../ai/basic.js';
 import { commitTurn, RUN_LIMITS } from '../ai/run.js';
-import { COLORS, counterLabel, drawFire, drawHexMarks, drawPath, drawSuspected } from '../render/hexmap.js';
+import { COLORS, counterLabel, drawFire, drawHexMarks, drawSuspected } from '../render/hexmap.js';
 import { createWorld } from '../render/world3d.js';
 import { hub, hubHome, hubIdOf, hubMapPage, servedByHub } from '../hub.js';
 import { positionAlong } from './anim.js';
 import { createDiceTray } from './dice.js';
 import { assaultFigures, assaultSummary, eventText, fireFigures, fireSummary, phaseLabel, previewAction, rallyPreview, unitName } from './describe.js';
-import { agree, count, diceText, FEATURE, menText, ROLE, sideName, statusText, TERRAIN, turnsText, typeName, unitName as shortName } from '../text.js';
+import { agree, diceText, FEATURE, menText, ROLE, sideName, statusText, TERRAIN, turnsText, typeName, unitName as shortName } from '../text.js';
 
 const PLAYER_SIDE = 'BLUFOR';
+// Pointer cursors over the board: a scope (fire) and an arrow onto a hex (move), hotspot where they point.
+const svgCursor = (svg, x, y, fallback) => `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${x} ${y}, ${fallback}`;
+const CURSOR = {
+  scope: svgCursor(`<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g fill='none' stroke-linecap='round'><g stroke='#0d0f11' stroke-width='4.5'><circle cx='16' cy='16' r='9'/><path d='M16 2v8M16 22v8M2 16h8M22 16h8'/></g><g stroke='#ffffff' stroke-width='2'><circle cx='16' cy='16' r='9'/><path d='M16 2v8M16 22v8M2 16h8M22 16h8'/></g></g><circle cx='16' cy='16' r='2' fill='#ff5a4f' stroke='#0d0f11' stroke-width='1'/></svg>`, 16, 16, 'crosshair'),
+  move: svgCursor(`<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><g fill='none' stroke-linecap='round' stroke-linejoin='round'><g stroke='#0d0f11' stroke-width='4.5'><path d='M16 2v12M11 9.5l5 5 5-5'/><path d='M16 18.5l5.6 3.2v6.4L16 31.3l-5.6-3.2v-6.4z'/></g><g stroke='#ffffff' stroke-width='2'><path d='M16 2v12M11 9.5l5 5 5-5'/><path d='M16 18.5l5.6 3.2v6.4L16 31.3l-5.6-3.2v-6.4z'/></g></g></svg>`, 16, 25, 'pointer'),
+};
 const CLICK_SLOP_PX = 4;
 const ARROW_PAN_PX = 140;   // an arrow key pans the view this far
 const TIP_OFFSET = { x: 14, y: 18 }; // px from the pointer to the "click to select" tag
@@ -31,9 +37,9 @@ const WHEEL_ZOOM = 1.15;
 const MOVE_ANIM_MS = 220;   // per hex
 const DICE_ROLL_MS = 1100;  // dice tumble this long before they settle
 const DICE_STAGGER_MS = 350; // a second row (casualty rolls, the defender) settles this much later
-const DICE_HOLD_MS = 800;   // the settled roll stays on screen this long
+const DICE_HOLD_MS = 1600;  // the settled roll stays on screen this long (doubled 2026-10-15: long enough to read)
 const RALLY_ROLL_MS = 700;
-const RALLY_HOLD_MS = 500;
+const RALLY_HOLD_MS = 1000;
 const BANG_MS = 900;        // a bang marker's life
 const COMMENT_MAX = 2000;   // the hub's limit for a comment on a map (FNF_COMMENT_MAX)
 const STEP_GAP_MS = 120;    // between steps without moves
@@ -89,6 +95,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     shots: [],         // lines of fire being shown: { from, to, start, ms, side, tag }
     bangs: [],         // bang markers being shown: { hex, start, k }
     playing: false,    // a commit is being played back
+    dragUnit: null,    // your unit being dragged to a hex (a drop there orders it, like a click)
     final: null,       // the state the commit being played back ends in
     timers: [],        // what playback has scheduled: cleared to stop it (a replay's pause or jump)
     fireCache: null,
@@ -524,19 +531,6 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   const NOT_POSSIBLE = 'НЕВОЗМОЖНО';
   const firefight = () => !(currentPhase(app.state).actions ?? []).includes('move');
 
-  function activeText() {
-    const s = app.state;
-    if (s.result) {
-      return `${s.result.why.charAt(0).toUpperCase()}${s.result.why.slice(1)}. В итогах — новая игра.`;
-    }
-    if (!planning()) return app.aiPending || s.activeSide !== PLAYER_SIDE ? 'Действует OPFOR.' : 'Приказы выполняются.';
-    const total = myUnits().length;
-    if (firefight()) {
-      return `Стрелять могут ${count(total, 'подразделение', 'подразделения', 'подразделений')}, которые не двигались. Цель есть у ${app.plan.length} из ${total}; остальные не стреляют.`;
-    }
-    return `Отдайте приказы на движение и выполните их. Кто двигался, в этот ход не стреляет. Приказ есть у ${app.plan.length} из ${total}; остальные остаются на месте.`;
-  }
-
   function phaseTitle() {
     const s = app.state;
     if (s.result) return s.result.winner === PLAYER_SIDE ? 'Задача выполнена' : 'Задача провалена';
@@ -631,7 +625,6 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       ? `Повтор · ${app.replay.player} · ход ${s.turn}`
       : s.result ? 'Задача завершена' : planning() ? `Ваши приказы · ход ${s.turn}` : s.activeSide === PLAYER_SIDE ? 'Приказы выполняются' : 'Ход противника';
     $('phaseCard').className = `panel thin ${s.result ? (s.result.winner === PLAYER_SIDE ? 'won' : 'lost') : ''}`;
-    $('active').textContent = activeText();
     renderPhases();
     const ready = planning() ? myUnits().length : 0;
     $('progress').style.width = `${ready ? (100 * Math.min(app.plan.length, ready)) / ready : 0}%`;
@@ -679,11 +672,26 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     return u && u.status !== 'eliminated' && shown(u) ? u.id : null;
   }
 
+  // The order a click (or a drop) on the hex under the pointer would give the selected unit, or null.
+  function hoverOrder() {
+    return app.selected !== null && planning() && app.hover && inBounds(app.state.map, app.hover) ? orderFor(app.hover) : null;
+  }
+
+  // The pointer (user request 2026-10-15): a scope over a hex the selected unit would fire at, an arrow onto a hex
+  // over one it would move to, a hand over a unit you can pick; dragging a unit, not-allowed where it can't go.
+  function cursorFor() {
+    const order = hoverOrder();
+    const of = (o) => (o.type === 'fire' ? CURSOR.scope : CURSOR.move);
+    if (app.dragUnit !== null) return order ? of(order) : 'not-allowed';
+    if (app.hoverUnit !== null) return 'pointer';
+    return order ? of(order) : '';
+  }
+
   // Over a unit a click would select: a pointer cursor, its counter lit (world3d), and a tag.
   function renderUnitTip() {
     const tip = $('unitTip');
     const id = app.hoverUnit;
-    canvas.style.cursor = id !== null ? 'pointer' : '';
+    canvas.style.cursor = cursorFor();
     const show = id !== null && id !== app.selected && app.pointer && !app.pointer.dragging;
     tip.hidden = !show;
     if (!show) return;
@@ -887,10 +895,10 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     }
     const suspected = knownEnemies(s, PLAYER_SIDE).filter((c) => c.level === 'suspected').map((c) => c.pos);
 
-    // Every planned order: a path, or a line of fire from where the unit will
-    // be when it runs. Lines of fire go on top of the counters (drawn last),
-    // so the crosshair shows on its target.
-    const paths = [];
+    // Every planned order: a move arrow (an arch to the hex it moves to, drawn by the world), or a line of fire
+    // from where the unit will be when it runs. Lines of fire go on top of the counters (drawn last), so the
+    // crosshair shows on its target.
+    const arrows = [];
     const fires = [];
     if (planning()) {
       const checks = checkPlan(s, app.plan);
@@ -905,10 +913,13 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
           if (a.second) fires.push({ from, to: a.second, color, tag });
           return;
         }
-        const path = a.type === 'move' ? [a.to] : a.path;
-        const color = !checks[i].ok ? COLORS.invalid : a.unit === app.selected ? COLORS.plan : COLORS.move;
-        paths.push({ from, path, color });
+        arrows.push({ from, to: a.type === 'move' ? a.to : a.path[a.path.length - 1], kind: checks[i].ok ? 'plan' : 'invalid' });
       });
+      // While deciding (pointing, or dragging the unit): the arrow to the hex a click or a drop would move it to.
+      const would = hoverOrder();
+      if (would && (would.type === 'move' || would.type === 'fastMove') && !assaultVia(projectedFor(would.unit), would)) {
+        arrows.push({ from: projectedFor(would.unit).units[would.unit].pos, to: would.type === 'move' ? would.to : would.path[would.path.length - 1], kind: 'hover' });
+      }
     }
 
     const animating = app.anim.length;
@@ -938,11 +949,11 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       bangs: app.bangs.map((b) => ({ hex: b.hex, k: b.k, t: (now - b.start) / BANG_MS })),
       hoverUnit: app.hoverUnit,
       shots,
-      sig: JSON.stringify([marks, suspected, paths, fires, shots.length ? now : 0]),
+      arrows,
+      sig: JSON.stringify([marks, suspected, fires, shots.length ? now : 0]),
       paint: (ctx, cam) => {
         drawHexMarks(ctx, cam, marks);
         drawSuspected(ctx, cam, suspected);
-        for (const p of paths) drawPath(ctx, cam, p.from, p.path, p.color);
         for (const f of fires) drawFire(ctx, cam, f.from, f.to, f.color, 1, f.tag);
         for (const x of app.shots) {
           const t = (now - x.start) / x.ms;
@@ -954,10 +965,14 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
 
   // ---- input ----
 
+  // A left drag that starts on one of your units moves that unit: dropped on a hex, it gets the order a click there
+  // would give (user request 2026-10-15). Any other drag moves the view (middle: turns it).
   let drag = null;
   canvas.addEventListener('pointerdown', (e) => {
     canvas.setPointerCapture(e.pointerId);
-    drag = { x: e.clientX, y: e.clientY, moved: false, button: e.button };
+    const r = canvas.getBoundingClientRect();
+    const grab = e.button === 0 ? selectableAt(e.clientX - r.left, e.clientY - r.top) : null;
+    drag = { x: e.clientX, y: e.clientY, moved: false, button: e.button, unit: grab };
   });
   canvas.addEventListener('pointermove', (e) => {
     const r = canvas.getBoundingClientRect();
@@ -969,9 +984,12 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       const dx = e.clientX - drag.x;
       const dy = e.clientY - drag.y;
       if (drag.moved || Math.hypot(dx, dy) > CLICK_SLOP_PX) {
+        if (drag.unit !== null) {
+          if (!drag.moved && app.selected !== drag.unit) select(drag.unit);
+          app.dragUnit = drag.unit;
+        } else if (drag.button === 1) app.cam.orbit(dx, dy); // middle drag turns the view
+        else app.cam.panBy(dx, dy);                          // left or right drag moves it
         drag.moved = true;
-        if (drag.button === 1) app.cam.orbit(dx, dy); // middle drag turns the view
-        else app.cam.panBy(dx, dy);                    // left or right drag moves it
         drag.x = e.clientX;
         drag.y = e.clientY;
       }
@@ -982,6 +1000,15 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   canvas.addEventListener('pointerup', (e) => {
     const d = drag;
     drag = null;
+    const r0 = canvas.getBoundingClientRect();
+    if (d?.moved && d.unit !== null) {
+      app.dragUnit = null;
+      const h = hexAt(app.cam.toWorld(e.clientX - r0.left, e.clientY - r0.top));
+      // Dropped back where it stands: nothing to do.
+      if (planning() && !same(h, projectedFor(d.unit).units[d.unit].pos)) orderOn(h);
+      else render();
+      return;
+    }
     if (!d || d.moved || !planning()) return;
     if (d.button === 2) {
       deselect();
@@ -995,9 +1022,13 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       select(picked);
       return;
     }
-    const h = hexAt(app.cam.toWorld(e.clientX - r.left, e.clientY - r.top));
-    if (!inBounds(app.state.map, h)) return;
     // ...a click on a hex the selected unit can be ordered to gives the order.
+    orderOn(hexAt(app.cam.toWorld(e.clientX - r.left, e.clientY - r.top)));
+  });
+
+  // A click or a drop on hex h: the selected unit's order there, or why it can't go.
+  function orderOn(h) {
+    if (!inBounds(app.state.map, h)) return;
     const order = orderFor(h);
     if (order) {
       setOrder(order);
@@ -1010,7 +1041,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
         : 'До этого гекса не добраться. Синий — движение, жёлтый — перебежка. Правая кнопка снимает выбор.';
       render();
     }
-  });
+  }
   canvas.addEventListener('pointerleave', () => {
     app.hover = null;
     app.pointer = null;
@@ -1260,9 +1291,6 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   }
 
 
-  const brief = app.state.map.mission?.brief;
-  const goal = app.state.map.objective ? `Объект: гекс ${app.state.map.objective.join(',')}` : 'Объекта нет';
-  $('objective').replaceChildren(el('b', '', goal), document.createElement('br'), document.createTextNode(brief ?? ''));
   if (app.replay) {
     const r = app.replay;
     app.message = `Повтор прохождения ${r.player}: ${r.result === 'won' ? `победа за ${turnsText(r.turns)}` : 'неудачная попытка'}.`

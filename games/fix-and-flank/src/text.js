@@ -51,7 +51,7 @@ export const PHASE = { movement: 'Движение', firefight: 'Огонь', ra
 export const phaseName = (p) => PHASE[p] ?? p;
 
 // Soldiers by role, short (unit cards, counters): a fireteam, the SL, the HMG crew.
-export const ROLE = { TL: 'КГ', AR: 'П', GRN: 'Г', RFL: 'С', SL: 'SL', GNR: 'Н', AG: 'ПН', AMMO: 'ПБ' };
+export const ROLE = { TL: 'FTL', AR: 'AR', GRN: 'GR', RFL: 'R', SL: 'SL', GNR: 'MG', AG: 'AG', AMMO: 'AB' }; // Latin, like SL (user request 2026-10-15)
 export const ROLE_FULL = {
   TL: 'командир группы', AR: 'пулемётчик', GRN: 'гранатомётчик', RFL: 'стрелок', SL: 'командир отделения',
   GNR: 'наводчик', AG: 'помощник наводчика', AMMO: 'подносчик',

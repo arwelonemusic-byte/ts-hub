@@ -104,7 +104,6 @@ kbd {
 #phaseName { margin: 0; font: 500 22px/28px var(--slab); color: var(--fg); }
 .won #phaseName { color: var(--success); }
 .lost #phaseName { color: var(--danger); }
-#active { margin: 0; font: 400 13px/20px var(--sans); color: var(--secondary); }
 .progress { height: 4px; background: var(--raised); border-radius: 2px; overflow: hidden; }
 #progress { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.2s; }
 .section { display: flex; flex-direction: column; gap: 8px; }
@@ -135,8 +134,6 @@ kbd {
 .order { grid-column: 2 / 4; font: 400 13px/18px var(--sans); color: var(--secondary); }
 .order:empty { display: none; }
 .order.bad { color: var(--danger); }
-.brief { padding: 12px 16px; background: var(--inset); border-radius: 8px; font: 400 13px/20px var(--sans); color: var(--secondary); }
-.brief b { color: var(--fg); font-weight: 500; }
 
 /* Map controls, top right */
 .hud { position: absolute; z-index: 2; top: var(--gap); right: var(--gap); display: flex; flex-direction: column; gap: 1px; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); }

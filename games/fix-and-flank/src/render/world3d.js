@@ -108,6 +108,12 @@ const TRACER = { per: 3, gap: 0.3, speed: 3.2, len: 0.3, thick: 0.025, from: 0.2
 // moves, fire, paths, the selection, the objective) lie on the ground but are
 // drawn over everything, so nothing standing on the board hides them.
 const OVERLAY = { look: 40, texels: 64, glow: 0.45, marksOrder: 5 };
+// Move arrows: an arch from a unit to the hex it moves to (rise: of the distance, at least minRise), white with a
+// dark edge, over everything like the marks; a hover one (deciding) fainter, an order that can't run red.
+const ARROW = {
+  radius: 0.055, edge: 0.03, head: 0.17, headLen: 0.4, rise: 0.18, minRise: 0.3, from: 0.18, to: 0.05, segs: 28, sides: 8,
+  ink: '#ffffff', invalid: '#f26f63', edgeInk: '#0d0f11', edgeOpacity: 0.6, hoverOpacity: 0.7,
+};
 const GRID = { ink: 'rgba(18, 34, 10, 0.2)', width: 1.2 }; // faint hex outlines on the ground
 
 // Camera: distance from its target, and the angle it looks down at (radians),
@@ -1104,6 +1110,62 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
   const bangs = [];
   const puffs = [];
   const tracers = [];
+  const arrowGroup = new THREE.Group();
+  scene.add(arrowGroup);
+  let arrowSig = '';
+
+  // The move arrows: rebuilt when they change (planning, or the hex under the pointer), not every frame.
+  function updateArrows(list = []) {
+    const sig = JSON.stringify(list);
+    if (sig === arrowSig) return;
+    arrowSig = sig;
+    for (const m of arrowGroup.children) {
+      m.geometry.dispose();
+      m.material.dispose();
+    }
+    arrowGroup.clear();
+    const mat = (color, opacity, order) => {
+      const m = new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthTest: false, depthWrite: false, toneMapped: false });
+      return { m, order };
+    };
+    const add = (geometry, { m, order }) => {
+      const mesh = new THREE.Mesh(geometry, m);
+      mesh.renderOrder = order;
+      arrowGroup.add(mesh);
+      return mesh;
+    };
+    for (const a of list) {
+      const p = center(a.from);
+      const q = center(a.to);
+      const len = Math.hypot(q.x - p.x, q.y - p.y);
+      if (len < 1e-6) continue;
+      const peak = Math.max(ARROW.minRise, len * ARROW.rise);
+      const start = V(p.x, ARROW.from, p.y);
+      const end = V(q.x, ARROW.to, q.y);
+      // A quadratic arch: its control point twice the peak above the ends' middle.
+      const ctrl = V((p.x + q.x) / 2, 2 * peak - (ARROW.from + ARROW.to) / 2, (p.y + q.y) / 2);
+      const dir = new THREE.QuadraticBezierCurve3(start, ctrl, end).getTangentAt(1).normalize();
+      const shaft = new THREE.QuadraticBezierCurve3(start, ctrl, end.clone().addScaledVector(dir, -ARROW.headLen * 0.9));
+      const opacity = a.kind === 'hover' ? ARROW.hoverOpacity : 1;
+      const ink = a.kind === 'invalid' ? ARROW.invalid : ARROW.ink;
+      const edge = mat(ARROW.edgeInk, ARROW.edgeOpacity * opacity, OVERLAY.marksOrder + 1);
+      const body = mat(ink, opacity, OVERLAY.marksOrder + 2);
+      add(new THREE.TubeGeometry(shaft, ARROW.segs, ARROW.radius + ARROW.edge, ARROW.sides), edge);
+      add(new THREE.TubeGeometry(shaft, ARROW.segs, ARROW.radius, ARROW.sides), body);
+      // The head: a flat triangle with its tip on the hex, along the arch's last direction and level sideways, so it
+      // reads as a head from any side (a cone seen end on is a disc).
+      const side = new THREE.Vector3().crossVectors(dir, V(0, 1, 0)).normalize();
+      const head = (r, h, material, tip) => {
+        const t = end.clone().addScaledVector(dir, tip);
+        const base = t.clone().addScaledVector(dir, -h);
+        const g = new THREE.BufferGeometry().setFromPoints([t, base.clone().addScaledVector(side, r), base.clone().addScaledVector(side, -r)]);
+        material.m.side = THREE.DoubleSide;
+        add(g, material);
+      };
+      head(ARROW.head + ARROW.edge * 1.6, ARROW.headLen + ARROW.edge * 3, mat(ARROW.edgeInk, ARROW.edgeOpacity * opacity, OVERLAY.marksOrder + 1), ARROW.edge);
+      head(ARROW.head, ARROW.headLen, mat(ink, opacity, OVERLAY.marksOrder + 2), 0);
+    }
+  }
 
   function paintOverlay(frame) {
     const selected = frame.counters.filter((c) => c.selected && c.unit.status !== 'eliminated').map((c) => spot(c));
@@ -1317,6 +1379,7 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
       setBoard(next);
     },
     // frame: { counters (as for drawCounters), rosterOf, bangs [{ hex, k, t }], shots [{ from, to, side, t }], hoverUnit (id or null),
+    // arrows [{ from, to, kind: plan | hover | invalid }] (move arrows),
     // paint(ctx, cam): draws the marks with the flat map's functions, sig: changes whenever they do }
     render(now, frame) {
       const dt = last === null ? 0 : Math.min(0.1, (now - last) / 1000);
@@ -1327,6 +1390,7 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
         place();
       }
       paintOverlay(frame);
+      updateArrows(frame.arrows);
       animateWater(now / 1000);
       flag?.wave(now / 1000);
       updateUnits(frame, dt);
