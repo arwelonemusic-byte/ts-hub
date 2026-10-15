@@ -34,6 +34,7 @@ const EXPOSURE = 1.05;
 // Heights (world units: a hex has circumradius 1).
 const LEVEL = { bed: -0.3, water: -0.09, base: -1.05, lip: -0.07, road: 0.014, trench: 0.01, bank: 0.05 };
 const EARTH = [{ to: -0.36, color: '#6e4a2b' }, { to: -0.7, color: '#8b6340' }, { to: LEVEL.base, color: '#a0774f' }];
+const TILE_EARTH = 1; // bands of earth under a palette tile (render/tiles.js): a thin slab, so the ground is what shows
 // Ground relief: each hex's triangles are lifted or sunk by up to half this.
 const BUMP = { open: 0.05, road: 0, scrub: 0.06, woods: 0.07, rubble: 0.06, building: 0.02, trench: 0, water: 0.04 };
 const INNER = 0.52; // inner ring of a hex's triangles, as a share of the way to its side midpoints
@@ -368,7 +369,7 @@ function wall(m, line, topY, bands, toward) {
   }
 }
 
-function buildBoard(map) {
+function buildBoard(map, earth) {
   const ground = new Mesher(); // takes the grid layer
   const top = new Mesher();    // the surface the marks lie on: the ground, and the water's surface
   const sides = new Mesher();  // the slab's edge and the banks
@@ -393,7 +394,7 @@ function buildBoard(map) {
         // The board's edge: a lip of this hex's ground, then bands of earth.
         const out = V(mid.x - c.x, 0, mid.y - c.y);
         const lip = '#' + color(pick(GROUND[t], r(400 + i))).clone().multiplyScalar(0.82).getHexString();
-        wall(sides, line, wet ? bedHeight : landY, [{ to: LEVEL.lip, color: lip }, ...EARTH], out);
+        wall(sides, line, wet ? bedHeight : landY, [{ to: LEVEL.lip, color: lip }, ...earth], out);
         if (wet) wall(water, line, () => LEVEL.water, [{ to: LEVEL.bed - BUMP.water, color: WATER.glass }], out);
       } else if (wet && !isWater(n)) {
         // A bank: the land drops to the bed.
@@ -416,7 +417,8 @@ function buildBoard(map) {
 }
 
 // A dirt track from the hex center to each neighbouring road hex; off the board
-// edge when the road leaves it; a dead end stops at the center.
+// edge when the road leaves it; a dead end stops at the center; alone, it
+// crosses the hex west to east, like a trench.
 function road(m, map, h) {
   const { c, outer } = hexPoints(h);
   const ns = neighbors(h);
@@ -425,7 +427,8 @@ function road(m, map, h) {
   ns.forEach((n, i) => {
     if (isRoad(n)) ends.push(i);
   });
-  if (ends.length === 1 && !inBounds(map, ns[(ends[0] + 3) % 6])) ends.push((ends[0] + 3) % 6);
+  if (!ends.length) ends.push(SIDES.indexOf('E'), SIDES.indexOf('W'));
+  else if (ends.length === 1 && !inBounds(map, ns[(ends[0] + 3) % 6])) ends.push((ends[0] + 3) % 6);
   const r = (i) => hash(h.col, h.row, 500 + i);
   const w = ROAD.width / 2;
   const y = LEVEL.road;
@@ -795,8 +798,9 @@ function bangTexture(k) {
 // pickCounters: a unit's counter and figures can be pointed at (pickUnit),
 // and the ground point under them is the unit's own (the game); the editor
 // turns it off, as it picks hex corners too.
-export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {}) {
-  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+// tile: the board as a palette tile (render/tiles.js): alone on a clear background, on a thin slab of earth.
+export function createWorld(boardCanvas, firstMap, { pickCounters = true, tile = false } = {}) {
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance', alpha: tile });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.toneMappingExposure = EXPOSURE;
@@ -809,7 +813,7 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
   if (getComputedStyle(boardCanvas).position === 'static') boardCanvas.style.position = 'relative'; // stays on top, for input
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(SKY);
+  scene.background = tile ? null : new THREE.Color(SKY);
   scene.fog = new THREE.Fog(SKY, 30, 90);
 
   // Light.
@@ -853,6 +857,7 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
   const table = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), new THREE.MeshStandardMaterial({ color: TABLE, roughness: 1 }));
   table.rotation.x = -Math.PI / 2;
   table.receiveShadow = true;
+  table.visible = !tile;
   // The marks layer, on a copy of the ground's surface drawn after everything
   // else and through it (no depth test); the counters and bangs still go on top.
   const marksMesh = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ transparent: true, depthTest: false, depthWrite: false, toneMapped: false }));
@@ -909,7 +914,7 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
     overlaySig = null;
 
     const old = built;
-    built = buildBoard(map);
+    built = buildBoard(map, tile ? EARTH.slice(0, TILE_EARTH) : EARTH);
     groundMesh.geometry = built.ground;
     sidesMesh.geometry = built.sides;
     thingsMesh.geometry = built.things;

@@ -7,6 +7,7 @@
 import { toScreen } from '../render/camera.js';
 import { COLORS, drawHexMarks } from '../render/hexmap.js';
 import { mapStill } from '../render/still.js';
+import { tilePictures } from '../render/tiles.js';
 import { TERRAIN } from '../text.js';
 import { createWorld } from '../render/world3d.js';
 import { center, corners, hexAt, SIDES } from '../sim/hex.js';
@@ -340,6 +341,17 @@ async function main() {
     b.onclick = () => pickTerrain(t);
     palette.append(b);
   });
+  // Each terrain as the board draws it, once the pictures are ready; the flat colour until then (or without WebGL).
+  tilePictures(TERRAINS, balance)
+    .then((pics) => {
+      for (const sw of palette.querySelectorAll('.sw')) {
+        const pic = pics[sw.parentElement.dataset.terrain];
+        if (!pic) continue;
+        sw.style.background = `center / contain no-repeat url(${pic})`;
+        sw.classList.add('pic');
+      }
+    })
+    .catch(() => {});
 
   function pickTerrain(t) {
     ed.terrain = t;
