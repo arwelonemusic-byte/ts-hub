@@ -984,18 +984,13 @@ async function main() {
     requestAnimationFrame(frame);
   }
 
-  // Served by the hub: its buttons instead of Play, and «Назад в Хаб» (and the brand) lead back to the game's page there.
+  // Served by the hub: its buttons instead of Play, and «Назад в Хаб» leads back to the game's page there. Only the
+  // link: the brand fills the bar's left column, so a click on it would catch the whole empty bar.
   if (inHub) {
     $('play').hidden = true;
-    const brand = document.querySelector('.brand');
-    brand.classList.add('home');
-    brand.title = 'Fix & Flank в хабе';
-    brand.onclick = () => {
-      location.href = hubHome;
-    };
     const back = el('a', 'where', 'Назад в Хаб');
     back.href = hubHome;
-    brand.querySelector('.where').replaceWith(back);
+    document.querySelector('.brand .where').replaceWith(back);
   }
   if (ed.hub) {
     for (const id of ['hubState', 'playtest', 'publish']) $(id).hidden = false;
