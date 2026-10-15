@@ -49,6 +49,8 @@ export interface FnfActivity {
   id: string;
   kind: "won" | "lost" | "record" | "published";
   player: string;
+  /** Their Discord avatar (players.avatar_url), or null: the initial is drawn. */
+  avatar: string | null;
   map: { id: string; name: string };
   turns?: number;
   at: string;

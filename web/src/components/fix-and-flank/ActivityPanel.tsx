@@ -18,7 +18,7 @@ export function ActivityPanel({ items, now, locale, t }: { items: FnfActivity[];
         <ol className="flex flex-col">
           {items.map((a) => (
             <li key={a.id} className="flex gap-3 border-t border-line py-3 first:border-t-0 first:pt-0">
-              <Avatar name={a.player} src={null} size={32} />
+              <Avatar name={a.player} src={a.avatar} size={32} />
               <div className="flex min-w-0 flex-col gap-0.5">
                 <p className="type-body-s text-fg-body">
                   <span className="type-label-s text-fg">{a.player}</span> {t(`fnf.act.${a.kind}`)}{" "}

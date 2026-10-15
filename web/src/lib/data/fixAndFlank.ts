@@ -134,14 +134,14 @@ export const fixAndFlankData: FixAndFlankData = {
     const db = await getDb();
     const [maps, runs] = await Promise.all([
       db.query(
-        `SELECT m.id, m.name, COALESCE(p.display_name, m.author_label) AS author, m.published_at FROM fnf_maps m
+        `SELECT m.id, m.name, COALESCE(p.display_name, m.author_label) AS author, p.avatar_url, m.published_at FROM fnf_maps m
          LEFT JOIN players p ON p.id = m.author_id
          WHERE m.published_at IS NOT NULL AND m.hidden_at IS NULL AND m.author_id IS NOT NULL ORDER BY m.published_at DESC LIMIT $1`,
         [limit],
       ),
       // A win is a record when no earlier win on that map took as few turns.
       db.query(
-        `SELECT r.id, r.result, r.turns, r.finished_at, p.display_name, m.id AS map_id, m.name AS map_name,
+        `SELECT r.id, r.result, r.turns, r.finished_at, p.display_name, p.avatar_url, m.id AS map_id, m.name AS map_name,
            (r.result = 'won' AND NOT EXISTS (SELECT 1 FROM fnf_runs e WHERE e.map_id = r.map_id AND e.result = 'won'
               AND e.finished_at < r.finished_at AND e.turns <= r.turns)) AS record
          FROM fnf_runs r JOIN players p ON p.id = r.player_id JOIN fnf_maps m ON m.id = r.map_id
@@ -149,12 +149,21 @@ export const fixAndFlankData: FixAndFlankData = {
         [limit],
       ),
     ]);
+    const avatar = (r: Row) => (r.avatar_url as string | null) ?? null;
     const out: FnfActivity[] = [
-      ...maps.map((m) => ({ id: `pub-${m.id}`, kind: "published" as const, player: String(m.author), map: { id: String(m.id), name: String(m.name) }, at: iso(m.published_at) })),
+      ...maps.map((m) => ({
+        id: `pub-${m.id}`,
+        kind: "published" as const,
+        player: String(m.author),
+        avatar: avatar(m),
+        map: { id: String(m.id), name: String(m.name) },
+        at: iso(m.published_at),
+      })),
       ...runs.map((r) => ({
         id: `run-${r.id}`,
         kind: r.record ? ("record" as const) : (r.result as "won" | "lost"),
         player: String(r.display_name),
+        avatar: avatar(r),
         map: { id: String(r.map_id), name: String(r.map_name) },
         turns: Number(r.turns),
         at: iso(r.finished_at),
