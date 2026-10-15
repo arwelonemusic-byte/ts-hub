@@ -64,11 +64,19 @@
       <div id="dice" hidden aria-live="polite"></div>
       <div class="hint" id="hint" aria-live="polite"><i class="dot"></i><div><span id="preview"></span> <span id="message"></span></div></div>
       <div class="actions" id="actions">
-        <button class="btn" id="hold" title="Отменить приказ выбранного подразделения (H)">На месте <kbd>H</kbd></button>
         <button class="btn" id="clear" title="Отменить все приказы">Сбросить всё</button>
         <button class="btn" id="view" title="Затемнить то, чего отделение не видит; наведите на подразделение (или выберите его), чтобы увидеть его обзор (V)">Обзор <kbd>V</kbd></button>
         <span class="sep"></span>
         <button class="btn primary" id="commit" title="Выполнить приказы (Пробел)"><span id="commitLabel">Выполнить приказы</span> <kbd>Пробел</kbd></button>
+      </div>
+      <!-- «Повтор»: instead of the orders' buttons, the replay's (src/ui/app.js). -->
+      <div class="actions" id="replayBar" hidden>
+        <button class="btn" id="replayExit" title="Выйти из повтора на страницу карты в хабе">Выйти из повтора</button>
+        <span class="sep"></span>
+        <span id="replayTurn"></span>
+        <button class="btn" id="replayBack" title="К началу хода; ещё раз — к предыдущему ходу" aria-label="Предыдущий ход"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 19 8 12l10-7z"/><rect x="5" y="5" width="2.5" height="14" rx="1"/></svg></button>
+        <button class="btn primary" id="replayPlay" title="Пауза и продолжение (Пробел)"><svg id="replayIconPause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><svg id="replayIconPlay" viewBox="0 0 24 24" fill="currentColor" hidden><path d="M7 4.5v15l12-7.5z"/></svg><span id="replayPlayLabel">Пауза</span> <kbd>Пробел</kbd></button>
+        <button class="btn" id="replayFwd" title="К следующему ходу" aria-label="Следующий ход"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m6 5 10 7-10 7z"/><rect x="16.5" y="5" width="2.5" height="14" rx="1"/></svg></button>
       </div>
     </div>
   </main>
@@ -90,7 +98,7 @@
           <kbd>Пробел</kbd><span>Выполнить приказы</span>
           <kbd>Tab</kbd><span>Следующее подразделение</span>
           <kbd>Esc</kbd><span>Снять выбор (или правая кнопка)</span>
-          <kbd>H</kbd><span>На месте: отменить приказ выбранного подразделения</span>
+          <kbd>Delete</kbd><span>Отменить приказ выбранного подразделения</span>
           <kbd>V</kbd><span>Обзор: затемняет то, чего отделение не видит; наведите на подразделение или выберите его, чтобы увидеть только его обзор</span>
           <kbd>Home</kbd><span>Вся карта · колесо — масштаб</span>
           <kbd>↑</kbd><span>Сдвинуть вид (стрелки или перетаскивание левой или правой кнопкой)</span>

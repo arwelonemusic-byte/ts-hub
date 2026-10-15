@@ -176,6 +176,7 @@ kbd {
 .btn.primary kbd { background: rgba(32, 36, 39, 0.12); color: var(--on-accent); box-shadow: none; }
 .btn:focus-visible, .unit:focus-visible, .iconbtn:focus-visible, .hud button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .actions .sep { width: 1px; height: 24px; background: var(--line-strong); margin: 0 4px; }
+#replayTurn { padding: 0 6px; font: 500 13px/20px var(--sans); color: var(--secondary); white-space: nowrap; }
 
 /* Dice tray: above the actions while a roll plays */
 #dice {

@@ -14,6 +14,7 @@ import { createRng } from '../sim/rng.js';
 import { knownEnemies } from '../sim/spotting.js';
 import { canActivate, currentPhase, unitType, unitsAt } from '../sim/state.js';
 import { chooseOrders } from '../ai/basic.js';
+import { commitTurn, RUN_LIMITS } from '../ai/run.js';
 import { COLORS, counterLabel, drawFire, drawHexMarks, drawPath, drawSuspected } from '../render/hexmap.js';
 import { createWorld } from '../render/world3d.js';
 import { hub, hubHome, hubIdOf, hubMapPage, servedByHub } from '../hub.js';
@@ -54,7 +55,26 @@ const ARROWS = { ArrowLeft: [ARROW_PAN_PX, 0], ArrowRight: [-ARROW_PAN_PX, 0], A
 
 // The board is drawn in 3D (render/world3d.js) under the board canvas, which takes the input.
 // recorder: a run on a hub map being recorded ({ commit(orders), finish() }, main.js); replay: a run played back
-// ({ commits, at, player, result, turns, sameRules }); unrecorded: why a hub map's game isn't recorded.
+// ({ mapId, commits, at, player, result, turns, sameRules }); unrecorded: why a hub map's game isn't recorded.
+// «Повтор»: where each turn of a run starts (the board, and how many of the player's commits come before it), and
+// its end. The same play-through as the hub's (ai/run.js), so a jump to a turn shows what playing up to it would.
+function replayMarks(state, commits) {
+  const marks = [];
+  let s = state;
+  let at = 0;
+  for (let i = 0; i < RUN_LIMITS.steps && !s.result && s.activeSide; i++) {
+    if (s.activeSide === PLAYER_SIDE) {
+      if (marks.at(-1)?.turn !== s.turn) marks.push({ turn: s.turn, at, state: s });
+      if (at >= commits.length) break;
+      s = commitTurn(s, commits[at++]);
+    } else {
+      s = commitTurn(s, chooseOrders(s, s.activeSide));
+    }
+  }
+  if (marks.at(-1)?.state !== s) marks.push({ turn: s.turn, at, state: s, end: true });
+  return marks;
+}
+
 export function startApp(initialState, { reveal = false, recorder = null, replay = null, unrecorded = '' } = {}) {
   const world = createWorld($('board'), initialState.map);
   const app = {
@@ -69,7 +89,8 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     shots: [],         // lines of fire being shown: { from, to, start, ms, side, tag }
     bangs: [],         // bang markers being shown: { hex, start, k }
     playing: false,    // a commit is being played back
-    timers: [],
+    final: null,       // the state the commit being played back ends in
+    timers: [],        // what playback has scheduled: cleared to stop it (a replay's pause or jump)
     fireCache: null,
     hover: null,
     hoverUnit: null,   // your unit under the pointer that a click would select
@@ -86,6 +107,11 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   };
   const canvas = $('board');
   const tray = createDiceTray($('dice'));
+  // A replay has its own controls instead of the orders' (user request 2026-10-15): pause, play, a turn back or
+  // forward, and the way out.
+  $('actions').hidden = !!replay;
+  $('replayBar').hidden = !replay;
+  if (replay) Object.assign(replay, { paused: false, marks: replayMarks(initialState, replay.commits) });
   // The part of the board the floating panels leave free: a fit centers the map in it.
   function freeArea(width) {
     const box = (id) => $(id).getBoundingClientRect();
@@ -94,7 +120,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       left: box('phaseCard').right - stage.left + FIT_GAP,
       right: stage.right - Math.min(box('hud').left, box('hexcard').left) + FIT_GAP,
       top: FIT_GAP,
-      bottom: stage.bottom - box('actions').top + HINT_ROOM,
+      bottom: stage.bottom - box(replay ? 'replayBar' : 'actions').top + HINT_ROOM,
     };
     return pad.left + pad.right > width / 2 ? { left: 0, right: 0, top: 0, bottom: 0 } : pad;
   }
@@ -264,6 +290,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     const before = app.state;
     const steps = [];
     const final = commitOrders(before, actions, createRng(before.rngState), (state, events) => steps.push({ state, events })).state;
+    app.final = final;
     app.playing = true;
     render();
     let t = 0;
@@ -338,7 +365,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
 
   // «Повтор»: the player's next recorded commit, after a pause.
   function replayNext() {
-    if (app.state.result || app.state.activeSide !== PLAYER_SIDE) return;
+    if (app.replay.paused || app.state.result || app.state.activeSide !== PLAYER_SIDE) return;
     const orders = app.replay.commits[app.replay.at++];
     if (!orders) {
       app.message = 'Запись на этом заканчивается.';
@@ -369,18 +396,101 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   }
 
   function enemyTurn() {
+    if (app.replay?.paused) {
+      render();
+      return;
+    }
     if (app.state.activeSide === PLAYER_SIDE || app.state.activeSide === null) {
-      if (app.replay && app.state.activeSide === PLAYER_SIDE) setTimeout(replayNext, REPLAY_PAUSE_MS);
+      if (app.replay && app.state.activeSide === PLAYER_SIDE) app.timers.push(setTimeout(replayNext, REPLAY_PAUSE_MS));
       render();
       return;
     }
     app.aiPending = true;
     render();
-    setTimeout(() => {
+    app.timers.push(setTimeout(() => {
       app.aiPending = false;
       const side = app.state.activeSide;
       run(chooseOrders(app.state, side), enemyTurn);
-    }, AI_DELAY_MS);
+    }, AI_DELAY_MS));
+  }
+
+  // ---- «Повтор»: pause, play, a turn back or forward ----
+
+  // Stop whatever playback has scheduled, mid-commit too.
+  function stopPlayback() {
+    for (const t of app.timers) clearTimeout(t);
+    app.timers = [];
+    app.playing = false;
+    app.aiPending = false;
+    app.anim = [];
+    app.shots = [];
+    app.bangs = [];
+    tray.hide();
+  }
+
+  // Pause at once: the commit being shown jumps to its end.
+  function pauseReplay() {
+    if (app.replay.paused) return;
+    const playing = app.playing;
+    stopPlayback();
+    if (playing) app.state = app.final;
+    app.replay.paused = true;
+    render();
+  }
+
+  // Go on from where the board is; at the end, from the start.
+  function playReplay() {
+    if (app.state.result) replayJump(0);
+    app.replay.paused = false;
+    render();
+    enemyTurn(); // the side to act next acts: the player's next commit, or the AI
+  }
+
+  const togglePause = () => (app.replay.paused || app.state.result ? playReplay() : pauseReplay());
+
+  // The turn shown: the last mark the board has reached.
+  function replayIndex() {
+    const { marks, at } = app.replay;
+    let i = 0;
+    marks.forEach((m, k) => {
+      if (m.at <= at && m.turn <= app.state.turn) i = k;
+    });
+    return i;
+  }
+
+  // The board is exactly at mark i: a turn's start (or the end), not partway through it.
+  function atMark(i) {
+    const m = app.replay.marks[i];
+    return !app.playing && app.replay.at === m.at && app.state.turn === m.turn && !!app.state.result === !!m.state.result
+      && currentPhase(app.state).name === currentPhase(m.state).name;
+  }
+
+  // Back: to the start of this turn, or of the one before when already there. Forward: to the next turn's start.
+  // A step pauses: the board waits to be looked at.
+  function replayStep(dir) {
+    const i = replayIndex();
+    replayJump(dir < 0 ? (atMark(i) ? i - 1 : i) : i + 1);
+  }
+
+  function replayJump(i) {
+    const m = app.replay.marks[Math.max(0, Math.min(i, app.replay.marks.length - 1))];
+    stopPlayback();
+    Object.assign(app.replay, { paused: true, at: m.at });
+    app.state = m.state;
+    app.debriefed = false; // reaching the end again shows the debrief again
+    render();
+  }
+
+  function renderReplayBar() {
+    const r = app.replay;
+    const i = replayIndex();
+    const playing = !r.paused && !app.state.result;
+    $('replayBack').disabled = i === 0 && atMark(0);
+    $('replayFwd').disabled = i >= r.marks.length - 1;
+    $('replayIconPause').hidden = !playing;
+    $('replayIconPlay').hidden = playing;
+    $('replayPlayLabel').textContent = app.state.result ? 'С начала' : playing ? 'Пауза' : 'Смотреть';
+    $('replayTurn').textContent = `Ход ${app.state.turn} из ${r.marks.at(-1).turn}`;
   }
 
   function toggleView() {
@@ -529,7 +639,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     $('units').replaceChildren(...s.units.filter((u) => u.side === PLAYER_SIDE).map((u) => unitCard(s, u)));
 
     const sel = app.selected !== null ? unit(app.selected) : null;
-    $('hold').disabled = !planning() || !sel || orderIndex(sel.id) === -1;
+    if (app.replay) renderReplayBar();
     $('clear').disabled = !planning() || !app.plan.length;
     $('commit').disabled = !planning() && !s.result;
     $('commitLabel').textContent = s.result ? 'Итоги' : firefight() ? 'Открыть огонь' : 'Выполнить движение';
@@ -932,12 +1042,13 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       showHelp();
     } else if (k === ' ' || k === 'enter') {
       e.preventDefault(); // also stops a focused button from being clicked by Space
-      commit();
+      if (app.replay && k === ' ') togglePause();
+      else commit();
     } else if (k === 'tab') {
       e.preventDefault();
       nextUnit();
     } else if (k === 'escape') deselect();
-    else if (k === 'h' || k === 'backspace' || k === 'delete') holdSelected();
+    else if (k === 'backspace' || k === 'delete') holdSelected();
     else if (k === 'v') toggleView();
     else if (k === 'home' || k === '0') fit();
     else if (k === 'q' || k === 'e') app.cam.turn(k === 'q' ? -1 : 1);
@@ -947,7 +1058,14 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     }
   });
 
-  $('hold').onclick = holdSelected;
+  if (replay) {
+    $('replayPlay').onclick = togglePause;
+    $('replayBack').onclick = () => replayStep(-1);
+    $('replayFwd').onclick = () => replayStep(1);
+    $('replayExit').onclick = () => {
+      location.href = hubBack();
+    };
+  }
   $('clear').onclick = clearAll;
   $('commit').onclick = commit;
   $('view').onclick = toggleView;
