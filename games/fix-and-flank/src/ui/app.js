@@ -911,7 +911,8 @@ export function startApp(initialState, { reveal = false } = {}) {
 
   // The editor, opening this map.
   const here = new URLSearchParams(location.search);
-  $('editBtn').href = `editor.html?${new URLSearchParams({ map: here.get('map') ?? 'trenchline' })}`;
+  // A hub map (?src=) opens in the editor too: its author goes on with a draft, anyone else starts a new map from it.
+  $('editBtn').href = `editor.html?${new URLSearchParams(here.get('src') ? { src: here.get('src') } : { map: here.get('map') ?? 'trenchline' })}`;
 
   $('helpBtn').onclick = showHelp;
 

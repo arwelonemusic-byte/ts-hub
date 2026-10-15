@@ -1336,6 +1336,17 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
       renderer.render(scene, camera);
       measureBanners();
     },
+    // The view as render() just drew it, as an image (data URL). Call it right after render(), in the same task:
+    // the canvas keeps its picture only until the browser shows it.
+    snapshot(type = 'image/jpeg', quality = 0.85) {
+      return gl.toDataURL(type, quality);
+    },
+    // Let go of the GPU, for a world made for one picture (render/still.js).
+    dispose() {
+      renderer.dispose();
+      renderer.forceContextLoss();
+      gl.remove();
+    },
   };
 }
 

@@ -55,7 +55,7 @@ The simulation must be completely separate from rendering and UI.
   /ai         enemy behavior (basic.js), scripted BLUFOR plans (drills.js)
   /render     drawing only: world3d.js (three.js), hexmap.js (marks, counters, bangs on canvases)
   /ui         input, action planning, odds preview, step-by-step playback with the dice tray
-  /editor     map editor (editor.html): model.js (pure, tested), editor.js (page), store.js (localStorage maps, played as ?map=local:<id>)
+  /editor     map editor (editor.html): model.js (pure, tested), editor.js (page), hub.js (drafts and publishing in the TS Hub, when it serves the editor), store.js (this browser's maps otherwise, played as ?map=local:<id>)
 /data
   balance.json      all tunable numbers (terrain table, dice modifiers)
   /maps             one JSON per mission

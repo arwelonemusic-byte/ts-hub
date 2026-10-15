@@ -6,6 +6,7 @@
 
 import { toScreen } from '../render/camera.js';
 import { COLORS, drawHexMarks } from '../render/hexmap.js';
+import { mapStill } from '../render/still.js';
 import { createWorld } from '../render/world3d.js';
 import { center, corners, hexAt, SIDES } from '../sim/hex.js';
 import { parseMap } from '../sim/map.js';
@@ -15,6 +16,7 @@ import {
   inside, moveObjective, nearestEdge, nearestVertex, newModel, paint, problems, randomize, startNear, terrainAt, toggleEnemy,
   toggleParapet, toMapJson,
 } from './model.js';
+import { connectHub, hub, hubHome, hubIdOf, hubMapPage, hubSrc } from './hub.js';
 import { LOCAL, deleteMap, listMaps, loadDraft, loadMap, saveDraft, saveMap } from './store.js';
 
 const WHEEL_ZOOM = 1.15;
@@ -26,6 +28,7 @@ const NEAR_CORNERS = 3.2;                   // corners shown within this many wo
 const STROKE_STEP = 0.35;                   // world units between samples along a drag
 const SQUAD_LABEL = 0.55;                   // the start's A / B / SL labels: text height in world units
 const SAVE_DELAY_MS = 400;
+const HUB_SAVE_DELAY_MS = 1500;             // an open hub draft saves itself this long after the last change
 const ARROW_PAN_PX = 140;                   // an arrow key pans the view this far
 const ARROWS = { ArrowLeft: [ARROW_PAN_PX, 0], ArrowRight: [-ARROW_PAN_PX, 0], ArrowUp: [0, ARROW_PAN_PX], ArrowDown: [0, -ARROW_PAN_PX] };
 const TOAST_MS = 2600;
@@ -63,12 +66,16 @@ async function openNamed(name) {
 }
 
 async function main() {
-  const balance = await loadJson('data/balance.json');
+  const [balance, hubLink] = await Promise.all([loadJson('data/balance.json'), connectHub()]);
   const params = new URLSearchParams(location.search);
 
   const ed = {
     model: null,
-    id: null,          // where it is saved in My maps, once it is
+    id: null,          // where it is saved in My maps (this browser), once it is
+    hub: hubLink && !hubLink.error ? hubLink : null, // the TS Hub, when it serves the editor: { name, maps }
+    hubId: null,       // the hub draft this map is, once saved there
+    hubState: 'none',  // none (not in the hub yet), saving, saved, unsaved, error
+    hubError: '',
     tool: 'terrain',
     terrain: 'woods',
     chain: null,       // wall or hedge being drawn: the corner it has got to
@@ -78,10 +85,25 @@ async function main() {
     version: 0,        // bumped on every change, for the 3D marks layer
   };
 
-  // The map to start from: ?map= (from the game's Edit button), else the draft, else a new one.
+  // The map to start from: from the hub ?draft= (one of yours) or ?src= (a map JSON on this site: your
+  // draft goes on, anyone else's map or a published one opens as a new map); ?map= (from the game's Edit
+  // button); else the draft in this browser; else a new one.
   const draft = loadDraft();
   const wanted = params.get('map');
-  if (wanted) {
+  const src = params.get('src');
+  const fromHub = params.get('draft') ?? (src && hubIdOf(src));
+  const ownDraft = (id) => !!id && !!ed.hub?.maps.some((x) => x.id === id && x.status === 'draft');
+  if (params.get('draft') || src) {
+    if (ownDraft(fromHub)) {
+      ed.model = fromMapJson(await hub.load(fromHub));
+      ed.hubId = fromHub;
+      ed.hubState = 'saved';
+    } else {
+      ed.model = fromMapJson(await loadJson(src ?? hubSrc(fromHub)));
+    }
+    for (const k of ['draft', 'src']) params.delete(k);
+    history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}`);
+  } else if (wanted) {
     if (draft?.model && !draft.id) saveMap(toMapJson(draft.model, balance)); // don't lose an unsaved draft
     ed.model = fromMapJson(await openNamed(wanted));
     ed.id = wanted.startsWith(LOCAL) ? wanted.slice(LOCAL.length) : null;
@@ -93,6 +115,10 @@ async function main() {
     delete ed.model.turns;
     delete ed.model.brief;
     ed.id = draft.id ?? null;
+    if (ownDraft(draft.hubId)) {
+      ed.hubId = draft.hubId;
+      ed.hubState = 'unsaved'; // this browser's copy may be newer than the hub's: saved again below
+    }
   } else {
     ed.model = newModel();
   }
@@ -132,7 +158,63 @@ async function main() {
   let saveTimer = null;
   function saveSoon() {
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => saveDraft({ model: ed.model, id: ed.id }), SAVE_DELAY_MS);
+    saveTimer = setTimeout(() => saveDraft({ model: ed.model, id: ed.id, hubId: ed.hubId }), SAVE_DELAY_MS);
+    hubSaveSoon();
+  }
+
+  // ---- the hub: drafts, playtest, publish ----
+
+  // A still of the map for its card in the hub: BLUFOR and the objective, never OPFOR.
+  const still = () => mapStill(renderMap(), toMapJson(ed.model, balance).units, balance);
+
+  function setHubState(state, error = '') {
+    ed.hubState = state;
+    ed.hubError = error;
+    renderHubState();
+  }
+
+  function renderHubState() {
+    if (!ed.hub) return;
+    const s = $('hubState');
+    const text = { none: 'Not in the hub yet', saving: 'Saving…', saved: 'Draft saved', unsaved: 'Unsaved changes', error: 'Not saved' }[ed.hubState];
+    s.textContent = text;
+    s.title = ed.hubError || (ed.hubId ? 'Only you see your drafts until you publish them.' : 'Save draft keeps it in the hub.');
+    s.className = ed.hubState === 'error' ? 'bad' : '';
+  }
+
+  // An open hub draft saves itself shortly after each change.
+  let hubTimer = null;
+  function hubSaveSoon() {
+    if (!ed.hub || !ed.hubId) return;
+    setHubState('unsaved');
+    clearTimeout(hubTimer);
+    hubTimer = setTimeout(() => saveToHub({ quiet: true }), HUB_SAVE_DELAY_MS);
+  }
+
+  // Saves go one after another, each with the map as it was when asked for.
+  let hubQueue = Promise.resolve(true);
+  function saveToHub({ quiet = false, thumb = false } = {}) {
+    clearTimeout(hubTimer);
+    const body = { name: ed.model.name, json: toMapJson(ed.model, balance) };
+    const model = ed.model;
+    hubQueue = hubQueue.then(async () => {
+      setHubState('saving');
+      try {
+        if (thumb) body.thumb = await still();
+        if (ed.hubId) await hub.save(ed.hubId, body);
+        else ed.hubId = (await hub.create(body)).id;
+        if (ed.model === model) saveDraft({ model: ed.model, id: ed.id, hubId: ed.hubId });
+        setHubState(ed.model === model ? 'saved' : 'unsaved');
+        if (!quiet) toast('Draft saved in the hub. Only you see it until you publish it.');
+        return true;
+      } catch (err) {
+        if (err.status === 404 || err.status === 409) ed.hubId = null; // deleted or published elsewhere: this is a new map now
+        setHubState('error', err.message);
+        if (!quiet) toast(`Could not save the draft: ${err.message}`, true);
+        return false;
+      }
+    });
+    return hubQueue;
   }
 
   function changed({ refit = false } = {}) {
@@ -184,12 +266,17 @@ async function main() {
   }
 
   // Replace the whole map (new, opened, imported); undo brings the old one back.
-  function replaceModel(model, id = null) {
+  // hubId: the hub draft it is (opened from My drafts), else it is a new map as far as the hub goes.
+  function replaceModel(model, id = null, hubId = null) {
+    if (ed.hubState === 'unsaved' && ed.hubId) saveToHub({ quiet: true }); // the open draft's last changes first
     remember();
     ed.model = model;
     ed.id = id;
+    ed.hubId = hubId;
     ed.chain = null;
     changed({ refit: true });
+    clearTimeout(hubTimer); // a draft just opened is as the hub has it
+    setHubState(hubId ? 'saved' : 'none');
   }
 
   let toastTimer = null;
@@ -289,6 +376,10 @@ async function main() {
       };
       return b;
     };
+    if (ed.hub) {
+      hubMenu(item);
+      return;
+    }
     const mine = listMaps();
     const rows = [
       item('New map', () => replaceModel(newModel())),
@@ -318,10 +409,73 @@ async function main() {
     menu.hidden = false;
     $('mapsBtn').setAttribute('aria-expanded', 'true');
   }
+  // The Maps menu when the hub serves the editor: your drafts there and your published maps, not this browser's.
+  function hubMenu(item) {
+    const drafts = ed.hub.maps.filter((x) => x.status === 'draft');
+    const published = ed.hub.maps.filter((x) => x.status === 'published');
+    const rows = [
+      item('New map', () => replaceModel(newModel())),
+      item('Save draft', () => saveToHub({ thumb: true }), ed.hubId ? 'in the hub' : 'not yet'),
+      el('hr'),
+      el('div', 'eyebrow', 'My drafts'),
+    ];
+    if (!drafts.length) rows.push(el('div', 'empty', 'No drafts yet. Save draft keeps the map in the hub, for you only.'));
+    for (const d of drafts) {
+      const b = item(d.name, async () => {
+        try {
+          replaceModel(fromMapJson(await hub.load(d.id)), null, d.id);
+        } catch (err) {
+          toast(`Could not open the draft: ${err.message}`, true);
+        }
+      }, d.id === ed.hubId ? 'open' : '');
+      const del = el('span', 'del', '×');
+      del.title = 'Delete this draft';
+      del.onclick = async (e) => {
+        e.stopPropagation();
+        if (!confirm(`Delete the draft "${d.name}"? This can't be undone.`)) return;
+        try {
+          await hub.remove(d.id);
+          if (ed.hubId === d.id) {
+            ed.hubId = null;
+            setHubState('none');
+          }
+          await refreshHubMaps();
+          openMenu();
+        } catch (err) {
+          toast(`Could not delete the draft: ${err.message}`, true);
+        }
+      };
+      b.append(del);
+      rows.push(b);
+    }
+    if (published.length) {
+      rows.push(el('hr'), el('div', 'eyebrow', 'Published (locked)'));
+      for (const p of published) rows.push(item(p.name, () => { location.href = hubMapPage(p.id); }, 'its page'));
+    }
+    rows.push(el('hr'), el('div', 'eyebrow', 'Start from a mission'));
+    for (const [file, name] of BUILT_IN) rows.push(item(name, async () => replaceModel(fromMapJson(await loadJson(`data/maps/${file}.json`)))));
+    rows.push(el('hr'), item('Import a map file…', () => $('importFile').click(), '.json'), item('Export this map', exportJson, '.json'));
+    menu.replaceChildren(...rows);
+    menu.hidden = false;
+    $('mapsBtn').setAttribute('aria-expanded', 'true');
+  }
+
+  async function refreshHubMaps() {
+    try {
+      ed.hub.maps = (await hub.mine()).maps;
+    } catch {
+      // keep the list we have
+    }
+  }
+
   $('mapsBtn').onclick = (e) => {
     e.stopPropagation();
-    if (menu.hidden) openMenu();
-    else closeMenu();
+    if (!menu.hidden) {
+      closeMenu();
+      return;
+    }
+    openMenu();
+    if (ed.hub) refreshHubMaps().then(() => !menu.hidden && openMenu());
   };
   document.addEventListener('click', (e) => {
     if (!menu.hidden && !menu.contains(e.target)) closeMenu();
@@ -362,6 +516,47 @@ async function main() {
       toast(`Not a map file: ${err.message}`, true);
     }
   };
+
+  // Hub: play your own draft (saved first); playtests aren't recorded.
+  $('playtest').onclick = async () => {
+    const issues = problems(ed.model, balance);
+    if (issues.length) {
+      toast(issues.join(' '), true);
+      return;
+    }
+    if (!(await saveToHub({ quiet: true, thumb: true }))) {
+      toast(`Could not save the draft: ${ed.hubError}`, true);
+      return;
+    }
+    location.href = `index.html?${new URLSearchParams({ src: hubSrc(ed.hubId), playtest: '1' })}`;
+  };
+
+  // Hub: put the map up for everyone, locked for good, then go to its page.
+  $('publish').onclick = async () => {
+    const issues = problems(ed.model, balance);
+    const name = ed.model.name.trim();
+    if (issues.length || !name) {
+      toast(issues.length ? issues.join(' ') : 'Give the map a name first.', true);
+      return;
+    }
+    if (!confirm(`Publish "${name}"?\n\nEveryone in the hub can play it then. A published map can't be changed any more, so its runs and records stay comparable.`)) return;
+    $('publish').disabled = true;
+    try {
+      if (!ed.hubId && !(await saveToHub({ quiet: true }))) throw new Error(ed.hubError);
+      await hubQueue;
+      const id = ed.hubId;
+      await hub.publish(id, { name, json: toMapJson(ed.model, balance), thumb: await still() });
+      clearTimeout(saveTimer);
+      clearTimeout(hubTimer);
+      saveDraft({ model: newModel(), id: null, hubId: null }); // back in the editor: a new map
+      location.href = hubMapPage(id);
+    } catch (err) {
+      toast(`Could not publish: ${err.message}`, true);
+      $('publish').disabled = false;
+    }
+  };
+
+  $('saveDraft').onclick = () => saveToHub({ thumb: true });
 
   $('play').onclick = () => {
     const issues = problems(ed.model, balance);
@@ -591,7 +786,10 @@ async function main() {
     if ((e.ctrlKey || e.metaKey) && !typing) {
       if (k === 'z' && !e.shiftKey) undo();
       else if (k === 'y' || (k === 'z' && e.shiftKey)) redo();
-      else if (k === 's') saveToLibrary();
+      else if (k === 's') {
+        if (ed.hub) saveToHub({ thumb: true });
+        else saveToLibrary();
+      }
       else return;
       e.preventDefault();
       return;
@@ -736,6 +934,22 @@ async function main() {
       $('status').textContent = `Display error: ${err.message}`;
     }
     requestAnimationFrame(frame);
+  }
+
+  // Served by the hub: its buttons instead of Play, and the brand leads back to the game's page there.
+  if (ed.hub) {
+    for (const id of ['hubState', 'saveDraft', 'playtest', 'publish']) $(id).hidden = false;
+    $('play').hidden = true;
+    const brand = document.querySelector('.brand');
+    brand.classList.add('home');
+    brand.title = 'Fix & Flank in the hub';
+    brand.onclick = () => {
+      location.href = hubHome;
+    };
+    renderHubState();
+    if (ed.hubState === 'unsaved') saveToHub({ quiet: true });
+  } else if (hubLink?.error) {
+    toast(`Maps stay in this browser: ${hubLink.error}`, true);
   }
 
   renderPanel();

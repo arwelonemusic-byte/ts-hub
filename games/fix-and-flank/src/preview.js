@@ -4,8 +4,8 @@
 // shown; OPFOR is not (in the game it has to be found). ?still=1 keeps the
 // first view, for a still of the map.
 
+import { squadCounters } from './render/still.js';
 import { createWorld } from './render/world3d.js';
-import { center } from './sim/hex.js';
 import { parseMap } from './sim/map.js';
 import { unitType } from './sim/state.js';
 
@@ -37,16 +37,7 @@ async function main() {
   const world = createWorld(canvas, map, { pickCounters: false });
   const cam = world.camera;
   const rosterOf = (u) => unitType(balance, u).roles;
-  const counters = (json.units ?? [])
-    .filter((u) => u.side === 'BLUFOR')
-    .map((u, id) => {
-      const kind = u.kind ?? 'team';
-      const type = u.type ?? null;
-      return {
-        unit: { id, side: u.side, team: u.team, kind, type, soldiers: [...unitType(balance, { kind, type }).roles], status: 'ok', activated: false, exposed: false, moved: false },
-        pos: center({ col: u.pos[0], row: u.pos[1] }), selected: false, ghost: false, stackedWithTeam: false,
-      };
-    });
+  const counters = squadCounters(json.units, balance);
   const fit = () => {
     const p = Math.round(Math.min(canvas.clientWidth, canvas.clientHeight) * FIT_PAD);
     cam.fit(canvas.clientWidth, canvas.clientHeight, { left: p, right: p, top: p, bottom: p });
