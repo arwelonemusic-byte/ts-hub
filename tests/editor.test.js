@@ -145,4 +145,7 @@ test('maps saved while there was a turn limit lose it, and the brief the editor 
   assert.equal(fromMapJson(own).brief, 'Hold the farm for 12 turns.');
   const current = toMapJson(newModel(), balance);
   assert.equal(upgradeMapJson(current), current, 'a current map is left alone');
+  // Opened and saved again in between: no turns any more, the old words still in the brief.
+  const resaved = { ...current, mission: { ...current.mission, brief: 'Take and hold the objective at 5,1 within 12 turns. 2 OPFOR fireteams defend the area.' } };
+  assert.equal(upgradeMapJson(resaved).mission.brief, 'Take and hold the objective at 5,1. 2 OPFOR fireteams defend the area.');
 });

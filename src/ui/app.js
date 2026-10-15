@@ -18,10 +18,11 @@ import { COLORS, counterLabel, drawFire, drawHexMarks, drawPath, drawSuspected }
 import { createWorld } from '../render/world3d.js';
 import { positionAlong } from './anim.js';
 import { createDiceTray } from './dice.js';
-import { assaultFigures, assaultSummary, eventText, fireFigures, fireSummary, passText, phaseLabel, previewAction, rallyPreview, unitName } from './describe.js';
+import { assaultFigures, assaultSummary, eventText, fireFigures, fireSummary, phaseLabel, previewAction, rallyPreview, unitName } from './describe.js';
 
 const PLAYER_SIDE = 'BLUFOR';
 const CLICK_SLOP_PX = 4;
+const ARROW_PAN_PX = 140;   // an arrow key pans the view this far
 const WHEEL_ZOOM = 1.15;
 const MOVE_ANIM_MS = 220;   // per hex
 const DICE_ROLL_MS = 1100;  // dice tumble this long before they settle
@@ -32,10 +33,8 @@ const RALLY_HOLD_MS = 500;
 const BANG_MS = 900;        // a bang marker's life
 const STEP_GAP_MS = 120;    // between steps without moves
 const AI_DELAY_MS = 450;    // pause before OPFOR commits, so it can be followed
-const MAX_LOG = 200;
 const FIT_GAP = 16;          // px between the fitted map and the floating panels
 const HINT_ROOM = 48;        // px kept clear above the action bar for the hint
-const CARD_OFFSET = 18;      // px from the pointer to the hex card
 const TERRAIN_NOTES = {
   open: 'Open ground', road: 'Farm track', scrub: 'Scrub and brambles', woods: 'Woodland',
   rubble: 'Shelled ruin', building: 'Farm buildings', trench: 'Dug-in trench line', water: 'Pond and stream',
@@ -45,6 +44,8 @@ const COVER = { 4: 'No cover', 5: 'Light cover', 6: 'Hard cover' }; // by the ro
 const HOVER = { color: 'rgba(255, 255, 255, 0.9)', width: 2.5 }; // the hovered hex on the ground
 
 const $ = (id) => document.getElementById(id);
+// Arrow keys pan: the view moves that way (the map the other).
+const ARROWS = { ArrowLeft: [ARROW_PAN_PX, 0], ArrowRight: [-ARROW_PAN_PX, 0], ArrowUp: [0, ARROW_PAN_PX], ArrowDown: [0, -ARROW_PAN_PX] };
 
 // The board is drawn in 3D (render/world3d.js) under the board canvas, which takes the input.
 export function startApp(initialState, { reveal = false } = {}) {
@@ -57,7 +58,6 @@ export function startApp(initialState, { reveal = false } = {}) {
     cam: world.camera,  // world3d's: toWorld, zoomAt, panBy, orbit, turn, fit
     selected: null,
     plan: [],          // BLUFOR's orders for this turn, in the order they will run
-    log: [],
     anim: [],
     shots: [],         // lines of fire being shown: { from, to, start, ms, side, tag }
     bangs: [],         // bang markers being shown: { hex, start, k }
@@ -76,7 +76,7 @@ export function startApp(initialState, { reveal = false } = {}) {
     const stage = box('stage');
     const pad = {
       left: box('phaseCard').right - stage.left + FIT_GAP,
-      right: stage.right - Math.min(box('hud').left, box('logPanel').left) + FIT_GAP,
+      right: stage.right - Math.min(box('hud').left, box('hexcard').left) + FIT_GAP,
       top: FIT_GAP,
       bottom: stage.bottom - box('actions').top + HINT_ROOM,
     };
@@ -224,17 +224,6 @@ export function startApp(initialState, { reveal = false } = {}) {
   // How long a roll stays on screen.
   const diceMs = (spec) => spec.rollMs + spec.staggerMs * (spec.rows.length - 1) + (spec.rollMs === RALLY_ROLL_MS ? RALLY_HOLD_MS : DICE_HOLD_MS);
 
-  function logStep(before, after, events, turnRef) {
-    for (const e of events) {
-      if (e.type === 'turn_start') turnRef.turn = e.turn;
-      const line = passText(before, e, PLAYER_SIDE) ?? eventText(after, e, PLAYER_SIDE);
-      if (!line) continue;
-      const kind = e.type === 'game_over' ? 'over' : ['turn_end', 'turn_start', 'phase_start'].includes(e.type) ? 'head' : 'line';
-      app.log.push({ text: line, kind, turn: turnRef.turn });
-    }
-    if (app.log.length > MAX_LOG) app.log.splice(0, app.log.length - MAX_LOG);
-  }
-
   // Animate this step's moves (of units the player can see), one unit after another. Returns the time it takes.
   function animateMoves(state, events) {
     let delay = 0;
@@ -261,12 +250,9 @@ export function startApp(initialState, { reveal = false } = {}) {
     const final = commitOrders(before, actions, createRng(before.rngState), (state, events) => steps.push({ state, events })).state;
     app.playing = true;
     render();
-    const turnRef = { turn: before.turn };
-    let prev = before;
     let t = 0;
     const later = (ms, fn) => app.timers.push(setTimeout(fn, ms));
     for (const step of steps) {
-      const from = prev;
       for (const e of step.events.filter((x) => rolls(x) && seen(step.state, x))) {
         const spec = diceSpec(step.state, e);
         const ms = diceMs(spec);
@@ -287,12 +273,10 @@ export function startApp(initialState, { reveal = false } = {}) {
       later(reveal, () => {
         tray.hide();
         app.state = step.state;
-        logStep(from, step.state, step.events, turnRef);
         animateMoves(step.state, step.events);
         render();
       });
       t += Math.max(STEP_GAP_MS, moveTime(step));
-      prev = step.state;
     }
     later(t, () => {
       tray.hide();
@@ -507,14 +491,6 @@ export function startApp(initialState, { reveal = false } = {}) {
       app.debriefed = true;
       showResult();
     }
-    const log = $('log');
-    log.replaceChildren(...app.log.map((entry) => {
-      const line = el('p', entry.kind === 'line' ? '' : entry.kind);
-      if (entry.kind === 'line') line.append(el('b', '', `T${entry.turn}`));
-      line.append(document.createTextNode(entry.text));
-      return line;
-    }));
-    log.scrollTop = log.scrollHeight;
     renderHover(); // the hex card follows the state too, not only the pointer
   }
 
@@ -529,41 +505,25 @@ export function startApp(initialState, { reveal = false } = {}) {
     const o = options();
     const assault = o.assault.length ? ' Red ring: assault the enemy there (point at it for the odds).' : '';
     const type = unitType(app.state.balance, u);
-    const moves = type.fastMove ? 'Click a green hex to move 1 hex, an orange hex to fast move 2.' : `Click a green hex to move 1 hex (the ${type.name} cannot fast move).`;
+    const moves = type.fastMove ? 'Click a blue hex to move 1 hex, a yellow hex to fast move 2.' : `Click a blue hex to move 1 hex (the ${type.name} cannot fast move).`;
     return `${u.team} selected. ${moves}${assault}${lead}${deselect}`;
   }
 
   const fireDiceText = (u) => { const n = fireDice(app.state.balance, u); return `${n} ${n === 1 ? 'die' : 'dice'}`; };
 
-  // The hex card: what the hex under the pointer is, what stands there and,
-  // with a unit selected, what an order there would do. Rebuilt only when
-  // something it shows changes; moved with the pointer every time.
+  // The hex card, docked bottom right: what the hex under the pointer is,
+  // what stands there and, with a unit selected, what an order there would
+  // do. Rebuilt only when something it shows changes.
   let cardKey = null;
   function renderHover() {
     if (planning() && app.selected !== null) $('preview').textContent = hint(unit(app.selected));
     $('hint').classList.toggle('empty', !$('preview').textContent && !app.message);
-    const card = $('hovercard');
-    const h = app.hover;
-    if (!h || !app.pointer || app.pointer.dragging || !inBounds(app.state.map, h) || app.modal) {
-      card.hidden = true;
-      cardKey = null;
-      return;
-    }
-    const k = [key(h), app.selected, app.plan.length, app.state.turn, app.state.phase, app.playing].join('|');
-    if (k !== cardKey || card.hidden) {
-      cardKey = k;
-      card.replaceChildren(...hexCard(h));
-      card.hidden = false;
-    }
-    // Beside the pointer, flipped to the other side near the edges.
-    const stage = $('stage').getBoundingClientRect();
-    const { x, y } = app.pointer;
-    const w = card.offsetWidth;
-    const hh = card.offsetHeight;
-    const left = x + CARD_OFFSET + w > stage.width - FIT_GAP ? x - CARD_OFFSET - w : x + CARD_OFFSET;
-    const top = Math.max(FIT_GAP, Math.min(y + CARD_OFFSET, stage.height - hh - FIT_GAP));
-    card.style.left = `${Math.max(FIT_GAP, left)}px`;
-    card.style.top = `${top}px`;
+    const card = $('hexcard');
+    const h = app.hover && inBounds(app.state.map, app.hover) ? app.hover : null;
+    const k = h ? [key(h), app.selected, app.plan.length, app.state.turn, app.state.phase, app.playing].join('|') : 'none';
+    if (k === cardKey) return;
+    cardKey = k;
+    card.replaceChildren(...(h ? hexCard(h) : [el('div', 'eyebrow', 'Hex'), el('p', 'hc-empty', 'Point at a hex to see its ground, its cover and who is there.')]));
   }
 
   function hexCard(h) {
@@ -706,10 +666,17 @@ export function startApp(initialState, { reveal = false } = {}) {
     }
     for (const h of o.assault) marks.push({ hex: h, color: COLORS.assault, width: 4 });
     if (app.hover && inBounds(s.map, app.hover)) marks.push({ hex: app.hover, color: HOVER.color, width: HOVER.width, inset: 0.02 });
-    if (app.view && app.selected !== null) {
-      const from = projectedFor(app.selected).units[app.selected].pos;
-      const k = `${app.selected}|${key(from)}`;
-      if (app.viewCache?.k !== k) app.viewCache = { k, seen: new Set(visibleFrom(s.map, s.balance, from).map(key)) };
+    if (app.view) {
+      // From the selected unit (where its order starts), else from every unit of the squad together.
+      const eyes = app.selected !== null
+        ? [projectedFor(app.selected).units[app.selected].pos]
+        : s.units.filter((u) => u.side === PLAYER_SIDE && u.status !== 'eliminated').map((u) => u.pos);
+      const k = eyes.map(key).join(';');
+      if (app.viewCache?.k !== k) {
+        const seen = new Set();
+        for (const from of eyes) for (const h of visibleFrom(s.map, s.balance, from)) seen.add(key(h));
+        app.viewCache = { k, seen };
+      }
       for (let row = 0; row < s.map.height; row++) {
         for (let col = 0; col < s.map.width; col++) {
           if (!app.viewCache.seen.has(`${col},${row}`)) marks.unshift({ hex: { col, row }, color: null, fill: COLORS.shade, inset: 0 });
@@ -798,8 +765,8 @@ export function startApp(initialState, { reveal = false } = {}) {
       const dy = e.clientY - drag.y;
       if (drag.moved || Math.hypot(dx, dy) > CLICK_SLOP_PX) {
         drag.moved = true;
-        if (drag.button !== 0) app.cam.orbit(dx, dy); // right drag turns the view
-        else app.cam.panBy(dx, dy);
+        if (drag.button === 1) app.cam.orbit(dx, dy); // middle drag turns the view
+        else app.cam.panBy(dx, dy);                    // left or right drag moves it
         drag.x = e.clientX;
         drag.y = e.clientY;
       }
@@ -835,7 +802,7 @@ export function startApp(initialState, { reveal = false } = {}) {
       const why = firefight() ? validateAction(projectedFor(app.selected), { type: 'fire', unit: app.selected, target: h }).reason : null;
       app.message = firefight()
         ? `Cannot fire there: ${why}. Right click to deselect.`
-        : 'That hex is out of reach. Green: move, orange: fast move. Right click to deselect.';
+        : 'That hex is out of reach. Blue: move, yellow: fast move. Right click to deselect.';
       render();
     }
   });
@@ -875,6 +842,10 @@ export function startApp(initialState, { reveal = false } = {}) {
     else if (k === 'v') toggleView();
     else if (k === 'home' || k === '0') fit();
     else if (k === 'q' || k === 'e') app.cam.turn(k === 'q' ? -1 : 1);
+    else if (ARROWS[e.key]) {
+      e.preventDefault();
+      app.cam.panBy(...ARROWS[e.key]);
+    }
   });
 
   $('hold').onclick = holdSelected;
@@ -898,10 +869,6 @@ export function startApp(initialState, { reveal = false } = {}) {
   const here = new URLSearchParams(location.search);
   $('editBtn').href = `editor.html?${new URLSearchParams({ map: here.get('map') ?? 'trenchline' })}`;
 
-  $('logHead').onclick = () => {
-    const closed = $('logPanel').classList.toggle('closed');
-    $('logHead').setAttribute('aria-expanded', String(!closed));
-  };
   $('helpBtn').onclick = showHelp;
 
   // ---- dialogs: briefing, help, debrief ----
@@ -915,7 +882,6 @@ export function startApp(initialState, { reveal = false } = {}) {
     m.onclick = (e) => {
       if (e.target === m) closeModal();
     };
-    $('hovercard').hidden = true;
     dialog.querySelector('.btn.primary')?.focus();
   }
 
@@ -1002,10 +968,8 @@ export function startApp(initialState, { reveal = false } = {}) {
 
 
   const brief = app.state.map.mission?.brief;
-  if (brief) app.log.push({ text: brief, kind: 'brief' });
   const goal = app.state.map.objective ? `Objective hex ${app.state.map.objective.join(',')}` : 'No objective';
   $('objective').replaceChildren(el('b', '', goal), document.createElement('br'), document.createTextNode(brief ?? ''));
-  app.log.push({ text: 'Turn 1.', kind: 'head' }, { text: `${phaseLabel(currentPhase(app.state).name)} phase (${app.state.activeSide}).`, kind: 'head' });
   render();
   renderHover();
   enemyTurn(0);

@@ -40,9 +40,9 @@ export const COLORS = {
   bang: '#f2b33d',
   bangCore: '#d9481c',
   hostileFireInk: '#8e1b12',
-  move: '#2e7d32',
-  fast: '#c8650f',
-  shade: 'rgba(21, 24, 26, 0.42)',
+  move: '#2fa8ff',   // bright blue: a 1-hex move, and planned paths
+  fast: '#ffd60a',   // bright yellow: a 2-hex fast move
+  shade: 'rgba(10, 12, 14, 0.66)', // out of line of sight
   suspect: '#8e1b12',
   fire: '#1f3f8f',
   fireZone: 'rgba(31, 63, 143, 0.09)',

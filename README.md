@@ -33,7 +33,7 @@ What works:
 - Assault (close combat), with exact odds.
 - Enemy AI with modes (hold, engage, split fire, counterattack, reposition, retreat, recover).
 - Mission 1, "Trench Line", with win/loss rules (no turn limit: turns are counted, the fight goes on until a side wins); the automated balance test.
-- Browser UI in the look of the Tactical Shift apps (TS Hub, Ops Planner, Mission Builder): dark panels floating over a full-window map, mission briefing and debrief dialogs, a hex card that follows the pointer (terrain, cover, hexsides, units, and the dice and odds of the order a click would give), phase track, roster cards, combat log, dice tray and bang markers, step-by-step playback.
+- Browser UI in the look of the Tactical Shift apps (TS Hub, Ops Planner, Mission Builder): dark panels floating over a full-window map, mission briefing and debrief dialogs, a hex card docked bottom right (the hex under the pointer: terrain, cover, hexsides, units, and the dice and odds of the order a click would give), phase track, roster cards, dice tray and bang markers, step-by-step playback. Line of sight (V) dims what the squad cannot see, or the selected unit when one is.
 - The board in 3D, the only map view: a low-poly diorama in three.js (terrain, trees, farms, walls, hedges, the trench), a figure per soldier under each counter, turnable camera.
 - A map editor (`editor.html`, the pencil in the game's top bar): map size, terrain painting with a palette and brush, a random-terrain button, walls and hedges drawn corner to corner along hex edges, parapets on hex sides, the BLUFOR start (ALPHA and the SL there, BRAVO beside them), the objective and up to four OPFOR teams, the briefing, undo and redo, all in 3D. Play saves the map in the browser (My maps) and opens it in the game; maps also export and import as JSON in the `data/maps` format.
 
@@ -50,7 +50,7 @@ npm run balance -- 400 201   # 400 runs from seed 201
 
 URL options: `?map=training` (sandbox map, never ends, has the HMG), `?map=local:<id>` (a map saved from the editor in this browser), `?seed=2` (other dice), `?reveal=1` (debug: draw unseen OPFOR faintly).
 
-Controls: left click a unit, then a hex (green: move, orange: fast move, red ring: assault; in the firefight any shaded hex: fire). Point at a hex for its card. Right click or Esc deselects. Space commits the phase, Tab next unit, H hold, V line of sight, wheel zoom, drag pan, Home fit, F1 help, right drag or Q / E turns the view.
+Controls: left click a unit, then a hex (blue: move, yellow: fast move, red ring: assault; in the firefight any shaded hex: fire). Point at a hex for its card. Right click or Esc deselects. Space commits the phase, Tab next unit, H hold, V line of sight, Home fit, F1 help. The view: left or right drag or the arrow keys move it, middle drag or Q / E turns it, the wheel zooms.
 
 ## Layout
 

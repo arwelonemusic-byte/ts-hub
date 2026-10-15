@@ -152,21 +152,6 @@ kbd {
 .hud button:active { background: var(--raised-hover); }
 .hud svg { width: 16px; height: 16px; }
 
-/* Combat log, bottom right */
-#logPanel { right: var(--gap); bottom: var(--gap); width: 320px; display: flex; flex-direction: column; overflow: hidden; }
-.loghead {
-  display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 14px 16px; border: 0; background: none; cursor: pointer;
-}
-.loghead svg { width: 16px; height: 16px; color: var(--tertiary); transition: transform 0.15s; }
-#logPanel.closed .loghead svg { transform: rotate(180deg); }
-#log { max-height: min(38vh, 380px); overflow-y: auto; padding: 0 16px 14px; font: 400 13px/18px var(--sans); color: var(--secondary); }
-#logPanel.closed #log { display: none; }
-#log p { margin: 0; padding: 4px 0; }
-#log p.head { padding-top: 10px; font: 500 11px/16px var(--sans); letter-spacing: 0.12em; text-transform: uppercase; color: var(--tertiary); }
-#log p.over { font-weight: 500; color: var(--accent); }
-#log p.brief { padding: 8px 12px; margin-bottom: 4px; background: var(--inset); border-radius: 8px; color: var(--secondary); }
-#log b { margin-right: 6px; font: 700 10px/16px var(--mono); color: var(--tertiary); }
-
 /* Bottom dock: dice, the hint, the actions */
 .dock {
   position: absolute; z-index: 3; left: 50%; bottom: var(--gap); transform: translateX(-50%);
@@ -221,12 +206,12 @@ kbd {
 .dice-result { min-height: 20px; font: 400 13px/20px var(--sans); color: var(--secondary); }
 #dice.settled .dice-result { font-weight: 500; color: var(--fg); }
 
-/* Hex card: follows the pointer over the board */
-#hovercard {
-  position: absolute; z-index: 4; width: 288px; padding: 14px 16px; pointer-events: none;
-  background: var(--overlay); border-radius: 12px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line-strong);
-  display: flex; flex-direction: column; gap: 10px; animation: fade 0.12s ease-out;
+/* Hex card: docked bottom right, about the hex under the pointer */
+#hexcard {
+  right: var(--gap); bottom: var(--gap); width: 320px; max-height: calc(100% - 2 * var(--gap) - 220px); overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px; padding: 16px;
 }
+.hc-empty { margin: 0; font: 400 13px/20px var(--sans); color: var(--tertiary); }
 .hc-head { display: flex; align-items: center; gap: 10px; }
 .hc-swatch { flex: none; width: 28px; height: 28px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15); }
 .hc-title { display: flex; flex-direction: column; min-width: 0; }
@@ -297,5 +282,5 @@ kbd {
   :root { --panel: 300px; }
   .bar { grid-template-columns: minmax(0, 1fr) auto; }
   #phases { display: none; }
-  #logPanel { width: 280px; }
+  #hexcard { width: 280px; }
 }

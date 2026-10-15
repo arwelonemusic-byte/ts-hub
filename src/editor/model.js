@@ -350,12 +350,17 @@ export function defaultBrief(m) {
 // had a turn limit ("... at 5,1 within 12 turns. ...").
 const AUTO_BRIEF = /^Take and hold the objective at \d+,\d+(?: within \d+ turns)?\. (?:One OPFOR fireteam defends|\d+ OPFOR fireteams defend) the area\.$/;
 
-// A map saved before the turn limit went: the limit goes, and so does
-// "within N turns" from a brief the editor wrote. A brief someone wrote stays as it is.
+export const isAutoBrief = (text) => AUTO_BRIEF.test(text ?? '');
+
+// A map saved while there was a turn limit: the limit goes, and so does
+// "within N turns" from a brief the editor wrote, also one saved again later
+// as fixed text. A brief someone wrote stays as it is.
 export function upgradeMapJson(json) {
-  if (json?.mission?.turns === undefined) return json;
-  const { turns, ...mission } = json.mission;
-  if (AUTO_BRIEF.test(mission.brief ?? '')) mission.brief = mission.brief.replace(/ within \d+ turns\./, '.');
+  const old = json?.mission;
+  if (!old) return json;
+  const { turns, ...mission } = old;
+  if (isAutoBrief(mission.brief)) mission.brief = mission.brief.replace(/ within \d+ turns\./, '.');
+  if (turns === undefined && mission.brief === old.brief) return json;
   return { ...json, mission };
 }
 
@@ -431,7 +436,7 @@ export function fromMapJson(json) {
   const m = newModel({ width, height, name: json.name ?? 'Untitled' });
   m.description = json.description ?? '';
   const brief = json.mission?.brief ?? '';
-  m.brief = AUTO_BRIEF.test(brief) ? '' : brief; // the editor's own brief is written again from the map
+  m.brief = isAutoBrief(brief) ? '' : brief; // the editor's own brief is written again from the map
   m.terrain = terrain;
   for (const entry of json.hexsides ?? []) {
     const hex = { col: entry.hex[0], row: entry.hex[1] };

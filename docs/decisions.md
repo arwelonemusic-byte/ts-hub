@@ -259,3 +259,11 @@ Answers to the follow-up questions:
 - **The 3D board is the only map view**, in the game and in the editor. The flat paper map, the painted tiles view (`?view=tiles`) and the isometric view (`?view=iso`) are gone, and with them the `?view=` option and the view switch in the top bars.
 - **Code:** `startApp` and the editor always create the 3D world and use its camera directly (`toWorld`, `zoomAt`, `panBy`, `orbit`, `turn`, `fit`). `render/camera.js` keeps only `toScreen`, the flat frame that the marks layer, the counter textures and the bang textures are drawn in. `render/hexmap.js` lost the flat map (`drawMap`, terrain details, `drawHexsides`, `fitCanvas`) and keeps the marks, counters and bangs, which the 3D view draws through it. three.js now loads with the page.
 - **Kept outside the repo:** `render/terrain.js` and the generated art of the tiles and iso views (`assets/ground`, `assets/iso`, `assets/tiles`, 10 MB) moved to `../parked-views/` beside the game folder, with a note on what they were.
+
+## Playtest round (user requests, 2026-10-15)
+
+- **Move colours:** a 1-hex move is bright blue (#2FA8FF), a fast move bright yellow (#FFD60A), instead of green and orange; planned paths follow the move colour.
+- **No combat log.** The log panel is gone; the hex card takes its corner, docked bottom right, instead of floating by the pointer. The dice tray and the bang markers still show every roll.
+- **Camera:** left or right drag moves the view, middle drag turns it (it was right and middle), the arrow keys move it too. Right click without dragging still deselects.
+- **Line of sight** (V) works without a selected unit: it then shows what the whole squad sees together (every unit's line of sight, from where it stands now). With a unit selected it is that unit's, from where its order starts, as before. Hexes out of sight are dimmed much more (66% instead of 42%), over whatever stands on them.
+- **Old briefs:** a map opened and saved again in the editor after the turn limit went kept the old auto brief as fixed text ("within 12 turns"); loading a map now drops those words from any brief the editor wrote, and the editor's draft does too.

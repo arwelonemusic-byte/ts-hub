@@ -11,7 +11,7 @@ import { center, corners, hexAt, neighbors, SIDES } from '../sim/hex.js';
 import { parseMap } from '../sim/map.js';
 import { unitType } from '../sim/state.js';
 import {
-  ENEMY_TEAMS, SIZE, TERRAINS, clone, defaultBrief, deployment, drawEdges, edgePath, eraseEdge, fromMapJson, graph,
+  ENEMY_TEAMS, SIZE, TERRAINS, clone, isAutoBrief, defaultBrief, deployment, drawEdges, edgePath, eraseEdge, fromMapJson, graph,
   inside, moveObjective, nearestEdge, nearestVertex, newModel, paint, problems, randomize, resize, terrainAt, toggleEnemy,
   toggleParapet, toMapJson,
 } from './model.js';
@@ -25,6 +25,8 @@ const REACH = { vertex: 0.42, edge: 0.45 }; // world units: how near a corner or
 const NEAR_CORNERS = 3.2;                   // corners shown within this many world units of the pointer
 const STROKE_STEP = 0.35;                   // world units between brush samples along a drag
 const SAVE_DELAY_MS = 400;
+const ARROW_PAN_PX = 140;                   // an arrow key pans the view this far
+const ARROWS = { ArrowLeft: [ARROW_PAN_PX, 0], ArrowRight: [-ARROW_PAN_PX, 0], ArrowUp: [0, ARROW_PAN_PX], ArrowDown: [0, -ARROW_PAN_PX] };
 const TOAST_MS = 2600;
 const BUILT_IN = [['trenchline', 'Mission 1: Trench Line'], ['training', 'Training ground']];
 const TERRAIN_KEYS = '12345678';
@@ -88,6 +90,7 @@ async function main() {
   } else if (draft?.model) {
     ed.model = draft.model;
     delete ed.model.turns; // drafts saved while maps still had a turn limit
+    if (isAutoBrief(ed.model.brief)) ed.model.brief = ''; // the editor's own brief, kept as fixed text
     ed.id = draft.id ?? null;
   } else {
     ed.model = newModel();
@@ -273,7 +276,7 @@ async function main() {
   $('redo').onclick = redo;
 
   const HELP = {
-    terrain: () => `Paint ${LABELS[ed.terrain].toLowerCase()}: click or drag over hexes. Keys 1–8 pick terrain. Right drag pans, middle drag or Q/E turns, wheel zooms.`,
+    terrain: () => `Paint ${LABELS[ed.terrain].toLowerCase()}: click or drag over hexes. Keys 1–8 pick terrain. Right drag or arrows move the view, middle drag or Q/E turns it, wheel zooms.`,
     wall: () => (ed.chain ? 'Click another corner: the wall runs along the hex edges to it. Right click or Esc to stop. Drawing over a wall takes it off.' : 'Click a hex corner to start a wall.'),
     hedge: () => (ed.chain ? 'Click another corner: the hedge runs along the hex edges to it. Right click or Esc to stop. Drawing over a hedge takes it off.' : 'Click a hex corner to start a hedge.'),
     parapet: () => 'Click near a side of a hex: a parapet just inside it, covering that side. Click again to take it off.',
@@ -629,6 +632,7 @@ async function main() {
     else if (k === 'r') $('randomize').click();
     else if (k === 'home' || k === '0') fit();
     else if (k === 'q' || k === 'e') cam.turn(k === 'q' ? -1 : 1);
+    else if (ARROWS[e.key]) cam.panBy(...ARROWS[e.key]);
     else return;
     e.preventDefault();
   });
