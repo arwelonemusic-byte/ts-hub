@@ -34,6 +34,7 @@ const RALLY_HOLD_MS = 500;
 const BANG_MS = 900;        // a bang marker's life
 const STEP_GAP_MS = 120;    // between steps without moves
 const AI_DELAY_MS = 450;    // pause before OPFOR commits, so it can be followed
+const REPLAY_PAUSE_MS = 900; // «Повтор»: pause before the player's next recorded commit
 const FIT_GAP = 16;          // px between the fitted map and the floating panels
 const HINT_ROOM = 48;        // px kept clear above the action bar for the hint
 const TERRAIN_NOTES = {
@@ -49,7 +50,9 @@ const $ = (id) => document.getElementById(id);
 const ARROWS = { ArrowLeft: [ARROW_PAN_PX, 0], ArrowRight: [-ARROW_PAN_PX, 0], ArrowUp: [0, ARROW_PAN_PX], ArrowDown: [0, -ARROW_PAN_PX] };
 
 // The board is drawn in 3D (render/world3d.js) under the board canvas, which takes the input.
-export function startApp(initialState, { reveal = false } = {}) {
+// recorder: a run on a hub map being recorded ({ commit(orders), finish() }, main.js); replay: a run played back
+// ({ commits, at, player, result, turns, sameRules }); unrecorded: why a hub map's game isn't recorded.
+export function startApp(initialState, { reveal = false, recorder = null, replay = null, unrecorded = '' } = {}) {
   const world = createWorld($('board'), initialState.map);
   const app = {
     reveal,            // debug: draw unseen OPFOR faintly (?reveal=1)
@@ -70,6 +73,11 @@ export function startApp(initialState, { reveal = false } = {}) {
     hoverSight: null,  // the unit under the pointer whose line of sight the view shows (yours, or a spotted enemy)
     message: '',
     aiPending: false,
+    recorder,
+    replay,
+    unrecorded,
+    runNote: '',       // what the hub said about the finished run, for the debrief
+    finishing: null,   // the run being sent to the hub
   };
   const canvas = $('board');
   const tray = createDiceTray($('dice'));
@@ -92,7 +100,7 @@ export function startApp(initialState, { reveal = false } = {}) {
   fit();
 
   const unit = (id) => app.state.units[id];
-  const planning = () => !app.playing && !app.state.result && app.state.activeSide === PLAYER_SIDE && !app.aiPending && !app.anim.length;
+  const planning = () => !app.replay && !app.playing && !app.state.result && app.state.activeSide === PLAYER_SIDE && !app.aiPending && !app.anim.length;
   const myUnits = () => app.state.units.filter((u) => u.side === PLAYER_SIDE && canActivate(app.state, u));
   const orderIndex = (id) => app.plan.findIndex((a) => a.unit === id);
   const spotted = (u) => app.state.contacts[PLAYER_SIDE]?.[u.id]?.level === 'spotted';
@@ -319,11 +327,43 @@ export function startApp(initialState, { reveal = false } = {}) {
     const plan = app.plan;
     app.plan = [];
     app.selected = null;
+    app.recorder?.commit(plan);
     run(plan, enemyTurn);
+  }
+
+  // «Повтор»: the player's next recorded commit, after a pause.
+  function replayNext() {
+    if (app.state.result || app.state.activeSide !== PLAYER_SIDE) return;
+    const orders = app.replay.commits[app.replay.at++];
+    if (!orders) {
+      app.message = 'The recording ends here.';
+      render();
+      return;
+    }
+    run(orders, enemyTurn);
+  }
+
+  // The run is over: the hub plays it through itself and says how it went.
+  function finishRun() {
+    app.finishing = app.recorder.finish().then(
+      (r) => {
+        if (r.result === 'won') {
+          const extra = r.record ? ' A new record for this map!' : r.personalBest ? ' Your best on this map so far.' : '';
+          app.runNote = `Recorded: won in ${r.turns} turn${r.turns === 1 ? '' : 's'}.${extra}`;
+        } else app.runNote = 'Recorded as a failed attempt.';
+      },
+      (err) => {
+        app.runNote = `This run wasn't recorded: ${err.message}`;
+      },
+    ).then(() => {
+      const note = document.getElementById('runNote');
+      if (note) note.textContent = app.runNote;
+    });
   }
 
   function enemyTurn() {
     if (app.state.activeSide === PLAYER_SIDE || app.state.activeSide === null) {
+      if (app.replay && app.state.activeSide === PLAYER_SIDE) setTimeout(replayNext, REPLAY_PAUSE_MS);
       render();
       return;
     }
@@ -467,7 +507,9 @@ export function startApp(initialState, { reveal = false } = {}) {
     const s = app.state;
     $('mission').textContent = s.map.name;
     $('phaseName').textContent = phaseTitle();
-    $('phaseKicker').textContent = s.result ? 'Mission over' : planning() ? `Your orders · turn ${s.turn}` : s.activeSide === PLAYER_SIDE ? 'Carrying out orders' : 'Enemy turn';
+    $('phaseKicker').textContent = app.replay && !s.result
+      ? `Replay · ${app.replay.player} · turn ${s.turn}`
+      : s.result ? 'Mission over' : planning() ? `Your orders · turn ${s.turn}` : s.activeSide === PLAYER_SIDE ? 'Carrying out orders' : 'Enemy turn';
     $('phaseCard').className = `panel thin ${s.result ? (s.result.winner === PLAYER_SIDE ? 'won' : 'lost') : ''}`;
     $('active').textContent = activeText();
     renderPhases();
@@ -490,6 +532,7 @@ export function startApp(initialState, { reveal = false } = {}) {
     $('preview').textContent = hint(sel);
     $('message').textContent = app.message;
     $('hint').classList.toggle('empty', !$('preview').textContent && !app.message);
+    if (s.result && app.recorder && !app.finishing) finishRun();
     if (s.result && !app.debriefed) {
       app.debriefed = true;
       showResult();
@@ -999,26 +1042,35 @@ export function startApp(initialState, { reveal = false } = {}) {
       if (seed !== undefined) q.set('seed', String(seed));
       location.search = q.toString();
     };
+    const note = app.recorder ? app.runNote || 'Recording the run…' : app.unrecorded ? `Not recorded: ${app.unrecorded}` : '';
     const body = [
       el('div', `stamp ${won ? 'won' : 'lost'}`, won ? 'Mission accomplished' : 'Mission failed'),
       el('p', '', `${s.result.why.charAt(0).toUpperCase()}${s.result.why.slice(1)}.`),
       facts([['Turn', `${s.turn}`], ['Men left', `${men} of ${full}`], ['Dice', `Seed ${s.seed ?? new URLSearchParams(location.search).get('seed') ?? 1}`]]),
     ];
-    openModal(dialog('Debrief', s.map.name, body, [
-      ['Look at the map', false, null],
-      ['Same dice', false, () => reload()],
-      ['New game', true, () => reload(1 + Math.floor(Math.random() * 9999))],
-    ]));
+    if (note) body.push(Object.assign(el('p', 'runNote', note), { id: 'runNote' }));
+    // A recorded run starts again with new dice from the hub (no «Same dice»: picking lucky dice isn't a run).
+    const buttons = app.replay
+      ? [['Look at the map', false, null], ['Watch again', true, () => location.reload()]]
+      : app.recorder
+        ? [['Look at the map', false, null], ['New game', true, () => location.reload()]]
+        : [['Look at the map', false, null], ['Same dice', false, () => reload()], ['New game', true, () => reload(1 + Math.floor(Math.random() * 9999))]];
+    openModal(dialog(app.replay ? 'Replay' : 'Debrief', s.map.name, body, buttons));
   }
 
 
   const brief = app.state.map.mission?.brief;
   const goal = app.state.map.objective ? `Objective hex ${app.state.map.objective.join(',')}` : 'No objective';
   $('objective').replaceChildren(el('b', '', goal), document.createElement('br'), document.createTextNode(brief ?? ''));
+  if (app.replay) {
+    const r = app.replay;
+    app.message = `Replay of ${r.player}'s run: ${r.result === 'won' ? `won in ${r.turns} turns` : 'a failed attempt'}.`
+      + (r.sameRules ? '' : ' The game\'s rules have changed since, so it may not play out the same.');
+  }
   render();
   renderHover();
   enemyTurn(0);
   requestAnimationFrame(frame);
-  showBriefing();
+  if (!app.replay) showBriefing();
   return app;
 }

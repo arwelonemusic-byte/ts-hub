@@ -1,9 +1,14 @@
-// The TS Hub's maps, when the hub serves the editor (/games/fix-and-flank/editor):
-// a member's drafts are kept there and published from there, and published maps
-// are locked for good. Served on its own (npm start) there is no hub, and the
-// editor keeps maps in this browser instead (store.js).
+// The TS Hub, when it serves the game (/games/fix-and-flank/play, /editor):
+// - maps: a member's drafts are kept there and published from there, and
+//   published maps are locked for good (the editor);
+// - runs: a game on a published map is recorded there: the hub hands out the
+//   seed, takes BLUFOR's orders at the end and plays them through itself for the
+//   result (the game; src/ai/run.js), and serves finished runs for «Повтор».
+// Served on its own (npm start) there is no hub: the editor keeps maps in this
+// browser (store.js) and games aren't recorded.
 
 const API = '/api/games/fix-and-flank/maps';
+const RUNS = '/api/games/fix-and-flank/runs';
 
 export const hubSrc = (id) => `${API}/${encodeURIComponent(id)}`;
 export const hubMapPage = (id) => `/games/fix-and-flank/maps/${encodeURIComponent(id)}`;
@@ -40,6 +45,12 @@ export async function connectHub() {
     return err.status === 401 || err.status === 403 ? { error: err.message } : null;
   }
 }
+
+export const runs = {
+  start: (mapId) => call('POST', RUNS, { mapId }), //          → { id, seed }
+  finish: (id, commits) => call('POST', `${RUNS}/${encodeURIComponent(id)}/finish`, { commits }), // → { result, turns, record, best }
+  load: (id) => call('GET', `${RUNS}/${encodeURIComponent(id)}`), // → { mapId, mapName, player, seed, commits, result, turns, sameRules }
+};
 
 export const hub = {
   mine: () => call('GET', `${API}?mine=1`),

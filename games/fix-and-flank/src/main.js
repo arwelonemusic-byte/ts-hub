@@ -3,6 +3,7 @@
 import { parseMap } from './sim/map.js';
 import { createState } from './sim/state.js';
 import { LOCAL, loadMap } from './editor/store.js';
+import { hubIdOf, hubSrc, runs } from './hub.js';
 import { startApp } from './ui/app.js';
 
 const DEFAULT_MAP = 'trenchline';
@@ -28,13 +29,46 @@ async function loadMapJson(name, src) {
   return json;
 }
 
+// Keeps BLUFOR's commits as they are made, and sends them to the hub at the end.
+function recorderFor(runId) {
+  const commits = [];
+  return {
+    commit: (orders) => commits.push(JSON.parse(JSON.stringify(orders))),
+    finish: () => runs.finish(runId, commits),
+  };
+}
+
+const randomSeed = () => 1 + Math.floor(Math.random() * 0x7ffffffe);
+
+// ?replay=<run>: a run from the hub, played back («Повтор»). ?src= of a published hub map: a recorded run, with
+// the hub's seed (unless &playtest=1, the author trying a draft). Otherwise a game as before: ?map=, ?seed=.
 async function main() {
   const params = new URLSearchParams(location.search);
-  const mapName = params.get('map') ?? DEFAULT_MAP;
-  const seed = Number(params.get('seed') ?? DEFAULT_SEED);
-  const [balance, mapJson] = await Promise.all([loadJson('data/balance.json'), loadMapJson(mapName, params.get('src'))]);
+  const balance = await loadJson('data/balance.json');
+  const src = params.get('src');
+  let seed = params.has('seed') ? Number(params.get('seed')) : src ? randomSeed() : DEFAULT_SEED;
+  let mapJson;
+  const options = { reveal: params.get('reveal') === '1' };
+  if (params.get('replay')) {
+    const run = await runs.load(params.get('replay'));
+    mapJson = await loadJson(hubSrc(run.mapId));
+    seed = run.seed;
+    options.replay = { commits: run.commits, at: 0, player: run.player, result: run.result, turns: run.turns, sameRules: run.sameRules };
+  } else {
+    mapJson = await loadMapJson(params.get('map') ?? DEFAULT_MAP, src);
+    const mapId = src && !params.has('playtest') ? hubIdOf(src) : null;
+    if (mapId) {
+      try {
+        const run = await runs.start(mapId);
+        seed = run.seed;
+        options.recorder = recorderFor(run.id);
+      } catch (err) {
+        options.unrecorded = err.message;
+      }
+    }
+  }
   const state = createState({ balance, map: parseMap(mapJson, balance), seed });
-  window.app = startApp(state, { reveal: params.get('reveal') === '1' }); // exposed for debugging in the console
+  window.app = startApp(state, options); // exposed for debugging in the console
 }
 
 main().catch((err) => {

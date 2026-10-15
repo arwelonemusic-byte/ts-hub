@@ -16,7 +16,7 @@ import {
   inside, moveObjective, nearestEdge, nearestVertex, newModel, paint, problems, randomize, startNear, terrainAt, toggleEnemy,
   toggleParapet, toMapJson,
 } from './model.js';
-import { connectHub, hub, hubHome, hubIdOf, hubMapPage, hubSrc } from './hub.js';
+import { connectHub, hub, hubHome, hubIdOf, hubMapPage, hubSrc } from '../hub.js';
 import { LOCAL, deleteMap, listMaps, loadDraft, loadMap, saveDraft, saveMap } from './store.js';
 
 const WHEEL_ZOOM = 1.15;
