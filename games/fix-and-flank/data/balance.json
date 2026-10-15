@@ -1,0 +1,114 @@
+{
+  "map": {
+    "hexMeters": 50
+  },
+  "turn": {
+    "sides": ["BLUFOR", "OPFOR"],
+    "stalemateTurns": 3,
+    "phases": [
+      { "name": "movement", "side": "BLUFOR", "actions": ["move", "fastMove"] },
+      { "name": "firefight", "side": "BLUFOR", "actions": ["fire"] },
+      { "name": "rally", "side": "BLUFOR", "automatic": "rally" },
+      { "name": "enemy action", "side": "OPFOR", "actions": ["move", "fastMove", "fire"], "recoverFirst": true }
+    ]
+  },
+  "unit": {
+    "roles": [
+      "TL",
+      "AR",
+      "GRN",
+      "RFL"
+    ],
+    "casualtyOrder": [
+      "RFL",
+      "GRN",
+      "TL",
+      "AR"
+    ],
+    "leaderRoles": [
+      "SL"
+    ]
+  },
+  "unitTypes": {
+    "hmg": {
+      "name": "HMG team",
+      "roles": ["GNR", "AG", "AMMO"],
+      "casualtyOrder": ["AMMO", "AG", "GNR"],
+      "fastMove": false,
+      "assault": false,
+      "fireEveryTurns": 2,
+      "maxRangeHexes": 12,
+      "range": [
+        { "upTo": 6, "mod": 0 },
+        { "upTo": 12, "mod": 1 }
+      ]
+    }
+  },
+  "movement": {
+    "fastMoveHexes": 2
+  },
+  "fire": {
+    "baseTn": 4,
+    "minTn": 2,
+    "maxTn": 6,
+    "maxRangeHexes": 10,
+    "diceByRole": { "TL": 1, "AR": 2, "GRN": 1, "RFL": 1, "SL": 1, "GNR": 4, "AG": 1, "AMMO": 1 },
+    "range": [
+      { "upTo": 3, "mod": 0 },
+      { "upTo": 6, "mod": 1 },
+      { "upTo": 10, "mod": 2 }
+    ],
+    "coverMod": { "4": 0, "5": 1, "6": 2 },
+    "exposedMod": -1,
+    "suppressedShooterMod": 1,
+    "blindMod": 2,
+    "pinHits": 2,
+    "splitMod": 0,
+    "splitSides": ["OPFOR"]
+  },
+  "assault": {
+    "attackTn": { "ok": 5, "suppressed": 3, "pinned": 3 },
+    "attackerSuppressedMod": 1,
+    "defendTn": 5,
+    "dugInFrom": 5,
+    "dugInMod": -1,
+    "defenderSuppressedMod": 1
+  },
+  "ai": {
+    "openFireRange": 6,
+    "pinWeight": 0.5,
+    "suppressWeight": 2,
+    "splitFire": true,
+    "assaultTakeAtLeast": 0.6,
+    "counterattackRange": 3,
+    "counterattackChance": 0.35,
+    "counterattackMinSoldiers": 3,
+    "counterattackTakeAtLeast": 0.4,
+    "retreatAtSoldiers": 1,
+    "goodCover": 5,
+    "seedSalt": 2654435769
+  },
+  "rally": {
+    "worstOn": 5
+  },
+  "vision": {
+    "maxRangeHexes": 12,
+    "spotWithinHexes": 1,
+    "suspectedTurns": 2
+  },
+  "terrain": {
+    "open": { "move": "normal", "casualtyOn": 4, "concealing": false, "blocksLos": false },
+    "road": { "move": "normal", "casualtyOn": 4, "concealing": false, "blocksLos": false },
+    "scrub": { "move": "rough", "casualtyOn": 5, "concealing": true, "blocksLos": false },
+    "woods": { "move": "rough", "casualtyOn": 5, "concealing": true, "blocksLos": true },
+    "rubble": { "move": "rough", "casualtyOn": 6, "concealing": true, "blocksLos": false },
+    "building": { "move": "rough", "casualtyOn": 6, "concealing": true, "blocksLos": true },
+    "trench": { "move": "normal", "casualtyOn": 5, "concealing": true, "blocksLos": false },
+    "water": { "move": "impassable", "casualtyOn": 4, "concealing": false, "blocksLos": false }
+  },
+  "hexsides": {
+    "wall": { "casualtyOn": 6, "shared": true, "blocksLos": false },
+    "hedge": { "casualtyOn": 5, "shared": true, "blocksLos": true },
+    "parapet": { "casualtyOn": 6, "shared": false, "blocksLos": false }
+  }
+}

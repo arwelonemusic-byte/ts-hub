@@ -1,0 +1,1023 @@
+// Browser UI: in each of BLUFOR's phases give every unit an order, see each
+// preview, commit them all. The sim is only touched through planning helpers
+// (moveOptions, projectOrders, checkPlan) and commitOrders. OPFOR's orders
+// come from src/ai.
+
+import { moveOptions, validateAction } from '../sim/actions.js';
+import { assaultVia } from '../sim/assault.js';
+import { center, distance, hexAt, key, neighbors, same } from '../sim/hex.js';
+import { visibleFrom } from '../sim/los.js';
+import { inBounds, terrainName, terrainOf } from '../sim/map.js';
+import { fireDice } from '../sim/combat.js';
+import { checkPlan, commitOrders, projectOrders } from '../sim/orders.js';
+import { createRng } from '../sim/rng.js';
+import { knownEnemies } from '../sim/spotting.js';
+import { canActivate, currentPhase, unitType, unitsAt } from '../sim/state.js';
+import { chooseOrders } from '../ai/basic.js';
+import { COLORS, counterLabel, drawFire, drawHexMarks, drawPath, drawSuspected } from '../render/hexmap.js';
+import { createWorld } from '../render/world3d.js';
+import { positionAlong } from './anim.js';
+import { createDiceTray } from './dice.js';
+import { assaultFigures, assaultSummary, eventText, fireFigures, fireSummary, phaseLabel, previewAction, rallyPreview, unitName } from './describe.js';
+
+const PLAYER_SIDE = 'BLUFOR';
+const CLICK_SLOP_PX = 4;
+const ARROW_PAN_PX = 140;   // an arrow key pans the view this far
+const TIP_OFFSET = { x: 14, y: 18 }; // px from the pointer to the "click to select" tag
+const WHEEL_ZOOM = 1.15;
+const MOVE_ANIM_MS = 220;   // per hex
+const DICE_ROLL_MS = 1100;  // dice tumble this long before they settle
+const DICE_STAGGER_MS = 350; // a second row (casualty rolls, the defender) settles this much later
+const DICE_HOLD_MS = 800;   // the settled roll stays on screen this long
+const RALLY_ROLL_MS = 700;
+const RALLY_HOLD_MS = 500;
+const BANG_MS = 900;        // a bang marker's life
+const STEP_GAP_MS = 120;    // between steps without moves
+const AI_DELAY_MS = 450;    // pause before OPFOR commits, so it can be followed
+const FIT_GAP = 16;          // px between the fitted map and the floating panels
+const HINT_ROOM = 48;        // px kept clear above the action bar for the hint
+const TERRAIN_NOTES = {
+  open: 'Open ground', road: 'Farm track', scrub: 'Scrub and brambles', woods: 'Woodland',
+  rubble: 'Shelled ruin', building: 'Farm buildings', trench: 'Dug-in trench line', water: 'Pond and stream',
+};
+const MOVE_TEXT = { normal: 'Normal', rough: 'Rough: ends a fast move', impassable: 'Impassable' };
+const COVER = { 4: 'No cover', 5: 'Light cover', 6: 'Hard cover' }; // by the roll a hit needs to become a casualty
+const HOVER = { color: 'rgba(255, 255, 255, 0.9)', width: 2.5 }; // the hovered hex on the ground
+
+const $ = (id) => document.getElementById(id);
+// Arrow keys pan: the view moves that way (the map the other).
+const ARROWS = { ArrowLeft: [ARROW_PAN_PX, 0], ArrowRight: [-ARROW_PAN_PX, 0], ArrowUp: [0, ARROW_PAN_PX], ArrowDown: [0, -ARROW_PAN_PX] };
+
+// The board is drawn in 3D (render/world3d.js) under the board canvas, which takes the input.
+export function startApp(initialState, { reveal = false } = {}) {
+  const world = createWorld($('board'), initialState.map);
+  const app = {
+    reveal,            // debug: draw unseen OPFOR faintly (?reveal=1)
+    view: false,       // shade hexes the selected unit cannot see (V)
+    viewCache: null,
+    state: initialState,
+    cam: world.camera,  // world3d's: toWorld, zoomAt, panBy, orbit, turn, fit
+    selected: null,
+    plan: [],          // BLUFOR's orders for this turn, in the order they will run
+    anim: [],
+    shots: [],         // lines of fire being shown: { from, to, start, ms, side, tag }
+    bangs: [],         // bang markers being shown: { hex, start, k }
+    playing: false,    // a commit is being played back
+    timers: [],
+    fireCache: null,
+    hover: null,
+    hoverUnit: null,   // your unit under the pointer that a click would select
+    hoverSight: null,  // the unit under the pointer whose line of sight the view shows (yours, or a spotted enemy)
+    message: '',
+    aiPending: false,
+  };
+  const canvas = $('board');
+  const tray = createDiceTray($('dice'));
+  // The part of the board the floating panels leave free: a fit centers the map in it.
+  function freeArea(width) {
+    const box = (id) => $(id).getBoundingClientRect();
+    const stage = box('stage');
+    const pad = {
+      left: box('phaseCard').right - stage.left + FIT_GAP,
+      right: stage.right - Math.min(box('hud').left, box('hexcard').left) + FIT_GAP,
+      top: FIT_GAP,
+      bottom: stage.bottom - box('actions').top + HINT_ROOM,
+    };
+    return pad.left + pad.right > width / 2 ? { left: 0, right: 0, top: 0, bottom: 0 } : pad;
+  }
+  const fit = () => {
+    const { clientWidth: width, clientHeight: height } = canvas;
+    app.cam.fit(width, height, freeArea(width));
+  };
+  fit();
+
+  const unit = (id) => app.state.units[id];
+  const planning = () => !app.playing && !app.state.result && app.state.activeSide === PLAYER_SIDE && !app.aiPending && !app.anim.length;
+  const myUnits = () => app.state.units.filter((u) => u.side === PLAYER_SIDE && canActivate(app.state, u));
+  const orderIndex = (id) => app.plan.findIndex((a) => a.unit === id);
+  const spotted = (u) => app.state.contacts[PLAYER_SIDE]?.[u.id]?.level === 'spotted';
+  const shown = (u) => u.side === PLAYER_SIDE || spotted(u);
+
+  // The state a unit's order is planned against: the orders before it applied.
+  function projectedFor(id) {
+    const i = orderIndex(id);
+    return projectOrders(app.state, i === -1 ? app.plan : app.plan.slice(0, i));
+  }
+
+  // Selection: left click a unit to select it, right click (or Esc) to deselect.
+  function select(id) {
+    app.selected = id;
+    app.message = '';
+    render();
+  }
+
+  function deselect() {
+    app.selected = null;
+    app.message = '';
+    render();
+  }
+
+  // ---- planning ----
+
+  function options() {
+    if (app.selected === null || !planning()) return { moves: [], fast: new Map(), fire: new Set(), assault: [], from: null };
+    const p = projectedFor(app.selected);
+    const u = p.units[app.selected];
+    const assault = neighbors(u.pos).filter((h) => assaultVia(p, { type: 'move', unit: u.id, to: h })
+      && validateAction(p, { type: 'move', unit: u.id, to: h }).ok);
+    return { ...moveOptions(p, u), fire: fireTargets(p, u), assault, from: u.pos };
+  }
+
+  // Hexes the unit can fire at (keys). Cached: it checks line of sight to every hex in range.
+  function fireTargets(p, u) {
+    const k = `${u.id}|${JSON.stringify(app.plan)}`;
+    if (app.fireCache?.state === app.state && app.fireCache.k === k) return app.fireCache.set;
+    const set = new Set();
+    if (firefight()) {
+      for (let row = 0; row < p.map.height; row++) {
+        for (let col = 0; col < p.map.width; col++) {
+          if (validateAction(p, { type: 'fire', unit: u.id, target: { col, row } }).ok) set.add(`${col},${row}`);
+        }
+      }
+    }
+    app.fireCache = { state: app.state, k, set };
+    return set;
+  }
+
+  // Give (or replace) the selected unit's order. A replaced order keeps its place.
+  function setOrder(action) {
+    const i = orderIndex(action.unit);
+    if (i === -1) app.plan.push(action);
+    else app.plan[i] = action;
+    app.message = '';
+    app.selected = null; // order given: the next click picks the next unit
+    render();
+  }
+
+  // The order a click on hex h gives the selected unit, or null. In the
+  // movement phase the distance decides: a next hex is a move, a hex two away
+  // a fast move. In the firefight, any hex it can fire at.
+  function orderFor(h) {
+    if (app.selected === null) return null;
+    const id = app.selected;
+    const o = options();
+    if (o.fire.has(key(h))) return { type: 'fire', unit: id, target: h };
+    if (o.assault.some((m) => same(m, h))) return { type: 'move', unit: id, to: h };
+    if (o.moves.some((m) => same(m, h))) return { type: 'move', unit: id, to: h };
+    if (o.fast.has(key(h))) return { type: 'fastMove', unit: id, path: o.fast.get(key(h)) };
+    return null;
+  }
+
+  function holdSelected() {
+    if (app.selected === null || !planning()) return;
+    const i = orderIndex(app.selected);
+    if (i !== -1) app.plan.splice(i, 1);
+    render();
+  }
+
+  function clearAll() {
+    if (!planning()) return;
+    app.plan = [];
+    render();
+  }
+
+  // ---- commit ----
+
+  // ---- playback: one step at a time, dice first, then the result ----
+
+  // Is this event's roll something the player gets to see?
+  const seen = (state, e) => !!eventText(state, e, PLAYER_SIDE);
+  const rolls = (e) => (e.type === 'fire' || e.type === 'assault' || (e.type === 'rally' && e.roll !== null && !e.blocked));
+  const label = (u) => counterLabel(u);
+
+  function diceSpec(state, e) {
+    if (e.type === 'fire') {
+      const shooter = state.units[e.unit];
+      const target = e.target === null ? null : state.units[e.target];
+      const known = target && (target.side === PLAYER_SIDE || e.aimed || state.contacts[PLAYER_SIDE]?.[target.id]?.level === 'spotted');
+      const rows = [{ label: `To hit · needs ${e.tn}+`, values: e.dice, need: e.tn }];
+      if (known && e.casualtyRolls.length) rows.push({ label: `Casualties · needs ${e.casualtyOn}+`, values: e.casualtyRolls.map((c) => c.roll), need: e.casualtyOn });
+      return {
+        title: `${unitName(shooter)} ${e.aimed ? 'fires on' : 'puts suppressive fire on'} ${key(e.hex)}`,
+        rows, result: fireSummary(state, e, PLAYER_SIDE), rollMs: DICE_ROLL_MS, staggerMs: DICE_STAGGER_MS,
+      };
+    }
+    if (e.type === 'assault') {
+      const a = state.units[e.unit];
+      const d = state.units[e.defender];
+      return {
+        title: `${unitName(a)} assaults ${unitName(d)} at ${key(e.hex)}`,
+        rows: [
+          { label: `${unitName(a)} · needs ${e.attackTn}+`, values: e.attackRolls, need: e.attackTn },
+          e.defendRolls.length
+            ? { label: `${unitName(d)} · needs ${e.defendTn}+`, values: e.defendRolls, need: e.defendTn }
+            : { label: unitName(d), values: [], note: 'pinned: cannot shoot back' },
+        ],
+        result: assaultSummary(state, e), rollMs: DICE_ROLL_MS, staggerMs: 0,
+      };
+    }
+    const u = state.units[e.unit];
+    return {
+      title: `${unitName(u)} rallies`,
+      rows: [{ label: `Needs ${e.need}+`, values: [e.roll], need: e.need }],
+      result: e.success ? `Now ${e.to}.` : `Still ${e.from}.`, rollMs: RALLY_ROLL_MS, staggerMs: 0,
+    };
+  }
+
+  // How long a roll stays on screen.
+  const diceMs = (spec) => spec.rollMs + spec.staggerMs * (spec.rows.length - 1) + (spec.rollMs === RALLY_ROLL_MS ? RALLY_HOLD_MS : DICE_HOLD_MS);
+
+  // Animate this step's moves (of units the player can see), one unit after another. Returns the time it takes.
+  function animateMoves(state, events) {
+    let delay = 0;
+    const byUnit = new Map();
+    for (const e of events.filter((x) => x.type === 'moved')) {
+      const u = state.units[e.unit];
+      if (u.side !== PLAYER_SIDE && state.contacts[PLAYER_SIDE]?.[u.id]?.level !== 'spotted') continue;
+      if (!byUnit.has(e.unit)) byUnit.set(e.unit, [e.from]);
+      byUnit.get(e.unit).push(e.to);
+    }
+    const now = performance.now();
+    for (const [id, hexes] of byUnit) {
+      app.anim.push({ id, points: hexes.map(center), start: now + delay });
+      delay += (hexes.length - 1) * MOVE_ANIM_MS;
+    }
+    return delay;
+  }
+
+  // Carry out the orders, then play them back: each step's dice, then its
+  // result on the map, the roster and the log, then its moves. `done` runs at the end.
+  function run(actions, done) {
+    const before = app.state;
+    const steps = [];
+    const final = commitOrders(before, actions, createRng(before.rngState), (state, events) => steps.push({ state, events })).state;
+    app.playing = true;
+    render();
+    let t = 0;
+    const later = (ms, fn) => app.timers.push(setTimeout(fn, ms));
+    for (const step of steps) {
+      for (const e of step.events.filter((x) => rolls(x) && seen(step.state, x))) {
+        const spec = diceSpec(step.state, e);
+        const ms = diceMs(spec);
+        later(t, () => {
+          tray.show(spec);
+          const now = performance.now();
+          if (e.type === 'fire' || e.type === 'assault') {
+            const shooter = step.state.units[e.unit];
+            app.shots.push({ from: e.from, to: e.hex, start: now, ms, side: shooter.side, tag: label(shooter) });
+            app.bangs.push({ hex: e.hex, start: now, k: 0 });
+            const second = e.type === 'assault' || e.hits > 0; // a second bang when the dice show hits
+            if (second) app.bangs.push({ hex: e.hex, start: now + spec.rollMs * 0.85, k: 1 });
+          }
+        });
+        t += ms;
+      }
+      const reveal = t;
+      later(reveal, () => {
+        tray.hide();
+        app.state = step.state;
+        animateMoves(step.state, step.events);
+        render();
+      });
+      t += Math.max(STEP_GAP_MS, moveTime(step));
+    }
+    later(t, () => {
+      tray.hide();
+      app.state = final;
+      app.playing = false;
+      app.timers = [];
+      render();
+      done?.();
+    });
+  }
+
+  function moveTime(step) {
+    let ms = 0;
+    const byUnit = new Map();
+    for (const e of step.events.filter((x) => x.type === 'moved')) {
+      const u = step.state.units[e.unit];
+      if (u.side !== PLAYER_SIDE && step.state.contacts[PLAYER_SIDE]?.[u.id]?.level !== 'spotted') continue;
+      byUnit.set(e.unit, (byUnit.get(e.unit) ?? 0) + 1);
+    }
+    for (const n of byUnit.values()) ms += n * MOVE_ANIM_MS;
+    return ms;
+  }
+
+  function commit() {
+    if (app.state.result) {
+      showResult();
+      return;
+    }
+    if (!planning()) return;
+    const bad = checkPlan(app.state, app.plan).filter((c) => !c.ok);
+    if (bad.length) {
+      app.message = `Fix or clear these orders first: ${bad.map((c) => `${unit(c.action.unit).team} (${c.reason})`).join('; ')}.`;
+      render();
+      return;
+    }
+    app.message = '';
+    const plan = app.plan;
+    app.plan = [];
+    app.selected = null;
+    run(plan, enemyTurn);
+  }
+
+  function enemyTurn() {
+    if (app.state.activeSide === PLAYER_SIDE || app.state.activeSide === null) {
+      render();
+      return;
+    }
+    app.aiPending = true;
+    render();
+    setTimeout(() => {
+      app.aiPending = false;
+      const side = app.state.activeSide;
+      run(chooseOrders(app.state, side), enemyTurn);
+    }, AI_DELAY_MS);
+  }
+
+  function toggleView() {
+    app.view = !app.view;
+    render();
+  }
+
+  function nextUnit() {
+    const ready = myUnits();
+    if (!ready.length) return;
+    const i = ready.findIndex((u) => u.id === app.selected);
+    select(ready[(i + 1) % ready.length].id);
+  }
+
+  // ---- panel ----
+
+  function orderLine(u) {
+    const i = orderIndex(u.id);
+    if (!canActivate(app.state, u)) {
+      return rallyPreview(app.state, u) ?? (u.moved ? 'moved: cannot fire this turn' : reloading(u) ? `reloading: cannot fire ${u.fired ? 'next' : 'this'} turn` : '');
+    }
+    if (i === -1) return firefight() ? 'no order: holds fire' : 'no order: holds';
+    const check = checkPlan(app.state, app.plan)[i];
+    return check.ok ? `${i + 1}. ${previewAction(projectedFor(u.id), app.plan[i]).replace(new RegExp(`^${u.team} `), '')}` : `${i + 1}. NOT POSSIBLE: ${check.reason}`;
+  }
+
+  // Still reloading on its side's next turn (the HMG after firing). Every unit's
+  // reload runs until its side's next turn starts; only one that lasts longer is shown.
+  const reloading = (u) => (u.fired ? u.reload > 1 : u.reload > 0);
+  const firefight = () => !(currentPhase(app.state).actions ?? []).includes('move');
+
+  function activeText() {
+    const s = app.state;
+    if (s.result) {
+      return `${s.result.why.charAt(0).toUpperCase()}${s.result.why.slice(1)}. The debrief has a new game.`;
+    }
+    if (!planning()) return app.aiPending || s.activeSide !== PLAYER_SIDE ? 'OPFOR is acting.' : 'Carrying out orders.';
+    const total = myUnits().length;
+    if (firefight()) {
+      return `${total} unit${total === 1 ? '' : 's'} that did not move can fire. ${app.plan.length} of ${total} have a target; the rest hold fire.`;
+    }
+    return `Give move orders, then commit. A unit that moves cannot fire this turn. ${app.plan.length} of ${total} have an order; the rest hold.`;
+  }
+
+  function phaseTitle() {
+    const s = app.state;
+    if (s.result) return s.result.winner === PLAYER_SIDE ? 'Mission accomplished' : 'Mission failed';
+    if (s.activeSide !== PLAYER_SIDE) return 'Enemy action';
+    return phaseLabel(currentPhase(s).name);
+  }
+
+  // Header: the turn's phases, the current one lit.
+  function renderPhases() {
+    const s = app.state;
+    const spans = s.balance.turn.phases.map((p, i) => {
+      const el = document.createElement('span');
+      el.textContent = phaseLabel(p.name);
+      el.title = `${p.side}${p.automatic ? ', automatic' : ''}`;
+      const cls = [];
+      if (p.side !== PLAYER_SIDE) cls.push('enemy');
+      if (i < s.phase || s.result) cls.push('done');
+      if (i === s.phase && s.activeSide !== null) cls.push('now');
+      el.className = cls.join(' ');
+      return el;
+    });
+    $('phases').replaceChildren(...spans);
+  }
+
+  const el = (tag, cls, text) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  };
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const svgEl = (tag, attrs) => {
+    const e = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    return e;
+  };
+
+  // A small counter for the roster: the NATO frame with the infantry X and the echelon mark.
+  function chip(u) {
+    const svg = svgEl('svg', { class: 'chipsvg', viewBox: '0 0 62 48', 'aria-hidden': 'true' });
+    const ink = COLORS.ink;
+    const mark = 'currentColor';
+    if (u.kind === 'leader') svg.append(svgEl('circle', { cx: 31, cy: 6, r: 3, fill: mark }));
+    else {
+      svg.append(svgEl('circle', { cx: 31, cy: 7, r: 4.5, fill: 'none', stroke: mark, 'stroke-width': 2 }));
+      svg.append(svgEl('line', { x1: 24, y1: 14, x2: 38, y2: 0, stroke: mark, 'stroke-width': 2 }));
+    }
+    const fill = u.status === 'eliminated' ? '#b9b5a8' : COLORS.blufor;
+    svg.append(svgEl('rect', { x: 2, y: 15, width: 58, height: 31, fill, stroke: ink, 'stroke-width': 3 }));
+    svg.append(svgEl('path', { d: 'M2 15 L60 46 M60 15 L2 46', stroke: ink, 'stroke-width': 2.5 }));
+    if (u.type === 'hmg') svg.append(svgEl('path', { d: 'M31 42 L31 19 M25 25 L31 19 L37 25', fill: 'none', stroke: ink, 'stroke-width': 2.5 }));
+    return svg;
+  }
+
+  const ROLE_NAMES = { TL: 'TL', AR: 'AR', GRN: 'GR', RFL: 'RFL', SL: 'SL' };
+
+  function unitCard(s, u) {
+    const b = el('button', 'unit');
+    if (u.id === app.selected) b.classList.add('selected');
+    const ready = canActivate(s, u) && planning();
+    b.disabled = !ready;
+    if (!ready) b.classList.add('idle');
+    const who = el('div');
+    const name = el('div', 'name', u.kind === 'leader' ? 'Squad leader' : u.team);
+    const roles = el('div', 'roles');
+    const roster = unitType(s.balance, u).roles;
+    for (const r of roster) {
+      const alive = u.soldiers.includes(r);
+      const span = el('span', alive ? '' : 'lost');
+      span.append(el('i', alive ? 'on' : ''), document.createTextNode(ROLE_NAMES[r] ?? r));
+      roles.append(span);
+    }
+    if (u.exposed) roles.append(el('span', 'exposed', 'exposed'));
+    who.append(name, roles);
+    // Once the mission is over only a lasting state is worth a tag.
+    const status = u.status !== 'ok' ? u.status : s.result ? '' : u.moved ? 'moved' : reloading(u) ? 'reloading' : 'ready';
+    const tag = el('span', `chip status ${status}`, status);
+    tag.hidden = !status;
+    const order = el('div', 'order', u.status === 'eliminated' || s.result ? '' : orderLine(u));
+    if (order.textContent.includes('NOT POSSIBLE')) order.classList.add('bad');
+    b.append(chip(u), who, tag, order);
+    b.onclick = () => select(u.id);
+    return b;
+  }
+
+  function render() {
+    const s = app.state;
+    $('mission').textContent = s.map.name;
+    $('phaseName').textContent = phaseTitle();
+    $('phaseKicker').textContent = s.result ? 'Mission over' : planning() ? `Your orders · turn ${s.turn}` : s.activeSide === PLAYER_SIDE ? 'Carrying out orders' : 'Enemy turn';
+    $('phaseCard').className = `panel thin ${s.result ? (s.result.winner === PLAYER_SIDE ? 'won' : 'lost') : ''}`;
+    $('active').textContent = activeText();
+    renderPhases();
+    const ready = planning() ? myUnits().length : 0;
+    $('progress').style.width = `${ready ? (100 * Math.min(app.plan.length, ready)) / ready : 0}%`;
+
+    $('units').replaceChildren(...s.units.filter((u) => u.side === PLAYER_SIDE).map((u) => unitCard(s, u)));
+
+    const sel = app.selected !== null ? unit(app.selected) : null;
+    $('hold').disabled = !planning() || !sel || orderIndex(sel.id) === -1;
+    $('clear').disabled = !planning() || !app.plan.length;
+    $('commit').disabled = !planning() && !s.result;
+    $('commitLabel').textContent = s.result ? 'Debrief' : firefight() ? 'Commit fire' : 'Commit moves';
+    $('view').classList.toggle('on', app.view);
+    const contacts = knownEnemies(s, PLAYER_SIDE);
+    const sp = contacts.filter((c) => c.level === 'spotted').length;
+    $('turn').textContent = `${s.turn}`;
+    $('contacts').textContent = (contacts.length ? `${sp} spotted · ${contacts.length - sp} suspected` : 'No contact') + (app.reveal ? ' · debug: all OPFOR shown' : '');
+    $('contacts').classList.toggle('hot', contacts.length > 0);
+    $('preview').textContent = hint(sel);
+    $('message').textContent = app.message;
+    $('hint').classList.toggle('empty', !$('preview').textContent && !app.message);
+    if (s.result && !app.debriefed) {
+      app.debriefed = true;
+      showResult();
+    }
+    renderHover(); // the hex card follows the state too, not only the pointer
+    if (app.pointer) {
+      app.hoverUnit = selectableAt(app.pointer.x, app.pointer.y);
+      app.hoverSight = sightAt(app.pointer.x, app.pointer.y);
+    }
+    renderUnitTip();
+  }
+
+  // Your unit whose counter or figures are under a screen point, if a click would select it now.
+  function selectableAt(sx, sy) {
+    const id = world.pickUnit(sx, sy);
+    const u = id === null ? null : unit(id);
+    return u && u.side === PLAYER_SIDE && planning() && canActivate(app.state, u) ? u.id : null;
+  }
+
+  // Any unit you can see whose counter or figures are under a screen point: yours, or a spotted enemy.
+  function sightAt(sx, sy) {
+    const id = world.pickUnit(sx, sy);
+    const u = id === null ? null : unit(id);
+    return u && u.status !== 'eliminated' && shown(u) ? u.id : null;
+  }
+
+  // Over a unit a click would select: a pointer cursor, its counter lit (world3d), and a tag.
+  function renderUnitTip() {
+    const tip = $('unitTip');
+    const id = app.hoverUnit;
+    canvas.style.cursor = id !== null ? 'pointer' : '';
+    const show = id !== null && id !== app.selected && app.pointer && !app.pointer.dragging;
+    tip.hidden = !show;
+    if (!show) return;
+    tip.replaceChildren(el('b', '', unit(id).team), document.createTextNode('click to select'));
+    tip.style.left = `${app.pointer.x + TIP_OFFSET.x}px`;
+    tip.style.top = `${app.pointer.y + TIP_OFFSET.y}px`;
+  }
+
+  function hint(u) {
+    if (!planning()) return '';
+    if (!u) return 'Click one of your units (its counter or its soldiers) to select it.';
+    const deselect = ' Right click to deselect.';
+    if (firefight()) {
+      return `${u.team} selected (${fireDiceText(u)}). Point at a hex to see the odds; click to fire. Blue ring: spotted enemy (aimed fire). Red ring, in the next hex: assault. Elsewhere in the shaded area: suppressive fire.${deselect}`;
+    }
+    const lead = u.kind === 'leader' ? ' Teams in his hex rally for sure in the rally phase; further away the roll must beat the distance to him. To join a team, click its hex beside its counter.' : '';
+    const o = options();
+    const assault = o.assault.length ? ' Red ring: assault the enemy there (point at it for the odds).' : '';
+    const type = unitType(app.state.balance, u);
+    const moves = type.fastMove ? 'Click a blue hex to move 1 hex, a yellow hex to fast move 2.' : `Click a blue hex to move 1 hex (the ${type.name} cannot fast move).`;
+    return `${u.team} selected. ${moves}${assault}${lead}${deselect}`;
+  }
+
+  const fireDiceText = (u) => { const n = fireDice(app.state.balance, u); return `${n} ${n === 1 ? 'die' : 'dice'}`; };
+
+  // The hex card, docked bottom right: what the hex under the pointer is,
+  // what stands there and, with a unit selected, what an order there would
+  // do. Rebuilt only when something it shows changes.
+  let cardKey = null;
+  function renderHover() {
+    if (planning() && app.selected !== null) $('preview').textContent = hint(unit(app.selected));
+    $('hint').classList.toggle('empty', !$('preview').textContent && !app.message);
+    const card = $('hexcard');
+    const h = app.hover && inBounds(app.state.map, app.hover) ? app.hover : null;
+    const k = h ? [key(h), app.selected, app.plan.length, app.state.turn, app.state.phase, app.playing].join('|') : 'none';
+    if (k === cardKey) return;
+    cardKey = k;
+    card.replaceChildren(...(h ? hexCard(h) : [el('div', 'eyebrow', 'Hex'), el('p', 'hc-empty', 'Point at a hex to see its ground, its cover and who is there.')]));
+  }
+
+  function hexCard(h) {
+    const s = app.state;
+    const t = terrainName(s.map, h);
+    const info = terrainOf(s.map, s.balance, h);
+    const head = el('div', 'hc-head');
+    const swatch = el('span', 'hc-swatch');
+    swatch.style.background = COLORS.terrain[t];
+    const title = el('div', 'hc-title');
+    title.append(el('b', '', t.charAt(0).toUpperCase() + t.slice(1)), el('span', '', `${TERRAIN_NOTES[t] ?? ''} · ${s.balance.map.hexMeters} m hex`));
+    head.append(swatch, title, el('span', 'hc-coord', key(h)));
+
+    const tags = el('div', 'hc-tags');
+    const tag = (text, tone = '') => tags.append(el('span', `chip ${tone}`, text));
+    const cover = COVER[info.casualtyOn] ?? `Casualties on ${info.casualtyOn}+`;
+    tag(cover, info.casualtyOn >= 6 ? 'good' : info.casualtyOn === 5 ? 'warn' : '');
+    if (info.concealing) tag('Concealing', 'good');
+    if (info.blocksLos) tag('Blocks sight');
+    if (info.move === 'rough') tag('Rough', 'warn');
+    if (info.move === 'impassable') tag('Impassable', 'bad');
+
+    const rows = el('dl', 'hc-rows');
+    const row = (label, value) => rows.append(el('dt', '', label), el('dd', '', value));
+    row('Movement', MOVE_TEXT[info.move] ?? info.move);
+    row('Casualties', `on ${info.casualtyOn}+`);
+    row('Concealment', info.concealing ? 'Yes' : 'None');
+    row('Line of sight', info.blocksLos ? 'Blocked' : 'Clear');
+    const out = [head, tags, rows];
+
+    const sides = Object.entries(s.map.sides[key(h)] ?? {});
+    if (sides.length) {
+      const list = el('div', 'hc-list');
+      for (const [side, f] of sides) {
+        const hs = s.balance.hexsides[f];
+        const line = el('div');
+        line.append(el('i', 'side'), el('span', '', `${f.charAt(0).toUpperCase() + f.slice(1)} on the ${side} side: casualties on ${hs.casualtyOn}+ from there${hs.blocksLos ? ', blocks sight' : ''}`));
+        list.append(line);
+      }
+      out.push(list);
+    }
+
+    const here = unitsAt(s, h).filter(shown);
+    const suspect = knownEnemies(s, PLAYER_SIDE).find((c) => c.level === 'suspected' && same(c.pos, h));
+    if (here.length || suspect) {
+      const list = el('div', 'hc-list');
+      for (const u of here) {
+        const line = el('div');
+        const men = u.soldiers.length;
+        line.append(el('i', u.side), el('span', '', `${unitName(u)} · ${men} ${men === 1 ? 'man' : 'men'} · ${u.status}${u.moved ? ' · moved' : ''}`));
+        list.append(line);
+      }
+      if (suspect) {
+        const line = el('div');
+        line.append(el('i', 'suspect'), el('span', '', 'Suspected enemy (last known position)'));
+        list.append(line);
+      }
+      out.push(list);
+    }
+
+    // What clicking here would order the selected unit to do.
+    const order = planning() ? orderFor(h) : null;
+    if (order) out.push(orderBox(order, h));
+    return out;
+  }
+
+  // An order's preview: its dice and odds as figures for fire and assault, in words for moves.
+  function orderBox(order, h) {
+    const p = projectedFor(order.unit);
+    const u = p.units[order.unit];
+    const assault = assaultVia(p, order);
+    const kind = order.type === 'fire' ? 'Fire' : order.type === 'fastMove' ? 'Fast move' : assault ? 'Assault' : 'Move';
+    const box = el('div', 'hc-order');
+    box.append(el('div', 'eyebrow', `Click: ${kind} · ${unitName(u)}`));
+    const stats = (pairs) => {
+      const g = el('div', 'hc-stats');
+      for (const [label, value] of pairs) {
+        const c = el('div');
+        c.append(el('b', '', value), el('span', '', label));
+        g.append(c);
+      }
+      return g;
+    };
+    const f = order.type === 'fire' && !order.second ? fireFigures(p, u, h) : null;
+    const a = assault ? assaultFigures(p, u, h) : null;
+    if (f) {
+      box.append(
+        el('div', 'hc-what', f.target ? `Aimed fire on ${f.target}` : 'Suppressive fire: no spotted enemy there'),
+        stats([['dice', `${f.dice}`], ['to hit', `${f.tn}+`], ['any hit', f.anyHit], ['to pin', f.pin]]),
+        el('div', 'hc-note', `Target number: ${f.mods}.`),
+        el('div', 'hc-note', `Casualties on ${f.casualtyOn}+ (${f.cover}), expected ${f.expected}.${f.target ? '' : ' Odds for a full team, if one is there.'}`),
+      );
+    } else if (a) {
+      box.append(
+        el('div', 'hc-what', `Assault ${a.defender} (${a.status})`),
+        stats([['dice', `${a.dice}`], ['to hit', `${a.tn}+`], ['enemy dice', a.defendDice ? `${a.defendDice} on ${a.defendTn}+` : 'none'], ['take hex', a.take]]),
+        el('div', 'hc-note', `Otherwise ${u.team} falls back pinned.${a.wiped ? ` ${a.wiped} that it is wiped out.` : ''} Expected losses: ${u.team} ${a.losses}, enemy ${a.kills}.`),
+      );
+    } else {
+      box.append(el('div', '', previewAction(p, order)));
+    }
+    return box;
+  }
+
+  // ---- drawing ----
+
+  function positionOf(u, now) {
+    const a = app.anim.find((x) => x.id === u.id);
+    if (!a) return center(u.pos);
+    return positionAlong(a.points, (now - a.start) / MOVE_ANIM_MS);
+  }
+
+  // Draw every frame; an error is shown instead of silently stopping the loop.
+  function frame(now) {
+    try {
+      draw(now);
+    } catch (err) {
+      console.error(err);
+      $('message').textContent = `Display error: ${err.message}`;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function draw(now) {
+    const s = app.state;
+
+    const marks = [];
+    const o = options();
+    for (const h of o.moves) marks.push({ hex: h, color: COLORS.move });
+    for (const path of o.fast.values()) {
+      const end = path[path.length - 1];
+      if (!o.moves.some((m) => same(m, end))) marks.push({ hex: end, color: COLORS.fast });
+    }
+    const spottedHere = (h) => s.units.some((u) => u.side !== PLAYER_SIDE && spotted(u) && u.status !== 'eliminated' && same(u.pos, h));
+    for (const k of o.fire) {
+      const [col, row] = k.split(',').map(Number);
+      const h = { col, row };
+      const ring = !spottedHere(h) ? null : o.from && distance(o.from, h) === 1 ? COLORS.assault : COLORS.fireInk;
+      marks.push(ring ? { hex: h, color: ring, width: 3, fill: COLORS.fireZone } : { hex: h, color: null, fill: COLORS.fireZone, inset: 0 });
+    }
+    for (const h of o.assault) marks.push({ hex: h, color: COLORS.assault, width: 4 });
+    if (app.hover && inBounds(s.map, app.hover)) marks.push({ hex: app.hover, color: HOVER.color, width: HOVER.width, inset: 0.02 });
+    if (app.view) {
+      // From the unit under the pointer, else the selected unit, else every unit of the squad together.
+      // One of yours sees from where its order starts; an enemy from where it is.
+      const eye = (id) => (unit(id).side === PLAYER_SIDE && planning() ? projectedFor(id).units[id].pos : unit(id).pos);
+      const one = app.hoverSight ?? app.selected;
+      const eyes = one !== null
+        ? [eye(one)]
+        : s.units.filter((u) => u.side === PLAYER_SIDE && u.status !== 'eliminated').map((u) => u.pos);
+      const k = eyes.map(key).join(';');
+      if (app.viewCache?.k !== k) {
+        const seen = new Set();
+        for (const from of eyes) for (const h of visibleFrom(s.map, s.balance, from)) seen.add(key(h));
+        app.viewCache = { k, seen };
+      }
+      for (let row = 0; row < s.map.height; row++) {
+        for (let col = 0; col < s.map.width; col++) {
+          if (!app.viewCache.seen.has(`${col},${row}`)) marks.unshift({ hex: { col, row }, color: null, fill: COLORS.shade, inset: 0 });
+        }
+      }
+    }
+    const suspected = knownEnemies(s, PLAYER_SIDE).filter((c) => c.level === 'suspected').map((c) => c.pos);
+
+    // Every planned order: a path, or a line of fire from where the unit will
+    // be when it runs. Lines of fire go on top of the counters (drawn last),
+    // so the crosshair shows on its target.
+    const paths = [];
+    const fires = [];
+    if (planning()) {
+      const checks = checkPlan(s, app.plan);
+      app.plan.forEach((a, i) => {
+        if (a.type === 'pass') return;
+        const from = projectOrders(s, app.plan.slice(0, i)).units[a.unit].pos;
+        if (a.type === 'fire' || assaultVia(projectOrders(s, app.plan.slice(0, i)), a)) {
+          const to = a.type === 'fire' ? a.target : a.to;
+          const color = !checks[i].ok ? COLORS.invalid : a.type === 'move' ? COLORS.assault : a.unit === app.selected ? COLORS.plan : COLORS.fireInk;
+          const tag = counterLabel(unit(a.unit));
+          fires.push({ from, to, color, tag });
+          if (a.second) fires.push({ from, to: a.second, color, tag });
+          return;
+        }
+        const path = a.type === 'move' ? [a.to] : a.path;
+        const color = !checks[i].ok ? COLORS.invalid : a.unit === app.selected ? COLORS.plan : COLORS.move;
+        paths.push({ from, path, color });
+      });
+    }
+
+    const animating = app.anim.length;
+    app.anim = app.anim.filter((a) => (now - a.start) / MOVE_ANIM_MS < a.points.length - 1);
+    if (animating && !app.anim.length) render(); // the panel waits for moves to finish
+    const counters = s.units.filter((u) => shown(u) || app.reveal).map((u) => ({
+      unit: u,
+      ghost: !shown(u),
+      pos: positionOf(u, now),
+      selected: u.id === app.selected && planning(),
+      stackedWithTeam: u.kind === 'leader' && unitsAt(s, u.pos).some((x) => x.kind === 'team'),
+    }));
+    // Teams first so the SL sits on top.
+    counters.sort((a, b) => (a.unit.kind === 'leader') - (b.unit.kind === 'leader'));
+    const rosterOf = (u) => unitType(s.balance, u).roles;
+    app.shots = app.shots.filter((x) => now < x.start + x.ms);
+    app.bangs = app.bangs.filter((b) => now < b.start + BANG_MS);
+    const shotAlpha = (t) => (t < 0.75 ? 1 : (1 - t) * 4);
+    const shotInk = (x) => (x.side === PLAYER_SIDE ? COLORS.fireInk : COLORS.hostileFireInk);
+
+    // The marks, paths and lines of fire are painted on the ground (repainted
+    // only when they change); the world draws the units and bangs itself.
+    const shots = app.shots.map((x) => ({ from: x.from, to: x.to, side: x.side, t: (now - x.start) / x.ms }));
+    world.render(now, {
+      counters,
+      rosterOf,
+      bangs: app.bangs.map((b) => ({ hex: b.hex, k: b.k, t: (now - b.start) / BANG_MS })),
+      hoverUnit: app.hoverUnit,
+      shots,
+      sig: JSON.stringify([marks, suspected, paths, fires, shots.length ? now : 0]),
+      paint: (ctx, cam) => {
+        drawHexMarks(ctx, cam, marks);
+        drawSuspected(ctx, cam, suspected);
+        for (const p of paths) drawPath(ctx, cam, p.from, p.path, p.color);
+        for (const f of fires) drawFire(ctx, cam, f.from, f.to, f.color, 1, f.tag);
+        for (const x of app.shots) {
+          const t = (now - x.start) / x.ms;
+          if (t >= 0) drawFire(ctx, cam, x.from, x.to, shotInk(x), shotAlpha(t), x.tag);
+        }
+      },
+    });
+  }
+
+  // ---- input ----
+
+  let drag = null;
+  canvas.addEventListener('pointerdown', (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    drag = { x: e.clientX, y: e.clientY, moved: false, button: e.button };
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    const r = canvas.getBoundingClientRect();
+    app.pointer = { x: e.clientX - r.left, y: e.clientY - r.top, dragging: !!drag?.moved };
+    app.hover = hexAt(app.cam.toWorld(e.clientX - r.left, e.clientY - r.top));
+    app.hoverUnit = drag?.moved ? null : selectableAt(app.pointer.x, app.pointer.y);
+    app.hoverSight = drag?.moved ? null : sightAt(app.pointer.x, app.pointer.y);
+    if (drag) {
+      const dx = e.clientX - drag.x;
+      const dy = e.clientY - drag.y;
+      if (drag.moved || Math.hypot(dx, dy) > CLICK_SLOP_PX) {
+        drag.moved = true;
+        if (drag.button === 1) app.cam.orbit(dx, dy); // middle drag turns the view
+        else app.cam.panBy(dx, dy);                    // left or right drag moves it
+        drag.x = e.clientX;
+        drag.y = e.clientY;
+      }
+    }
+    renderHover();
+    renderUnitTip();
+  });
+  canvas.addEventListener('pointerup', (e) => {
+    const d = drag;
+    drag = null;
+    if (!d || d.moved || !planning()) return;
+    if (d.button === 2) {
+      deselect();
+      return;
+    }
+    if (d.button !== 0) return;
+    const r = canvas.getBoundingClientRect();
+    // A click on one of your units (its counter or its soldiers) selects that unit...
+    const picked = selectableAt(e.clientX - r.left, e.clientY - r.top);
+    if (picked !== null) {
+      select(picked);
+      return;
+    }
+    const h = hexAt(app.cam.toWorld(e.clientX - r.left, e.clientY - r.top));
+    if (!inBounds(app.state.map, h)) return;
+    // ...a click on a hex the selected unit can be ordered to gives the order.
+    const order = orderFor(h);
+    if (order) {
+      setOrder(order);
+      return;
+    }
+    if (app.selected !== null) {
+      const why = firefight() ? validateAction(projectedFor(app.selected), { type: 'fire', unit: app.selected, target: h }).reason : null;
+      app.message = firefight()
+        ? `Cannot fire there: ${why}. Right click to deselect.`
+        : 'That hex is out of reach. Blue: move, yellow: fast move. Right click to deselect.';
+      render();
+    }
+  });
+  canvas.addEventListener('pointerleave', () => {
+    app.hover = null;
+    app.pointer = null;
+    app.hoverUnit = null;
+    app.hoverSight = null;
+    renderHover();
+    renderUnitTip();
+  });
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    app.cam.zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? WHEEL_ZOOM : 1 / WHEEL_ZOOM);
+  }, { passive: false });
+  window.addEventListener('resize', fit);
+
+  window.addEventListener('keydown', (e) => {
+    const k = e.key.toLowerCase();
+    if (app.modal) {
+      if (k === 'escape' || k === 'enter' || k === ' ') {
+        e.preventDefault();
+        closeModal();
+      }
+      return;
+    }
+    if (k === 'f1' || k === '?') {
+      e.preventDefault();
+      showHelp();
+    } else if (k === ' ' || k === 'enter') {
+      e.preventDefault(); // also stops a focused button from being clicked by Space
+      commit();
+    } else if (k === 'tab') {
+      e.preventDefault();
+      nextUnit();
+    } else if (k === 'escape') deselect();
+    else if (k === 'h' || k === 'backspace' || k === 'delete') holdSelected();
+    else if (k === 'v') toggleView();
+    else if (k === 'home' || k === '0') fit();
+    else if (k === 'q' || k === 'e') app.cam.turn(k === 'q' ? -1 : 1);
+    else if (ARROWS[e.key]) {
+      e.preventDefault();
+      app.cam.panBy(...ARROWS[e.key]);
+    }
+  });
+
+  $('hold').onclick = holdSelected;
+  $('clear').onclick = clearAll;
+  $('commit').onclick = commit;
+  $('view').onclick = toggleView;
+
+  // Map controls. Zoom about the middle of the free area.
+  const zoomCenter = (factor) => {
+    const { clientWidth: width, clientHeight: height } = canvas;
+    const pad = freeArea(width);
+    app.cam.zoomAt(pad.left + (width - pad.left - pad.right) / 2, pad.top + (height - pad.top - pad.bottom) / 2, factor);
+  };
+  $('zoomIn').onclick = () => zoomCenter(WHEEL_ZOOM * WHEEL_ZOOM);
+  $('zoomOut').onclick = () => zoomCenter(1 / (WHEEL_ZOOM * WHEEL_ZOOM));
+  $('fitBtn').onclick = fit;
+  $('turnLeft').onclick = () => app.cam.turn(-1);
+  $('turnRight').onclick = () => app.cam.turn(1);
+
+  // The editor, opening this map.
+  const here = new URLSearchParams(location.search);
+  $('editBtn').href = `editor.html?${new URLSearchParams({ map: here.get('map') ?? 'trenchline' })}`;
+
+  $('helpBtn').onclick = showHelp;
+
+  // ---- dialogs: briefing, help, debrief ----
+
+  function openModal(dialog) {
+    const m = $('modal');
+    m.replaceChildren(dialog);
+    m.hidden = false;
+    app.modal = true;
+    for (const b of m.querySelectorAll('[data-close]')) b.onclick = closeModal;
+    m.onclick = (e) => {
+      if (e.target === m) closeModal();
+    };
+    dialog.querySelector('.btn.primary')?.focus();
+  }
+
+  function closeModal() {
+    $('modal').hidden = true;
+    $('modal').replaceChildren();
+    app.modal = false;
+  }
+
+  function dialog(kicker, title, body, buttons) {
+    const d = el('div', 'dialog');
+    d.setAttribute('role', 'dialog');
+    d.setAttribute('aria-modal', 'true');
+    const head = el('header');
+    const t = el('div');
+    t.append(el('div', 'eyebrow', kicker), el('h2', '', title));
+    head.append(t);
+    const foot = el('footer');
+    for (const [label, primary, fn] of buttons) {
+      const b = el('button', primary ? 'btn primary' : 'btn', label);
+      if (primary) b.style.minWidth = '0';
+      if (fn) b.onclick = fn;
+      else b.dataset.close = '';
+      foot.append(b);
+    }
+    const main = el('div', 'body');
+    main.append(...body);
+    d.append(head, main, foot);
+    return d;
+  }
+
+  const facts = (pairs) => {
+    const f = el('div', 'facts');
+    for (const [label, value] of pairs) {
+      const c = el('div');
+      c.append(el('span', 'eyebrow', label), el('b', '', value));
+      f.append(c);
+    }
+    return f;
+  };
+
+  function showBriefing() {
+    const s = app.state;
+    const m = s.map.mission;
+    const squad = s.units.filter((u) => u.side === PLAYER_SIDE);
+    const body = [];
+    if (s.map.description) body.push(el('p', '', s.map.description));
+    if (m?.brief) body.push(el('div', 'callout', m.brief));
+    body.push(facts([
+      ['Objective', s.map.objective ? s.map.objective.join(',') : 'None'],
+      ['To win', m ? 'Hold it at a turn end' : 'Sandbox: no end'],
+      ['Squad', `${squad.length} units · ${squad.reduce((n, u) => n + u.soldiers.length, 0)} men`],
+    ]));
+    openModal(dialog('Mission briefing', s.map.name, body, [['How to play', false, showHelp], ['Begin', true, closeModal]]));
+  }
+
+  function showHelp() {
+    openModal($('helpTpl').content.firstElementChild.cloneNode(true));
+  }
+
+  function showResult() {
+    const s = app.state;
+    if (!s.result) return;
+    const won = s.result.winner === PLAYER_SIDE;
+    const squad = s.units.filter((u) => u.side === PLAYER_SIDE);
+    const men = squad.reduce((n, u) => n + u.soldiers.length, 0);
+    const full = squad.reduce((n, u) => n + unitType(s.balance, u).roles.length, 0);
+    const reload = (seed) => {
+      const q = new URLSearchParams(location.search);
+      if (seed !== undefined) q.set('seed', String(seed));
+      location.search = q.toString();
+    };
+    const body = [
+      el('div', `stamp ${won ? 'won' : 'lost'}`, won ? 'Mission accomplished' : 'Mission failed'),
+      el('p', '', `${s.result.why.charAt(0).toUpperCase()}${s.result.why.slice(1)}.`),
+      facts([['Turn', `${s.turn}`], ['Men left', `${men} of ${full}`], ['Dice', `Seed ${s.seed ?? new URLSearchParams(location.search).get('seed') ?? 1}`]]),
+    ];
+    openModal(dialog('Debrief', s.map.name, body, [
+      ['Look at the map', false, null],
+      ['Same dice', false, () => reload()],
+      ['New game', true, () => reload(1 + Math.floor(Math.random() * 9999))],
+    ]));
+  }
+
+
+  const brief = app.state.map.mission?.brief;
+  const goal = app.state.map.objective ? `Objective hex ${app.state.map.objective.join(',')}` : 'No objective';
+  $('objective').replaceChildren(el('b', '', goal), document.createElement('br'), document.createTextNode(brief ?? ''));
+  render();
+  renderHover();
+  enemyTurn(0);
+  requestAnimationFrame(frame);
+  showBriefing();
+  return app;
+}

@@ -1,0 +1,231 @@
+# CLAUDE.md: Fix and Flank
+
+Start with `README.md`: current state, how to run and test, and the list of known issues and fixes to make.
+
+A turn-based hex wargame of small unit infantry tactics for the browser. Modern setting, dismounted infantry, squad scale. The core loop is **fix and flank**: pin the enemy with a base of fire, maneuver a second element close, then finish them with an assault. A frontal assault on a dug-in enemy should usually fail.
+
+The game is for a community of Arma Reforger players. It should feel familiar to them (terminology, tactics) and ideally double as a place to rehearse squad drills.
+
+Reference for the feel: Brothers in Arms (fix, flank, finish). Reference for the format: Take That Hill (https://takethathill.com/play): traditional hexes, fireteam counters, dice, few orders.
+
+The first version (2 m tiles, real-time WEGO with 10 second turns, percentage hit chances, directional cover, seven order types) was replaced on 2026-10-08 at the user's request. It is in git history up to commit `acfdbe8`.
+
+---
+
+## 1. Design pillars
+
+1. **Fix and flank is the optimal strategy.** If a frontal assault is ever the best plan against an entrenched enemy, the balance is wrong.
+2. **Dice, but never hidden dice.** Combat is resolved with d6 rolls. Before committing, the player sees the target number, the dice and the odds. After, the player sees the actual rolls and why.
+3. **Turn-based, in phases (after Take That Hill).** Each turn runs Movement, Firefight, Rally, Enemy action. In each of its phases the player gives every unit an order and commits them all; they are carried out in the order given. Nothing moves while the player decides.
+4. **Small and readable.** A BLUFOR squad of two fireteams and a squad leader against a few OPFOR fireteams. Each counter is a fireteam (or the SL). Three orders: Move, Fast move, Fire. The SL rallies by being close (the rally phase).
+5. **Real tactics, abstract presentation.** Correct doctrine and terminology, simple visuals (NATO-style counters, flat hexes). No made-up superweapons.
+
+---
+
+## 2. Tech stack and constraints
+
+- **HTML5 canvas, plain JavaScript ES modules, no build step** (or TypeScript only if asked). Must run by opening a local server or hosting as static files.
+- **The board is 3D** (user decisions 2026-10-15): three.js, vendored in `vendor/three` (the one dependency, approved by the user), drawn by `src/render/world3d.js`. It is the only map view; the flat, tiles and iso views were removed (the tiles and iso art is kept outside the repo, in `../parked-views/`).
+- **Node for headless tests** (`node --test` or Vitest). Keep dependencies minimal and ask before adding any.
+- Desktop browser first, mouse input. Keep layout responsive and do not block touch input later.
+- No external network calls at runtime. All assets inline or in `/assets`.
+- Free of real-world IP: generic factions (BLUFOR / OPFOR), generic weapon classes with realistic behavior.
+
+---
+
+## 3. Architecture
+
+The simulation must be completely separate from rendering and UI.
+
+```
+/src
+  /sim        pure logic, no DOM, no Math.random
+    hex.js          hex coordinates, neighbors, distance, lines
+    map.js          map loading, terrain lookups
+    state.js        game state shape
+    actions.js      action validation and resolution (the step function)
+    orders.js       a side's orders: commit, and planning projections
+    mission.js      mission end: objective held, fireteams eliminated, a stalled attack (no turn limit)
+    phases.js       the turn sequence: movement, firefight, rally, enemy action
+    los.js          line of sight and concealment on hexes
+    spotting.js     fog of war and contact tracking
+    combat.js       dice, target numbers, suppression, casualties, assault
+    odds.js         exact odds for the preview
+    rng.js          seeded RNG (mulberry32)
+  /ai         enemy behavior (basic.js), scripted BLUFOR plans (drills.js)
+  /render     drawing only: world3d.js (three.js), hexmap.js (marks, counters, bangs on canvases)
+  /ui         input, action planning, odds preview, step-by-step playback with the dice tray
+  /editor     map editor (editor.html): model.js (pure, tested), editor.js (page), store.js (localStorage maps, played as ?map=local:<id>)
+/data
+  balance.json      all tunable numbers (terrain table, dice modifiers)
+  /maps             one JSON per mission
+/tests
+```
+
+Rules for the simulation:
+
+- **Deterministic.** Same state + same actions + same seed = same result, always. Tests depend on this.
+- `applyAction(state, action, rng)` resolves one unit's order and `commitOrders(state, actions, rng)` a whole side's; both return the new state and a list of **events** (activated, moved, fired, dice rolled, suppressed, casualty, spotted, assault, turn ended). `commitOrders` also takes an optional `onStep(state, events)` callback, which the UI uses to play a commit back one order at a time. The renderer and the dice tray consume the events. Never let rendering logic decide outcomes.
+- **No magic numbers in code.** Every tunable lives in `data/balance.json`.
+
+---
+
+## 4. Map model
+
+- Pointy-top hex grid, offset rows ("odd-r": odd rows are shifted half a hex right). **1 hex = 50 m.** Maps are hand-built JSON, one character per hex.
+- Each hex has one terrain type. The terrain table in `balance.json` gives each type: movement (normal, stops fast move, impassable), cover (a casualty roll number), concealment (hides units in it), and whether it blocks line of sight through it.
+- Terrain types: open, road, scrub, woods, rubble, building, trench (dug-in fighting positions), water.
+- **Hexside features** sit on one of a hex's six sides (E, SE, SW, W, NW, NE): **wall** and **hedge** are on the edge between two hexes and count for both; a **parapet** belongs to its trench hex only.
+- **Cover and concealment are different.** Cover makes casualties less likely. Concealment hides a unit and, for woods and buildings, blocks sight through the hex.
+- Stacking: one fireteam per hex, plus the squad leader.
+
+### Directional cover (the core mechanic)
+
+- A unit's cover against fire from a hex is the better of its hex's terrain (protects all round) and the feature on the side of its hex facing the shooter. If the line of fire runs exactly through a hex corner, the better of the two sides counts.
+- So a trench with parapets facing south is hard to hurt from the south and only trench-covered from the east or west. Flanking means firing through a side without a feature.
+
+---
+
+## 5. Rules (first pass, all numbers tunable in `balance.json`)
+
+### Units
+
+A counter is one **fireteam**: side, team name (ALPHA, BRAVO...), soldiers (default 4: TL, AR, GRN, RFL), status, activated in this phase, moved, exposed (fast moved), fired. Casualties remove soldiers; the AR is lost last. A team with no soldiers left is eliminated.
+
+The **squad leader (SL)** is a counter of one man. He moves and fires like a team and may share a hex with one fireteam. He has no rally order: his position drives the **rally phase** (below).
+
+The **HMG team** (`type: "hmg"`, numbers in `balance.unitTypes.hmg`) is the squad's third element: a crew of three (gunner, assistant gunner, ammo bearer; gunner lost last) firing 6 dice, no range penalty to 6 hexes and +1 to 12. It moves one hex at a time (no fast move), never assaults, and fires only every other turn (`fireEveryTurns` 2: barrel change and reloading). A base-of-fire weapon. Kept for more difficult missions; not in mission 1.
+
+Status: **ok**, **suppressed** (cannot move, can still fire), **pinned** (cannot move and cannot shoot back), eliminated.
+
+### Turn and phases
+
+Each turn runs four phases, in the order set in `balance.json` (`turn.phases`), after the Take That Hill turn sequence:
+
+1. **Movement** (BLUFOR): Move or Fast move, or hold. A unit that moves is spent: it cannot fire this turn.
+2. **Firefight** (BLUFOR): units that did not move and are not pinned may Fire, or hold.
+3. **Rally** (BLUFOR, automatic): every suppressed or pinned unit tries to improve one step. With the SL in its hex it succeeds without a roll. Otherwise it rolls a d6 and must beat its distance in hexes to the SL (needs distance + 1, never worse than 5+; 5+ with no SL). A unit next to an enemy cannot rally unless the SL is with it.
+4. **Enemy action** (OPFOR): each suppressed or pinned enemy unit recovers one step and does nothing else; the others Move, Fast move or Fire.
+
+- In a phase that needs orders, the side gives an order to every unit that can act and commits them; the orders are carried out one after another in the order they were given, each rolling its own dice. A unit without an order holds. An order that has become impossible by the time it runs is skipped with the reason, and that unit holds.
+- While planning, each order is checked against where the earlier orders will have put things, so a team can move into a hex another team leaves earlier in the plan. Dice results are not known while planning.
+- A phase in which nobody can act is skipped. A side's first phase in a turn starts its turn: its units' moved, exposed and fired flags are cleared.
+
+### Actions
+
+| Action | Effect |
+|---|---|
+| Move | 1 hex. The careful way: the team keeps its normal profile. A unit that moved cannot fire this turn. |
+| Fast move | Up to 2 hexes, but entering rough terrain ends it. The team is **exposed** until its side's next turn: easier to spot and to hit. It cannot fire this turn. |
+| Fire | One d6 per soldier (AR rolls two) at a hex in range and line of sight. On a spotted enemy it is aimed fire; on a hex with no spotted enemy it is suppressive fire at worse odds. |
+| Assault | Moving or firing into an **adjacent enemy hex** starts an assault (close combat). |
+
+### Fire
+
+- One d6 per soldier, the AR rolls two (a full team: 5 dice; the SL: 1).
+- Target number (TN) on a d6, base 4+, plus: range (+0 up to 3 hexes, +1 up to 6, +2 up to 10, the maximum), the target hex's directional cover (+1 for 5+ cover, +2 for 6+), target exposed (-1), shooter suppressed (+1), no spotted enemy in the hex (+2, suppressive fire). Clamped to 2+ .. 6+.
+- Each die at or above the TN is a hit. 1 hit: the target is suppressed (already suppressed: pinned). 2 or more hits: pinned.
+- Each hit gets a casualty roll against the target's directional cover (for example 4+ in the open, 5+ in a trench seen from the flank, 6 behind its parapet). Each success removes a soldier (rifleman first, AR last).
+- Fire hits the fireteam in the hex; the SL only when he is alone there. Suppressive fire on a hex with an unseen enemy can still hit it; the shooter sees the dice but not the effect.
+- **Split fire (OPFOR only):** an OPFOR team with no enemy next to it may divide its dice between two hexes (the larger half first), each half rolled at its own target number.
+- **Units that moved this turn cannot fire.** Suppressed units fire at worse odds. Pinned units cannot fire. Firing on a spotted enemy in the next hex is an assault (below), not fire.
+- A unit that fires is spotted by every enemy with line of sight until its side's next turn starts.
+
+### Assault
+
+Close combat when a fireteam moves (a 1-hex Move, in the movement phase) or fires (in the firefight) into the next hex with an enemy in it. Only fireteams assault; a suppressed team cannot move in but can assault by fire; a pinned team cannot assault.
+
+- Both sides roll one die per soldier at the same time; each success removes an enemy soldier.
+- Attacker's TN by the defender's state: 5+ ok, 3+ suppressed or pinned; +1 if the attacker is suppressed.
+- Defender's TN: 5+, 4+ if dug in (its cover against the attacker's hex is 5+ or better), +1 if suppressed. A pinned defender cannot shoot back.
+- If the defender is wiped out or ends with fewer soldiers than the attacker, it is eliminated (with any other enemy unit in the hex: overrun) and the attacker takes the hex. Otherwise the attacker falls back pinned. A tie holds the hex.
+- With the defaults, a full team assaulting an unsuppressed full team in a trench takes it 20% of the time and loses 2 men on average; against a suppressed team 74%; against a pinned team 99%. Fix first, then assault.
+
+### Vision and fog of war
+
+- Line of sight runs from hex center to hex center; woods and buildings in between block it. The target's own hex never blocks.
+- Enemy contacts have three levels: **unseen**, **suspected** (last known position, or a hex that fired), **spotted** (confirmed, shown on the map).
+- A unit in line of sight is spotted if it is in the open, adjacent, exposed, or has fired this turn. Firing reveals the shooter, which is how a dug-in enemy gets found.
+- Once spotted, a unit stays spotted while it stays in that hex and an enemy unit still has line of sight to it (a known position). It drops to suspected when it moves on while concealed, or when nobody can see the hex any more.
+
+### Odds preview (important)
+
+Before committing, the UI tells the player what will happen, for example:
+
+- "ALPHA fires on OPFOR ALPHA at 3,1 (open): 5 dice, hit on 5+ (4 base, +1 range 4 hexes). 87% at least one hit, 54% to pin. Casualties on 4+ (open), expected 0.83."
+- "ALPHA puts suppressive fire on 4,2 (trench), no spotted enemy there: 5 dice, hit on 6+ (4 base, +2 range 9 hexes, +2 behind a parapet (SE side), +2 no spotted enemy: suppressive fire, 10+ capped at 6+). If a team is there: 60% at least one hit, 20% to pin."
+- "Rally phase: ALPHA needs 3+ on a d6 to become suppressed, 4 in 6 (67%; SL 2 hexes away)."
+- "ALPHA assaults OPFOR ALPHA at 4,2 (trench, pinned): ALPHA 4 dice, hit on 3+ (defender pinned); OPFOR ALPHA is pinned and cannot shoot back. 99% to take the hex; otherwise ALPHA falls back pinned. Expected losses: ALPHA 0.00, OPFOR ALPHA 2.67."
+- "BRAVO fast moves 2 hexes in view of a known enemy: exposed until its next turn."
+
+### Missions
+
+A map may carry a `mission` (attacker, defender, brief), which needs an `objective` hex on the map (parseMap refuses it without one), and `drills` (scripted plans for the balance test). There is no turn limit (user decision 2026-10-15): turns are counted and the fight goes on until a side wins. The attacker wins by holding the objective with a fireteam at the end of a turn, or by eliminating every defending fireteam; the defender wins by eliminating every attacking fireteam, or when the attack has stalled (no attacking unit able to act for `turn.stalemateTurns` turns in a row). Mission 1 is `data/maps/trenchline.json` (the default); `?map=training` loads the sandbox map, which never ends.
+
+### Dice on screen
+
+When orders are committed they play back one at a time: each roll tumbles in a dice tray over the map and settles on the real dice (hits highlighted, with the target number and the outcome), fire puts bang markers on the hex fired on, and only then does the result show on the map and the roster. (There is no combat log since 2026-10-15; a full after-action replay was planned and dropped on 2026-10-14 at the user's request.)
+
+---
+
+## 6. Enemy AI
+
+Scripted behavior per enemy fireteam, using the **same visibility and rules as the player**, no cheating. One deliberate exception, at the user's request: only OPFOR may split its fire.
+
+Each enemy unit picks one mode per enemy action phase (`src/ai/basic.js`, numbers in `balance.ai`), first that applies:
+
+- `SUPPRESSED`: suppressed or pinned, it spends the phase recovering.
+- `COUNTER_FLANK`: assault a spotted team in the next hex when the odds to take it are good; or, sometimes (a chance per phase), move against a weakened team close by (suppressed, pinned or fewer men) and assault it when next to it.
+- `RETREAT`: down to its last man, move away from known enemies.
+- `ENGAGED`: aimed fire on the best spotted target within its open-fire range, or at any range on a team that has fired at it (return fire). Scored by expected casualties plus weights for the chance to pin and to suppress; with no enemy next to it, it may split its fire between the best two targets (OPFOR only, see Fire).
+- `REPOSITION`: in poor cover against the nearest known enemy, move to a next hex with good cover that is not next to an enemy.
+- `HOLD`: stay put and hold fire; firing would give it away.
+
+Design goal: the AI reacts sensibly to suppression and sometimes counterattacks, so the same plan does not win every time. Difficulty levels change aggression and dice modifiers, not information.
+
+---
+
+## 7. Milestones
+
+Work one milestone at a time. Do not start the next until the current one passes its acceptance check. Milestone 1 (scaffold) carries over from the first version.
+
+1. **Scaffold.** Done.
+2. **Hex map, counters, orders, movement.** Hex map from JSON, fireteam and SL counters, orders for the whole side committed per phase, Move and Fast move, hold, the phase sequence with the rally phase. *Accept:* turn order rules tested; deterministic replay of an action list.
+3. **Line of sight and fog on hexes.** *Accept:* unit tests for LOS through woods and buildings, and the spotting rules.
+4. **Fire with dice, suppression, casualties, recovery.** *Accept:* tests for target numbers and modifiers; outcome frequencies over many seeded rolls match the exact odds; a team in a trench is much harder to kill than one in the open.
+5. **Assault and the odds preview.** *Accept:* preview odds equal the exact odds the sim rolls against.
+6. **Enemy AI.** *Accept:* AI fires from its positions, waits when pinned, and sometimes counterattacks.
+7. **First mission and balance test.** BLUFOR squad vs. dug-in OPFOR. *Accept (automated):* over 200 seeded runs, a scripted frontal assault wins under 25 percent and a scripted fix-and-flank plan wins over 70 percent. Adjust `balance.json` until this holds.
+8. ~~After-action replay~~: dropped on 2026-10-14 at the user's request. The dice tray covers seeing the rolls.
+9. **Content.** More missions, terrain, difficulty levels. Only after the core loop is proven fun.
+
+Later, out of scope for now: vehicles, drones, indirect fire, multiple squads, campaign, multiplayer.
+
+---
+
+## 8. How to work in this repo
+
+- Keep the simulation headless and covered by tests. Run the tests after every change to `/src/sim` or `/src/ai`.
+- Prefer small commits, one concern each, with a clear message.
+- When a rule is ambiguous, pick the simplest option, write it down in `docs/decisions.md`, and continue. Do not silently invent complex systems.
+- Do not add dependencies, frameworks, or a build step without asking.
+- When balance feels off, change `balance.json`, not code, and re-run the milestone 7 balance test (`npm test`; `npm run balance` prints the win rates and how the games ended).
+- Keep UI text plain and in the vocabulary of infantry tactics (fireteam, base of fire, contact, bounding, suppress, flank, assault). No filler, no flowery language.
+- After each milestone, summarize what works, what is stubbed, and what you would test next.
+- Run: `npm start` (http://localhost:8080, editor at /editor.html); `npm test` (all tests plus the 200-seed balance test); `npm run balance -- 200 201` for another seed block.
+- Git: `main` is current work; `main-3wu53y` is the handoff state, restored from `../fix_and_flank.bundle` (the `origin` remote); nothing is pushed.
+- Line endings are LF (`core.autocrlf=input`). On Windows, write files with LF; in Python use `newline=''`.
+- Debug hooks: `window.app` (game) and `window.editor` (`ed`, `cam`, `world`, `renderMap`). Use them in console checks; frames don't run in a hidden tab.
+- 3D scenery: build from the cached unit shapes in world3d.js (`box/cone/cyl/blob/rock` via `shape()`, `Mesher` typed arrays). The editor rebuilds the board on every edit (~12 ms at 18x14); per-call three.js geometries made it ~220 ms.
+- Marks painted through `frame.paint` (hexmap.js) lie on the ground but draw over everything (no depth test); the hex grid stays in the ground shader.
+- Units are picked by their counter and figures (`world.pickUnit`); a hex click gives orders.
+- Scripted balance plans (drills.js) must end games on their own (there is no turn limit): a run without a result fails the balance test.
+- Maps saved by older builds are fixed on load by `upgradeMapJson` (editor/model.js); extend it when the map format changes.
+
+---
+
+## 9. Open questions
+
+**Resolved 2026-09-30, see `docs/decisions.md`:** both game and drill tool; desktop first; anonymous soldiers by role; hand-built maps only; distribution decided later.
+
+**Resolved 2026-10-08 (hex redesign):** 50 m hexes; alternating activations at first, then (same day) orders for the whole side committed together; fireteam counters of 4; d6 per shooter with odds shown; keep fog of war, suppression states and the odds preview; directional cover dropped at first, then restored the same day as hexside cover (walls, hedges, parapets). Also added the same day: moved units cannot fire that turn; squad leader counter with Rally; suppressed (no move) and pinned (no move, no fire). Later the same day: the Take That Hill phase sequence (movement, firefight, rally, enemy action) replaced the SL's Rally order and the turn-start recovery roll.

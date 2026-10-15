@@ -1,0 +1,37 @@
+{
+  "name": "Training Area",
+  "description": "A dug-in OPFOR fireteam holds a trench line north of an open field, parapets facing south. Treelines on the east flank, a walled farm north-east, a hedge by the road.",
+  "width": 12,
+  "height": 12,
+  "legend": { ".": "open", "=": "road", ":": "scrub", "T": "woods", "%": "rubble", "B": "building", "n": "trench", "~": "water" },
+  "rows": [
+    "TTT.....BB..",
+    "TT.....:BB..",
+    "T...nn..:...",
+    "~~.....::...",
+    "~.......:.TT",
+    "....=.....TT",
+    "....=.%...TT",
+    ":...=.....TT",
+    "::..=......T",
+    "....=..::...",
+    "....=.......",
+    "....=......."
+  ],
+  "objective": [4, 2],
+  "hexsides": [
+    { "hex": [4, 2], "sides": ["SW", "SE"], "feature": "parapet" },
+    { "hex": [5, 2], "sides": ["SW", "SE"], "feature": "parapet" },
+    { "hex": [8, 1], "sides": ["SW", "SE"], "feature": "wall" },
+    { "hex": [9, 1], "sides": ["SW", "SE"], "feature": "wall" },
+    { "hex": [3, 7], "sides": ["NE", "E"], "feature": "hedge" },
+    { "hex": [4, 6], "sides": ["E"], "feature": "hedge" }
+  ],
+  "units": [
+    { "side": "BLUFOR", "team": "ALPHA", "pos": [4, 11] },
+    { "side": "BLUFOR", "team": "BRAVO", "pos": [6, 11] },
+    { "side": "OPFOR", "team": "ALPHA", "pos": [4, 2] },
+    { "side": "BLUFOR", "team": "SL", "kind": "leader", "pos": [5, 11] },
+    { "side": "BLUFOR", "team": "HMG", "type": "hmg", "pos": [3, 11] }
+  ]
+}
