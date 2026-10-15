@@ -15,7 +15,7 @@ const URL_PREFIX = "/uploads/";
 export const UPLOAD_TYPES: Record<string, string> = { jpg: "image/jpeg", png: "image/png", webp: "image/webp" };
 
 /** Saves `bytes` as `<dir>/<base>-<hash>.<ext>`; returns its URL. */
-export async function saveUpload(dir: "covers", base: string, bytes: Uint8Array, ext: keyof typeof UPLOAD_TYPES): Promise<string> {
+export async function saveUpload(dir: "covers" | "fnf", base: string, bytes: Uint8Array, ext: keyof typeof UPLOAD_TYPES): Promise<string> {
   const hash = createHash("sha256").update(bytes).digest("hex").slice(0, 10);
   const name = `${base}-${hash}.${ext}`;
   await mkdir(path.join(UPLOADS_DIR, dir), { recursive: true });

@@ -50,7 +50,7 @@ events it was part of · times played · `Markers.layer` (needed for planning)
 
 ## Fix and Flank («Мини-игры»)
 
-Drafted in `db/schema.sql` (`fnf_*`); the pages run on mock data until it's built (user decisions 2026-10-15).
+Built in `db/migrations/012_fix_and_flank.sql` (user decisions 2026-10-15). Maps are written by the game's editor; nothing writes runs or comments yet.
 
 ```mermaid
 erDiagram
@@ -64,5 +64,6 @@ erDiagram
 - A map is a draft (its author's only, editable) until published; then it's locked for good, so its runs and record stay comparable.
 - A run is a seed plus the orders given. The game is deterministic, so the server replays them to get the result and turns (records can't be faked) and «Повтор» plays them back. A run keeps the game version it was played on.
 - The leaderboard is each player's best win on a map, fewest turns first, top 10. Losses don't count toward the ranking. «Популярные» sorts by finished runs.
-- «Активность» is derived: runs (won, lost, a new record) and published maps.
+- «Активность» is derived: runs (won, lost, a new record) and maps members published.
+- A map that came with the game (Trench Line) has no author row: `author_label` credits the game's authors.
 - Playing and publishing are for members of the Discord (`viewer.inGuild`).

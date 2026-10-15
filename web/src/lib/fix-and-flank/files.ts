@@ -7,7 +7,8 @@ import path from "node:path";
  * relative URLs, so a page served at /games/fix-and-flank/play finds src/, assets/, vendor/ and data/ beside it.
  * The server runs from web/ (dev and the box), so the game is one level up.
  */
-export const GAME_DIR = path.resolve(process.cwd(), "..", "games", "fix-and-flank");
+// turbopackIgnore: a folder of runtime files, not something for the build to trace.
+export const GAME_DIR = path.resolve(/* turbopackIgnore: true */ process.cwd(), "..", "games", "fix-and-flank");
 
 /** The game's pages by URL name. The game's own links say index.html and editor.html, so those work too. */
 export const GAME_PAGES: Record<string, { file: string; members: boolean }> = {

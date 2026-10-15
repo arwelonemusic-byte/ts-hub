@@ -7,6 +7,7 @@ import { buttonClass, ButtonLink, Icon, StatusChip } from "@/components/ui";
 import { getFixAndFlankData } from "@/lib/data";
 import { FNF_AUTHORS, FNF_COVER, gameUrl } from "@/lib/fix-and-flank/game";
 import { getT } from "@/lib/i18n-server";
+import { playerIdOf } from "@/lib/players";
 import { getViewer } from "@/lib/viewer";
 
 const ACTIVITY = 12;
@@ -20,10 +21,11 @@ export default async function FixAndFlankPage({ searchParams }: PageProps<"/game
   const sp = await searchParams;
   const data = getFixAndFlankData();
   const [{ locale, t }, viewer] = await Promise.all([getT(), getViewer()]);
+  const playerId = viewer ? await playerIdOf(viewer) : null;
   const [fresh, popular, mine, activity] = await Promise.all([
     data.listMaps("fresh"),
     data.listMaps("popular"),
-    viewer ? data.listMapsBy(viewer.name) : [],
+    playerId ? data.listMapsBy(playerId) : [],
     data.listActivity(ACTIVITY),
   ]);
   const canPlay = !!viewer?.inGuild;

@@ -295,7 +295,7 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   the header shows "dev" next to the name. Roles: `viewer.roles` (names via `DISCORD_ROLE_MAP`), `hasRole`,
   `isMissionMaker` (@mission officer), `isAdmin` (`HUB_ADMIN_IDS` / `HUB_ADMIN_ROLES`).
   Admins are the Discord user IDs in `HUB_ADMIN_IDS` (production: Galaxy) and/or the role names in `HUB_ADMIN_ROLES`.
-- **«Мини-игры» → Fix & Flank** (user decisions 2026-10-15, sketches in the conversation; **scaffold, mock data**). The
+- **«Мини-игры» → Fix & Flank** (user decisions 2026-10-15, sketches in the conversation). The
   header's «Мини-игры» is a menu (`NavDropdown`; a labelled group in `NavMenu`) with one game. `app/games/fix-and-flank`:
   the game's page (cover, Играть → a map picker with search, author and sort; Создать карту → the editor; «Карты» with
   Свежие / Популярные / Мои tabs; «Активность»), and `maps/[id]`: the map turning in 3D (the game's `preview` page in an
@@ -306,9 +306,20 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   Published maps are locked (no edits: they'd void runs and records); drafts are their author's; publishing needs only
   a valid map (no clear check). Runs are seed + orders, replayed on the server through the game's sim to get the
   result (so records can't be faked) and played back for «Повтор». Data: `getFixAndFlankData()` (`lib/data/fixAndFlank.ts`)
-  over `fix-and-flank-mock.json` (made with the game's map generator; stills in `public/fix-and-flank/`) until the
-  `fnf_*` tables drafted in `db/schema.sql` are built. Not done yet: saving and publishing maps from the editor, recording
-  runs, replays, comments, the game's UI in Russian.
+  over `fnf_maps`, `fnf_runs`, `fnf_comments` (migration 012, which also puts in Trench Line, credited to the game's
+  authors via `author_label`; such maps stay out of «Активность»).
+  **Maps from the editor:** served by the hub, the game's editor keeps a member's drafts in the hub (`src/editor/hub.js`;
+  it knows it's in the hub when `GET /api/games/fix-and-flank/maps?mine=1` answers). Save draft (Ctrl+S) and an open
+  draft saving itself 1.5 s after each change; Playtest (saves, then plays the draft, not recorded); Publish (confirm,
+  then the map's page); the Maps menu lists your drafts (delete) and published maps. API, members only, JSON bodies
+  (`lib/fix-and-flank/api.ts`): `POST /maps` (new draft), `PUT|DELETE /maps/<id>` (drafts only; a published map is 409),
+  `POST /maps/<id>/publish`. The server reads, cleans and checks every map with the game's own code loaded at run time
+  (`lib/fix-and-flank/rules.ts`: `import()` of `games/fix-and-flank/src/*.js` with `turbopackIgnore`, so the build
+  never reaches outside `web/`): 14 x 16, a name, and for publishing what the editor's «Ready to play» checks. Map ids
+  come from the name (Cyrillic spelled out) plus 4 hex digits. The editor sends a 16:10 JPEG still (`render/still.js`:
+  BLUFOR and the objective, no OPFOR) on Save draft, Playtest and Publish → `uploads/fnf/`. Run on its own (`npm start`)
+  the editor keeps maps in the browser as before. Not done yet: recording runs, replays, comments, the game's UI in
+  Russian, an admin's way to take a map down (`hidden_at` is there).
 
 ## Decided (2026-10-09)
 

@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState } from "react";
 import { DialogShell } from "@/components/mission/editor/DialogShell";
 import { Select, TextInput } from "@/components/mission/editor/fields";
 import { buttonClass, Eyebrow, Icon } from "@/components/ui";
 import { playUrl } from "@/lib/fix-and-flank/game";
+import { MapThumb } from "./MapRow";
 import type { FnfMap, FnfSort } from "@/lib/fix-and-flank/types";
 import { makeT, plural, type Locale } from "@/lib/i18n";
 
@@ -72,7 +72,7 @@ function PickerDialog({ maps, locale, onClose }: { maps: { fresh: FnfMap[]; popu
           {shown.map((m) => (
             <li key={m.id}>
               <a href={playUrl(m.id)} className="flex flex-col gap-4 rounded-xl bg-inset p-3 ring-line-strong hover:ring-1 sm:flex-row sm:items-center">
-                <Image src={m.thumbUrl} alt="" width={640} height={400} sizes="(min-width: 640px) 208px, 100vw" className="aspect-[16/10] w-full shrink-0 rounded-lg bg-page object-cover sm:w-52" />
+                <MapThumb url={m.thumbUrl} sizes="(min-width: 640px) 208px, 100vw" className="w-full shrink-0 sm:w-52" label={t("fnf.noPreview")} />
                 <div className="flex min-w-0 flex-1 flex-col gap-3">
                   <div className="flex flex-col gap-1">
                     <span className="truncate type-heading-xs text-fg">{m.name}</span>
@@ -82,7 +82,7 @@ function PickerDialog({ maps, locale, onClose }: { maps: { fresh: FnfMap[]; popu
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 sm:max-w-80">
-                    <Stat label={t("fnf.played")} value={plural(locale, "fnf.times", m.plays)} />
+                    <Stat label={t("fnf.played")} value={m.plays ? plural(locale, "fnf.times", m.plays) : t("fnf.never")} />
                     <Stat label={t("fnf.record")} value={m.record === null ? "—" : plural(locale, "fnf.turns", m.record)} />
                   </div>
                 </div>

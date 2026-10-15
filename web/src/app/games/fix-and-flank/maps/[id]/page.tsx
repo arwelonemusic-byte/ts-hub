@@ -9,6 +9,7 @@ import { shortDate } from "@/lib/format";
 import { FNF_HOME, gameUrl, playUrl, previewUrl } from "@/lib/fix-and-flank/game";
 import { format, plural } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
+import { playerIdOf } from "@/lib/players";
 import { getViewer } from "@/lib/viewer";
 
 /**
@@ -19,7 +20,7 @@ export default async function MapPage({ params }: PageProps<"/games/fix-and-flan
   const { id } = await params;
   const data = getFixAndFlankData();
   const [{ locale, t }, viewer] = await Promise.all([getT(), getViewer()]);
-  const map = await data.getMap(id, viewer?.name ?? null);
+  const map = await data.getMap(id, viewer ? await playerIdOf(viewer) : null);
   if (!map) notFound();
   const [runs, comments] = await Promise.all([data.getLeaderboard(map.id), data.getComments(map.id)]);
   const now = new Date();
@@ -58,17 +59,17 @@ export default async function MapPage({ params }: PageProps<"/games/fix-and-flan
                 </span>
                 <span className="flex items-center gap-2">
                   <Icon name="calendar" />
-                  {shortDate(map.publishedAt ?? map.createdAt)}
+                  {shortDate(map.publishedAt ?? map.updatedAt)}
                 </span>
               </div>
               {!draft && (
                 <div className="grid grid-cols-2 gap-3">
-                  <StatBox label={t("fnf.played")} value={plural(locale, "fnf.times", map.plays)} />
+                  <StatBox label={t("fnf.played")} value={map.plays ? plural(locale, "fnf.times", map.plays) : t("fnf.never")} />
                   <StatBox label={t("fnf.record")} value={map.record === null ? "—" : plural(locale, "fnf.turns", map.record)} />
                 </div>
               )}
               {draft ? (
-                <a href={gameUrl("editor")} className={buttonClass("secondary", "m")}>
+                <a href={gameUrl("editor", { draft: map.id })} className={buttonClass("secondary", "m")}>
                   <Icon name="pencil" />
                   {t("fnf.continue")}
                 </a>

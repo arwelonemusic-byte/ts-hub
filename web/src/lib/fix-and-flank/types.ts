@@ -6,17 +6,20 @@ export type FnfMapStatus = "draft" | "published";
 export interface FnfMap {
   id: string;
   name: string;
-  /** Display name. Will be a player (players.id) once maps are in the database. */
+  /** Display name: the author's, or the credit of a map that came with the game. */
   author: string;
+  /** players.id; null for a map that came with the game. */
+  authorId: string | null;
   status: FnfMapStatus;
   createdAt: string;
+  updatedAt: string;
   publishedAt: string | null;
   /** Finished runs, won or lost: what «Популярные» sorts by. */
   plays: number;
   /** The fewest turns anyone has won it in; null until someone has. */
   record: number | null;
-  /** A still of the map for lists (16:10). */
-  thumbUrl: string;
+  /** A still of the map for lists (16:10), taken in the editor; null until it has one. */
+  thumbUrl: string | null;
 }
 
 /** A row of a map's leaderboard: each player's best win, fewest turns first (turns only, user decision 2026-10-15). */
