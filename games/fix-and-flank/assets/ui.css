@@ -142,7 +142,7 @@ kbd {
 .hud button:active { background: var(--raised-hover); }
 .hud svg { width: 16px; height: 16px; }
 
-/* Bottom dock: dice, the hint, the actions */
+/* Bottom dock: dice and the actions (the game's hint is in the panel; the editor's here) */
 .dock {
   position: absolute; z-index: 3; left: 50%; bottom: var(--gap); transform: translateX(-50%);
   display: flex; flex-direction: column; align-items: center; gap: 10px; width: min(680px, calc(100% - 2 * var(--gap))); pointer-events: none;
@@ -155,6 +155,7 @@ kbd {
 }
 .hint.empty { display: none; }
 .hint .dot { flex: none; width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1.6s ease-in-out infinite; }
+#phaseCard .hint { padding: 10px 12px; background: var(--inset); box-shadow: none; } /* the game's: in the panel */
 #message { color: var(--danger); font-weight: 500; }
 #message:empty { display: none; }
 .actions { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); }

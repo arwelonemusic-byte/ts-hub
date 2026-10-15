@@ -42,6 +42,8 @@
         <div class="eyebrow">Отделение · BLUFOR</div>
         <div id="units"></div>
       </section>
+      <!-- Hints and messages: at the bottom of the panel (user request 2026-10-15), not over the map. -->
+      <div class="hint" id="hint" aria-live="polite"><i class="dot"></i><div><span id="preview"></span> <span id="message"></span></div></div>
     </aside>
 
     <div class="hud" id="hud" aria-label="Управление картой">
@@ -57,7 +59,6 @@
 
     <div class="dock">
       <div id="dice" hidden aria-live="polite"></div>
-      <div class="hint" id="hint" aria-live="polite"><i class="dot"></i><div><span id="preview"></span> <span id="message"></span></div></div>
       <div class="actions" id="actions">
         <button class="btn" id="clear" title="Отменить все приказы">Сбросить всё</button>
         <button class="btn" id="view" title="Затемнить то, чего отделение не видит; наведите на подразделение (или выберите его), чтобы увидеть его обзор (V)">Обзор <kbd>V</kbd></button>

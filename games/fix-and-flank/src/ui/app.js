@@ -37,16 +37,16 @@ const WHEEL_ZOOM = 1.15;
 const MOVE_ANIM_MS = 220;   // per hex
 const DICE_ROLL_MS = 1100;  // dice tumble this long before they settle
 const DICE_STAGGER_MS = 350; // a second row (casualty rolls, the defender) settles this much later
-const DICE_HOLD_MS = 1600;  // the settled roll stays on screen this long (doubled 2026-10-15: long enough to read)
+const DICE_HOLD_MS = 2400;  // the settled roll stays on screen this long (user requests 2026-10-15: long enough to read)
 const RALLY_ROLL_MS = 700;
-const RALLY_HOLD_MS = 1000;
+const RALLY_HOLD_MS = 1500;
 const BANG_MS = 900;        // a bang marker's life
 const COMMENT_MAX = 2000;   // the hub's limit for a comment on a map (FNF_COMMENT_MAX)
 const STEP_GAP_MS = 120;    // between steps without moves
 const AI_DELAY_MS = 450;    // pause before OPFOR commits, so it can be followed
 const REPLAY_PAUSE_MS = 900; // «Повтор»: pause before the player's next recorded commit
 const FIT_GAP = 16;          // px between the fitted map and the floating panels
-const HINT_ROOM = 48;        // px kept clear above the action bar for the hint
+const HINT_ROOM = 48;        // px kept clear above the action bar (the dice tray rises there)
 const TERRAIN_NOTES = {
   open: 'Открытая местность', road: 'Полевая дорога', scrub: 'Кустарник и бурьян', woods: 'Лесной массив',
   rubble: 'Разрушенные постройки', building: 'Хозяйственные постройки', trench: 'Окопы', water: 'Пруд и ручей',
