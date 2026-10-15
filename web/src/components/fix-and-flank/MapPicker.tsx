@@ -5,7 +5,7 @@ import { DialogShell } from "@/components/mission/editor/DialogShell";
 import { Select, TextInput } from "@/components/mission/editor/fields";
 import { buttonClass, Eyebrow, Icon } from "@/components/ui";
 import { playUrl } from "@/lib/fix-and-flank/game";
-import { MapThumb } from "./MapRow";
+import { MapThumb } from "./MapCard";
 import type { FnfMap, FnfSort } from "@/lib/fix-and-flank/types";
 import { makeT, plural, type Locale } from "@/lib/i18n";
 

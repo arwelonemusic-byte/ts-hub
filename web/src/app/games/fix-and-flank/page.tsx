@@ -22,10 +22,11 @@ export default async function FixAndFlankPage({ searchParams }: PageProps<"/game
   const data = getFixAndFlankData();
   const [{ locale, t }, viewer] = await Promise.all([getT(), getViewer()]);
   const playerId = viewer ? await playerIdOf(viewer) : null;
-  const [fresh, popular, mine, activity] = await Promise.all([
+  const [fresh, popular, mine, played, activity] = await Promise.all([
     data.listMaps("fresh"),
     data.listMaps("popular"),
     playerId ? data.listMapsBy(playerId) : [],
+    playerId ? data.listPlayedBy(playerId) : [],
     data.listActivity(ACTIVITY),
   ]);
   const canPlay = !!viewer?.inGuild;
@@ -78,7 +79,7 @@ export default async function FixAndFlankPage({ searchParams }: PageProps<"/game
         </div>
         <div className="flex w-full max-w-[1216px] flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex min-w-0 flex-1 flex-col gap-4">
-            <MapsSection lists={{ fresh, popular, mine }} initial={tab} canPlay={canPlay} signedIn={!!viewer} locale={locale} />
+            <MapsSection lists={{ fresh, popular, mine }} played={played} initial={tab} canPlay={canPlay} signedIn={!!viewer} locale={locale} />
           </div>
           <aside className="flex shrink-0 flex-col gap-4 lg:w-[360px]">
             <ActivityPanel items={activity} now={new Date()} locale={locale} t={t} />

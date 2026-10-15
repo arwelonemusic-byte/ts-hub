@@ -12,6 +12,8 @@ export interface FixAndFlankData {
   listMaps(sort: FnfSort): Promise<FnfMap[]>;
   /** A player's own maps (players.id), drafts first, then published, newest first in each. */
   listMapsBy(playerId: string): Promise<FnfMap[]>;
+  /** The maps a player has finished a run on (ids), for «Вы играли». */
+  listPlayedBy(playerId: string): Promise<string[]>;
   /** A published map, or the viewer's own draft. */
   getMap(id: string, playerId: string | null): Promise<FnfMap | null>;
   /** The map in the game's file format (data/maps), for the game, the editor and the preview. */
@@ -68,6 +70,11 @@ export const fixAndFlankData: FixAndFlankData = {
       [playerId],
     );
     return rows.map(toMap);
+  },
+  async listPlayedBy(playerId) {
+    const db = await getDb();
+    const rows = await db.query(`SELECT DISTINCT map_id FROM fnf_runs WHERE player_id = $1 AND result IS NOT NULL`, [playerId]);
+    return rows.map((r) => String(r.map_id));
   },
   async getMap(id, playerId) {
     const db = await getDb();

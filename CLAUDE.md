@@ -297,8 +297,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   Admins are the Discord user IDs in `HUB_ADMIN_IDS` (production: Galaxy) and/or the role names in `HUB_ADMIN_ROLES`.
 - **«Мини-игры» → Fix & Flank** (user decisions 2026-10-15, sketches in the conversation). The
   header's «Мини-игры» is a menu (`NavDropdown`; a labelled group in `NavMenu`) with one game. `app/games/fix-and-flank`:
-  the game's page (cover, Играть → a map picker with search, author and sort; Создать карту → the editor; «Карты» with
-  Свежие / Популярные / Мои tabs; «Активность»), and `maps/[id]`: the map turning in 3D (the game's `preview` page in an
+  the game's page (cover with the title on it, Играть → a map picker with search, author and sort; Создать карту → the
+  editor; «Карты» with Свежие / Популярные / Мои карты tabs and the maps' cards on the page itself, not in a panel, each
+  with «Вы играли» once the viewer has finished a run on it (`MapCard`, the user's design); «Активность»), and `maps/[id]`: the map turning in 3D (the game's `preview` page in an
   iframe), plays and record, «Рейтинг» (each player's best win, top 10, **turns only**), «Комментарии» (the hub's own,
   composer on top). The game is served as it is from `games/fix-and-flank` by `app/games/fix-and-flank/[...path]`
   (`/play`, `/editor`, `/preview` and the files they load; nothing else of the folder) and loads a hub map with
