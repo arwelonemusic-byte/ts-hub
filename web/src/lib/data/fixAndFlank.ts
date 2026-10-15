@@ -5,7 +5,7 @@ import type { FnfActivity, FnfComment, FnfMap, FnfRun, FnfSort } from "@/lib/fix
 /**
  * Fix and Flank's maps, runs and comments (migration 012: fnf_maps, fnf_runs, fnf_comments). Maps are made and
  * published in the game's editor (lib/fix-and-flank/maps.ts); runs are recorded by the game (lib/fix-and-flank/runs.ts)
- * and only finished ones count; comments aren't written yet.
+ * and only finished ones count; comments are written on the map's page (lib/fix-and-flank/actions.ts).
  */
 export interface FixAndFlankData {
   /** Published maps, newest first or most played first. */
@@ -109,11 +109,18 @@ export const fixAndFlankData: FixAndFlankData = {
   async getComments(mapId) {
     const db = await getDb();
     const rows = await db.query(
-      `SELECT c.id, p.display_name, p.avatar_url, c.body, c.created_at FROM fnf_comments c JOIN players p ON p.id = c.player_id
+      `SELECT c.id, c.player_id, p.display_name, p.avatar_url, c.body, c.created_at FROM fnf_comments c JOIN players p ON p.id = c.player_id
        WHERE c.map_id = $1 AND c.deleted_at IS NULL ORDER BY c.created_at DESC`,
       [mapId],
     );
-    return rows.map((c) => ({ id: String(c.id), author: String(c.display_name), avatar: (c.avatar_url as string | null) ?? null, body: String(c.body), createdAt: iso(c.created_at) }));
+    return rows.map((c) => ({
+      id: String(c.id),
+      authorId: String(c.player_id),
+      author: String(c.display_name),
+      avatar: (c.avatar_url as string | null) ?? null,
+      body: String(c.body),
+      createdAt: iso(c.created_at),
+    }));
   },
   async listActivity(limit) {
     const db = await getDb();

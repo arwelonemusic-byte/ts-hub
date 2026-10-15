@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { sendComment } from "@/lib/discord/actions";
 import { COMMENT_MAX, type Comment, type Comments } from "@/lib/discord/comments";
 import { discordTimestamp, mskDay, shortDay, time } from "@/lib/format";
 import { plural, type Locale, type T } from "@/lib/i18n";
@@ -217,7 +218,8 @@ export function CommentsPanel({
         {viewer && (
           <div className="border-t border-line pt-5">
             <CommentForm
-              eventId={eventId}
+              action={sendComment}
+              fields={{ event: eventId }}
               me={{ name: viewer.name, avatar: viewer.avatar }}
               max={COMMENT_MAX}
               labels={{

@@ -327,8 +327,11 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   `GET /runs/<id>` serves a finished run; `play?replay=<id>` («Повтор» on the leaderboard, members) plays it back with
   the game's own playback. `game_version` is a hash of `src/sim`, `src/ai` and `balance.json`: a replay of a run made
   under other rules says it may not play out the same. Known limit: the seed is known when the run starts, so a
-  patient cheat could search orders offline; server-side dice per commit would close that. Not done yet: comments,
-  the game's UI in Russian, an admin's way to take a map down (`hidden_at` is there).
+  patient cheat could search orders offline; server-side dice per commit would close that.
+  **Comments** on a map (`lib/fix-and-flank/actions.ts`, user request 2026-10-15): the hub's own `fnf_comments`, written
+  with the event page's `CommentForm` (it takes its server action and hidden fields as props), members only, on a
+  published map, 2000 characters at most, newest first. «Удалить» for the author or an admin sets `deleted_at`.
+  Not done yet: the game's UI in Russian, an admin's way to take a map down (`hidden_at` is there).
 
 ## Decided (2026-10-09)
 

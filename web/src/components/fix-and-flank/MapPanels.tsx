@@ -1,11 +1,14 @@
 import Image from "next/image";
 import { Avatar } from "@/components/event/Avatar";
+import { CommentForm } from "@/components/event/CommentForm";
 import { buttonClass, Icon } from "@/components/ui";
-import { gameUrl } from "@/lib/fix-and-flank/game";
+import { postMapComment } from "@/lib/fix-and-flank/actions";
+import { FNF_COMMENT_MAX, gameUrl } from "@/lib/fix-and-flank/game";
 import { shortDay, time } from "@/lib/format";
 import type { FnfComment, FnfRun } from "@/lib/fix-and-flank/types";
-import { plural, type Locale, type T } from "@/lib/i18n";
+import { format, plural, type Locale, type T } from "@/lib/i18n";
 import type { Viewer } from "@/lib/viewer";
+import { DeleteCommentButton } from "./DeleteCommentButton";
 
 const MEDALS = ["gold", "silver", "bronze"];
 
@@ -60,45 +63,86 @@ export function LeaderboardPanel({ runs, canWatch, now, locale, t }: { runs: Fnf
 }
 
 /**
- * «Комментарии» on a map: the box to write in on top (the sketch's note), then the comments, newest first.
- * The hub's own (not a Discord thread like a game's). Writing waits for the maps' tables.
+ * «Комментарии» on a map: the box to write in on top (the sketch's note), then the comments, newest first. The hub's
+ * own (fnf_comments), not a Discord thread like a game's. Members of the Discord write, on a published map; a comment
+ * can be taken down by its author or an admin.
  */
-export function MapCommentsPanel({ comments, viewer, now, locale, t }: { comments: FnfComment[]; viewer: Viewer | null; now: Date; locale: Locale; t: T }) {
+export function MapCommentsPanel({
+  mapId,
+  comments,
+  viewer,
+  viewerId,
+  open,
+  now,
+  locale,
+  t,
+}: {
+  mapId: string;
+  comments: FnfComment[];
+  viewer: Viewer | null;
+  /** The viewer's players.id: their own comments get «Удалить». */
+  viewerId: string | null;
+  /** Published: a draft is its author's alone, so nobody comments on it. */
+  open: boolean;
+  now: Date;
+  locale: Locale;
+  t: T;
+}) {
+  const deleteLabels = { delete: t("fnf.comments.delete"), confirm: t("fnf.comments.deleteConfirm") };
   return (
-    <section className="flex flex-col gap-4 rounded-xl bg-inset p-5">
+    <section id="comments" className="flex flex-col gap-4 rounded-xl bg-inset p-5">
       <h2 className="flex items-baseline gap-2 type-heading-xs text-fg">
         {t("fnf.comments")}
         {comments.length > 0 && <span className="type-caption text-fg-tertiary">{comments.length}</span>}
       </h2>
-      {viewer?.inGuild ? (
-        <div className="flex gap-3">
-          <Avatar name={viewer.name} src={viewer.avatar} size={32} />
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <textarea
-              disabled
-              rows={2}
-              placeholder={t("fnf.comments.placeholder")}
-              className="w-full resize-none rounded-lg border border-line bg-page px-3 py-2 type-body-s text-fg placeholder:text-fg-tertiary disabled:opacity-60"
-            />
-            <span className="type-caption text-fg-tertiary">{t("fnf.comments.soon")}</span>
-          </div>
-        </div>
+      {!open ? null : viewer?.inGuild && viewerId ? (
+        <CommentForm
+          action={postMapComment}
+          fields={{ map: mapId }}
+          me={{ name: viewer.name, avatar: viewer.avatar }}
+          max={FNF_COMMENT_MAX}
+          labels={{
+            placeholder: t("fnf.comments.placeholder"),
+            send: t("fnf.comments.send"),
+            sending: t("fnf.comments.sending"),
+            hint: t("fnf.comments.hint"),
+            errors: {
+              empty: t("fnf.comments.error.empty"),
+              tooLong: format(t("fnf.comments.error.tooLong"), { max: FNF_COMMENT_MAX }),
+              forbidden: t("fnf.comments.error.forbidden"),
+              gone: t("fnf.comments.error.gone"),
+            },
+          }}
+        />
+      ) : viewer ? (
+        <p className="type-body-s text-fg-secondary">{t("fnf.comments.members")}</p>
       ) : (
-        <p className="type-body-s text-fg-secondary">{t("fnf.comments.login")}</p>
+        <div className="flex flex-col items-start gap-3">
+          <p className="type-body-s text-fg-secondary">{t("fnf.comments.login")}</p>
+          <a href="/api/auth/login" className={buttonClass("secondary", "s")}>
+            <Icon name="user-login" />
+            {t("auth.login")}
+          </a>
+        </div>
       )}
       {comments.length ? (
         <ol className="flex flex-col">
           {comments.map((c) => (
             <li key={c.id} className="flex gap-3 border-t border-line py-3">
               <Avatar name={c.author} src={c.avatar} size={32} />
-              <div className="flex min-w-0 flex-col gap-1">
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <span className="flex items-baseline gap-2">
                   <span className="type-label-s text-fg">{c.author}</span>
                   <span className="type-caption text-fg-tertiary">
                     {shortDay(c.createdAt, now, locale)}, {time(c.createdAt)}
                   </span>
+                  {(c.authorId === viewerId || viewer?.isAdmin) && (
+                    <span className="ml-auto">
+                      <DeleteCommentButton id={c.id} labels={deleteLabels} />
+                    </span>
+                  )}
                 </span>
-                <p className="whitespace-pre-line type-body-s text-fg-body">{c.body}</p>
+                <p className="whitespace-pre-line break-words type-body-s text-fg-body">{c.body}</p>
               </div>
             </li>
           ))}

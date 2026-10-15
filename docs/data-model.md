@@ -50,7 +50,7 @@ events it was part of · times played · `Markers.layer` (needed for planning)
 
 ## Fix and Flank («Мини-игры»)
 
-Built in `db/migrations/012_fix_and_flank.sql` (user decisions 2026-10-15). Maps are written by the game's editor, runs by the game; nothing writes comments yet.
+Built in `db/migrations/012_fix_and_flank.sql` (user decisions 2026-10-15). Maps are written by the game's editor, runs by the game, comments on the map's page.
 
 ```mermaid
 erDiagram

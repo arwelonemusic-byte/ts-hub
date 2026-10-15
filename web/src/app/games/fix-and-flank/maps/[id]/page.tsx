@@ -20,7 +20,8 @@ export default async function MapPage({ params }: PageProps<"/games/fix-and-flan
   const { id } = await params;
   const data = getFixAndFlankData();
   const [{ locale, t }, viewer] = await Promise.all([getT(), getViewer()]);
-  const map = await data.getMap(id, viewer ? await playerIdOf(viewer) : null);
+  const viewerId = viewer ? await playerIdOf(viewer) : null;
+  const map = await data.getMap(id, viewerId);
   if (!map) notFound();
   const [runs, comments] = await Promise.all([data.getLeaderboard(map.id), data.getComments(map.id)]);
   const now = new Date();
@@ -97,7 +98,7 @@ export default async function MapPage({ params }: PageProps<"/games/fix-and-flan
             <LeaderboardPanel runs={runs} canWatch={canPlay} now={now} locale={locale} t={t} />
           </div>
           <aside className="flex shrink-0 flex-col gap-4 lg:w-[400px]">
-            <MapCommentsPanel comments={comments} viewer={viewer} now={now} locale={locale} t={t} />
+            <MapCommentsPanel mapId={map.id} comments={comments} viewer={viewer} viewerId={viewerId} open={!draft} now={now} locale={locale} t={t} />
           </aside>
         </div>
       </main>

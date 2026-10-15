@@ -2,6 +2,8 @@
 
 export const FNF_HOME = "/games/fix-and-flank";
 export const FNF_AUTHORS = ["Galaxy", "VonScheer"];
+/** The longest comment on a map, in characters (as a game's comments). */
+export const FNF_COMMENT_MAX = 2000;
 /** A still of mission 1, Trench Line. */
 export const FNF_COVER = "/fix-and-flank/cover.jpg";
 

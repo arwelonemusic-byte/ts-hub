@@ -34,6 +34,8 @@ export interface FnfRun {
 
 export interface FnfComment {
   id: string;
+  /** players.id, so its author (or an admin) can take it down. */
+  authorId: string;
   author: string;
   avatar: string | null;
   body: string;
