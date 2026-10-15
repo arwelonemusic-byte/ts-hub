@@ -73,7 +73,7 @@ const RUIN = { w: 0.8, d: 0.55, h: 0.36, thick: 0.06, plaster: '#d4c8ae', brick:
 const WALL = { stones: 5, height: 0.17, thick: 0.1, cap: 0.035, colors: ['#aaa397', '#948d81', '#bcb5a8'] };
 const HEDGE = { n: 7, r: 0.12, colors: ['#3e7a2e', '#4c8a36', '#356d28'] };
 const BAGS = { perRow: 6, rows: 2, h: 0.06, d: 0.1, inset: 0.12, colors: ['#c8ad78', '#bba06a', '#d1b886'] };
-const TRENCH = { zig: 0.15, width: 0.24, floor: '#4b3826', berm: 0.11, bermH: 0.07, colors: ['#9a7b52', '#8d7049'] };
+const TRENCH = { zig: 0.15, legs: 3, width: 0.24, floor: '#4b3826', berm: 0.11, bermH: 0.07, colors: ['#9a7b52', '#8d7049'] }; // legs: zig-zags from the center to a side
 const FLAG = { at: { x: 0.42, y: -0.45 }, height: 0.95, w: 0.36, h: 0.22, color: '#d93a2b', pole: '#e2ddd0', ball: '#e8b830' };
 const OBJECTIVE_INK = '#ffd34d';
 
@@ -398,7 +398,7 @@ function buildBoard(map) {
     });
 
     if (t === 'road') road(ground, map, h);
-    else if (t === 'trench') trench(ground, things, h, r);
+    else if (t === 'trench') trench(ground, things, map, h, r);
     else if (t === 'woods') woods(things, c, r);
     else if (t === 'scrub') scrub(things, c, r);
     else if (t === 'open') meadow(things, c, r);
@@ -440,36 +440,60 @@ function road(m, map, h) {
   }
 }
 
-// A zig-zag trench across the hex, west side to east side, so neighbouring trench hexes join.
-function trench(groundM, things, h, r) {
-  const c = center(h);
-  const half = SQRT3 / 2;
-  const n = 6;
-  const pts = Array.from({ length: n + 1 }, (_, i) => ({ x: c.x - half + (i * 2 * half) / n, y: c.y + (i === 0 || i === n ? 0 : (i % 2 ? -1 : 1) * TRENCH.zig) }));
+// A zig-zag trench from the hex center to each neighbouring trench hex, so
+// trench hexes join up like roads do. With one trench neighbour it runs on
+// through the far side, so a line of trench hexes reads as one trench;
+// alone, it crosses the hex west to east.
+function trench(groundM, things, map, h, r) {
+  const { c, outer } = hexPoints(h);
+  const sides = [];
+  neighbors(h).forEach((n, i) => {
+    if (inBounds(map, n) && terrainName(map, n) === 'trench') sides.push(i);
+  });
+  if (!sides.length) sides.push(SIDES.indexOf('E'), SIDES.indexOf('W'));
+  else if (sides.length === 1) sides.push((sides[0] + 3) % 6);
   const w = TRENCH.width / 2;
+  const y = LEVEL.trench;
   const floor = color(TRENCH.floor);
-  for (let i = 0; i < n; i++) {
-    const a = pts[i];
-    const b = pts[i + 1];
-    const dx = b.x - a.x;
-    const dz = b.y - a.y;
-    const len = Math.hypot(dx, dz);
-    const nx = -dz / len;
-    const nz = dx / len;
-    const y = LEVEL.trench;
-    groundM.quad(V(a.x + nx * w, y, a.y + nz * w), V(b.x + nx * w, y, b.y + nz * w), V(b.x - nx * w, y, b.y - nz * w), V(a.x - nx * w, y, a.y - nz * w), floor, UP);
-    if (i) {
-      for (let k = 0; k < 6; k++) {
-        const t0 = (Math.PI / 3) * k;
-        const t1 = (Math.PI / 3) * (k + 1);
-        groundM.tri(V(a.x, y, a.y), V(a.x + Math.cos(t0) * w, y, a.y + Math.sin(t0) * w), V(a.x + Math.cos(t1) * w, y, a.y + Math.sin(t1) * w), floor, UP);
+  // A round patch of floor where legs meet, so the bends have no gaps.
+  const joint = (p) => {
+    for (let k = 0; k < 6; k++) {
+      const t0 = (Math.PI / 3) * k;
+      const t1 = (Math.PI / 3) * (k + 1);
+      groundM.tri(V(p.x, y, p.y), V(p.x + Math.cos(t0) * w, y, p.y + Math.sin(t0) * w), V(p.x + Math.cos(t1) * w, y, p.y + Math.sin(t1) * w), floor, UP);
+    }
+  };
+  joint(c);
+  sides.forEach((side, k) => {
+    // From the center to the side's midpoint (where the next hex's trench starts), bent out and back.
+    const e = outer[2 * side + 1];
+    const ex = e.x - c.x;
+    const ez = e.y - c.y;
+    const elen = Math.hypot(ex, ez);
+    const px = -ez / elen;
+    const pz = ex / elen;
+    const n = TRENCH.legs;
+    const pts = Array.from({ length: n + 1 }, (_, i) => {
+      const off = i === 0 || i === n ? 0 : (i % 2 ? 1 : -1) * TRENCH.zig;
+      return { x: c.x + (ex * i) / n + px * off, y: c.y + (ez * i) / n + pz * off };
+    });
+    for (let i = 0; i < n; i++) {
+      const a = pts[i];
+      const b = pts[i + 1];
+      const dx = b.x - a.x;
+      const dz = b.y - a.y;
+      const len = Math.hypot(dx, dz);
+      const nx = -dz / len;
+      const nz = dx / len;
+      groundM.quad(V(a.x + nx * w, y, a.y + nz * w), V(b.x + nx * w, y, b.y + nz * w), V(b.x - nx * w, y, b.y - nz * w), V(a.x - nx * w, y, a.y - nz * w), floor, UP);
+      if (i) joint(a);
+      for (const s of [1, -1]) {
+        const off = s * (w + TRENCH.berm / 2);
+        const salt = 600 + k * 20 + i * 2;
+        things.add(box(len + 0.05, TRENCH.bermH, TRENCH.berm), at((a.x + b.x) / 2 + nx * off, TRENCH.bermH / 2 - 0.01, (a.y + b.y) / 2 + nz * off, along(dx, dz)), pick(TRENCH.colors, r(salt + (s > 0 ? 0 : 1))), r(salt + 10));
       }
     }
-    for (const s of [1, -1]) {
-      const off = s * (w + TRENCH.berm / 2);
-      things.add(box(len + 0.05, TRENCH.bermH, TRENCH.berm), at((a.x + b.x) / 2 + nx * off, TRENCH.bermH / 2 - 0.01, (a.y + b.y) / 2 + nz * off, along(dx, dz)), pick(TRENCH.colors, r(600 + i * 2 + (s > 0 ? 0 : 1))), r(620 + i));
-    }
-  }
+  });
 }
 
 function conifer(m, x, z, s, r) {
