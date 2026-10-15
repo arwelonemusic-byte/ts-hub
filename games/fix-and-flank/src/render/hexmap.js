@@ -345,7 +345,7 @@ function echelon(ctx, kind, x, y, size) {
 // Counters after the "Fireteam Counters" design. units: [{ unit, pos: {x, y}
 // world center, selected, stackedWithTeam, ghost, hovered }]. A fireteam: NATO frame
 // with the infantry X and the fireteam mark above, its letter to the right,
-// one pip per soldier below (filled: present, hollow: lost). Pinned teams are
+// one pip per soldier below (white: present, black: lost). Pinned teams are
 // hatched. The SL: a smaller counter with the squad dot, at the hex's lower
 // left when it shares the hex with a team.
 export function drawCounters(ctx, cam, units, rosterOf) {
@@ -436,7 +436,7 @@ export function drawCounters(ctx, cam, units, rosterOf) {
       for (let i = 0; i < roster.length; i++) {
         ctx.beginPath();
         ctx.arc(px0 + i * gap, py, r, 0, Math.PI * 2);
-        ctx.fillStyle = i < unit.soldiers.length ? COLORS.ink : COLORS.label;
+        ctx.fillStyle = i < unit.soldiers.length ? COLORS.label : COLORS.ink;
         ctx.fill();
         ctx.strokeStyle = COLORS.ink;
         ctx.stroke();
