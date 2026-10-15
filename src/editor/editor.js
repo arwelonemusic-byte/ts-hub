@@ -11,8 +11,8 @@ import { center, corners, hexAt, SIDES } from '../sim/hex.js';
 import { parseMap } from '../sim/map.js';
 import { unitType } from '../sim/state.js';
 import {
-  ENEMY_TEAMS, TERRAINS, clone, deployment, drawEdges, edgePath, eraseEdge, fitSize, fromMapJson, graph,
-  inside, moveObjective, nearestEdge, nearestVertex, newModel, paint, problems, randomize, terrainAt, toggleEnemy,
+  ENEMY_TEAMS, TERRAINS, clone, drawEdges, edgePath, eraseEdge, fitMap, formation, fromMapJson, graph,
+  inside, moveObjective, nearestEdge, nearestVertex, newModel, paint, problems, randomize, startNear, terrainAt, toggleEnemy,
   toggleParapet, toMapJson,
 } from './model.js';
 import { LOCAL, deleteMap, listMaps, loadDraft, loadMap, saveDraft, saveMap } from './store.js';
@@ -24,6 +24,7 @@ const HISTORY = 100;                        // undo steps kept
 const REACH = { vertex: 0.42, edge: 0.45 }; // world units: how near a corner or an edge the pointer must be
 const NEAR_CORNERS = 3.2;                   // corners shown within this many world units of the pointer
 const STROKE_STEP = 0.35;                   // world units between samples along a drag
+const SQUAD_LABEL = 0.55;                   // the start's A / B / SL labels: text height in world units
 const SAVE_DELAY_MS = 400;
 const ARROW_PAN_PX = 140;                   // an arrow key pans the view this far
 const ARROWS = { ArrowLeft: [ARROW_PAN_PX, 0], ArrowRight: [-ARROW_PAN_PX, 0], ArrowUp: [0, ARROW_PAN_PX], ArrowDown: [0, -ARROW_PAN_PX] };
@@ -32,7 +33,7 @@ const BUILT_IN = [['trenchline', 'Mission 1: Trench Line']]; // not the training
 const TERRAIN_KEYS = '12345678';
 const TOOL_KEYS = { w: 'wall', h: 'hedge', p: 'parapet', x: 'erase', b: 'start', o: 'objective', f: 'enemy' };
 const INK = {
-  start: '#5996dc', objective: '#f4db50', enemy: '#e25a55', brush: '#ffffff', under: 'rgba(13, 15, 17, 0.7)',
+  start: '#5996dc', objective: '#f4db50', enemy: '#e25a55', brush: '#ffffff', label: '#ffffff', under: 'rgba(13, 15, 17, 0.7)',
   wall: '#f3eee2', hedge: '#8fe36b', remove: '#f26f63', parapet: '#e8c77e', corner: 'rgba(255, 255, 255, 0.75)',
 };
 const LABELS = { open: 'Grass', road: 'Road', scrub: 'Scrub', woods: 'Woods', rubble: 'Rubble', building: 'Building', trench: 'Trench', water: 'Water' };
@@ -88,7 +89,7 @@ async function main() {
     history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}`);
   } else if (draft?.model) {
     // A draft from when maps had other sizes, a turn limit or a briefing of their own.
-    ed.model = fitSize(draft.model);
+    ed.model = fitMap(draft.model);
     delete ed.model.turns;
     delete ed.model.brief;
     ed.id = draft.id ?? null;
@@ -116,16 +117,14 @@ async function main() {
   function makeCounters() {
     const m = ed.model;
     const out = [];
-    const counter = (id, side, team, kind, hex, stacked = false) => ({
+    const counter = (id, side, team, kind, hex) => ({
       unit: { id, side, team, kind, type: null, soldiers: [...unitType(balance, { kind, type: null }).roles], status: 'ok', activated: false, exposed: false, moved: false },
-      pos: center(hex), selected: false, ghost: false, stackedWithTeam: stacked,
+      pos: center(hex), selected: false, ghost: false, stackedWithTeam: false,
     });
-    const d = deployment(m, balance);
-    if (d) out.push(counter(0, 'BLUFOR', 'ALPHA', 'team', d.ALPHA), counter(1, 'BLUFOR', 'BRAVO', 'team', d.BRAVO));
-    else if (inside(m, m.start)) out.push(counter(0, 'BLUFOR', 'ALPHA', 'team', m.start));
+    const f = formation(m.start);
+    out.push(counter(0, 'BLUFOR', 'ALPHA', 'team', f.ALPHA), counter(1, 'BLUFOR', 'BRAVO', 'team', f.BRAVO), counter(2, 'BLUFOR', 'SL', 'leader', f.SL));
     m.enemies.forEach((e, i) => out.push(counter(10 + i, 'OPFOR', ENEMY_TEAMS[i], 'team', e)));
-    if (d) out.push(counter(2, 'BLUFOR', 'SL', 'leader', d.SL, true)); // last: drawn on top
-    return out;
+    return out.filter((c) => inside(m, hexAt(c.pos)));
   }
 
   // ---- changes, undo, saving ----
@@ -251,7 +250,7 @@ async function main() {
     hedge: () => (ed.chain ? 'Click another corner: the hedge runs along the hex edges to it. Right click or Esc to stop. Drawing over a hedge takes it off.' : 'Click a hex corner to start a hedge.'),
     parapet: () => 'Click near a side of a hex: a parapet just inside it, covering that side. Click again to take it off.',
     erase: () => 'Click or drag over hex edges to clear their walls, hedges and parapets.',
-    start: () => 'Click a hex: ALPHA and the squad leader start there, BRAVO beside them.',
+    start: () => 'Point where the squad should start: ALPHA and BRAVO side by side, the squad leader behind them. Click to place it there.',
     objective: () => 'Click a hex for the objective. An OPFOR team holding the old one moves with it.',
     enemy: () => `Click a hex to place an OPFOR fireteam (up to ${ENEMY_TEAMS.length}); click one to remove it.`,
   };
@@ -431,6 +430,7 @@ async function main() {
       vertex: nearestVertex(edgeGraph, p, REACH.vertex),
       edge: nearestEdge(edgeGraph, p, REACH.edge),
       side: inside(ed.model, hex) ? sideAt(hex, p) : null,
+      start: startNear(ed.model, p), // where the start tool would put the squad
     };
   }
 
@@ -473,11 +473,13 @@ async function main() {
       case 'parapet':
         if (h.hex) edit((mm) => toggleParapet(mm, h.hex, h.side));
         return;
-      case 'start':
-        if (!h.hex) return;
-        if (m.enemies.some((e) => e.col === h.hex.col && e.row === h.hex.row)) toast('An OPFOR team stands there.', true);
-        else edit((mm) => { mm.start = { ...h.hex }; });
+      case 'start': {
+        if (!h.start) return;
+        const squad = Object.values(formation(h.start));
+        if (m.enemies.some((e) => squad.some((x) => x.col === e.col && x.row === e.row))) toast('An OPFOR team stands there.', true);
+        else edit((mm) => { mm.start = { ...h.start }; });
         return;
+      }
       case 'objective':
         if (h.hex) edit((mm) => moveObjective(mm, h.hex));
         return;
@@ -649,14 +651,31 @@ async function main() {
       drawHexMarks(ctx, c, hexes.map((hex) => ({ hex, color, width, inset: 0.04, dashed })));
     };
 
-    if (inside(m, m.start)) outline([m.start], INK.start, 2.5, true);
+    // The squad's three hexes, each with who starts there.
+    const squad = (start, width, dashed) => {
+      const f = formation(start);
+      outline(Object.values(f).filter((x) => inside(m, x)), INK.start, width, dashed);
+      ctx.font = `700 ${Math.round(c.scale * SQUAD_LABEL)}px Roboto, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.lineJoin = 'round';
+      for (const [who, hex] of Object.entries({ A: f.ALPHA, B: f.BRAVO, SL: f.SL })) {
+        const s = P(center(hex));
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = INK.under;
+        ctx.strokeText(who, s.x, s.y);
+        ctx.fillStyle = INK.label;
+        ctx.fillText(who, s.x, s.y);
+      }
+    };
     const h = ed.hover;
+    if (ed.tool === 'start' && h?.start) squad(h.start, 3, false);
+    else outline(Object.values(formation(m.start)).filter((x) => inside(m, x)), INK.start, 2.5, true);
     if (!h) return;
     switch (ed.tool) {
       case 'terrain':
         if (h.hex && inside(m, h.hex)) outline([h.hex], INK.brush, 2);
         break;
-      case 'start':
       case 'objective':
       case 'enemy':
         if (h.hex) outline([h.hex], INK[ed.tool], 3);
@@ -698,7 +717,7 @@ async function main() {
 
   const marksSig = () => {
     const h = ed.hover;
-    return [ed.version, ed.tool, ed.terrain, ed.chain, h?.hex && `${h.hex.col},${h.hex.row}`, h?.vertex?.key, h?.edge?.key, h?.side].join('|');
+    return [ed.version, ed.tool, ed.terrain, ed.chain, h?.hex && `${h.hex.col},${h.hex.row}`, h?.vertex?.key, h?.edge?.key, h?.side, h?.start && `${h.start.col},${h.start.row}`].join('|');
   };
 
   function frame(now) {

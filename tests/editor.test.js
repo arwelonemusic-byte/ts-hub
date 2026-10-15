@@ -1,11 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { corners, distance, SIDES } from '../src/sim/hex.js';
+import { center, corners, distance, SIDES } from '../src/sim/hex.js';
 import { parseMap, sideFeature, terrainName } from '../src/sim/map.js';
 import { createState } from '../src/sim/state.js';
 import {
-  SIZE, clone, deployment, drawEdges, edgeKey, edgePath, eraseEdge, fitSize, fromMapJson, graph, moveObjective,
-  nearestVertex, newModel, paint, problems, randomize, toggleEnemy, toggleParapet, toMapJson, upgradeMapJson,
+  SIZE, clone, deployment, drawEdges, edgeKey, edgePath, eraseEdge, fitMap, formation, fromMapJson, graph, inside,
+  moveObjective, nearestVertex, newModel, paint, problems, randomize, startNear, toggleEnemy, toggleParapet, toMapJson,
+  upgradeMapJson,
 } from '../src/editor/model.js';
 import { H, balance, loadJson } from './helpers.js';
 
@@ -28,15 +29,40 @@ test('a new map is 14 x 16, all grass, ready to play, and parses as a mission', 
   assert.deepEqual(state.units.find((u) => u.side === 'OPFOR').pos, m.objective, 'the enemy holds the objective');
 });
 
-test('the squad deploys round the start: BRAVO beside ALPHA and the SL, on open ground', () => {
+test('the squad starts in its formation: ALPHA and BRAVO side by side, the SL behind them', () => {
   const m = newModel();
-  m.start = H(3, 6);
-  assert.deepEqual(deployment(m, balance), { ALPHA: H(3, 6), BRAVO: H(4, 6), SL: H(3, 6) });
-  paint(m, [H(4, 6)], 'water');
-  assert.deepEqual(deployment(m, balance).BRAVO, H(2, 6), 'east is water: west instead');
-  paint(m, [H(3, 6)], 'water');
+  m.start = H(6, 14);
+  assert.deepEqual(deployment(m, balance), { ALPHA: H(5, 13), BRAVO: H(6, 13), SL: H(6, 14) });
+  m.start = H(6, 13);
+  assert.deepEqual(deployment(m, balance), { ALPHA: H(6, 12), BRAVO: H(7, 12), SL: H(6, 13) }, 'on an odd row too');
+  const map = parseMap(toMapJson(m, balance), balance);
+  assert.deepEqual(map.units.filter((u) => u.side === 'BLUFOR').map((u) => `${u.team} ${u.pos}`), ['ALPHA 6,12', 'BRAVO 7,12', 'SL 6,13']);
+  paint(m, [H(7, 12)], 'water');
   assert.equal(deployment(m, balance), null);
-  assert.match(problems(m, balance).join(' '), /start is on ground nobody can enter/);
+  assert.match(problems(m, balance).join(' '), /BLUFOR unit would start on ground nobody can enter/);
+  paint(m, [H(7, 12)], 'open');
+  toggleEnemy(m, H(6, 13));
+  assert.equal(deployment(m, balance), null);
+  assert.match(problems(m, balance).join(' '), /OPFOR team stands where BLUFOR starts/);
+});
+
+test('placing the start: the formation centered nearest the pointer, always on the map', () => {
+  const m = newModel();
+  const near = (hex, i) => {
+    const k = corners(hex)[i];
+    const c = center(hex);
+    return { x: k.x + (c.x - k.x) * 0.1, y: k.y + (c.y - k.y) * 0.1 };
+  };
+  assert.deepEqual(startNear(m, near(H(6, 10), 5)), H(6, 10), 'by its top corner: the SL in this hex');
+  assert.deepEqual(startNear(m, near(H(6, 10), 1)), H(6, 11), 'by its lower right corner: a team here, the SL below');
+  assert.deepEqual(startNear(m, near(H(6, 10), 3)), H(5, 11), 'by its lower left corner');
+  for (let col = 0; col < SIZE.width; col++) {
+    for (const row of [0, SIZE.height - 1]) {
+      const s = startNear(m, center(H(col, row)));
+      assert.ok(Object.values(formation(s)).every((h) => inside(m, h)), `the squad fits pointing at ${col},${row}`);
+    }
+  }
+  assert.equal(startNear(m, { x: -30, y: -30 }), null, 'off the map');
 });
 
 test('walls and hedges follow hex edges from corner to corner, and drawing them again takes them off', () => {
@@ -85,6 +111,9 @@ test('Trench Line opens in the editor and saves to the same terrain, hexsides an
   const b = parseMap(out, balance);
   assert.deepEqual(b.sides, a.sides);
   assert.deepEqual(b.units.filter((u) => u.side === 'OPFOR').map((u) => u.pos), [[6, 3]]);
+  const blufor = (units) => Object.fromEntries(units.filter((u) => u.side === 'BLUFOR').map((u) => [u.team, u.pos]));
+  assert.deepEqual(blufor(b.units), blufor(a.units), 'the squad starts where it did');
+  assert.deepEqual(blufor(a.units), { ALPHA: [8, 13], BRAVO: [9, 13], SL: [9, 14] }, 'in its formation');
 });
 
 test('a map of another size is made 14 x 16: what fits stays, the forces move onto the map', () => {
@@ -95,12 +124,12 @@ test('a map of another size is made 14 x 16: what fits stays, the forces move on
   m.edges[edgeOf(H(1, 1), 'E')] = 'hedge';
   m.start = H(19, 19);
   toggleEnemy(m, H(18, 18));
-  fitSize(m);
+  fitMap(m);
   assert.deepEqual([m.width, m.height, m.terrain.length], [SIZE.width, SIZE.height, SIZE.width * SIZE.height]);
   assert.equal(terrainName(m, H(1, 1)), 'woods');
   assert.equal(m.terrain.filter((t) => t === 'woods').length, 1, 'the woods at 18,18 were cut off');
   assert.deepEqual(Object.values(m.edges), ['hedge'], 'the wall was off the new map');
-  assert.deepEqual(m.start, H(13, 15));
+  assert.ok(distance(m.start, H(13, 15)) <= 1 && deployment(m, balance), 'the squad is in the corner, all on the map');
   assert.equal(m.enemies.length, 1, 'the team at 18,18 is gone, the one at the objective stays');
   // The training ground (12 x 12) opens at 14 x 16, the new hexes grass.
   const training = fromMapJson(loadJson('data/maps/training.json'));

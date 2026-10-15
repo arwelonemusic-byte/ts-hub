@@ -278,7 +278,7 @@
       "side": "BLUFOR",
       "team": "ALPHA",
       "pos": [
-        5,
+        8,
         13
       ]
     },
@@ -286,7 +286,7 @@
       "side": "BLUFOR",
       "team": "BRAVO",
       "pos": [
-        10,
+        9,
         13
       ]
     },
@@ -303,8 +303,8 @@
       "team": "SL",
       "kind": "leader",
       "pos": [
-        10,
-        13
+        9,
+        14
       ]
     }
   ],

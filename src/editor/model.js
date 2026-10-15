@@ -12,12 +12,12 @@
 //   terrain: ['open', ...],            // row-major, width x height
 //   edges: { edgeKey: 'wall' | 'hedge' }, // on the edge between two hexes (or the board's edge)
 //   parapets: ['col,row,SIDE', ...],   // just inside one hex, facing out of that side
-//   start: { col, row },               // BLUFOR: ALPHA and the SL here, BRAVO beside them
+//   start: { col, row },               // BLUFOR: the SL here, ALPHA and BRAVO in front of him (formation)
 //   objective: { col, row },
 //   enemies: [{ col, row }, ...],      // OPFOR fireteams
 // }
 
-import { SIDES, corners, neighborOn, sidesFacing } from '../sim/hex.js';
+import { SIDES, corners, distance, hexAt, neighborOn, sidesFacing } from '../sim/hex.js';
 import { createRng } from '../sim/rng.js';
 
 export const TERRAINS = ['open', 'road', 'scrub', 'woods', 'rubble', 'building', 'trench', 'water'];
@@ -26,7 +26,6 @@ const CHAR = Object.fromEntries(Object.entries(LEGEND).map(([c, t]) => [t, c]));
 export const EDGE_FEATURES = ['wall', 'hedge'];
 export const SIZE = { width: 14, height: 16 }; // every map, for now (user decision 2026-10-15)
 export const ENEMY_TEAMS = ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA'];
-const DEPLOY = ['E', 'W', 'NE', 'NW', 'SE', 'SW']; // where BRAVO starts beside ALPHA, in order of preference
 
 // The random map: smooth noise fields, a stream or a pond, a road, farms,
 // hedgerows and yard walls, and the two sides at opposite ends.
@@ -68,7 +67,7 @@ export function newModel({ name = 'New map' } = {}) {
     terrain: new Array(width * height).fill('open'),
     edges: {},
     parapets: [],
-    start: { col: mid - 1, row: height - 2 },
+    start: { col: mid, row: height - 2 },
     objective: { col: mid, row: 2 },
     enemies: [{ col: mid, row: 2 }],
   };
@@ -76,6 +75,53 @@ export function newModel({ name = 'New map' } = {}) {
 
 export function clone(m) {
   return JSON.parse(JSON.stringify(m));
+}
+
+// ---- the squad's start ----
+
+// How BLUFOR starts (user decision 2026-10-15): ALPHA and BRAVO side by side,
+// the SL behind them, touching both. model.start is the SL's hex; the teams
+// are on its NW and NE sides, toward the top of the map.
+export function formation(start) {
+  return { ALPHA: neighborOn(start, 'NW'), BRAVO: neighborOn(start, 'NE'), SL: { col: start.col, row: start.row } };
+}
+
+const fits = (m, start) => Object.values(formation(start)).every((h) => inside(m, h));
+
+// The nearest start (to a hex) whose three hexes are all on the map.
+function nearestFit(m, from) {
+  let best = null;
+  for (let row = 0; row < m.height; row++) {
+    for (let col = 0; col < m.width; col++) {
+      const h = { col, row };
+      if (fits(m, h) && (!best || distance(h, from) < distance(best, from))) best = h;
+    }
+  }
+  return best;
+}
+
+// Placing the start with the pointer: the formation centered nearest a world
+// point. Its center is the corner its three hexes share, the top corner of
+// the SL's hex; every hex has three such corners (its top one, and its lower
+// left and lower right ones, where it is a team and the SL is below it).
+// By the map's bottom corners none of those fit: the nearest start that does.
+// Null off the map.
+export function startNear(m, p) {
+  const h = hexAt(p);
+  if (!inside(m, h)) return null;
+  const TOP = 5; // corners() index of a hex's top corner
+  let best = null;
+  let bestD = Infinity;
+  for (const sl of [h, neighborOn(h, 'SW'), neighborOn(h, 'SE')]) {
+    if (!fits(m, sl)) continue;
+    const c = corners(sl)[TOP];
+    const d = Math.hypot(c.x - p.x, c.y - p.y);
+    if (d < bestD) {
+      best = sl;
+      bestD = d;
+    }
+  }
+  return best ?? nearestFit(m, h);
 }
 
 // ---- corners and edges ----
@@ -205,13 +251,19 @@ export function paint(m, hexes, terrain) {
   return changed;
 }
 
-// A map of another size (saved before maps were all SIZE, or imported) made
-// SIZE: the hexes that fit keep their terrain (new ones are grass); walls,
-// hedges, parapets and enemies off the map go; the start and the objective
-// move onto it.
-export function fitSize(m) {
+// A map from elsewhere (saved by an older editor, or imported) made what the
+// editor makes. Another size becomes SIZE: the hexes that fit keep their
+// terrain (new ones are grass); walls, hedges, parapets and enemies off the
+// map go; the objective moves onto it. And the squad's start moves to the
+// nearest place where its three hexes are on the map.
+export function fitMap(m) {
   const { width: w, height: h } = SIZE;
-  if (m.width === w && m.height === h) return m;
+  if (m.width !== w || m.height !== h) resize(m, w, h);
+  if (!fits(m, m.start)) m.start = nearestFit(m, m.start);
+  return m;
+}
+
+function resize(m, w, h) {
   const terrain = new Array(w * h).fill('open');
   for (let row = 0; row < Math.min(h, m.height); row++) {
     for (let col = 0; col < Math.min(w, m.width); col++) terrain[row * w + col] = m.terrain[row * m.width + col];
@@ -334,13 +386,11 @@ export function randomize(m, seed) {
   // The two ends: BLUFOR's is the bottom, OPFOR's the top. depth: 0 on the bottom row, 1 on the top one.
   const depth = (h) => (m.height - 1 - h.row) / (m.height - 1);
   const pickFrom = (hexes) => hexes[rng.int(hexes.length)];
-  // BLUFOR's start: any dry hex near its edge, with dry ground beside it for BRAVO.
-  const near = all.filter((h) => depth(h) <= GEN.band);
-  const dryNear = near.filter((h) => terrainAt(m, h) !== 'water');
+  // BLUFOR's start near its edge, the squad's three hexes on dry ground (made dry if there is none).
+  const near = all.filter((h) => depth(h) <= GEN.band && fits(m, h));
+  const dryNear = near.filter((h) => Object.values(formation(h)).every((x) => terrainAt(m, x) !== 'water'));
   m.start = { ...pickFrom(dryNear.length ? dryNear : near) };
-  if (terrainAt(m, m.start) === 'water') set(m.start, 'open');
-  const bravo = DEPLOY.map((side) => neighborOn(m.start, side)).find((h) => inside(m, h));
-  if (bravo && terrainAt(m, bravo) === 'water') set(bravo, 'open');
+  for (const h of Object.values(formation(m.start))) if (terrainAt(m, h) === 'water') set(h, 'open');
   // The objective near the far end but off the board's edge (so it can be
   // flanked either way), on cover when there is some; one OPFOR team holds it.
   const onEdge = (h) => h.col === 0 || h.row === 0 || h.col === m.width - 1 || h.row === m.height - 1;
@@ -403,12 +453,12 @@ export function randomize(m, seed) {
 
 const passable = (m, balance, h) => inside(m, h) && balance.terrain[terrainAt(m, h)].move !== 'impassable';
 
-// Where the squad starts: ALPHA and the SL on the start hex, BRAVO on the
-// first open hex beside it. Null when the start or every hex beside it is blocked.
+// Where the squad starts (formation), or null when one of its hexes is off
+// the map, ground nobody can enter, or held by an OPFOR team.
 export function deployment(m, balance) {
-  if (!passable(m, balance, m.start) || m.enemies.some((e) => same(e, m.start))) return null;
-  const bravo = DEPLOY.map((s) => neighborOn(m.start, s)).find((h) => passable(m, balance, h) && !m.enemies.some((e) => same(e, h)));
-  return bravo ? { ALPHA: m.start, BRAVO: bravo, SL: m.start } : null;
+  const f = formation(m.start);
+  const free = (h) => passable(m, balance, h) && !m.enemies.some((e) => same(e, h));
+  return Object.values(f).every(free) ? f : null;
 }
 
 // Click with the enemy tool: a team there goes, else one comes (up to four).
@@ -460,15 +510,14 @@ export function problems(m, balance) {
   const out = [];
   if (!inside(m, m.objective)) out.push('Place the objective.');
   else if (!passable(m, balance, m.objective)) out.push('The objective is on ground nobody can enter.');
-  if (!inside(m, m.start)) out.push('Place the BLUFOR start.');
-  else if (!passable(m, balance, m.start)) out.push('The BLUFOR start is on ground nobody can enter.');
-  else if (!deployment(m, balance)) out.push('BRAVO has no open hex beside the BLUFOR start.');
+  const squad = Object.values(formation(m.start));
+  if (!squad.every((h) => inside(m, h))) out.push('Place the BLUFOR start: the squad does not fit on the map there.');
+  else if (!squad.every((h) => passable(m, balance, h))) out.push('A BLUFOR unit would start on ground nobody can enter.');
   if (!m.enemies.length) out.push('Place at least one OPFOR team.');
   m.enemies.forEach((e, i) => {
     if (!passable(m, balance, e)) out.push(`OPFOR ${ENEMY_TEAMS[i]} is on ground nobody can enter.`);
   });
-  const d = deployment(m, balance);
-  if (d && m.enemies.some((e) => same(e, d.ALPHA) || same(e, d.BRAVO))) out.push('An OPFOR team stands where BLUFOR starts.');
+  if (squad.some((h) => m.enemies.some((e) => same(e, h)))) out.push('An OPFOR team stands where BLUFOR starts.');
   return out;
 }
 
@@ -515,9 +564,10 @@ export function toMapJson(m, balance) {
   };
 }
 
-// A map in the data/maps format, as a model, made SIZE if it is not. The
-// editor's squad is ALPHA, BRAVO and the SL: other BLUFOR units (the HMG) are
-// left out, and the start is where ALPHA stood. The briefing is not kept
+// A map in the data/maps format, as a model, made what the editor makes
+// (fitMap). The editor's squad is ALPHA, BRAVO and the SL in their formation:
+// other BLUFOR units (the HMG) are left out, and the start is where the SL
+// stood (else the hex behind ALPHA). The briefing is not kept
 // (missionBrief writes it); a map without an objective gets one under its
 // first OPFOR team.
 export function fromMapJson(json) {
@@ -543,9 +593,11 @@ export function fromMapJson(json) {
   }
   const pos = (u) => ({ col: u.pos[0], row: u.pos[1] });
   const blufor = (json.units ?? []).filter((u) => u.side === 'BLUFOR' && (u.kind ?? 'team') === 'team' && !u.type);
-  if (blufor.length) m.start = pos(blufor[0]);
+  const leader = (json.units ?? []).find((u) => u.side === 'BLUFOR' && u.kind === 'leader');
+  if (leader) m.start = pos(leader);
+  else if (blufor.length) m.start = neighborOn(pos(blufor[0]), 'SE');
   m.enemies = (json.units ?? []).filter((u) => u.side === 'OPFOR' && (u.kind ?? 'team') === 'team').slice(0, ENEMY_TEAMS.length).map(pos);
   if (json.objective) m.objective = { col: json.objective[0], row: json.objective[1] };
   else if (m.enemies.length) m.objective = { ...m.enemies[0] };
-  return fitSize(m);
+  return fitMap(m);
 }
