@@ -9,15 +9,17 @@
   <link rel="stylesheet" href="assets/ui.css">
   <style>
     /* Editor-only parts; the rest is assets/ui.css, shared with the game. */
-    .brand .where { font: 500 14px/20px var(--sans); color: var(--secondary); white-space: nowrap; }
+    .brand .where { font: 500 14px/20px var(--sans); color: var(--secondary); white-space: nowrap; text-decoration: none; }
+    .brand a.where:hover { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
     #mapName {
-      width: min(320px, 22vw); height: 36px; padding: 0 12px; text-align: center;
+      width: 100%; height: 40px; padding: 0 12px;
       background: var(--inset); border: 1px solid var(--line); border-radius: 8px; color: var(--fg); font: 500 15px/20px var(--slab);
     }
+    #mapName::placeholder { color: var(--tertiary); }
     #mapName:focus { outline: none; border-color: var(--accent); }
     .bar .btn { height: 36px; }
-    /* The editor's bar: the right side takes what its buttons need (the hub's Russian labels are long), the name the rest. */
-    @media (min-width: 1101px) { .bar { grid-template-columns: auto minmax(0, 1fr) auto; } #mapName { justify-self: center; max-width: 100%; } }
+    /* The editor's bar: the brand, and on the right what the buttons need (the hub's Russian labels are long). */
+    .bar { grid-template-columns: minmax(0, 1fr) auto; }
     .bar .right > * { flex: none; }
     .bar .btn.primary { min-width: 0; height: 36px; padding: 0 16px; font-size: 14px; }
 
@@ -82,7 +84,6 @@
       <span class="sep"></span>
       <span class="where">Редактор карт</span>
     </div>
-    <input id="mapName" maxlength="40" spellcheck="false" aria-label="Название карты">
     <div class="right">
       <button class="iconbtn" id="undo" title="Отменить (Ctrl+Z)" aria-label="Отменить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
       <button class="iconbtn" id="redo" title="Вернуть (Ctrl+Y)" aria-label="Вернуть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
@@ -92,7 +93,6 @@
       </div>
       <!-- Served by the TS Hub: drafts are kept there and published from there (src/editor/hub.js). -->
       <span id="hubState" hidden></span>
-      <button class="btn" id="saveDraft" title="Сохранить карту черновиком в хабе (Ctrl+S). Пока вы её не опубликуете, её видите только вы." hidden>Сохранить</button>
       <button class="btn" id="playtest" title="Сыграть черновик самому. Тестовые игры не засчитываются." hidden><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>Тест</button>
       <button class="btn primary" id="publish" title="Выложить карту в хаб для всех. Опубликованную карту больше нельзя менять." hidden>Опубликовать</button>
       <button class="btn primary" id="play" title="Сыграть эту карту (сохраняет её в «Мои карты»)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>Играть</button>
@@ -105,6 +105,7 @@
     <aside class="panel thin" id="tools">
       <section>
         <div class="eyebrow">Карта</div>
+        <input id="mapName" maxlength="40" spellcheck="false" placeholder="Название карты" aria-label="Название карты">
         <button class="btn block" id="randomize" title="Совсем новая случайная карта (R): местность, изгороди и стены, старт BLUFOR и группа OPFOR на объекте. Всё, что есть на карте сейчас, пропадёт; Ctrl+Z вернёт."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>Случайная карта</button>
       </section>
 

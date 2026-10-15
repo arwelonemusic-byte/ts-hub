@@ -211,8 +211,9 @@ async function main() {
   function renderHubState() {
     if (!ed.hub) return;
     const s = $('hubState');
-    const text = { none: 'Ещё не в хабе', saving: 'Сохраняем…', saved: 'Черновик сохранён', unsaved: 'Есть несохранённое', error: 'Не сохранено' }[ed.hubState];
-    s.textContent = text;
+    // Nothing to say until the map is a draft: it is in this browser, as every new map is.
+    s.hidden = ed.hubState === 'none';
+    s.textContent = { saving: 'Сохраняем…', saved: 'Черновик сохранён', unsaved: 'Есть несохранённое', error: 'Не сохранено' }[ed.hubState] ?? '';
     s.title = ed.hubError || (ed.hubId ? 'Черновики видите только вы, пока не опубликуете.' : '«Сохранить черновик» сохранит карту в хабе.');
     s.className = ed.hubState === 'error' ? 'bad' : '';
   }
@@ -459,7 +460,7 @@ async function main() {
     const published = ed.hub.maps.filter((x) => x.status === 'published');
     const rows = [
       newMap,
-      item('Сохранить черновик', () => saveToHub({ thumb: true }), ed.hubId ? 'в хабе' : 'ещё нет'),
+      item('Сохранить черновик', () => saveToHub({ thumb: true }), 'Ctrl+S'),
       el('hr'),
       el('div', 'eyebrow', 'Мои черновики'),
     ];
@@ -600,7 +601,6 @@ async function main() {
     }
   };
 
-  $('saveDraft').onclick = () => saveToHub({ thumb: true });
 
   $('play').onclick = () => {
     const issues = problems(ed.model, balance);
@@ -827,13 +827,17 @@ async function main() {
   window.addEventListener('keydown', (e) => {
     const typing = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
     const k = e.key.toLowerCase();
+    // Ctrl+S saves even while the map's name is being typed (else the browser offers to save the page).
+    if ((e.ctrlKey || e.metaKey) && k === 's') {
+      e.preventDefault();
+      if (ed.hub) saveToHub({ thumb: true });
+      else if (inHub) toast(`Черновики недоступны: ${hubDown}`, true, NOTICE_MS);
+      else saveToLibrary();
+      return;
+    }
     if ((e.ctrlKey || e.metaKey) && !typing) {
       if (k === 'z' && !e.shiftKey) undo();
       else if (k === 'y' || (k === 'z' && e.shiftKey)) redo();
-      else if (k === 's') {
-        if (ed.hub) saveToHub({ thumb: true });
-        else saveToLibrary();
-      }
       else return;
       e.preventDefault();
       return;
@@ -980,7 +984,7 @@ async function main() {
     requestAnimationFrame(frame);
   }
 
-  // Served by the hub: its buttons instead of Play, and the brand leads back to the game's page there.
+  // Served by the hub: its buttons instead of Play, and «Назад в Хаб» (and the brand) lead back to the game's page there.
   if (inHub) {
     $('play').hidden = true;
     const brand = document.querySelector('.brand');
@@ -989,9 +993,12 @@ async function main() {
     brand.onclick = () => {
       location.href = hubHome;
     };
+    const back = el('a', 'where', 'Назад в Хаб');
+    back.href = hubHome;
+    brand.querySelector('.where').replaceWith(back);
   }
   if (ed.hub) {
-    for (const id of ['hubState', 'saveDraft', 'playtest', 'publish']) $(id).hidden = false;
+    for (const id of ['hubState', 'playtest', 'publish']) $(id).hidden = false;
     renderHubState();
     if (ed.hubState === 'unsaved') saveToHub({ quiet: true });
   } else if (inHub) {
