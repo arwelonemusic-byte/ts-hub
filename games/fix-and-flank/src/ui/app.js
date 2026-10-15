@@ -1185,6 +1185,32 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   // The brand leads to the game's page in the hub (user request 2026-10-15); a game under way asks first, as leaving
   // loses it. Run on its own there is no game page, and the brand stays a title.
   const underWay = () => !app.replay && !app.state.result && (app.state !== initialState || app.plan.length > 0);
+
+  // A new game on this map («Ещё раз», «Начать заново»): a recorded run starts a new run in the hub, which deals its
+  // dice; any other game rolls new dice of its own.
+  function restart() {
+    if (app.recorder) {
+      location.reload();
+      return;
+    }
+    const q = new URLSearchParams(location.search);
+    q.set('seed', String(1 + Math.floor(Math.random() * 9999)));
+    location.search = q.toString();
+  }
+
+  // «Начать заново» in the header's corner (user request 2026-10-15), asking first while a game is under way. Not in a
+  // replay: it has its own controls.
+  $('restartBtn').hidden = !!replay;
+  $('restartBtn').onclick = () => {
+    if (!underWay()) {
+      restart();
+      return;
+    }
+    openModal(dialog('Новая игра', 'Начать заново?', [el('p', '', 'Игра ещё не закончена: если начать заново, её прогресс будет потерян.')], [
+      ['Продолжить игру', false, null],
+      ['Начать заново', true, restart],
+    ]));
+  };
   if (servedByHub()) {
     $('home').href = hubHome;
     $('home').onclick = (e) => {
@@ -1307,11 +1333,6 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     const squad = s.units.filter((u) => u.side === PLAYER_SIDE);
     const men = squad.reduce((n, u) => n + u.soldiers.length, 0);
     const full = squad.reduce((n, u) => n + unitType(s.balance, u).roles.length, 0);
-    const newDice = () => {
-      const q = new URLSearchParams(location.search);
-      q.set('seed', String(1 + Math.floor(Math.random() * 9999)));
-      location.search = q.toString();
-    };
     const note = app.recorder ? app.runNote || 'Прохождение засчитывается…' : app.unrecorded ? `Не засчитывается: ${app.unrecorded}` : '';
     const body = [
       el('div', `stamp ${won ? 'won' : 'lost'}`, won ? 'Задача выполнена' : 'Задача провалена'),
@@ -1334,7 +1355,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     });
     const buttons = [['Посмотреть карту', false, null], editable ? ['Обратно в редактор', false, go($('editBtn').href)] : ['Обратно в Хаб', false, go(hubBack())]];
     if (app.recorder) buttons.push(['Повтор', false, go(`?${new URLSearchParams({ replay: app.recorder.id })}`), 'replayBtn']);
-    buttons.push(app.replay ? ['Смотреть снова', true, () => location.reload()] : ['Ещё раз', true, onward(app.recorder ? () => location.reload() : newDice)]);
+    buttons.push(app.replay ? ['Смотреть снова', true, () => location.reload()] : ['Ещё раз', true, onward(restart)]);
     openModal(dialog(app.replay ? 'Повтор' : 'Итоги', s.map.name, body, buttons));
     showReplayButton();
   }
