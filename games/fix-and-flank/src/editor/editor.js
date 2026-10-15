@@ -17,7 +17,7 @@ import {
   inside, layoutKey, moveObjective, nearestEdge, nearestVertex, newModel, paint, problems, randomize, startNear, terrainAt,
   toggleEnemy, toggleParapet, toMapJson,
 } from './model.js';
-import { connectHub, hub, hubHome, hubIdOf, hubMapPage, hubSrc } from '../hub.js';
+import { connectHub, hub, hubHome, hubIdOf, hubMapPage, hubSrc, servedByHub } from '../hub.js';
 import { LOCAL, deleteMap, listMaps, loadDraft, loadMap, saveDraft, saveMap } from './store.js';
 
 const WHEEL_ZOOM = 1.15;
@@ -74,6 +74,11 @@ async function openNamed(name) {
 
 async function main() {
   const [balance, hubLink] = await Promise.all([loadJson('data/balance.json'), connectHub()]);
+  // Served by the hub, the editor is the hub's even when the hub keeps no maps for this viewer (a dev stand-in with
+  // no player, a lost session) or doesn't answer: then there are no drafts, and never the standalone editor's map
+  // files, «Мои карты» or missions (user decisions 2026-10-15).
+  const inHub = servedByHub();
+  const hubDown = hubLink?.error ?? 'хаб не ответил'; // why there are no drafts, when ed.hub is null in the hub
   const params = new URLSearchParams(location.search);
 
   const ed = {
@@ -128,7 +133,7 @@ async function main() {
       ed.hubId = fromHub;
       ed.hubState = 'saved';
     }
-  } else if (wanted && hubLink && !wanted.startsWith(LOCAL)) {
+  } else if (wanted && inHub && !wanted.startsWith(LOCAL)) {
     refused = ONLY_PLAYED;
   } else if (wanted) {
     if (draft?.model && !draft.id) saveMap(toMapJson(draft.model, balance)); // don't lose an unsaved draft
@@ -406,7 +411,7 @@ async function main() {
       };
       return b;
     };
-    if (ed.hub) {
+    if (inHub) {
       hubMenu(item);
       return;
     }
@@ -441,12 +446,19 @@ async function main() {
   }
   // The Maps menu when the hub serves the editor: your drafts there and your published maps, not this browser's.
   function hubMenu(item) {
+    const newMap = item('Новая карта', () => {
+      if (!keepUnsaved(ed.model, !!ed.hubId, 'Эта карта не сохранена и пропадёт. Начать новую?')) replaceModel(newModel());
+    });
+    if (!ed.hub) {
+      menu.replaceChildren(newMap, el('hr'), el('div', 'empty', `Черновики недоступны: ${hubDown}`));
+      menu.hidden = false;
+      $('mapsBtn').setAttribute('aria-expanded', 'true');
+      return;
+    }
     const drafts = ed.hub.maps.filter((x) => x.status === 'draft');
     const published = ed.hub.maps.filter((x) => x.status === 'published');
     const rows = [
-      item('Новая карта', () => {
-        if (!keepUnsaved(ed.model, !!ed.hubId, 'Эта карта не сохранена и пропадёт. Начать новую?')) replaceModel(newModel());
-      }),
+      newMap,
       item('Сохранить черновик', () => saveToHub({ thumb: true }), ed.hubId ? 'в хабе' : 'ещё нет'),
       el('hr'),
       el('div', 'eyebrow', 'Мои черновики'),
@@ -969,8 +981,7 @@ async function main() {
   }
 
   // Served by the hub: its buttons instead of Play, and the brand leads back to the game's page there.
-  if (ed.hub) {
-    for (const id of ['hubState', 'saveDraft', 'playtest', 'publish']) $(id).hidden = false;
+  if (inHub) {
     $('play').hidden = true;
     const brand = document.querySelector('.brand');
     brand.classList.add('home');
@@ -978,10 +989,19 @@ async function main() {
     brand.onclick = () => {
       location.href = hubHome;
     };
+  }
+  if (ed.hub) {
+    for (const id of ['hubState', 'saveDraft', 'playtest', 'publish']) $(id).hidden = false;
     renderHubState();
     if (ed.hubState === 'unsaved') saveToHub({ quiet: true });
-  } else if (hubLink?.error) {
-    toast(`Карты хранятся в этом браузере: ${hubLink.error}`, true);
+  } else if (inHub) {
+    // No drafts: the map can be made but stays in this browser until the hub keeps maps for this viewer.
+    const s = $('hubState');
+    s.hidden = false;
+    s.textContent = 'Черновики недоступны';
+    s.title = hubDown;
+    s.className = 'bad';
+    toast(`Черновики недоступны: ${hubDown}`, true, NOTICE_MS);
   }
   if (refused) toast(refused, true, NOTICE_MS);
 
