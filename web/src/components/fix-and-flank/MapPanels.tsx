@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Avatar } from "@/components/event/Avatar";
 import { buttonClass, Icon } from "@/components/ui";
+import { gameUrl } from "@/lib/fix-and-flank/game";
 import { shortDay, time } from "@/lib/format";
 import type { FnfComment, FnfRun } from "@/lib/fix-and-flank/types";
 import { plural, type Locale, type T } from "@/lib/i18n";
@@ -10,9 +11,9 @@ const MEDALS = ["gold", "silver", "bronze"];
 
 /**
  * «Рейтинг» (sketch "Map Details"): each player's best win, up to 10, fewest turns first; a tie shares the
- * rank. «Повтор» will play the run back (a run is its map, seed and orders); off until runs are recorded.
+ * rank. «Повтор» plays the run back in the game (its seed and orders; the AI plays OPFOR again), for members.
  */
-export function LeaderboardPanel({ runs, now, locale, t }: { runs: FnfRun[]; now: Date; locale: Locale; t: T }) {
+export function LeaderboardPanel({ runs, canWatch, now, locale, t }: { runs: FnfRun[]; canWatch: boolean; now: Date; locale: Locale; t: T }) {
   return (
     <section className="flex flex-col gap-4 rounded-xl bg-surface p-6">
       <div className="flex flex-col gap-1">
@@ -37,10 +38,17 @@ export function LeaderboardPanel({ runs, now, locale, t }: { runs: FnfRun[]; now
                 </span>
               </span>
               <span className="shrink-0 type-heading-xxs text-fg">{plural(locale, "fnf.turns", r.turns)}</span>
-              <button type="button" disabled title={t("fnf.replay.soon")} className={buttonClass("secondary", "s")}>
-                <Icon name="play-light" />
-                {t("fnf.replay")}
-              </button>
+              {canWatch ? (
+                <a href={gameUrl("play", { replay: r.runId })} className={buttonClass("secondary", "s")}>
+                  <Icon name="play-light" />
+                  {t("fnf.replay")}
+                </a>
+              ) : (
+                <button type="button" disabled title={t("fnf.replay.members")} className={buttonClass("secondary", "s")}>
+                  <Icon name="play-light" />
+                  {t("fnf.replay")}
+                </button>
+              )}
             </li>
           ))}
         </ol>

@@ -19,23 +19,25 @@ CREATE TABLE fnf_maps (
 CREATE INDEX fnf_maps_published ON fnf_maps (published_at DESC) WHERE published_at IS NOT NULL;
 CREATE INDEX fnf_maps_author ON fnf_maps (author_id);
 
--- A run: a member playing a published map to its end (a run given up is not kept). The game is deterministic, so a run
--- is its seed and the orders given: the hub plays them through the game's rules on the server to get the result and the
--- turns (a record can't be typed in), and the same data plays it back («Повтор»). Not written yet.
+-- A run: a member playing a published map. The game is deterministic, so a run is its seed and BLUFOR's orders (OPFOR's
+-- come from the AI): the hub hands out the seed when the run starts (lib/fix-and-flank/runs.ts), and when it ends plays
+-- the orders through the game's rules on the server to get the result and the turns (a record can't be typed in). The
+-- same data plays it back («Повтор»). A run given up stays unfinished (result NULL) and counts for nothing.
 CREATE TABLE fnf_runs (
   id            BIGSERIAL PRIMARY KEY,
   map_id        TEXT NOT NULL REFERENCES fnf_maps(id),
   player_id     BIGINT NOT NULL REFERENCES players(id),
   seed          BIGINT NOT NULL,
-  orders        JSONB NOT NULL,                    -- every committed phase's actions, in order
-  result        TEXT NOT NULL CHECK (result IN ('won', 'lost')),
-  turns         INT NOT NULL,                      -- the leaderboard ranks wins by this alone (fewest first)
-  game_version  TEXT NOT NULL,                     -- the game's commit: a replay needs the rules it was played with
-  started_at    TIMESTAMPTZ NOT NULL,
-  finished_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  orders        JSONB NOT NULL DEFAULT '[]',       -- BLUFOR's commits: each one an array of actions, in order
+  result        TEXT CHECK (result IN ('won', 'lost')), -- NULL while playing (or given up)
+  turns         INT,                               -- the leaderboard ranks wins by this alone (fewest first)
+  game_version  TEXT NOT NULL,                     -- a hash of the game's rules: a replay needs the rules it was played with
+  started_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  finished_at   TIMESTAMPTZ,
+  CHECK ((result IS NULL) = (finished_at IS NULL) AND (result IS NULL) = (turns IS NULL))
 );
 CREATE INDEX fnf_runs_board ON fnf_runs (map_id, turns, finished_at) WHERE result = 'won';
-CREATE INDEX fnf_runs_recent ON fnf_runs (finished_at DESC);
+CREATE INDEX fnf_runs_recent ON fnf_runs (finished_at DESC) WHERE finished_at IS NOT NULL;
 
 -- The hub's own comments on a map (not a Discord thread, unlike a game's). Not written yet.
 CREATE TABLE fnf_comments (

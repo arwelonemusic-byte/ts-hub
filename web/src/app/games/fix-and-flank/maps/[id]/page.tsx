@@ -94,7 +94,7 @@ export default async function MapPage({ params }: PageProps<"/games/fix-and-flan
         </div>
         <div className="flex w-full max-w-[1216px] flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex min-w-0 flex-1 flex-col gap-4">
-            <LeaderboardPanel runs={runs} now={now} locale={locale} t={t} />
+            <LeaderboardPanel runs={runs} canWatch={canPlay} now={now} locale={locale} t={t} />
           </div>
           <aside className="flex shrink-0 flex-col gap-4 lg:w-[400px]">
             <MapCommentsPanel comments={comments} viewer={viewer} now={now} locale={locale} t={t} />

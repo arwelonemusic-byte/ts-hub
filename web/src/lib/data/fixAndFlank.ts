@@ -4,8 +4,8 @@ import type { FnfActivity, FnfComment, FnfMap, FnfRun, FnfSort } from "@/lib/fix
 
 /**
  * Fix and Flank's maps, runs and comments (migration 012: fnf_maps, fnf_runs, fnf_comments). Maps are made and
- * published in the game's editor (lib/fix-and-flank/maps.ts); runs and comments aren't written yet, so the
- * leaderboards, records and «Активность» runs are empty until they are.
+ * published in the game's editor (lib/fix-and-flank/maps.ts); runs are recorded by the game (lib/fix-and-flank/runs.ts)
+ * and only finished ones count; comments aren't written yet.
  */
 export interface FixAndFlankData {
   /** Published maps, newest first or most played first. */
@@ -29,7 +29,7 @@ const iso = (v: unknown) => new Date(v as string).toISOString();
 // A map with its author's name and how it's been played.
 const MAP_COLUMNS = `m.id, m.name, m.author_id, COALESCE(p.display_name, m.author_label) AS author, m.thumb_url,
   m.created_at, m.updated_at, m.published_at,
-  (SELECT count(*)::int FROM fnf_runs r WHERE r.map_id = m.id) AS plays,
+  (SELECT count(*)::int FROM fnf_runs r WHERE r.map_id = m.id AND r.result IS NOT NULL) AS plays,
   (SELECT min(r.turns) FROM fnf_runs r WHERE r.map_id = m.id AND r.result = 'won') AS record
   FROM fnf_maps m LEFT JOIN players p ON p.id = m.author_id`;
 
@@ -130,7 +130,7 @@ export const fixAndFlankData: FixAndFlankData = {
            (r.result = 'won' AND NOT EXISTS (SELECT 1 FROM fnf_runs e WHERE e.map_id = r.map_id AND e.result = 'won'
               AND e.finished_at < r.finished_at AND e.turns <= r.turns)) AS record
          FROM fnf_runs r JOIN players p ON p.id = r.player_id JOIN fnf_maps m ON m.id = r.map_id
-         WHERE m.hidden_at IS NULL ORDER BY r.finished_at DESC LIMIT $1`,
+         WHERE r.result IS NOT NULL AND m.hidden_at IS NULL ORDER BY r.finished_at DESC LIMIT $1`,
         [limit],
       ),
     ]);

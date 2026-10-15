@@ -650,7 +650,7 @@ const RU: Dict = {
   "fnf.leaderboard.hint": "Лучшая победа каждого игрока, до 10 мест: меньше ходов — выше.",
   "fnf.leaderboard.empty": "Карту ещё никто не прошёл. Будьте первым.",
   "fnf.replay": "Повтор",
-  "fnf.replay.soon": "Повторы появятся вместе с записью прохождений",
+  "fnf.replay.members": "Повторы смотрят участники нашего Discord",
   "fnf.comments": "Комментарии",
   "fnf.comments.empty": "Комментариев пока нет.",
   "fnf.comments.placeholder": "Написать комментарий…",

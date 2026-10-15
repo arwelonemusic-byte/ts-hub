@@ -318,8 +318,17 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   never reaches outside `web/`): 14 x 16, a name, and for publishing what the editor's «Ready to play» checks. Map ids
   come from the name (Cyrillic spelled out) plus 4 hex digits. The editor sends a 16:10 JPEG still (`render/still.js`:
   BLUFOR and the objective, no OPFOR) on Save draft, Playtest and Publish → `uploads/fnf/`. Run on its own (`npm start`)
-  the editor keeps maps in the browser as before. Not done yet: recording runs, replays, comments, the game's UI in
-  Russian, an admin's way to take a map down (`hidden_at` is there).
+  the editor keeps maps in the browser as before.
+  **Runs** (`lib/fix-and-flank/runs.ts`): a game on a published map (`play?src=`, not `&playtest=1`) is recorded.
+  `POST /runs {mapId}` starts it and hands out the seed (the player doesn't pick the dice; «Same dice» is gone for
+  recorded runs); the game keeps BLUFOR's commits; `POST /runs/<id>/finish {commits}` plays them through the game's own
+  `playRun` (`src/ai/run.js`; the AI plays OPFOR again) and stores the result and turns the server got (never the
+  browser's), and answers record / personal best for the debrief. A run left unfinished counts for nothing.
+  `GET /runs/<id>` serves a finished run; `play?replay=<id>` («Повтор» on the leaderboard, members) plays it back with
+  the game's own playback. `game_version` is a hash of `src/sim`, `src/ai` and `balance.json`: a replay of a run made
+  under other rules says it may not play out the same. Known limit: the seed is known when the run starts, so a
+  patient cheat could search orders offline; server-side dice per commit would close that. Not done yet: comments,
+  the game's UI in Russian, an admin's way to take a map down (`hidden_at` is there).
 
 ## Decided (2026-10-09)
 
