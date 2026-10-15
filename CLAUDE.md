@@ -55,6 +55,7 @@ The simulation must be completely separate from rendering and UI.
   /ai         enemy behavior (basic.js), scripted BLUFOR plans (drills.js)
   /render     drawing only: world3d.js (three.js), hexmap.js (marks, counters, bangs on canvases)
   /ui         input, action planning, odds preview, step-by-step playback with the dice tray
+  /editor     map editor (editor.html): model.js (pure, tested), editor.js (page), store.js (localStorage maps, played as ?map=local:<id>)
 /data
   balance.json      all tunable numbers (terrain table, dice modifiers)
   /maps             one JSON per mission
@@ -64,7 +65,7 @@ The simulation must be completely separate from rendering and UI.
 Rules for the simulation:
 
 - **Deterministic.** Same state + same actions + same seed = same result, always. Tests depend on this.
-- `applyAction(state, action, rng)` resolves one unit's order and `commitOrders(state, actions, rng)` a whole side's; both return the new state and a list of **events** (activated, moved, fired, dice rolled, suppressed, casualty, spotted, assault, turn ended). `commitOrders` also takes an optional `onStep(state, events)` callback, which the UI uses to play a commit back one order at a time. The renderer, the log and the dice tray all consume the events. Never let rendering logic decide outcomes.
+- `applyAction(state, action, rng)` resolves one unit's order and `commitOrders(state, actions, rng)` a whole side's; both return the new state and a list of **events** (activated, moved, fired, dice rolled, suppressed, casualty, spotted, assault, turn ended). `commitOrders` also takes an optional `onStep(state, events)` callback, which the UI uses to play a commit back one order at a time. The renderer and the dice tray consume the events. Never let rendering logic decide outcomes.
 - **No magic numbers in code.** Every tunable lives in `data/balance.json`.
 
 ---
@@ -163,7 +164,7 @@ A map may carry a `mission` (attacker, defender, brief), an `objective` hex and 
 
 ### Dice on screen
 
-When orders are committed they play back one at a time: each roll tumbles in a dice tray over the map and settles on the real dice (hits highlighted, with the target number and the outcome), fire puts bang markers on the hex fired on, and only then does the result show on the map, the roster and the log. Every roll and its reasons are also in the log. (A full after-action replay was planned and dropped on 2026-10-14 at the user's request.)
+When orders are committed they play back one at a time: each roll tumbles in a dice tray over the map and settles on the real dice (hits highlighted, with the target number and the outcome), fire puts bang markers on the hex fired on, and only then does the result show on the map and the roster. (There is no combat log since 2026-10-15; a full after-action replay was planned and dropped on 2026-10-14 at the user's request.)
 
 ---
 
@@ -195,7 +196,7 @@ Work one milestone at a time. Do not start the next until the current one passes
 5. **Assault and the odds preview.** *Accept:* preview odds equal the exact odds the sim rolls against.
 6. **Enemy AI.** *Accept:* AI fires from its positions, waits when pinned, and sometimes counterattacks.
 7. **First mission and balance test.** BLUFOR squad vs. dug-in OPFOR. *Accept (automated):* over 200 seeded runs, a scripted frontal assault wins under 25 percent and a scripted fix-and-flank plan wins over 70 percent. Adjust `balance.json` until this holds.
-8. ~~After-action replay~~: dropped on 2026-10-14 at the user's request. The dice tray and the log cover seeing the rolls.
+8. ~~After-action replay~~: dropped on 2026-10-14 at the user's request. The dice tray covers seeing the rolls.
 9. **Content.** More missions, terrain, difficulty levels. Only after the core loop is proven fun.
 
 Later, out of scope for now: vehicles, drones, indirect fire, multiple squads, campaign, multiplayer.
@@ -211,6 +212,15 @@ Later, out of scope for now: vehicles, drones, indirect fire, multiple squads, c
 - When balance feels off, change `balance.json`, not code, and re-run the milestone 7 balance test (`npm test`; `npm run balance` prints the win rates and how the games ended).
 - Keep UI text plain and in the vocabulary of infantry tactics (fireteam, base of fire, contact, bounding, suppress, flank, assault). No filler, no flowery language.
 - After each milestone, summarize what works, what is stubbed, and what you would test next.
+- Run: `npm start` (http://localhost:8080, editor at /editor.html); `npm test` (all tests plus the 200-seed balance test); `npm run balance -- 200 201` for another seed block.
+- Git: `main` is current work; `main-3wu53y` is the handoff state, restored from `../fix_and_flank.bundle` (the `origin` remote); nothing is pushed.
+- Line endings are LF (`core.autocrlf=input`). On Windows, write files with LF; in Python use `newline=''`.
+- Debug hooks: `window.app` (game) and `window.editor` (`ed`, `cam`, `world`, `renderMap`). Use them in console checks; frames don't run in a hidden tab.
+- 3D scenery: build from the cached unit shapes in world3d.js (`box/cone/cyl/blob/rock` via `shape()`, `Mesher` typed arrays). The editor rebuilds the board on every edit (~12 ms at 18x14); per-call three.js geometries made it ~220 ms.
+- Marks painted through `frame.paint` (hexmap.js) lie on the ground but draw over everything (no depth test); the hex grid stays in the ground shader.
+- Units are picked by their counter and figures (`world.pickUnit`); a hex click gives orders.
+- Scripted balance plans (drills.js) must end games on their own (there is no turn limit): a run without a result fails the balance test.
+- Maps saved by older builds are fixed on load by `upgradeMapJson` (editor/model.js); extend it when the map format changes.
 
 ---
 
