@@ -30,6 +30,7 @@ interface GameRules {
   fromMapJson(json: MapJson): Model;
   toMapJson(m: Model, balance: unknown): MapJson;
   problems(m: Model, balance: unknown): string[];
+  layoutKey(m: Model): string;
   SIZE: { width: number; height: number };
 }
 
@@ -55,6 +56,7 @@ function gameRules(): Promise<GameRules> {
       fromMapJson: model.fromMapJson,
       toMapJson: model.toMapJson,
       problems: model.problems,
+      layoutKey: model.layoutKey,
       SIZE: model.SIZE,
     };
   })().catch((err) => {
@@ -96,6 +98,19 @@ export async function replayRun(mapJson: unknown, seed: number, commitsInput: un
     return { result: state.result.winner === "BLUFOR" ? "won" : "lost", turns: state.turn, commits: read.commits };
   } catch (err) {
     return { error: format(t("fnf.err.runBroken"), { why: (err as Error).message }) };
+  }
+}
+
+/**
+ * What is played on a map (terrain, hexsides, forces, objective; not its name), as the editor's model.js `layoutKey`
+ * writes it: two maps with the same layout are the same map. Null for a map the game can't read.
+ */
+export async function mapLayout(json: unknown): Promise<string | null> {
+  const r = await gameRules();
+  try {
+    return r.layoutKey(r.fromMapJson(json as MapJson));
+  } catch {
+    return null;
   }
 }
 

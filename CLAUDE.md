@@ -304,7 +304,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   composer on top). The game is served as it is from `games/fix-and-flank` by `app/games/fix-and-flank/[...path]`
   (`/play`, `/editor`, `/preview` and the files they load; nothing else of the folder) and loads a hub map with
   `?src=/api/games/fix-and-flank/maps/<id>`. **Members only** (`viewer.inGuild`): signed out goes to the login.
-  Published maps are locked (no edits: they'd void runs and records); drafts are their author's; publishing needs only
+  Published maps are locked (no edits: they'd void runs and records) and never copied (the game's pencil shows only while
+  an author tries their own draft, the editor opens only the viewer's own drafts, and publishing refuses a map whose
+  `layoutKey` is already published; exact copies only); drafts are their author's; publishing needs only
   a valid map (no clear check). Runs are seed + orders, replayed on the server through the game's sim to get the
   result (so records can't be faked) and played back for «Повтор». Data: `getFixAndFlankData()` (`lib/data/fixAndFlank.ts`)
   over `fnf_maps`, `fnf_runs`, `fnf_comments` (migration 012, which also puts in Trench Line, credited to the game's

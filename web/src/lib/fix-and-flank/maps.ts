@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { getDb } from "@/lib/db";
 import { removeUpload, saveUpload } from "@/lib/uploads";
-import { makeT } from "@/lib/i18n";
-import { cleanMap } from "./rules";
+import { format, makeT } from "@/lib/i18n";
+import { cleanMap, mapLayout } from "./rules";
 
 const t = makeT("ru"); // the game reads these, and the game is Russian only
 
@@ -10,6 +10,8 @@ const t = makeT("ru"); // the game reads these, and the game is Russian only
  * Members' maps in the hub (fnf_maps), written by the game's editor through /api/games/fix-and-flank/maps.
  * A draft is its author's: saved as often as they like, deleted when they like. Publishing locks it for good
  * (user decision 2026-10-15): an edit would void its runs and record, so nothing below changes a published map.
+ * A published map is only played, never copied (same day): the editor won't open one, and a map whose layout is
+ * already published (a published map's file brought back into the editor) isn't published again.
  */
 
 export type Outcome<T> = { ok: T } | { error: string; status: number };
@@ -124,6 +126,8 @@ export async function publishMap(id: string, playerId: string, input: MapInput):
   if ("error" in own) return own;
   const clean = await cleanMap(input.json, String(input.name ?? ""), { publish: true });
   if ("error" in clean) return { error: clean.error, status: 400 };
+  const copyOf = await publishedWithLayout(clean.json);
+  if (copyOf) return { error: format(t("fnf.err.duplicate"), { name: copyOf }), status: 409 };
   const thumb = await storeThumb(id, input.thumb, own.ok.thumbUrl);
   if ("error" in thumb) return thumb;
   const db = await getDb();
@@ -133,6 +137,18 @@ export async function publishMap(id: string, playerId: string, input: MapInput):
     [id, playerId, clean.json.name, JSON.stringify(clean.json), thumb.ok],
   );
   return rows.length ? { ok: { id } } : { error: t("fnf.err.published"), status: 409 };
+}
+
+// The name of a published map (taken down or not) with this map's layout, if there is one. Every published map is
+// read for it: there are a few dozen, and publishing is rare.
+async function publishedWithLayout(json: unknown): Promise<string | null> {
+  const layout = await mapLayout(json);
+  const db = await getDb();
+  for (const m of await db.query(`SELECT name, json FROM fnf_maps WHERE published_at IS NOT NULL`)) {
+    const other = typeof m.json === "string" ? JSON.parse(m.json) : m.json;
+    if (layout && (await mapLayout(other)) === layout) return String(m.name);
+  }
+  return null;
 }
 
 export async function deleteDraft(id: string, playerId: string): Promise<Outcome<{ id: string }>> {

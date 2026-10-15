@@ -33,7 +33,12 @@ const HUB_SAVE_DELAY_MS = 1500;             // an open hub draft saves itself th
 const ARROW_PAN_PX = 140;                   // an arrow key pans the view this far
 const ARROWS = { ArrowLeft: [ARROW_PAN_PX, 0], ArrowRight: [-ARROW_PAN_PX, 0], ArrowUp: [0, ARROW_PAN_PX], ArrowDown: [0, -ARROW_PAN_PX] };
 const TOAST_MS = 2600;
-const BUILT_IN = [['trenchline', 'Миссия 1: Trench Line']]; // not the training ground: a 12 x 12 sandbox with no mission
+const NOTICE_MS = 6000;                     // a longer toast, for a map that didn't open
+const ONLY_PLAYED = 'Опубликованную карту можно только играть, в редакторе она не открывается.';
+const NOT_YOUR_DRAFT = 'Такого черновика среди ваших нет.';
+// The game's missions to start from, when the editor runs on its own. Not in the hub, where Trench Line is a
+// published map. Not the training ground: a 12 x 12 sandbox with no mission.
+const BUILT_IN = [['trenchline', 'Миссия 1: Trench Line']];
 const TERRAIN_KEYS = '12345678';
 const TOOL_KEYS = { w: 'wall', h: 'hedge', p: 'parapet', x: 'erase', b: 'start', o: 'objective', f: 'enemy' };
 const INK = {
@@ -86,31 +91,37 @@ async function main() {
     version: 0,        // bumped on every change, for the 3D marks layer
   };
 
-  // The map to start from: from the hub ?draft= (one of yours) or ?src= (a map JSON on this site: your
-  // draft goes on, anyone else's map or a published one opens as a new map); ?map= (from the game's Edit
-  // button); else the draft in this browser; else a new one.
+  // The map to start from: ?draft= or ?src= (the game's pencil while you try a draft) opens one of your hub
+  // drafts; ?map= (the game's pencil, run on its own) a mission of the game's or a map of this browser's; else
+  // the draft in this browser; else a new one. A published map never opens here, so it can't be copied: it is
+  // only played (user decision 2026-10-15). In the hub that goes for the game's own missions too (Trench Line
+  // is published there).
   const draft = loadDraft();
   const wanted = params.get('map');
   const src = params.get('src');
   const fromHub = params.get('draft') ?? (src && hubIdOf(src));
   const ownDraft = (id) => !!id && !!ed.hub?.maps.some((x) => x.id === id && x.status === 'draft');
+  let refused = ''; // why the map asked for didn't open
   if (params.get('draft') || src) {
     if (ownDraft(fromHub)) {
       ed.model = fromMapJson(await hub.load(fromHub));
       ed.hubId = fromHub;
       ed.hubState = 'saved';
     } else {
-      ed.model = fromMapJson(await loadJson(src ?? hubSrc(fromHub)));
+      refused = params.get('draft') && !src ? NOT_YOUR_DRAFT : ONLY_PLAYED;
     }
-    for (const k of ['draft', 'src']) params.delete(k);
-    history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}`);
+  } else if (wanted && hubLink && !wanted.startsWith(LOCAL)) {
+    refused = ONLY_PLAYED;
   } else if (wanted) {
     if (draft?.model && !draft.id) saveMap(toMapJson(draft.model, balance)); // don't lose an unsaved draft
     ed.model = fromMapJson(await openNamed(wanted));
     ed.id = wanted.startsWith(LOCAL) ? wanted.slice(LOCAL.length) : null;
-    params.delete('map');
+  }
+  if (params.get('draft') || src || wanted) {
+    for (const k of ['draft', 'src', 'map']) params.delete(k);
     history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}`);
-  } else if (draft?.model) {
+  }
+  if (!ed.model && draft?.model) {
     // A draft from when maps had other sizes, a turn limit or a briefing of their own.
     ed.model = fitMap(draft.model);
     delete ed.model.turns;
@@ -120,7 +131,7 @@ async function main() {
       ed.hubId = draft.hubId;
       ed.hubState = 'unsaved'; // this browser's copy may be newer than the hub's: saved again below
     }
-  } else {
+  } else if (!ed.model) {
     ed.model = newModel();
   }
 
@@ -281,7 +292,7 @@ async function main() {
   }
 
   let toastTimer = null;
-  function toast(text, bad = false) {
+  function toast(text, bad = false, ms = TOAST_MS) {
     const t = $('toast');
     t.textContent = text;
     t.className = bad ? 'bad' : '';
@@ -289,7 +300,7 @@ async function main() {
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       t.hidden = true;
-    }, TOAST_MS);
+    }, ms);
   }
 
   // ---- the panel ----
@@ -453,8 +464,7 @@ async function main() {
       rows.push(el('hr'), el('div', 'eyebrow', 'Опубликованные (не меняются)'));
       for (const p of published) rows.push(item(p.name, () => { location.href = hubMapPage(p.id); }, 'страница'));
     }
-    rows.push(el('hr'), el('div', 'eyebrow', 'Начать с миссии'));
-    for (const [file, name] of BUILT_IN) rows.push(item(name, async () => replaceModel(fromMapJson(await loadJson(`data/maps/${file}.json`)))));
+    // No «Начать с миссии» here: the game's missions are published maps in the hub, and those aren't copied.
     rows.push(el('hr'), item('Загрузить файл карты…', () => $('importFile').click(), '.json'), item('Выгрузить эту карту', exportJson, '.json'));
     menu.replaceChildren(...rows);
     menu.hidden = false;
@@ -952,6 +962,7 @@ async function main() {
   } else if (hubLink?.error) {
     toast(`Карты хранятся в этом браузере: ${hubLink.error}`, true);
   }
+  if (refused) toast(refused, true, NOTICE_MS);
 
   renderPanel();
   fit();

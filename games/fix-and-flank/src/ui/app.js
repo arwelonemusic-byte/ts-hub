@@ -16,6 +16,7 @@ import { canActivate, currentPhase, unitType, unitsAt } from '../sim/state.js';
 import { chooseOrders } from '../ai/basic.js';
 import { COLORS, counterLabel, drawFire, drawHexMarks, drawPath, drawSuspected } from '../render/hexmap.js';
 import { createWorld } from '../render/world3d.js';
+import { servedByHub } from '../hub.js';
 import { positionAlong } from './anim.js';
 import { createDiceTray } from './dice.js';
 import { assaultFigures, assaultSummary, eventText, fireFigures, fireSummary, phaseLabel, previewAction, rallyPreview, unitName } from './describe.js';
@@ -957,10 +958,12 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   $('turnLeft').onclick = () => app.cam.turn(-1);
   $('turnRight').onclick = () => app.cam.turn(1);
 
-  // The editor, opening this map.
+  // The editor, opening this map. In the hub only a draft its author is trying (?src=…&playtest=1) goes back there: a
+  // published map is only played, never opened in the editor or copied (user decision 2026-10-15).
   const here = new URLSearchParams(location.search);
-  // A hub map (?src=) opens in the editor too: its author goes on with a draft, anyone else starts a new map from it.
-  $('editBtn').href = `editor.html?${new URLSearchParams(here.get('src') ? { src: here.get('src') } : { map: here.get('map') ?? 'trenchline' })}`;
+  const editable = !servedByHub() || (!replay && !!here.get('src') && here.has('playtest'));
+  $('editBtn').hidden = !editable;
+  if (editable) $('editBtn').href = `editor.html?${new URLSearchParams(here.get('src') ? { src: here.get('src') } : { map: here.get('map') ?? 'trenchline' })}`;
 
   $('helpBtn').onclick = showHelp;
 

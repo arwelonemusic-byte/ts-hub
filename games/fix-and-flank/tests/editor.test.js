@@ -5,8 +5,8 @@ import { parseMap, sideFeature, terrainName } from '../src/sim/map.js';
 import { createState } from '../src/sim/state.js';
 import {
   SIZE, clone, deployment, drawEdges, edgeKey, edgePath, eraseEdge, fitMap, formation, fromMapJson, graph, inside,
-  moveObjective, nearestVertex, newModel, paint, problems, randomize, startNear, toggleEnemy, toggleParapet, toMapJson,
-  upgradeMapJson,
+  layoutKey, moveObjective, nearestVertex, newModel, paint, problems, randomize, startNear, toggleEnemy, toggleParapet,
+  toMapJson, upgradeMapJson,
 } from '../src/editor/model.js';
 import { H, balance, loadJson } from './helpers.js';
 
@@ -114,6 +114,19 @@ test('Trench Line opens in the editor and saves to the same terrain, hexsides an
   const blufor = (units) => Object.fromEntries(units.filter((u) => u.side === 'BLUFOR').map((u) => [u.team, u.pos]));
   assert.deepEqual(blufor(b.units), blufor(a.units), 'the squad starts where it did');
   assert.deepEqual(blufor(a.units), { ALPHA: [8, 13], BRAVO: [9, 13], SL: [9, 14] }, 'in its formation');
+});
+
+test('a map\'s layout key: the same map under another name or written in another order is the same map', () => {
+  const json = loadJson('data/maps/trenchline.json');
+  const key = layoutKey(fromMapJson(json));
+  const renamed = { ...json, name: 'Моя карта', description: 'Совсем другая', hexsides: [...json.hexsides].reverse() };
+  assert.equal(layoutKey(fromMapJson(renamed)), key);
+  const changed = fromMapJson(json);
+  paint(changed, [H(0, 0)], changed.terrain[0] === 'woods' ? 'open' : 'woods');
+  assert.notEqual(layoutKey(changed), key, 'one hex of other terrain is another map');
+  const moved = fromMapJson(json);
+  moveObjective(moved, H(5, 3));
+  assert.notEqual(layoutKey(moved), key, 'so is another objective');
 });
 
 test('a map of another size is made 14 x 16: what fits stays, the forces move onto the map', () => {

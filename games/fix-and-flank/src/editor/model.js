@@ -565,6 +565,23 @@ export function toMapJson(m, balance) {
   };
 }
 
+// What is played on a map, as one string: its terrain, hexsides, BLUFOR's
+// start, OPFOR's teams and the objective, not its name or description, and in
+// no particular order. Two maps with the same key are the same map: the hub
+// won't publish a map that is already published (user decision 2026-10-15).
+export function layoutKey(m) {
+  const at = (h) => (h ? `${h.col},${h.row}` : '-');
+  return JSON.stringify({
+    size: [m.width, m.height],
+    terrain: m.terrain.map((t) => CHAR[t]).join(''),
+    edges: Object.entries(m.edges).map(([k, f]) => `${k}=${f}`).sort(),
+    parapets: [...m.parapets].sort(),
+    start: at(m.start),
+    enemies: m.enemies.map(at).sort(),
+    objective: at(m.objective),
+  });
+}
+
 // A map in the data/maps format, as a model, made what the editor makes
 // (fitMap). The editor's squad is ALPHA, BRAVO and the SL in their formation:
 // other BLUFOR units (the HMG) are left out, and the start is where the SL

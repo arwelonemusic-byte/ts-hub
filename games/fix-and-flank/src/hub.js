@@ -13,6 +13,8 @@ const RUNS = '/api/games/fix-and-flank/runs';
 export const hubSrc = (id) => `${API}/${encodeURIComponent(id)}`;
 export const hubMapPage = (id) => `/games/fix-and-flank/maps/${encodeURIComponent(id)}`;
 export const hubHome = '/games/fix-and-flank';
+// Served by the hub (its pages are /games/fix-and-flank/play, /editor and /preview), not on its own.
+export const servedByHub = () => location.pathname.startsWith(`${hubHome}/`);
 
 // The hub's id of a map from its ?src= URL (this site's /api/games/fix-and-flank/maps/<id>), or null.
 export function hubIdOf(src) {
