@@ -95,7 +95,12 @@ const TRACER = { per: 3, gap: 0.3, speed: 3.2, len: 0.3, thick: 0.025, from: 0.2
 
 // The marks layer laid over the ground: drawn as the flat map would be at `look`
 // pixels per unit, stored at `texels` per unit.
-const OVERLAY = { look: 40, texels: 64, glow: 0.45 };
+// The ground's layers, canvases the size of the board: drawn as the flat map
+// would be at `look` pixels per unit, stored at `texels` per unit. The grid is
+// painted into the ground (things standing on it hide it); the marks (hover,
+// moves, fire, paths, the selection, the objective) lie on the ground but are
+// drawn over everything, so nothing standing on the board hides them.
+const OVERLAY = { look: 40, texels: 64, glow: 0.45, marksOrder: 5 };
 const GRID = { ink: 'rgba(18, 34, 10, 0.2)', width: 1.2 }; // faint hex outlines on the ground
 
 // Camera: distance from its target, and the angle it looks down at (radians),
@@ -351,7 +356,8 @@ function wall(m, line, topY, bands, toward) {
 }
 
 function buildBoard(map) {
-  const ground = new Mesher(); // takes the marks layer
+  const ground = new Mesher(); // takes the grid layer
+  const top = new Mesher();    // the surface the marks lie on: the ground, and the water's surface
   const sides = new Mesher();  // the slab's edge and the banks
   const water = new Mesher();
   const things = new Mesher();
@@ -363,6 +369,8 @@ function buildBoard(map) {
     const wet = t === 'water';
     hexFaces(ground, h, wet ? bedHeight : landY, (i) => (wet ? LEVEL.bed : 0) + BUMP[t] * (r(100 + i) - 0.5), GROUND[t], r, 200);
     if (wet) hexFaces(water, h, () => LEVEL.water, () => LEVEL.water, WATER.colors, r, 300);
+    if (wet) hexFaces(top, h, () => LEVEL.water, () => LEVEL.water, WATER.colors, r, 300);
+    else hexFaces(top, h, landY, (i) => BUMP[t] * (r(100 + i) - 0.5), GROUND[t], r, 200);
 
     const { c, outer } = hexPoints(h);
     neighbors(h).forEach((n, i) => {
@@ -391,7 +399,7 @@ function buildBoard(map) {
     else if (t === 'rubble') ruin(things, c.x, c.y - HOUSE.back, (Math.floor(r(2) * 3) * Math.PI) / 3 + (r(3) - 0.5) * 0.2, r);
   });
   hexsides(things, map);
-  return { ground: ground.build(), sides: sides.build(), water: water.build(), things: things.build() };
+  return { ground: ground.build(), top: top.build(), sides: sides.build(), water: water.build(), things: things.build() };
 }
 
 // A dirt track from the hex center to each neighbouring road hex; off the board
@@ -777,7 +785,7 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
   const fill = new THREE.DirectionalLight(LIGHT.fill, LIGHT.fillPower);
   scene.add(sun, sun.target, fill);
 
-  // The marks layer: a canvas the size of the board, laid over the ground by its shader.
+  // The grid layer, laid over the ground by its shader.
   const overlayUniforms = { uOverlay: { value: null }, uOverlayBox: { value: new THREE.Vector4() } };
   const withOverlay = (material) => {
     material.onBeforeCompile = (shader) => {
@@ -807,7 +815,11 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
   const table = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), new THREE.MeshStandardMaterial({ color: TABLE, roughness: 1 }));
   table.rotation.x = -Math.PI / 2;
   table.receiveShadow = true;
-  scene.add(groundMesh, sidesMesh, thingsMesh, waterMesh, table);
+  // The marks layer, on a copy of the ground's surface drawn after everything
+  // else and through it (no depth test); the counters and bangs still go on top.
+  const marksMesh = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ transparent: true, depthTest: false, depthWrite: false, toneMapped: false }));
+  marksMesh.renderOrder = OVERLAY.marksOrder;
+  scene.add(groundMesh, sidesMesh, thingsMesh, waterMesh, table, marksMesh);
 
   let map = null;
   let bounds = null;
@@ -815,8 +827,8 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
   let built = null;
   let waterBase = null;
   let flag = null;
-  let overlay = null;
-  let overlayCtx = null;
+  let gridCtx = null;
+  let marksCtx = null;
   let ow = 0;
   let oh = 0;
   const fitPoints = [];
@@ -840,15 +852,22 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
     if (w !== ow || h !== oh) {
       ow = w;
       oh = h;
-      overlay = canvas(ow, oh);
-      overlayCtx = overlay.getContext('2d');
+      const layer = () => {
+        const tex = canvasTexture(canvas(ow, oh));
+        tex.flipY = false;
+        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        return tex;
+      };
       overlayUniforms.uOverlay.value?.dispose();
-      const tex = canvasTexture(overlay);
-      tex.flipY = false;
-      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-      overlayUniforms.uOverlay.value = tex;
+      overlayUniforms.uOverlay.value = layer();
+      gridCtx = overlayUniforms.uOverlay.value.image.getContext('2d');
+      marksMesh.material.map?.dispose();
+      marksMesh.material.map = layer();
+      marksMesh.material.needsUpdate = true;
+      marksCtx = marksMesh.material.map.image.getContext('2d');
     }
     overlayUniforms.uOverlayBox.value.set(bounds.minX, bounds.minY, ow / OVERLAY.texels, oh / OVERLAY.texels);
+    paintGrid();
     overlaySig = null;
 
     const old = built;
@@ -858,6 +877,15 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
     thingsMesh.geometry = built.things;
     waterMesh.geometry = built.water;
     waterBase = built.water.attributes.position.array.slice();
+    // The marks' surface, its texture coordinates from where each corner is on the board.
+    const top = built.top.attributes.position;
+    const uv = new Float32Array(top.count * 2);
+    for (let i = 0; i < top.count; i++) {
+      uv[i * 2] = ((top.getX(i) - bounds.minX) * OVERLAY.texels) / ow;
+      uv[i * 2 + 1] = ((top.getZ(i) - bounds.minY) * OVERLAY.texels) / oh;
+    }
+    built.top.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    marksMesh.geometry = built.top;
     if (old) for (const g of Object.values(old)) g.dispose();
 
     if (flag) {
@@ -873,6 +901,33 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
     }
   }
   let overlaySig = null;
+
+  // A layer's canvas, cleared, with its drawing frame (the flat frame of camera.js).
+  function begin(ctx) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, ow, oh);
+    const k = OVERLAY.texels / OVERLAY.look;
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+    return { x: bounds.minX, y: bounds.minY, scale: OVERLAY.look };
+  }
+
+  function paintGrid() {
+    const cam2d = begin(gridCtx);
+    gridCtx.strokeStyle = GRID.ink;
+    gridCtx.lineWidth = GRID.width;
+    gridCtx.beginPath();
+    forEachHex(map, (h) => {
+      corners(h).forEach((p, i) => {
+        const x = (p.x - cam2d.x) * cam2d.scale;
+        const y = (p.y - cam2d.y) * cam2d.scale;
+        if (i) gridCtx.lineTo(x, y);
+        else gridCtx.moveTo(x, y);
+      });
+      gridCtx.closePath();
+    });
+    gridCtx.stroke();
+    overlayUniforms.uOverlay.value.needsUpdate = true;
+  }
   setBoard(firstMap);
 
   // ---- camera ----
@@ -1009,39 +1064,23 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
     const sig = `${frame.sig}|${JSON.stringify(selected)}`;
     if (sig === overlaySig) return;
     overlaySig = sig;
-    overlayCtx.setTransform(1, 0, 0, 1, 0, 0);
-    overlayCtx.clearRect(0, 0, ow, oh);
-    const k = OVERLAY.texels / OVERLAY.look;
-    overlayCtx.setTransform(k, 0, 0, k, 0, 0);
-    const cam2d = { x: bounds.minX, y: bounds.minY, scale: OVERLAY.look };
-    overlayCtx.strokeStyle = GRID.ink;
-    overlayCtx.lineWidth = GRID.width;
-    overlayCtx.beginPath();
-    forEachHex(map, (h) => {
-      corners(h).forEach((p, i) => {
-        const x = (p.x - cam2d.x) * cam2d.scale;
-        const y = (p.y - cam2d.y) * cam2d.scale;
-        if (i) overlayCtx.lineTo(x, y);
-        else overlayCtx.moveTo(x, y);
-      });
-      overlayCtx.closePath();
-    });
-    overlayCtx.stroke();
-    if (map.objective) drawObjective(overlayCtx, cam2d, { col: map.objective[0], row: map.objective[1] }, OBJECTIVE_INK);
+    const ctx = marksCtx;
+    const cam2d = begin(ctx);
+    if (map.objective) drawObjective(ctx, cam2d, { col: map.objective[0], row: map.objective[1] }, OBJECTIVE_INK);
     for (const p of selected) {
       const x = (p.x - cam2d.x) * cam2d.scale;
       const y = (p.y - cam2d.y) * cam2d.scale;
-      overlayCtx.beginPath();
-      overlayCtx.arc(x, y, SELECT.radius * cam2d.scale, 0, Math.PI * 2);
-      overlayCtx.lineWidth = SELECT.width + 2;
-      overlayCtx.strokeStyle = SELECT.edge;
-      overlayCtx.stroke();
-      overlayCtx.lineWidth = SELECT.width;
-      overlayCtx.strokeStyle = SELECT.ink;
-      overlayCtx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y, SELECT.radius * cam2d.scale, 0, Math.PI * 2);
+      ctx.lineWidth = SELECT.width + 2;
+      ctx.strokeStyle = SELECT.edge;
+      ctx.stroke();
+      ctx.lineWidth = SELECT.width;
+      ctx.strokeStyle = SELECT.ink;
+      ctx.stroke();
     }
-    frame.paint(overlayCtx, cam2d);
-    overlayUniforms.uOverlay.value.needsUpdate = true;
+    frame.paint(ctx, cam2d);
+    marksMesh.material.map.needsUpdate = true;
   }
 
   // Where a counter's unit stands: the SL steps aside when he shares the hex with a team.
