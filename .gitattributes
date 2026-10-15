@@ -1,0 +1,2 @@
+# Line endings stay LF on every checkout (this game moved into the ts-hub repo, which checks out with CRLF on Windows).
+* text=auto eol=lf
