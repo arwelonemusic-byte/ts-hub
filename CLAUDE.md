@@ -291,7 +291,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   step with the portal's. Roles are refreshed with the bot token every 10 minutes per member (`lib/viewer.ts`). Without the env vars, login redirects back with a "not configured" notice. Steam is planned.
   Env template: `web/.env.example`. Pages ask `getViewer()` (`lib/viewer.ts`) who is looking. On a dev machine
   without OAuth configured it returns a stand-in from `data/players` (Galaxy, an admin, by default; switch with
-  `/api/dev/viewer?name=<display name>[&roles=SL,Rifleman]`, roles default to Rifleman) so write flows can be tried;
+  `/api/dev/viewer?name=<display name or Discord username>[&roles=SL,Rifleman]`, roles default to Rifleman; display names
+  carry clan tags, so `?name=vonscheer` is easier than `[лампас]VonScheer`; a name that isn't a member's can browse but
+  not write) so write flows can be tried;
   the header shows "dev" next to the name. Roles: `viewer.roles` (names via `DISCORD_ROLE_MAP`), `hasRole`,
   `isMissionMaker` (@mission officer), `isAdmin` (`HUB_ADMIN_IDS` / `HUB_ADMIN_ROLES`).
   Admins are the Discord user IDs in `HUB_ADMIN_IDS` (production: Galaxy) and/or the role names in `HUB_ADMIN_ROLES`.

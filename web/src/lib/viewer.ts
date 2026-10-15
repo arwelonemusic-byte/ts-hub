@@ -36,7 +36,8 @@ const ADMIN_IDS = list(process.env.HUB_ADMIN_IDS);
 /**
  * On a dev machine without Discord OAuth configured, pages act as if a player
  * from the players table were signed in, so write flows can be tried locally.
- * Galaxy by default; switch with /api/dev/viewer?name=<display name>.
+ * Galaxy by default; switch with /api/dev/viewer?name=<display name or Discord username>. Display names carry clan
+ * tags ("[лампас]VonScheer"), so the username ("vonscheer") is the easy one to type.
  */
 export const DEV_VIEWER = process.env.NODE_ENV !== "production" && !discordConfigured();
 export const DEV_VIEWER_COOKIE = "ts_hub_dev_viewer";
@@ -59,7 +60,12 @@ async function devViewer(): Promise<Viewer | null> {
     // Not percent-encoded after all: keep the default.
   }
   // Not a member (or players not seeded): the stand-in still works, just without an id or avatar.
-  const [m] = await (await getDb()).query("SELECT discord_id, avatar_url FROM players WHERE display_name = $1 LIMIT 1", [name]);
+  const [m] = await (await getDb()).query(
+    `SELECT discord_id, display_name, avatar_url FROM players WHERE display_name = $1 OR lower(username) = lower($1)
+     ORDER BY (display_name = $1) DESC LIMIT 1`,
+    [name],
+  );
+  if (m) name = String(m.display_name);
   return {
     discordId: m?.discord_id ?? `dev:${name}`,
     name,
