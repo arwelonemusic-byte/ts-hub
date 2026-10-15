@@ -38,7 +38,7 @@ export const COLORS = {
   hoverHalo: 'rgba(244, 219, 80, 0.38)', // the counter a click would select: the TS yellow
   hoverEdge: '#f4db50',
   invalid: '#ff6a3d',
-  fireInk: '#1f3f8f',
+  fireInk: '#8fd3ff', // light blue (user request 2026-10-15): your lines of fire, planned and shown
   bang: '#f2b33d',
   bangCore: '#d9481c',
   hostileFireInk: '#8e1b12',
@@ -131,9 +131,9 @@ function crosshair(ctx, x, y, r, color, width) {
   ctx.fill();
 }
 
-// A line of fire: dashed, from hex center to a crosshair on the target hex,
-// tagged with the shooter's letter when given.
-export function drawFire(ctx, cam, from, to, color, alpha = 1, tag = null) {
+// A line of fire: from hex center to a crosshair on the target hex, tagged
+// with the shooter's letter when given; dashed for a shot that can't be made.
+export function drawFire(ctx, cam, from, to, color, alpha = 1, tag = null, dashed = false) {
   const a = center(from);
   const b = center(to);
   const p = toScreen(cam, a.x, a.y);
@@ -144,7 +144,7 @@ export function drawFire(ctx, cam, from, to, color, alpha = 1, tag = null) {
   ctx.globalAlpha = alpha;
   ctx.strokeStyle = color;
   ctx.lineWidth = Math.max(2, cam.scale * 0.06);
-  ctx.setLineDash([cam.scale * 0.2, cam.scale * 0.14]);
+  if (dashed) ctx.setLineDash([cam.scale * 0.2, cam.scale * 0.14]); // a shot that can't be made
   ctx.beginPath();
   ctx.moveTo(p.x, p.y);
   ctx.lineTo(q.x - ((q.x - p.x) / len) * r * 0.55, q.y - ((q.y - p.y) / len) * r * 0.55);
@@ -159,7 +159,7 @@ export function drawFire(ctx, cam, from, to, color, alpha = 1, tag = null) {
     const ty = q.y - r * 1.05;
     ctx.fillStyle = color;
     ctx.fillRect(tx, ty, tw, size * 1.1);
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = color === COLORS.fireInk ? COLORS.ink : '#ffffff'; // dark on the light blue
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(tag, tx + tw / 2, ty + size * 0.58);

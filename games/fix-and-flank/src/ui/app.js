@@ -6,7 +6,7 @@
 import { moveOptions, validateAction } from '../sim/actions.js';
 import { assaultVia } from '../sim/assault.js';
 import { center, distance, hexAt, key, neighbors, same } from '../sim/hex.js';
-import { visibleFrom } from '../sim/los.js';
+import { lineOfSight, visibleFrom } from '../sim/los.js';
 import { inBounds, terrainName, terrainOf } from '../sim/map.js';
 import { fireDice } from '../sim/combat.js';
 import { checkPlan, commitOrders, projectOrders } from '../sim/orders.js';
@@ -672,6 +672,21 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     return u && u.status !== 'eliminated' && shown(u) ? u.id : null;
   }
 
+  // The firefight's aim: the selected unit at the hex under the pointer, from where its order starts. ok: it can
+  // fire there (assault: at an enemy next to it); else why not, a missing line of sight said as such. Null when not
+  // aiming (no unit selected, the pointer off the map or on the unit's own hex).
+  function aimAt() {
+    if (!firefight() || app.selected === null || !planning() || !app.hover || !inBounds(app.state.map, app.hover)) return null;
+    const p = projectedFor(app.selected);
+    const from = p.units[app.selected].pos;
+    if (same(from, app.hover)) return null;
+    const order = orderFor(app.hover);
+    if (order) return { from, to: app.hover, ok: true, assault: !!assaultVia(p, order) };
+    const los = lineOfSight(p.map, p.balance, from, app.hover);
+    const why = los.clear ? validateAction(p, { type: 'fire', unit: app.selected, target: app.hover }).reason : `нет прямой видимости (${los.reason})`;
+    return { from, to: app.hover, ok: false, why };
+  }
+
   // The order a click (or a drop) on the hex under the pointer would give the selected unit, or null.
   function hoverOrder() {
     return app.selected !== null && planning() && app.hover && inBounds(app.state.map, app.hover) ? orderFor(app.hover) : null;
@@ -687,15 +702,20 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     return order ? of(order) : '';
   }
 
-  // Over a unit a click would select: a pointer cursor, its counter lit (world3d), and a tag.
+  // By the pointer: over a unit a click would select, its name and a pointer cursor (its counter lit, world3d);
+  // aiming where the selected unit can't fire, why not.
   function renderUnitTip() {
     const tip = $('unitTip');
     const id = app.hoverUnit;
     canvas.style.cursor = cursorFor();
-    const show = id !== null && id !== app.selected && app.pointer && !app.pointer.dragging;
+    const aim = id === null ? aimAt() : null;
+    const pick = id !== null && id !== app.selected;
+    const show = (pick || (aim && !aim.ok)) && app.pointer && !app.pointer.dragging;
     tip.hidden = !show;
     if (!show) return;
-    tip.replaceChildren(el('b', '', shortName(unit(id))), document.createTextNode('нажмите, чтобы выбрать'));
+    tip.classList.toggle('bad', !pick);
+    if (pick) tip.replaceChildren(el('b', '', shortName(unit(id))), document.createTextNode('нажмите, чтобы выбрать'));
+    else tip.replaceChildren(document.createTextNode(`Сюда не выстрелить: ${aim.why}`));
     tip.style.left = `${app.pointer.x + TIP_OFFSET.x}px`;
     tip.style.top = `${app.pointer.y + TIP_OFFSET.y}px`;
   }
@@ -907,14 +927,18 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
         const from = projectOrders(s, app.plan.slice(0, i)).units[a.unit].pos;
         if (a.type === 'fire' || assaultVia(projectOrders(s, app.plan.slice(0, i)), a)) {
           const to = a.type === 'fire' ? a.target : a.to;
-          const color = !checks[i].ok ? COLORS.invalid : a.type === 'move' ? COLORS.assault : a.unit === app.selected ? COLORS.plan : COLORS.fireInk;
+          const color = !checks[i].ok ? COLORS.invalid : a.type === 'move' ? COLORS.assault : COLORS.fireInk;
           const tag = counterLabel(unit(a.unit));
-          fires.push({ from, to, color, tag });
-          if (a.second) fires.push({ from, to: a.second, color, tag });
+          fires.push({ from, to, color, tag, dashed: !checks[i].ok });
+          if (a.second) fires.push({ from, to: a.second, color, tag, dashed: !checks[i].ok });
           return;
         }
         arrows.push({ from, to: a.type === 'move' ? a.to : a.path[a.path.length - 1], kind: checks[i].ok ? 'plan' : 'invalid' });
       });
+      // Aiming in the firefight: a line from the selected unit to the hex under the pointer (user request
+      // 2026-10-15), light blue where it can fire, red and dashed where it can't (the reason by the pointer).
+      const aim = aimAt();
+      if (aim) fires.push({ from: aim.from, to: aim.to, color: !aim.ok ? COLORS.invalid : aim.assault ? COLORS.assault : COLORS.fireInk, tag: null, dashed: !aim.ok });
       // While deciding (pointing, or dragging the unit): the arrow to the hex a click or a drop would move it to.
       const would = hoverOrder();
       if (would && (would.type === 'move' || would.type === 'fastMove') && !assaultVia(projectedFor(would.unit), would)) {
@@ -954,7 +978,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       paint: (ctx, cam) => {
         drawHexMarks(ctx, cam, marks);
         drawSuspected(ctx, cam, suspected);
-        for (const f of fires) drawFire(ctx, cam, f.from, f.to, f.color, 1, f.tag);
+        for (const f of fires) drawFire(ctx, cam, f.from, f.to, f.color, 1, f.tag, f.dashed);
         for (const x of app.shots) {
           const t = (now - x.start) / x.ms;
           if (t >= 0) drawFire(ctx, cam, x.from, x.to, shotInk(x), shotAlpha(t), x.tag);
