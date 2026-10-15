@@ -67,6 +67,7 @@ export function startApp(initialState, { reveal = false } = {}) {
     fireCache: null,
     hover: null,
     hoverUnit: null,   // your unit under the pointer that a click would select
+    hoverSight: null,  // the unit under the pointer whose line of sight the view shows (yours, or a spotted enemy)
     message: '',
     aiPending: false,
   };
@@ -494,7 +495,10 @@ export function startApp(initialState, { reveal = false } = {}) {
       showResult();
     }
     renderHover(); // the hex card follows the state too, not only the pointer
-    if (app.pointer) app.hoverUnit = selectableAt(app.pointer.x, app.pointer.y);
+    if (app.pointer) {
+      app.hoverUnit = selectableAt(app.pointer.x, app.pointer.y);
+      app.hoverSight = sightAt(app.pointer.x, app.pointer.y);
+    }
     renderUnitTip();
   }
 
@@ -503,6 +507,13 @@ export function startApp(initialState, { reveal = false } = {}) {
     const id = world.pickUnit(sx, sy);
     const u = id === null ? null : unit(id);
     return u && u.side === PLAYER_SIDE && planning() && canActivate(app.state, u) ? u.id : null;
+  }
+
+  // Any unit you can see whose counter or figures are under a screen point: yours, or a spotted enemy.
+  function sightAt(sx, sy) {
+    const id = world.pickUnit(sx, sy);
+    const u = id === null ? null : unit(id);
+    return u && u.status !== 'eliminated' && shown(u) ? u.id : null;
   }
 
   // Over a unit a click would select: a pointer cursor, its counter lit (world3d), and a tag.
@@ -691,9 +702,12 @@ export function startApp(initialState, { reveal = false } = {}) {
     for (const h of o.assault) marks.push({ hex: h, color: COLORS.assault, width: 4 });
     if (app.hover && inBounds(s.map, app.hover)) marks.push({ hex: app.hover, color: HOVER.color, width: HOVER.width, inset: 0.02 });
     if (app.view) {
-      // From the selected unit (where its order starts), else from every unit of the squad together.
-      const eyes = app.selected !== null
-        ? [projectedFor(app.selected).units[app.selected].pos]
+      // From the unit under the pointer, else the selected unit, else every unit of the squad together.
+      // One of yours sees from where its order starts; an enemy from where it is.
+      const eye = (id) => (unit(id).side === PLAYER_SIDE && planning() ? projectedFor(id).units[id].pos : unit(id).pos);
+      const one = app.hoverSight ?? app.selected;
+      const eyes = one !== null
+        ? [eye(one)]
         : s.units.filter((u) => u.side === PLAYER_SIDE && u.status !== 'eliminated').map((u) => u.pos);
       const k = eyes.map(key).join(';');
       if (app.viewCache?.k !== k) {
@@ -786,6 +800,7 @@ export function startApp(initialState, { reveal = false } = {}) {
     app.pointer = { x: e.clientX - r.left, y: e.clientY - r.top, dragging: !!drag?.moved };
     app.hover = hexAt(app.cam.toWorld(e.clientX - r.left, e.clientY - r.top));
     app.hoverUnit = drag?.moved ? null : selectableAt(app.pointer.x, app.pointer.y);
+    app.hoverSight = drag?.moved ? null : sightAt(app.pointer.x, app.pointer.y);
     if (drag) {
       const dx = e.clientX - drag.x;
       const dy = e.clientY - drag.y;
@@ -836,6 +851,7 @@ export function startApp(initialState, { reveal = false } = {}) {
     app.hover = null;
     app.pointer = null;
     app.hoverUnit = null;
+    app.hoverSight = null;
     renderHover();
     renderUnitTip();
   });
