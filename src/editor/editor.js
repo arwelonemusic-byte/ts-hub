@@ -7,7 +7,7 @@
 import { toScreen } from '../render/camera.js';
 import { COLORS, drawHexMarks } from '../render/hexmap.js';
 import { createWorld } from '../render/world3d.js';
-import { center, corners, hexAt, neighbors, SIDES } from '../sim/hex.js';
+import { center, corners, hexAt, SIDES } from '../sim/hex.js';
 import { parseMap } from '../sim/map.js';
 import { unitType } from '../sim/state.js';
 import {
@@ -23,7 +23,7 @@ const FIT_GAP = 16;
 const HISTORY = 100;                        // undo steps kept
 const REACH = { vertex: 0.42, edge: 0.45 }; // world units: how near a corner or an edge the pointer must be
 const NEAR_CORNERS = 3.2;                   // corners shown within this many world units of the pointer
-const STROKE_STEP = 0.35;                   // world units between brush samples along a drag
+const STROKE_STEP = 0.35;                   // world units between samples along a drag
 const SAVE_DELAY_MS = 400;
 const ARROW_PAN_PX = 140;                   // an arrow key pans the view this far
 const ARROWS = { ArrowLeft: [ARROW_PAN_PX, 0], ArrowRight: [-ARROW_PAN_PX, 0], ArrowUp: [0, ARROW_PAN_PX], ArrowDown: [0, -ARROW_PAN_PX] };
@@ -70,7 +70,6 @@ async function main() {
     id: null,          // where it is saved in My maps, once it is
     tool: 'terrain',
     terrain: 'woods',
-    brush: 1,
     chain: null,       // wall or hedge being drawn: the corner it has got to
     hover: null,       // { p, hex, vertex, edge, side }
     undo: [],
@@ -232,12 +231,6 @@ async function main() {
   }
 
   for (const b of document.querySelectorAll('.tool')) b.onclick = () => setTool(b.dataset.tool);
-  for (const b of document.querySelectorAll('#brush button')) {
-    b.onclick = () => {
-      ed.brush = Number(b.dataset.brush);
-      renderPanel();
-    };
-  }
 
   $('mapName').oninput = () => {
     ed.model.name = $('mapName').value;
@@ -267,11 +260,11 @@ async function main() {
     const m = ed.model;
     for (const b of document.querySelectorAll('.tile')) b.classList.toggle('on', ed.tool === 'terrain' && b.dataset.terrain === ed.terrain);
     for (const b of document.querySelectorAll('.tool')) b.classList.toggle('on', b.dataset.tool === ed.tool);
-    for (const b of document.querySelectorAll('#brush button')) b.classList.toggle('on', Number(b.dataset.brush) === ed.brush);
     if (document.activeElement !== $('mapName')) $('mapName').value = m.name;
     $('undo').disabled = !ed.undo.length;
     $('redo').disabled = !ed.redo.length;
     $('help').textContent = HELP[ed.tool]();
+    renderWhere();
     const issues = problems(m, balance);
     const check = $('check');
     check.className = issues.length ? 'bad' : 'ready';
@@ -413,7 +406,6 @@ async function main() {
 
   // ---- tools on the board ----
 
-  const brushHexes = (hex) => (ed.brush > 1 ? [hex, ...neighbors(hex)] : [hex]);
 
   // The side of hex h nearest point p.
   function sideAt(h, p) {
@@ -447,7 +439,7 @@ async function main() {
     const m = ed.model;
     if (ed.tool === 'terrain') {
       const hex = hexAt(p);
-      return inside(m, hex) && paint(m, brushHexes(hex), ed.terrain);
+      return inside(m, hex) && paint(m, [hex], ed.terrain);
     }
     if (ed.tool === 'erase') {
       const e = nearestEdge(edgeGraph, p, REACH.edge);
@@ -524,12 +516,18 @@ async function main() {
     gameMap = renderMap();
     counters = makeCounters();
     worldDirty = true;
+    renderWhere();
+  }
+  // The hex under the pointer and its terrain, by the help line; again after an edit, which may have repainted it.
+  function renderWhere() {
+    const hex = ed.hover?.hex;
+    $('where').textContent = hex && inside(ed.model, hex) ? `${hex.col},${hex.row} · ${LABELS[terrainAt(ed.model, hex)]}` : '';
   }
   canvas.addEventListener('pointermove', (e) => {
     const s = local(e);
     const p = cam.toWorld(s.x, s.y);
     ed.hover = hoverAt(p);
-    $('where').textContent = ed.hover.hex ? `${ed.hover.hex.col},${ed.hover.hex.row} · ${LABELS[terrainAt(ed.model, ed.hover.hex)]}` : '';
+    renderWhere();
     if (!drag) return;
     if (drag.stroke) {
       // Sample along the drag so a fast stroke leaves no gaps.
@@ -577,7 +575,7 @@ async function main() {
   });
   canvas.addEventListener('pointerleave', () => {
     ed.hover = null;
-    $('where').textContent = '';
+    renderWhere();
   });
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
@@ -656,7 +654,7 @@ async function main() {
     if (!h) return;
     switch (ed.tool) {
       case 'terrain':
-        if (h.hex) outline(brushHexes(h.hex).filter((x) => inside(m, x)), INK.brush, 2);
+        if (h.hex && inside(m, h.hex)) outline([h.hex], INK.brush, 2);
         break;
       case 'start':
       case 'objective':
@@ -700,7 +698,7 @@ async function main() {
 
   const marksSig = () => {
     const h = ed.hover;
-    return [ed.version, ed.tool, ed.terrain, ed.brush, ed.chain, h?.hex && `${h.hex.col},${h.hex.row}`, h?.vertex?.key, h?.edge?.key, h?.side].join('|');
+    return [ed.version, ed.tool, ed.terrain, ed.chain, h?.hex && `${h.hex.col},${h.hex.row}`, h?.vertex?.key, h?.edge?.key, h?.side].join('|');
   };
 
   function frame(now) {

@@ -23,7 +23,6 @@
       display: flex; flex-direction: column; gap: 18px; padding: 20px; overflow-y: auto;
     }
     #tools > section { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
-    .field { display: flex; align-items: center; justify-content: space-between; gap: 8px; font: 400 13px/20px var(--sans); color: var(--secondary); }
 
     .palette { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
     .tile, .tool {
@@ -41,10 +40,6 @@
     .tool kbd { margin-left: auto; }
     .row2 .btn, .btn.block { width: 100%; }
     .col1 { display: grid; gap: 6px; }
-    .seg.wide { display: grid; grid-template-columns: 1fr 1fr; }
-    .seg button { height: 28px; padding: 0 10px; border: 0; border-radius: 4px; background: none; color: var(--tertiary); font: 500 12px/16px var(--sans); cursor: pointer; }
-    .seg button:hover { color: var(--fg); }
-    .seg button.on { background: var(--raised); color: var(--fg); }
 
     .edock { position: absolute; z-index: 3; left: 50%; bottom: var(--gap); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(720px, calc(100% - 2 * var(--gap))); pointer-events: none; }
     .edock > * { pointer-events: auto; }
@@ -105,7 +100,6 @@
       <section>
         <div class="eyebrow">Terrain</div>
         <div class="palette" id="palette"></div>
-        <div class="field">Brush <div class="seg wide" id="brush"><button data-brush="1">1 hex</button><button data-brush="2">7 hexes</button></div></div>
       </section>
 
       <section>
