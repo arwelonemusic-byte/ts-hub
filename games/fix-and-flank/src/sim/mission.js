@@ -32,7 +32,7 @@ export function turnEndResult(state) {
   if (!m) return null;
   const obj = { col: state.map.objective[0], row: state.map.objective[1] };
   const holder = teams(state, m.attacker).find((u) => same(u.pos, obj));
-  if (holder) return { winner: m.attacker, why: `${m.attacker} ${holder.team} удерживает объект` };
+  if (holder) return { winner: m.attacker, why: `${m.attacker} ${holder.team} удерживает цель` };
   state.stalledTurns = state.attackerCouldAct ? 0 : state.stalledTurns + 1;
   state.attackerCouldAct = false;
   const n = state.balance.turn.stalemateTurns;

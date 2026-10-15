@@ -219,10 +219,10 @@ test('maps saved while there was a turn limit lose it, and the brief the editor 
 test('every map from the editor has one mission, take and hold the objective, and always an objective', () => {
   const json = loadJson('data/maps/trenchline.json');
   const out = toMapJson(fromMapJson(json), balance);
-  assert.equal(out.mission.brief, 'Захватить и удержать объект на 6,3. Его обороняет одна группа OPFOR.', 'Trench Line\'s own brief is not kept');
+  assert.equal(out.mission.brief, 'Захватить и удержать цель на 6,3. Её обороняет одна группа OPFOR.', 'Trench Line\'s own brief is not kept');
   assert.deepEqual(out.objective, [6, 3]);
   const m = fromMapJson({ ...json, objective: null });
   assert.deepEqual(m.objective, H(6, 3), 'a map without one gets it under its first OPFOR team');
   m.enemies.push(H(2, 2));
-  assert.equal(toMapJson(m, balance).mission.brief, 'Захватить и удержать объект на 6,3. Его обороняют 2 группы OPFOR.');
+  assert.equal(toMapJson(m, balance).mission.brief, 'Захватить и удержать цель на 6,3. Её обороняют 2 группы OPFOR.');
 });

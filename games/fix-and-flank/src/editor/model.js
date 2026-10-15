@@ -485,7 +485,7 @@ export function moveObjective(m, hex) {
 // hold the objective (user decision 2026-10-15).
 export function missionBrief(m) {
   const n = m.enemies.length;
-  return `Захватить и удержать объект на ${m.objective.col},${m.objective.row}. ${n === 1 ? 'Его обороняет одна группа OPFOR' : `Его обороняют ${count(n, 'группа', 'группы', 'групп')} OPFOR`}.`;
+  return `Захватить и удержать цель на ${m.objective.col},${m.objective.row}. ${n === 1 ? 'Её обороняет одна группа OPFOR' : `Её обороняют ${count(n, 'группа', 'группы', 'групп')} OPFOR`}.`;
 }
 
 // A brief the editor wrote itself (missionBrief), also as it read while maps
@@ -509,8 +509,8 @@ export function upgradeMapJson(json) {
 // What stops the map from being played, in words. Empty: ready.
 export function problems(m, balance) {
   const out = [];
-  if (!inside(m, m.objective)) out.push('Поставьте объект.');
-  else if (!passable(m, balance, m.objective)) out.push('Объект стоит там, куда не пройти.');
+  if (!inside(m, m.objective)) out.push('Поставьте цель.');
+  else if (!passable(m, balance, m.objective)) out.push('Цель стоит там, куда не пройти.');
   const squad = Object.values(formation(m.start));
   if (!squad.every((h) => inside(m, h))) out.push('Поставьте старт BLUFOR: там отделение не помещается на карте.');
   else if (!squad.every((h) => passable(m, balance, h))) out.push('Подразделение BLUFOR начало бы там, куда не пройти.');

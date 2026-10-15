@@ -16,8 +16,8 @@ test('training map parses: 12 x 12 hexes, a BLUFOR squad with an HMG and a dug-i
 
 test('a mission cannot be without an objective hex on the map', () => {
   const base = { width: 2, height: 1, legend: LEGEND, rows: ['..'], mission: { attacker: 'BLUFOR', defender: 'OPFOR' } };
-  assert.throws(() => parseMap(base, balance), /нужен гекс объекта/);
-  assert.throws(() => parseMap({ ...base, objective: [2, 0] }, balance), /нужен гекс объекта/);
+  assert.throws(() => parseMap(base, balance), /нужен гекс цели/);
+  assert.throws(() => parseMap({ ...base, objective: [2, 0] }, balance), /нужен гекс цели/);
   assert.deepEqual(parseMap({ ...base, objective: [1, 0] }, balance).objective, [1, 0]);
   assert.equal(parseMap({ ...base, mission: null }, balance).objective, null, 'a sandbox map needs none');
 });

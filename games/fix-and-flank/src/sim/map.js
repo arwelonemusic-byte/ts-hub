@@ -30,7 +30,7 @@ export function parseMap(json, balance) {
   if (mission) {
     const [col, row] = Array.isArray(objective) ? objective : [];
     const onMap = Number.isInteger(col) && Number.isInteger(row) && col >= 0 && row >= 0 && col < width && row < height;
-    if (!onMap) throw new Error(`Задаче нужен гекс объекта на карте, а указан ${JSON.stringify(objective)}`);
+    if (!onMap) throw new Error(`Задаче нужен гекс цели на карте, а указан ${JSON.stringify(objective)}`);
   }
   const map = { name, description, width, height, terrain: Object.freeze(terrain), units: Object.freeze(units.map((u) => Object.freeze({ ...u }))), objective, mission: mission ? Object.freeze({ ...mission }) : null, sides: {} };
 

@@ -61,7 +61,7 @@ function hexPath(ctx, cam, h, inset = 0) {
   ctx.closePath();
 }
 
-// The objective: a dashed outline inside its hex, labelled «ОБЪ» (объект).
+// The objective: a dashed outline inside its hex, labelled «ЦЕЛЬ».
 export function drawObjective(ctx, cam, objective, color = COLORS.objective) {
   const c = toScreen(cam, center(objective).x, center(objective).y);
   ctx.strokeStyle = color;
@@ -74,7 +74,7 @@ export function drawObjective(ctx, cam, objective, color = COLORS.objective) {
   ctx.font = `700 ${Math.round(cam.scale * 0.34)}px ${FONT}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText('ОБЪ', c.x, c.y - cam.scale * 0.6);
+  ctx.fillText('ЦЕЛЬ', c.x, c.y - cam.scale * 0.6);
 }
 
 // Suspected contacts: a dashed red outline with a question mark, at hex centers.

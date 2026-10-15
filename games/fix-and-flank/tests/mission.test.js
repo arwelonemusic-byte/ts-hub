@@ -21,7 +21,7 @@ test('holding the objective with a fireteam at the end of a turn wins', () => {
   s = commit(s, [{ type: 'move', unit: 0, to: H(3, 1) }]).state;
   assert.equal(s.result, null, 'not before the turn ends');
   const r = commit(s);
-  assert.deepEqual(r.state.result, { winner: 'BLUFOR', why: 'BLUFOR ALPHA удерживает объект' });
+  assert.deepEqual(r.state.result, { winner: 'BLUFOR', why: 'BLUFOR ALPHA удерживает цель' });
   assert.ok(r.events.some((e) => e.type === 'game_over' && e.winner === 'BLUFOR'));
   assert.equal(r.state.activeSide, null);
 });
