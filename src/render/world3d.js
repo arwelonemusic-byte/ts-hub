@@ -85,10 +85,17 @@ const FIGURE = {
   skin: '#e3b48a', gun: '#2a2a2a', ghost: 0.35,
   slots: [[0, -0.2], [-0.24, 0], [0.24, 0.02], [0.02, 0.22]], // TL in front; forward is -z before turning
   proneSpread: 1.3,
-  stack: { x: -0.42, y: 0.4 }, // the SL's spot when he shares a hex with a team
+  stack: { x: -0.36, y: 0.58 }, // the SL's spot when he shares a hex with a team: in front, so the counters do not overlap
   bob: 0.035, stride: 24, turnRate: 7,
 };
-const BANNER = { px: 256, scale: 120, size: 1.35, lift: 0.8, pick: { w: 0.7, h: 0.6 } }; // pick: half size in counter units
+// A unit is picked by its counter and the figures below it: a column from
+// the counter (half sizes in counter units; the SL's counter is smaller) down
+// to `foot` world units below where it stands.
+const BANNER = {
+  px: 256, scale: 120, size: 1.35, lift: { team: 0.8, leader: 0.56 }, // the SL's smaller counter floats lower
+  pick: { team: { w: 0.62, h: 0.56 }, leader: { w: 0.42, h: 0.4 }, foot: 0.12 },
+  hover: { grow: 1.1 }, // the counter under the pointer: a little bigger, with a yellow halo (hexmap.js)
+};
 const SELECT = { radius: 0.62, width: 4, ink: '#ffffff', edge: 'rgba(21, 24, 26, 0.6)' };
 const BANG = { px: 128, lift: 0.42, size: 0.85, puffs: 3, puff: '#e9e4da' };
 const TRACER = { per: 3, gap: 0.3, speed: 3.2, len: 0.3, thick: 0.025, from: 0.24, to: 0.16, BLUFOR: '#ffe08a', OPFOR: '#ff9a6a' };
@@ -734,10 +741,10 @@ function canvasTexture(c) {
 }
 
 // The unit's counter, drawn by the flat map's own drawCounters, centered on a square canvas.
-function bannerTexture(unit, rosterOf, selected, ghost) {
+function bannerTexture(unit, rosterOf, selected, ghost, hovered) {
   const c = canvas(BANNER.px);
   const half = BANNER.px / 2 / BANNER.scale;
-  drawCounters(c.getContext('2d'), { x: -half, y: -half, scale: BANNER.scale }, [{ unit, pos: { x: 0, y: 0 }, selected, stackedWithTeam: false, ghost }], rosterOf);
+  drawCounters(c.getContext('2d'), { x: -half, y: -half, scale: BANNER.scale }, [{ unit, pos: { x: 0, y: 0 }, selected, stackedWithTeam: false, ghost, hovered }], rosterOf);
   return canvasTexture(c);
 }
 
@@ -755,8 +762,9 @@ function bangTexture(k) {
 // ---- the world ----
 
 // canvas: the board canvas the UI listens on; the 3D view is drawn under it.
-// pickCounters: a click on a unit's counter means its hex (the game); the
-// editor turns it off, as it picks hex corners too.
+// pickCounters: a unit's counter and figures can be pointed at (pickUnit),
+// and the ground point under them is the unit's own (the game); the editor
+// turns it off, as it picks hex corners too.
 export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -974,7 +982,21 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
     rig.z = clamp(rig.z, bounds.minY - CAM.roam, bounds.maxY + CAM.roam);
   }
 
-  const banners = []; // where each counter was drawn last frame, for picking: { x, y, hw, hh, depth, pos }
+  const banners = []; // each unit's counter and figures on screen last frame, for picking: { id, x, y, hw, hh, ground, depth, pos }
+
+  // The unit whose counter or figures are under a screen point: of two
+  // overlapping (a team and its SL), the one whose column is nearer.
+  function pickAt(sx, sy) {
+    if (!pickCounters) return null;
+    let best = null;
+    for (const b of banners) {
+      if (sy < b.y - b.hh || sy > Math.max(b.y + b.hh, b.ground)) continue;
+      const off = Math.abs(sx - b.x) / b.hw;
+      if (off > 1) continue;
+      if (!best || off < best.off || (off === best.off && b.depth < best.b.depth)) best = { b, off };
+    }
+    return best?.b ?? null;
+  }
 
   const cam = {
     // Fit the board in the part of the view that pad (px) leaves free.
@@ -1008,7 +1030,7 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
     },
     toWorld(sx, sy) {
       // A click on a unit's counter means the unit's hex, not the ground behind it.
-      const front = !pickCounters ? null : banners.filter((b) => Math.abs(sx - b.x) <= b.hw && Math.abs(sy - b.y) <= b.hh).sort((p, q) => p.depth - q.depth)[0];
+      const front = pickAt(sx, sy);
       if (front) return { ...front.pos };
       return groundAt(sx, sy) ?? { x: -1e6, y: -1e6 };
     },
@@ -1092,10 +1114,10 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
     return geometries.get(k);
   }
 
-  function bannerFor(c, rosterOf) {
+  function bannerFor(c, rosterOf, hovered) {
     const u = c.unit;
-    const k = [u.side, u.kind, u.type, u.team, u.status, u.soldiers.length, rosterOf(u).length, u.activated, u.exposed, c.selected, c.ghost].join('|');
-    if (!textures.has(k)) textures.set(k, bannerTexture(u, rosterOf, c.selected, c.ghost));
+    const k = [u.side, u.kind, u.type, u.team, u.status, u.soldiers.length, rosterOf(u).length, u.activated, u.exposed, c.selected, c.ghost, hovered].join('|');
+    if (!textures.has(k)) textures.set(k, bannerTexture(u, rosterOf, c.selected, c.ghost, hovered));
     return textures.get(k);
   }
 
@@ -1148,12 +1170,16 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
         f.position.set((sx * cos + sz * sin) * spread, moving ? Math.abs(Math.sin(g.walk + i * 1.7)) * FIGURE.bob : 0, (-sx * sin + sz * cos) * spread);
         f.rotation.y = g.yaw;
       });
-      const map_ = bannerFor(c, frame.rosterOf);
+      const hovered = frame.hoverUnit === u.id;
+      const map_ = bannerFor(c, frame.rosterOf, hovered);
       if (g.banner.material.map !== map_) {
         g.banner.material.map = map_;
         g.banner.material.needsUpdate = true;
       }
-      g.banner.position.set(0, BANNER.lift, 0);
+      g.banner.position.set(0, leader ? BANNER.lift.leader : BANNER.lift.team, 0);
+      g.leader = leader;
+      const grow = hovered ? BANNER.hover.grow : 1;
+      g.banner.scale.set(BANNER.size * grow, BANNER.size * grow, 1);
     }
     for (const [id, g] of units) if (!seen.has(id)) g.root.visible = false;
   }
@@ -1166,14 +1192,19 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
     camera.getWorldDirection(look);
     const perUnit = size.h / 2 / Math.tan(THREE.MathUtils.degToRad(CAM.fov) / 2);
     const counterUnit = BANNER.size / (BANNER.px / BANNER.scale); // world units per counter unit
-    for (const g of units.values()) {
+    for (const [id, g] of units) {
       if (!g.root.visible) continue;
       const w = g.banner.getWorldPosition(new THREE.Vector3());
       const depth = toCam.subVectors(w, camera.position).dot(look);
       if (depth <= 0) continue;
       const s = w.clone().project(camera);
       const px = (perUnit / depth) * counterUnit;
-      banners.push({ x: ((s.x + 1) / 2) * size.w, y: ((1 - s.y) / 2) * size.h, hw: BANNER.pick.w * px, hh: BANNER.pick.h * px, depth, pos: { x: g.at.x, y: g.at.y } });
+      const pick = g.leader ? BANNER.pick.leader : BANNER.pick.team;
+      const foot = V(g.at.x, 0, g.at.y + BANNER.pick.foot).project(camera); // a little in front of its feet
+      banners.push({
+        id, x: ((s.x + 1) / 2) * size.w, y: ((1 - s.y) / 2) * size.h, hw: pick.w * px, hh: pick.h * px,
+        ground: ((1 - foot.y) / 2) * size.h, depth, pos: { x: g.at.x, y: g.at.y },
+      });
     }
   }
 
@@ -1253,11 +1284,15 @@ export function createWorld(boardCanvas, firstMap, { pickCounters = true } = {})
 
   return {
     camera: cam,
+    // The unit whose counter or figures are under a screen point, or null.
+    pickUnit(sx, sy) {
+      return pickAt(sx, sy)?.id ?? null;
+    },
     // A changed map (the editor): rebuild the board in place.
     setMap(next) {
       setBoard(next);
     },
-    // frame: { counters (as for drawCounters), rosterOf, bangs [{ hex, k, t }], shots [{ from, to, side, t }],
+    // frame: { counters (as for drawCounters), rosterOf, bangs [{ hex, k, t }], shots [{ from, to, side, t }], hoverUnit (id or null),
     // paint(ctx, cam): draws the marks with the flat map's functions, sig: changes whenever they do }
     render(now, frame) {
       const dt = last === null ? 0 : Math.min(0.1, (now - last) / 1000);

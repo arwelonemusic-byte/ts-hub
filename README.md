@@ -50,7 +50,7 @@ npm run balance -- 400 201   # 400 runs from seed 201
 
 URL options: `?map=training` (sandbox map, never ends, has the HMG), `?map=local:<id>` (a map saved from the editor in this browser), `?seed=2` (other dice), `?reveal=1` (debug: draw unseen OPFOR faintly).
 
-Controls: left click a unit, then a hex (blue: move, yellow: fast move, red ring: assault; in the firefight any shaded hex: fire). Point at a hex for its card. Right click or Esc deselects. Space commits the phase, Tab next unit, H hold, V line of sight, Home fit, F1 help. The view: left or right drag or the arrow keys move it, middle drag or Q / E turns it, the wheel zooms.
+Controls: left click one of your units (its counter or its soldiers; hovering one lights it and says "click to select"), then a hex (blue: move, yellow: fast move, red ring: assault; in the firefight any shaded hex: fire). Point at a hex for its card. Right click or Esc deselects. Space commits the phase, Tab next unit, H hold, V line of sight, Home fit, F1 help. The view: left or right drag or the arrow keys move it, middle drag or Q / E turns it, the wheel zooms.
 
 ## Layout
 

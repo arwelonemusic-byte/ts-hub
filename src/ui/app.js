@@ -23,6 +23,7 @@ import { assaultFigures, assaultSummary, eventText, fireFigures, fireSummary, ph
 const PLAYER_SIDE = 'BLUFOR';
 const CLICK_SLOP_PX = 4;
 const ARROW_PAN_PX = 140;   // an arrow key pans the view this far
+const TIP_OFFSET = { x: 14, y: 18 }; // px from the pointer to the "click to select" tag
 const WHEEL_ZOOM = 1.15;
 const MOVE_ANIM_MS = 220;   // per hex
 const DICE_ROLL_MS = 1100;  // dice tumble this long before they settle
@@ -65,6 +66,7 @@ export function startApp(initialState, { reveal = false } = {}) {
     timers: [],
     fireCache: null,
     hover: null,
+    hoverUnit: null,   // your unit under the pointer that a click would select
     message: '',
     aiPending: false,
   };
@@ -492,16 +494,38 @@ export function startApp(initialState, { reveal = false } = {}) {
       showResult();
     }
     renderHover(); // the hex card follows the state too, not only the pointer
+    if (app.pointer) app.hoverUnit = selectableAt(app.pointer.x, app.pointer.y);
+    renderUnitTip();
+  }
+
+  // Your unit whose counter or figures are under a screen point, if a click would select it now.
+  function selectableAt(sx, sy) {
+    const id = world.pickUnit(sx, sy);
+    const u = id === null ? null : unit(id);
+    return u && u.side === PLAYER_SIDE && planning() && canActivate(app.state, u) ? u.id : null;
+  }
+
+  // Over a unit a click would select: a pointer cursor, its counter lit (world3d), and a tag.
+  function renderUnitTip() {
+    const tip = $('unitTip');
+    const id = app.hoverUnit;
+    canvas.style.cursor = id !== null ? 'pointer' : '';
+    const show = id !== null && id !== app.selected && app.pointer && !app.pointer.dragging;
+    tip.hidden = !show;
+    if (!show) return;
+    tip.replaceChildren(el('b', '', unit(id).team), document.createTextNode('click to select'));
+    tip.style.left = `${app.pointer.x + TIP_OFFSET.x}px`;
+    tip.style.top = `${app.pointer.y + TIP_OFFSET.y}px`;
   }
 
   function hint(u) {
     if (!planning()) return '';
-    if (!u) return 'Left click one of your units to select it.';
+    if (!u) return 'Click one of your units (its counter or its soldiers) to select it.';
     const deselect = ' Right click to deselect.';
     if (firefight()) {
       return `${u.team} selected (${fireDiceText(u)}). Point at a hex to see the odds; click to fire. Blue ring: spotted enemy (aimed fire). Red ring, in the next hex: assault. Elsewhere in the shaded area: suppressive fire.${deselect}`;
     }
-    const lead = u.kind === 'leader' ? ' Teams in his hex rally for sure in the rally phase; further away the roll must beat the distance to him.' : '';
+    const lead = u.kind === 'leader' ? ' Teams in his hex rally for sure in the rally phase; further away the roll must beat the distance to him. To join a team, click its hex beside its counter.' : '';
     const o = options();
     const assault = o.assault.length ? ' Red ring: assault the enemy there (point at it for the odds).' : '';
     const type = unitType(app.state.balance, u);
@@ -734,6 +758,7 @@ export function startApp(initialState, { reveal = false } = {}) {
       counters,
       rosterOf,
       bangs: app.bangs.map((b) => ({ hex: b.hex, k: b.k, t: (now - b.start) / BANG_MS })),
+      hoverUnit: app.hoverUnit,
       shots,
       sig: JSON.stringify([marks, suspected, paths, fires, shots.length ? now : 0]),
       paint: (ctx, cam) => {
@@ -760,6 +785,7 @@ export function startApp(initialState, { reveal = false } = {}) {
     const r = canvas.getBoundingClientRect();
     app.pointer = { x: e.clientX - r.left, y: e.clientY - r.top, dragging: !!drag?.moved };
     app.hover = hexAt(app.cam.toWorld(e.clientX - r.left, e.clientY - r.top));
+    app.hoverUnit = drag?.moved ? null : selectableAt(app.pointer.x, app.pointer.y);
     if (drag) {
       const dx = e.clientX - drag.x;
       const dy = e.clientY - drag.y;
@@ -772,6 +798,7 @@ export function startApp(initialState, { reveal = false } = {}) {
       }
     }
     renderHover();
+    renderUnitTip();
   });
   canvas.addEventListener('pointerup', (e) => {
     const d = drag;
@@ -783,19 +810,18 @@ export function startApp(initialState, { reveal = false } = {}) {
     }
     if (d.button !== 0) return;
     const r = canvas.getBoundingClientRect();
+    // A click on one of your units (its counter or its soldiers) selects that unit...
+    const picked = selectableAt(e.clientX - r.left, e.clientY - r.top);
+    if (picked !== null) {
+      select(picked);
+      return;
+    }
     const h = hexAt(app.cam.toWorld(e.clientX - r.left, e.clientY - r.top));
     if (!inBounds(app.state.map, h)) return;
-    // With a unit selected, a hex it can be ordered to gives the order...
+    // ...a click on a hex the selected unit can be ordered to gives the order.
     const order = orderFor(h);
     if (order) {
       setOrder(order);
-      return;
-    }
-    // ...otherwise a click on own units selects (again on a shared hex: switch team / SL).
-    const mine = unitsAt(app.state, h).filter((u) => u.side === PLAYER_SIDE && canActivate(app.state, u));
-    if (mine.length) {
-      const i = mine.findIndex((u) => u.id === app.selected);
-      select(mine[(i + 1) % mine.length].id);
       return;
     }
     if (app.selected !== null) {
@@ -809,7 +835,9 @@ export function startApp(initialState, { reveal = false } = {}) {
   canvas.addEventListener('pointerleave', () => {
     app.hover = null;
     app.pointer = null;
+    app.hoverUnit = null;
     renderHover();
+    renderUnitTip();
   });
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   canvas.addEventListener('wheel', (e) => {

@@ -35,6 +35,8 @@ export const COLORS = {
   exposed: '#f6f4ee',
   select: '#15181a',
   selectHalo: '#f6f4ee',
+  hoverHalo: 'rgba(244, 219, 80, 0.38)', // the counter a click would select: the TS yellow
+  hoverEdge: '#f4db50',
   invalid: '#ff6a3d',
   fireInk: '#1f3f8f',
   bang: '#f2b33d',
@@ -353,13 +355,13 @@ function echelon(ctx, kind, x, y, size) {
 }
 
 // Counters after the "Fireteam Counters" design. units: [{ unit, pos: {x, y}
-// world center, selected, stackedWithTeam, ghost }]. A fireteam: NATO frame
+// world center, selected, stackedWithTeam, ghost, hovered }]. A fireteam: NATO frame
 // with the infantry X and the fireteam mark above, its letter to the right,
 // one pip per soldier below (filled: present, hollow: lost). Pinned teams are
 // hatched. The SL: a smaller counter with the squad dot, at the hex's lower
 // left when it shares the hex with a team.
 export function drawCounters(ctx, cam, units, rosterOf) {
-  for (const { unit, pos, selected, stackedWithTeam, ghost } of units) {
+  for (const { unit, pos, selected, stackedWithTeam, ghost, hovered } of units) {
     if (unit.status === 'eliminated') continue;
     const leader = unit.kind === 'leader';
     const size = cam.scale * (leader ? 0.64 : 1.06);
@@ -373,6 +375,16 @@ export function drawCounters(ctx, cam, units, rosterOf) {
     const lw = Math.max(1.2, size * 0.045);
 
     ctx.globalAlpha = ghost ? 0.3 : unit.activated ? 0.55 : 1;
+    if (hovered) {
+      // Under the pointer, a click away from being selected: a yellow halo.
+      const pad = size * 0.16;
+      frame(ctx, unit.side, x0 - pad, y0 - pad, w + pad * 2, h + pad * 2);
+      ctx.fillStyle = COLORS.hoverHalo;
+      ctx.fill();
+      ctx.strokeStyle = COLORS.hoverEdge;
+      ctx.lineWidth = Math.max(2, size * 0.07);
+      ctx.stroke();
+    }
     if (selected) {
       const pad = size * 0.09;
       frame(ctx, unit.side, x0 - pad, y0 - pad, w + pad * 2, h + pad * 2);

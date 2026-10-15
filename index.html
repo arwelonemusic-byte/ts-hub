@@ -58,6 +58,7 @@
     </div>
 
     <aside class="panel thin" id="hexcard" aria-live="polite"></aside>
+    <div id="unitTip" hidden></div>
 
     <div class="dock">
       <div id="dice" hidden aria-live="polite"></div>
@@ -83,7 +84,7 @@
       </header>
       <div class="body">
         <p><b>Each turn:</b> Movement (move your units; a unit that moves cannot fire this turn), Firefight (units that did not move fire), Rally (automatic: suppressed and pinned units roll to recover, sure with the SL in their hex, otherwise the roll must beat the distance to him), Enemy action.</p>
-        <p><b>Orders:</b> click a unit, then a hex. Movement: blue moves 1 hex, yellow fast moves 2 (exposed), a red ring next to your team assaults the enemy in it. Firefight: any hex in the shaded area; a blue ring is a spotted enemy (aimed fire), a red ring next to you an assault, anything else is suppressive fire. Point at a hex to see what it is and, with a unit selected, the dice and odds of the order. OPFOR teams may split their fire between two of your units (dice divided), but not with one of yours next to them. A new order replaces the old one; orders run in the order given; units without an order hold.</p>
+        <p><b>Orders:</b> click one of your units (its counter or its soldiers), then a hex. Movement: blue moves 1 hex, yellow fast moves 2 (exposed), a red ring next to your team assaults the enemy in it. Firefight: any hex in the shaded area; a blue ring is a spotted enemy (aimed fire), a red ring next to you an assault, anything else is suppressive fire. Point at a hex to see what it is and, with a unit selected, the dice and odds of the order. OPFOR teams may split their fire between two of your units (dice divided), but not with one of yours next to them. A new order replaces the old one; orders run in the order given; units without an order hold.</p>
         <p><b>Counters:</b> blue box BLUFOR, red diamond OPFOR, letter = team, dots below = soldiers left. Amber badge, one chevron: suppressed (cannot move). Dark red badge, two chevrons, hatched: pinned (cannot move or fire). "!": exposed (fast moved). "?": suspected enemy position. OPFOR shows only once spotted. The figures under each counter show it too: one per soldier, crouched when suppressed, prone when pinned.</p>
         <div class="keys">
           <kbd>Space</kbd><span>Commit the orders</span>
