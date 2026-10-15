@@ -323,7 +323,13 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   never reaches outside `web/`): 14 x 16, a name, and for publishing what the editor's «Ready to play» checks. Map ids
   come from the name (Cyrillic spelled out) plus 4 hex digits. The editor sends a 16:10 JPEG still (`render/still.js`:
   BLUFOR and the objective, no OPFOR) on Save draft, Playtest and Publish → `uploads/fnf/`. Run on its own (`npm start`)
-  the editor keeps maps in the browser as before.
+  the editor keeps maps in the browser as before. Served by the hub it never turns into that standalone editor: when the
+  hub keeps no maps for the viewer (a dev stand-in with no `players` row gets 403) or doesn't answer, it shows «Черновики
+  недоступны» and why. **Dev:** `/api/dev/viewer` with no name goes back to Galaxy. The hub loads the game's rules
+  (`src/sim`, `src/ai`, `src/editor/model.js`, `balance.json`) once per server process: restart `npm run dev` after
+  changing them, or the API checks maps and replays runs with the old code. Images in `public/` go through the image
+  optimizer, which keeps a file for 4 hours under the same name: delete `web/.next/dev/cache/images` (dev) or give a
+  replaced image a new name.
   **Runs** (`lib/fix-and-flank/runs.ts`): a game on a published map (`play?src=`, not `&playtest=1`) is recorded.
   `POST /runs {mapId}` starts it and hands out the seed (the player doesn't pick the dice; «Same dice» is gone for
   recorded runs); the game keeps BLUFOR's commits; `POST /runs/<id>/finish {commits}` plays them through the game's own
