@@ -10,6 +10,8 @@ export interface Viewer {
   avatar: string | null;
   /** Discord role names (DISCORD_ROLE_MAP), as of login. */
   roles: string[];
+  /** Every Discord role id as the bot last saw it, mapped or not; empty when it couldn't ask (or a dev stand-in). */
+  roleIds: string[];
   isAdmin: boolean;
   /** @mission officer: adds missions to the catalogue and edits their own. */
   isMissionMaker: boolean;
@@ -71,6 +73,7 @@ async function devViewer(): Promise<Viewer | null> {
     name,
     avatar: m?.avatar_url ?? null,
     roles,
+    roleIds: [],
     isAdmin: DEV_ADMINS.has(name),
     isMissionMaker: roles.some((r) => roleKey(r) === roleKey(MISSION_MAKER_ROLE)),
     inGuild: true,
@@ -85,6 +88,7 @@ async function devViewer(): Promise<Viewer | null> {
 const ROLES_TTL_MS = 10 * 60_000;
 interface Membership {
   roles: string[];
+  roleIds: string[];
   inGuild: boolean;
 }
 const roleCache = ((globalThis as unknown as { __tsHubRoles?: Map<string, { at: number } & Membership> }).__tsHubRoles ??= new Map());
@@ -96,19 +100,21 @@ async function currentRoles(userId: string, atLogin: string[]): Promise<Membersh
   // Left the server: no roles. Discord not answering: the login's roles, asked again next time.
   const inGuild = member !== "NOT_IN_GUILD";
   const roles = !inGuild ? [] : member ? mapRoleIdsToNames(member.roles) : atLogin;
-  if (member) roleCache.set(userId, { at: Date.now(), roles, inGuild });
-  return { roles, inGuild };
+  const roleIds = member && member !== "NOT_IN_GUILD" ? member.roles : [];
+  if (member) roleCache.set(userId, { at: Date.now(), roles, roleIds, inGuild });
+  return { roles, roleIds, inGuild };
 }
 
 export async function getViewer(): Promise<Viewer | null> {
   const session = await getSession();
   if (session) {
-    const { roles, inGuild } = await currentRoles(session.userId, session.roles);
+    const { roles, roleIds, inGuild } = await currentRoles(session.userId, session.roles);
     return {
       discordId: session.userId,
       name: session.displayName,
       avatar: avatarUrl(session.userId, session.avatar),
       roles,
+      roleIds,
       isAdmin: ADMIN_IDS.includes(session.userId) || roles.some((r) => ADMIN_ROLES.includes(r)),
       isMissionMaker: roles.some((r) => roleKey(r) === roleKey(MISSION_MAKER_ROLE)),
       inGuild,

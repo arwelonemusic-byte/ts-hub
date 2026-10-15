@@ -12,15 +12,20 @@ import { NavMenu, type NavItem } from "./NavMenu";
 import { ServerStatus } from "./ServerStatus";
 import { buttonClass, Icon } from "./ui";
 
+/** The Discord's @srv role: the only ones besides hub admins who see «Мини-игры» in the nav for now. */
+const GAMES_PREVIEW_ROLE_ID = "633772282745061457";
+
 /** Figma "App header" (8:180): brand · centred nav · account. */
 export async function AppHeader({ active }: { active: "events" | "missions" | "games" | "players" }) {
   const [{ locale, t }, viewer] = await Promise.all([getT(), getViewer()]);
-  // «Мини-игры» is a menu: one game for now (user request 2026-10-15).
+  // «Мини-игры» is a menu: one game for now (user request 2026-10-15). Shown only to admins and @srv until it opens
+  // to everyone (user decision 2026-10-15); its pages themselves are open to members.
   const games: NavItem[] = [{ key: "fixAndFlank", href: FNF_HOME, label: t("nav.fixAndFlank"), active: active === "games" }];
+  const seesGames = !!viewer && (viewer.isAdmin || viewer.roleIds.includes(GAMES_PREVIEW_ROLE_ID));
   const nav: NavItem[] = [
     { key: "events", href: "/events" },
     { key: "missions", href: "/missions" },
-    { key: "games", href: FNF_HOME, children: games },
+    ...(seesGames ? [{ key: "games", href: FNF_HOME, children: games }] : []),
     // «Игроки» is the admins' name matching for now (app/players); everyone gets it once player profiles exist.
     ...(viewer?.isAdmin ? [{ key: "players", href: "/players" }] : []),
     { key: "planner", href: PLANNER_URL, external: true },

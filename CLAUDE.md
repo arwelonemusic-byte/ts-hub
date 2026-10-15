@@ -298,7 +298,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   `isMissionMaker` (@mission officer), `isAdmin` (`HUB_ADMIN_IDS` / `HUB_ADMIN_ROLES`).
   Admins are the Discord user IDs in `HUB_ADMIN_IDS` (production: Galaxy) and/or the role names in `HUB_ADMIN_ROLES`.
 - **«Мини-игры» → Fix & Flank** (user decisions 2026-10-15, sketches in the conversation). The
-  header's «Мини-игры» is a menu (`NavDropdown`; a labelled group in `NavMenu`) with one game. `app/games/fix-and-flank`:
+  header's «Мини-игры» is a menu (`NavDropdown`; a labelled group in `NavMenu`) with one game. For now only admins and the Discord's @srv role
+  (`GAMES_PREVIEW_ROLE_ID` in `AppHeader`, checked against `viewer.roleIds`, the member's raw role ids, since @srv isn't
+  in `DISCORD_ROLE_MAP`) see it in the nav (user decision 2026-10-15); the pages are open to members by link. `app/games/fix-and-flank`:
   the game's page (cover with the title on it, Играть → a map picker with search, author and sort; Создать карту → the
   editor; «Карты» with Свежие / Популярные / Мои карты tabs and the maps' cards on the page itself, not in a panel, each
   with «Вы играли» once the viewer has finished a run on it (`MapCard`, the user's design); «Активность»), and `maps/[id]`: the map turning in 3D (the game's `preview` page in an
