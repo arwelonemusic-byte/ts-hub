@@ -20,20 +20,16 @@ import { createWorld } from '../render/world3d.js';
 import { hub, hubHome, hubIdOf, hubMapPage, servedByHub } from '../hub.js';
 import { positionAlong } from './anim.js';
 import { createDiceTray } from './dice.js';
+import { HELP } from './help.js';
+import { ICONS } from './icons.js';
 import { assaultFigures, assaultSummary, eventText, fireFigures, fireSummary, phaseLabel, previewAction, rallyPreview, unitName } from './describe.js';
 import { agree, diceText, FEATURE, menText, ROLE, sideName, statusText, TERRAIN, turnsText, typeName, unitName as shortName } from '../text.js';
 
 const PLAYER_SIDE = 'BLUFOR';
 // The turn's phases as the player sees them (user request 2026-10-15): a key for the colour (ui.css --ph-*) and an
-// icon each. Movement an arching arrow, like the move arrows; fire and the enemy's turn a rifle; recovery a cross.
+// icon each (icons.js). Movement an arching arrow, like the move arrows; fire and the enemy's turn a rifle; recovery a cross.
 const PHASE_KEY = { movement: 'movement', firefight: 'firefight', rally: 'rally', 'enemy action': 'enemy' };
 const PHASE_ICON = { movement: 'move', firefight: 'weapon', rally: 'health', enemy: 'weapon' };
-const ICONS = {
-  move: { stroke: ['M4 19.5Q7.5 7 19 8.5', 'M14.8 4.6l4.4 3.9-3.6 4.4'] },
-  weapon: { fill: ['M1.5 8.7 6 8v3.4l-4 1.2z', 'M6 7.6h10v3.4H6z', 'M16 8.5h7V10h-7z', 'M9.4 6.2h3v1.4h-3z', 'M10.6 11H13l.8 4.6-2.2.4z', 'M7 11h1.9l-.6 3.6H6.4z'] },
-  health: { fill: ['M9.5 3h5v6.5H21v5h-6.5V21h-5v-6.5H3v-5h6.5z'] },
-  chevron: { stroke: ['M9 6l6 6-6 6'] },
-};
 // Pointer cursors over the board: a scope (fire) and an arrow onto a hex (move), hotspot where they point.
 const svgCursor = (svg, x, y, fallback) => `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${x} ${y}, ${fallback}`;
 const CURSOR = {
@@ -620,7 +616,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     b.disabled = !ready;
     if (!ready) b.classList.add('idle');
     const who = el('div');
-    const name = el('div', 'name', u.kind === 'leader' ? 'Командир отделения' : u.team);
+    const name = el('span', 'name', u.kind === 'leader' ? "1'1 SL" : u.team); // the squad's call sign for its leader (user request 2026-10-15)
     const roles = el('div', 'roles');
     const roster = unitType(s.balance, u).roles;
     for (const r of roster) {
@@ -630,15 +626,18 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
       roles.append(span);
     }
     if (u.exposed) roles.append(el('span', 'exposed', 'на виду'));
-    who.append(name, roles);
+    who.append(roles);
     // Once the mission is over only a lasting state is worth a tag.
     const status = u.status !== 'ok' ? u.status : s.result ? '' : u.moved ? 'moved' : reloading(u) ? 'reloading' : 'ready';
     const label = { moved: movedWord(u), reloading: 'перезарядка', ready: agree(u, { team: 'готова', leader: 'готов' }) }[status] ?? (status ? statusText(u, status) : '');
     const tag = el('span', `chip status ${status}`, label);
     tag.hidden = !status;
+    const title = el('div', 'title'); // the name with its state beside it (user request 2026-10-15)
+    title.append(name, tag);
+    who.prepend(title);
     const order = el('div', 'order', u.status === 'eliminated' || s.result ? '' : orderLine(u));
     if (order.textContent.includes(NOT_POSSIBLE)) order.classList.add('bad');
-    b.append(chip(u), who, tag, order);
+    b.append(chip(u), who, order);
     b.onclick = () => select(u.id);
     return b;
   }
@@ -978,9 +977,12 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     const animating = app.anim.length;
     app.anim = app.anim.filter((a) => (now - a.start) / MOVE_ANIM_MS < a.points.length - 1);
     if (animating && !app.anim.length) render(); // the panel waits for moves to finish
+    const firing = s.activeSide === PLAYER_SIDE && currentPhase(s).name === 'firefight';
     const counters = s.units.filter((u) => shown(u) || app.reveal).map((u) => ({
       unit: u,
-      ghost: !shown(u),
+      // Faint: an enemy shown only for debugging (?reveal=1), or in the firefight one of yours that moved this turn
+      // and so can't fire (user request 2026-10-15).
+      ghost: !shown(u) || (firing && u.side === PLAYER_SIDE && u.moved && u.status !== 'eliminated'),
       pos: positionOf(u, now),
       selected: u.id === app.selected && planning(),
       stackedWithTeam: u.kind === 'leader' && unitsAt(s, u.pos).some((x) => x.kind === 'team'),
@@ -1115,6 +1117,11 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     const k = e.key.toLowerCase();
     if (app.modal) {
       if (e.target instanceof HTMLTextAreaElement && k !== 'escape') return; // typing a comment in the debrief
+      if (app.helpPick && ['arrowleft', 'arrowup', 'arrowright', 'arrowdown'].includes(k)) { // the help's tabs
+        e.preventDefault();
+        app.helpPick((app.helpTab + (k === 'arrowleft' || k === 'arrowup' ? -1 : 1) + HELP.length) % HELP.length);
+        return;
+      }
       if (k === 'escape' || k === 'enter' || k === ' ') {
         e.preventDefault();
         closeModal();
@@ -1210,6 +1217,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     $('modal').hidden = true;
     $('modal').replaceChildren();
     app.modal = false;
+    app.helpPick = null;
   }
 
   function dialog(kicker, title, body, buttons) {
@@ -1246,8 +1254,50 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     return f;
   };
 
+  // «Как играть»: tabs on the left (help.js), the page of the one picked on the right; ← → switch tabs. It opens on
+  // the tab last read.
   function showHelp() {
-    openModal($('helpTpl').content.firstElementChild.cloneNode(true));
+    const d = el('div', 'dialog help');
+    d.setAttribute('role', 'dialog');
+    d.setAttribute('aria-modal', 'true');
+    const head = el('header');
+    const title = el('div');
+    title.append(el('div', 'eyebrow', 'Fix and Flank'), el('h2', '', 'Как играть'));
+    const close = el('button', 'iconbtn');
+    close.dataset.close = '';
+    close.setAttribute('aria-label', 'Закрыть');
+    close.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+    head.append(title, close);
+    const nav = el('nav');
+    nav.setAttribute('role', 'tablist');
+    const page = el('div', 'page');
+    page.setAttribute('role', 'tabpanel');
+    const tabs = HELP.map((h, i) => {
+      const b = el('button');
+      b.type = 'button';
+      b.setAttribute('role', 'tab');
+      b.append(icon(h.icon), el('span', '', h.title));
+      b.onclick = () => pick(i);
+      return b;
+    });
+    function pick(i) {
+      app.helpTab = i;
+      tabs.forEach((b, k) => b.setAttribute('aria-selected', String(k === i)));
+      page.innerHTML = HELP[i].html; // the game's own text (help.js), nothing typed by anyone
+      d.scrollTop = 0;
+    }
+    nav.append(...tabs);
+    const main = el('div', 'help-main');
+    main.append(nav, page);
+    const foot = el('footer');
+    const back = el('button', 'btn primary', 'Вернуться к карте');
+    back.dataset.close = '';
+    back.style.minWidth = '0';
+    foot.append(back);
+    d.append(head, main, foot);
+    pick(app.helpTab ?? 0);
+    openModal(d);
+    app.helpPick = pick;
   }
 
   function showResult() {
