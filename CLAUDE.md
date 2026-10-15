@@ -25,6 +25,7 @@ The first version (2 m tiles, real-time WEGO with 10 second turns, percentage hi
 ## 2. Tech stack and constraints
 
 - **HTML5 canvas, plain JavaScript ES modules, no build step** (or TypeScript only if asked). Must run by opening a local server or hosting as static files.
+- **The board is 3D** (user decisions 2026-10-15): three.js, vendored in `vendor/three` (the one dependency, approved by the user), drawn by `src/render/world3d.js`. It is the only map view; the flat, tiles and iso views were removed (the tiles and iso art is kept outside the repo, in `../parked-views/`).
 - **Node for headless tests** (`node --test` or Vitest). Keep dependencies minimal and ask before adding any.
 - Desktop browser first, mouse input. Keep layout responsive and do not block touch input later.
 - No external network calls at runtime. All assets inline or in `/assets`.
@@ -44,7 +45,7 @@ The simulation must be completely separate from rendering and UI.
     state.js        game state shape
     actions.js      action validation and resolution (the step function)
     orders.js       a side's orders: commit, and planning projections
-    mission.js      mission end: objective held, fireteams eliminated, turn limit
+    mission.js      mission end: objective held, fireteams eliminated, a stalled attack (no turn limit)
     phases.js       the turn sequence: movement, firefight, rally, enemy action
     los.js          line of sight and concealment on hexes
     spotting.js     fog of war and contact tracking
@@ -52,7 +53,7 @@ The simulation must be completely separate from rendering and UI.
     odds.js         exact odds for the preview
     rng.js          seeded RNG (mulberry32)
   /ai         enemy behavior (basic.js), scripted BLUFOR plans (drills.js)
-  /render     canvas drawing only
+  /render     drawing only: world3d.js (three.js), hexmap.js (marks, counters, bangs on canvases)
   /ui         input, action planning, odds preview, step-by-step playback with the dice tray
 /data
   balance.json      all tunable numbers (terrain table, dice modifiers)
@@ -158,7 +159,7 @@ Before committing, the UI tells the player what will happen, for example:
 
 ### Missions
 
-A map may carry a `mission` (attacker, defender, turn limit, brief), an `objective` hex and `drills` (scripted plans for the balance test). The attacker wins by holding the objective with a fireteam at the end of a turn, or by eliminating every defending fireteam; the defender wins by eliminating every attacking fireteam, or when the last turn ends. Mission 1 is `data/maps/trenchline.json` (the default); `?map=training` loads the sandbox map, which never ends.
+A map may carry a `mission` (attacker, defender, brief), an `objective` hex and `drills` (scripted plans for the balance test). There is no turn limit (user decision 2026-10-15): turns are counted and the fight goes on until a side wins. The attacker wins by holding the objective with a fireteam at the end of a turn, or by eliminating every defending fireteam; the defender wins by eliminating every attacking fireteam, or when the attack has stalled (no attacking unit able to act for `turn.stalemateTurns` turns in a row). Mission 1 is `data/maps/trenchline.json` (the default); `?map=training` loads the sandbox map, which never ends.
 
 ### Dice on screen
 

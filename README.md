@@ -32,8 +32,10 @@ What works:
 - Fire with d6 (target numbers from range, cover, exposure, suppression, suppressive fire), suppression and pinning, casualties against cover; split fire for OPFOR.
 - Assault (close combat), with exact odds.
 - Enemy AI with modes (hold, engage, split fire, counterattack, reposition, retreat, recover).
-- Mission 1, "Trench Line", with win/loss rules and a turn limit; the automated balance test.
-- Browser UI: paper-and-ink style, map filling the window, roster cards, odds previews, phase track, log, dice tray and bang markers, step-by-step playback.
+- Mission 1, "Trench Line", with win/loss rules (no turn limit: turns are counted, the fight goes on until a side wins); the automated balance test.
+- Browser UI in the look of the Tactical Shift apps (TS Hub, Ops Planner, Mission Builder): dark panels floating over a full-window map, mission briefing and debrief dialogs, a hex card that follows the pointer (terrain, cover, hexsides, units, and the dice and odds of the order a click would give), phase track, roster cards, combat log, dice tray and bang markers, step-by-step playback.
+- The board in 3D, the only map view: a low-poly diorama in three.js (terrain, trees, farms, walls, hedges, the trench), a figure per soldier under each counter, turnable camera.
+- A map editor (`editor.html`, the pencil in the game's top bar): map size, terrain painting with a palette and brush, a random-terrain button, walls and hedges drawn corner to corner along hex edges, parapets on hex sides, the BLUFOR start (ALPHA and the SL there, BRAVO beside them), the objective and up to four OPFOR teams, the briefing, undo and redo, all in 3D. Play saves the map in the browser (My maps) and opens it in the game; maps also export and import as JSON in the `data/maps` format.
 
 ## Run and test
 
@@ -46,15 +48,18 @@ npm run balance      # win rates of the scripted plans and how the games ended
 npm run balance -- 400 201   # 400 runs from seed 201
 ```
 
-URL options: `?map=training` (sandbox map, never ends, has the HMG), `?seed=2` (other dice), `?reveal=1` (debug: draw unseen OPFOR faintly).
+URL options: `?map=training` (sandbox map, never ends, has the HMG), `?map=local:<id>` (a map saved from the editor in this browser), `?seed=2` (other dice), `?reveal=1` (debug: draw unseen OPFOR faintly).
 
-Controls: left click a unit, then a hex (green: move, orange: fast move, red ring: assault; in the firefight any shaded hex: fire). Right click or Esc deselects. Space commits the phase, Tab next unit, H hold, V line of sight, wheel zoom, drag pan, Home fit.
+Controls: left click a unit, then a hex (green: move, orange: fast move, red ring: assault; in the firefight any shaded hex: fire). Point at a hex for its card. Right click or Esc deselects. Space commits the phase, Tab next unit, H hold, V line of sight, wheel zoom, drag pan, Home fit, F1 help, right drag or Q / E turns the view.
 
 ## Layout
 
 ```
-index.html            page, styles (paper-and-ink), panel markup
-assets/fonts/         Barlow, Barlow Condensed (latin, SIL OFL, OFL.txt)
+index.html            the game page: panel and dialog markup
+editor.html           the map editor page
+assets/ui.css         styles of both pages (the TS apps' dark look)
+assets/fonts/         Roboto, Roboto Slab, Roboto Mono (UI; OFL / Apache 2.0) and Barlow, Barlow Condensed (counters; OFL)
+assets/icons/         ts-mark.svg (Tactical Shift logo, from TS Hub)
 data/balance.json     every tunable number: terrain, hexsides, fire, assault, rally, AI, unit types, phases
 data/maps/            trenchline.json (mission 1, the default), training.json (sandbox)
 src/sim/              pure rules: no DOM, no Math.random, deterministic
@@ -67,9 +72,16 @@ src/sim/              pure rules: no DOM, no Math.random, deterministic
   odds.js             exact odds (binomials) for previews, AI and tests
   los.js, spotting.js line of sight, contacts, fog
   cover.js, map.js, hex.js, dice.js, rng.js (mulberry32), mission.js (win/loss)
+src/editor/           model.js (the map being edited as plain data: paint, resize, randomize, hex-edge paths,
+                      forces, to and from the map JSON; no DOM, tested), editor.js (page: drawing, tools, undo),
+                      store.js (My maps and the draft in localStorage; the game reads ?map=local: maps from it)
 src/ai/basic.js       OPFOR AI: planOrders() / chooseOrders()
 src/ai/drills.js      scripted BLUFOR plans (frontal, fix and flank) for the balance test; playOut()
-src/render/           canvas drawing: hexmap.js (map, counters, markers), camera.js
+src/render/           world3d.js (the board in 3D: low-poly geometry built from the map, figures, effects,
+                      and the camera), hexmap.js (marks, counters and bangs, drawn on canvases the 3D view uses:
+                      the marks layer its ground shader lays over the terrain, counter and bang textures),
+                      camera.js (the flat frame those canvases are drawn in)
+vendor/three/         three.js 0.186.1 (MIT)
 src/ui/               app.js (input, panel, playback), describe.js (previews and log text), dice.js (tray), anim.js
 scripts/              serve.js (static server), balance.js (balance report)
 tests/                node --test suites; helpers.js builds small maps from strings
@@ -92,7 +104,7 @@ How a turn flows: the UI collects a plan (one order per unit), checks it with `c
 
 Acceptance (milestone 7), automated in `tests/balance.test.js`: over 200 seeded runs of mission 1 against the AI, a scripted frontal assault wins **under 25%** and a scripted fix-and-flank plan **over 70%**.
 
-Current, seeds 1-200: frontal **0.0%**, fix and flank **74.5%** (average win on turn 10 of 12). Other blocks of 200 seeds: fix and flank 74.5-83%, frontal 0-1%.
+Current, seeds 1-200: frontal **3.5%**, fix and flank **97.0%** (average win on turn 14.4); seeds 201-400: frontal 1.5%, fix and flank 99.0%. Since the turn limit went (2026-10-15) a patient fix and flank nearly always wins in the end; the frontal rush still almost never does. Before that, with 12 turns: frontal 0-1%, fix and flank 74.5-83%.
 
 The scripted plans live in `src/ai/drills.js`; their mission-specific hexes (routes, base-of-fire position, assault position) are in the map's `drills` entry. Any change to rules, the AI, `balance.json` or the map can move these numbers; `npm test` fails if a target is missed.
 
@@ -104,8 +116,8 @@ Found in an audit on 2026-10-14 (all tests green; no console errors in a full br
 
 **Bugs / gaps in the UI**
 
-1. **No way to start a new game.** At the end the panel says "Reload the page to play again (add ?seed=2 for other dice)". Needs a New game button (new seed) and ideally a mission picker; today missions and seeds are only URL parameters (`src/ui/app.js` `activeText()`, `src/main.js`).
-2. **Roster shows "ready" after the mission is over.** The status tag in `unitCard()` (`src/ui/app.js`) does not look at `state.result`; it should show nothing (or the final state) once the game has ended.
+1. **No mission picker.** The debrief (end of game) has New game (new dice) and Same dice, but missions are still only the `?map=` URL parameter (`src/main.js`); maps made in the editor open from its Play button or its My maps list.
+2. ~~Roster shows "ready" after the mission is over.~~ Fixed: once the game has ended the roster shows only lasting states (suppressed, pinned, eliminated).
 3. **Playback cannot be skipped or sped up.** Each roll takes about 2 s (`DICE_ROLL_MS`, `DICE_HOLD_MS` in `src/ui/app.js`); a firefight with several shots plus the enemy's fire is slow to watch. Add Space/click to skip to the result and/or a speed setting.
 4. **Touch input is incomplete.** Pointer events work for tapping, but there is no pinch zoom, and right-click (deselect) has no touch equivalent. Desktop first was the brief; worth doing before sharing widely.
 5. **Unit "reload" coupling is fragile.** Every unit gets `reload = fireEveryTurns` when it fires and counts down at its side's next turn start; the UI hides the harmless "reloading" of rifle teams by checking `fired` (`reloading()` in `app.js`). Cleaner: store the turn the unit may fire again.
@@ -118,7 +130,7 @@ Found in an audit on 2026-10-14 (all tests green; no console errors in a full br
 9. **The HMG cannot do anything against an enemy in the next hex**: it never assaults, and fire into an adjacent enemy hex counts as an assault. Decide whether it may fire point-blank (would need an exception in `assaultVia()` / `validateAction()`).
 10. **Blind-fire previews assume a full, unsuppressed fireteam** (the player cannot know who is there). Intentional; mention it in the UI text if players find it confusing.
 11. **Frontal assault wins 0%**: the frontal script never stops to fire, so it is a pure rush. That satisfies the acceptance test; a "frontal with covering fire" script would be a more honest comparison if the balance is ever questioned.
-12. **Balance margin is thin on seeds 1-200** (74.5% vs the 70% target). New rules that help the defender will likely break the test; re-tune `balance.json` (rally `worstOn`, `assault.attackTn`) rather than the code.
+12. **The balance test now measures who wins, not how fast.** Without a turn limit fix and flank wins 97-99%, so the 70% target no longer says much. A measure of cost (turns taken, men lost) would tell the plans apart better; the frontal target (under 25%) still holds with a wide margin.
 
 **Housekeeping**
 

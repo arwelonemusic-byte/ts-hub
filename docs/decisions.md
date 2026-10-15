@@ -180,7 +180,7 @@ Answers to the follow-up questions:
 
 ## Hex milestone 7: first mission and balance
 
-- **Mission end** (`mission.js`, map `mission` block): attacker wins by holding the `objective` with a fireteam at the end of a turn, or when every defending fireteam is eliminated; defender wins when every attacking fireteam is eliminated (an SL alone cannot fight on) or when the last turn (`turns`, 12) ends. Elimination ends the game at once; the objective and turn limit are checked at turn end. `state.result = { winner, why }`; nobody can act afterwards. Maps without a mission never end.
+- **Mission end** (`mission.js`, map `mission` block): attacker wins by holding the `objective` with a fireteam at the end of a turn, or when every defending fireteam is eliminated; defender wins when every attacking fireteam is eliminated (an SL alone cannot fight on) or when the last turn (`turns`, 12) ends. (The turn limit was removed on 2026-10-15: see "No turn limit" below.) Elimination ends the game at once; the objective and turn limit are checked at turn end. `state.result = { winner, why }`; nobody can act afterwards. Maps without a mission never end.
 - **Mission 1: Trench Line** (`data/maps/trenchline.json`, 14 x 16 hexes, 700 x 800 m), built instead of reusing the training map at the user's request ("more balanced and realistic"). The training map's trench saw almost the whole field and its only flank route crossed open ground. The new map:
   - one OPFOR fireteam in a two-hex trench at the edge of the woods, parapets facing south (the objective is the west hex, 6,3);
   - an open field in front: the killing ground;
@@ -246,3 +246,16 @@ Answers to the follow-up questions:
 - The after-action replay (old milestone 8) is dropped at the user's request; the dice tray and the log show every roll. `CLAUDE.md` updated.
 - `README.md` written for the agent taking over: what the game is, goals, status, how to run and test, layout, balance, and the list of known issues and fixes needed (found in an audit the same day).
 - Dead code removed: `fireAtSpotted` in `src/ai/drills.js` (unused since the frontal plan stopped firing).
+
+## No turn limit (user request, 2026-10-15)
+
+- **Missions have no turn limit.** Turns are still counted (top bar, log, debrief) but the game goes on until a side wins. Gone: the map's `mission.turns`, the defender's win "did not take the objective in N turns", the "N turns" in Trench Line's brief, and the turns setting in the editor.
+- **A stalled attack ends the mission.** Without the limit one dead end was left: every attacking team pinned next to the enemy with no SL to rally it (it cannot rally there), while the defender holds; the game would play enemy turns for ever. Now when no attacking unit could act for `turn.stalemateTurns` (3) turns in a row the defender wins ("the attack stalled"). It counts only turns in which the attacker could do nothing at all; a player who holds by choice never triggers it. State: `attackerCouldAct` (set when an attacker phase opens with someone able to act) and `stalledTurns` (counted at turn end, in `turnEndResult`). "Nobody on either side can act" ends the same way; OPFOR recovers a step every enemy phase, so in practice that does not last.
+- **The scripted plans finish the job** (`drills.js`). The old limit hid that they could wait for ever: the frontal rush stopped at the end of its route when the enemy had left the trench, and the fix-and-flank assault waited for a suppression that never came once the base of fire was dead. Now a team next to the objective that sees nobody on it walks in, one further off closes in; the maneuver element assaults anyway when no base-of-fire team is left; the base of fire closes in itself when the maneuver element is gone. Every run of the balance test ends.
+- **Balance:** seeds 1-200: frontal 3.5%, fix and flank 97.0% (win on turn 14.4 on average); seeds 201-400: frontal 1.5%, fix and flank 99.0%. The acceptance targets still hold. With time no longer pressing, fix and flank nearly always wins in the end; how fast and at what cost would now tell the plans apart better than the win rate.
+
+## 3D only (user request, 2026-10-15)
+
+- **The 3D board is the only map view**, in the game and in the editor. The flat paper map, the painted tiles view (`?view=tiles`) and the isometric view (`?view=iso`) are gone, and with them the `?view=` option and the view switch in the top bars.
+- **Code:** `startApp` and the editor always create the 3D world and use its camera directly (`toWorld`, `zoomAt`, `panBy`, `orbit`, `turn`, `fit`). `render/camera.js` keeps only `toScreen`, the flat frame that the marks layer, the counter textures and the bang textures are drawn in. `render/hexmap.js` lost the flat map (`drawMap`, terrain details, `drawHexsides`, `fitCanvas`) and keeps the marks, counters and bangs, which the 3D view draws through it. three.js now loads with the page.
+- **Kept outside the repo:** `render/terrain.js` and the generated art of the tiles and iso views (`assets/ground`, `assets/iso`, `assets/tiles`, 10 MB) moved to `../parked-views/` beside the game folder, with a note on what they were.
