@@ -306,7 +306,7 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   `?src=/api/games/fix-and-flank/maps/<id>`. **Members only** (`viewer.inGuild`): signed out goes to the login.
   Published maps are locked (no edits: they'd void runs and records) and never copied (the game's pencil shows only while
   an author tries their own draft, the editor opens only the viewer's own drafts, and publishing refuses a map whose
-  `layoutKey` is already published; exact copies only); drafts are their author's; publishing needs only
+  `layoutKey` is already published, a safety net for a map sent to the API by hand; exact copies only); drafts are their author's; publishing needs only
   a valid map (no clear check). Runs are seed + orders, replayed on the server through the game's sim to get the
   result (so records can't be faked) and played back for «Повтор». Data: `getFixAndFlankData()` (`lib/data/fixAndFlank.ts`)
   over `fnf_maps`, `fnf_runs`, `fnf_comments` (migration 012, which also puts in Trench Line, credited to the game's
@@ -314,7 +314,9 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   **Maps from the editor:** served by the hub, the game's editor keeps a member's drafts in the hub (`src/editor/hub.js`;
   it knows it's in the hub when `GET /api/games/fix-and-flank/maps?mine=1` answers). Save draft (Ctrl+S) and an open
   draft saving itself 1.5 s after each change; Playtest (saves, then plays the draft, not recorded); Publish (confirm,
-  then the map's page); the Maps menu lists your drafts (delete) and published maps. API, members only, JSON bodies
+  then the map's page); the Maps menu lists your drafts (delete) and published maps, and has no map files (user decision 2026-10-15: a map gets
+  into the hub only by being made in the editor). A map never saved as a draft is kept only in that browser, so «Новая
+  карта», opening a draft or a «Продолжить» link asks before replacing it (unless it's still blank). API, members only, JSON bodies
   (`lib/fix-and-flank/api.ts`): `POST /maps` (new draft), `PUT|DELETE /maps/<id>` (drafts only; a published map is 409),
   `POST /maps/<id>/publish`. The server reads, cleans and checks every map with the game's own code loaded at run time
   (`lib/fix-and-flank/rules.ts`: `import()` of `games/fix-and-flank/src/*.js` with `turbopackIgnore`, so the build

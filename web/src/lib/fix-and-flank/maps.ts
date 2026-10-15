@@ -11,7 +11,7 @@ const t = makeT("ru"); // the game reads these, and the game is Russian only
  * A draft is its author's: saved as often as they like, deleted when they like. Publishing locks it for good
  * (user decision 2026-10-15): an edit would void its runs and record, so nothing below changes a published map.
  * A published map is only played, never copied (same day): the editor won't open one, and a map whose layout is
- * already published (a published map's file brought back into the editor) isn't published again.
+ * already published isn't published again (the hub's editor has no file import, so that's a map sent here by hand).
  */
 
 export type Outcome<T> = { ok: T } | { error: string; status: number };

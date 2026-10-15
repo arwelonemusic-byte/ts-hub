@@ -14,8 +14,8 @@ import { parseMap } from '../sim/map.js';
 import { unitType } from '../sim/state.js';
 import {
   ENEMY_TEAMS, TERRAINS, clone, drawEdges, edgePath, eraseEdge, fitMap, formation, fromMapJson, graph,
-  inside, moveObjective, nearestEdge, nearestVertex, newModel, paint, problems, randomize, startNear, terrainAt, toggleEnemy,
-  toggleParapet, toMapJson,
+  inside, layoutKey, moveObjective, nearestEdge, nearestVertex, newModel, paint, problems, randomize, startNear, terrainAt,
+  toggleEnemy, toggleParapet, toMapJson,
 } from './model.js';
 import { connectHub, hub, hubHome, hubIdOf, hubMapPage, hubSrc } from '../hub.js';
 import { LOCAL, deleteMap, listMaps, loadDraft, loadMap, saveDraft, saveMap } from './store.js';
@@ -36,6 +36,7 @@ const TOAST_MS = 2600;
 const NOTICE_MS = 6000;                     // a longer toast, for a map that didn't open
 const ONLY_PLAYED = 'Опубликованную карту можно только играть, в редакторе она не открывается.';
 const NOT_YOUR_DRAFT = 'Такого черновика среди ваших нет.';
+const BLANK_LAYOUT = layoutKey(newModel()); // a new map nobody has touched yet: nothing to lose
 // The game's missions to start from, when the editor runs on its own. Not in the hub, where Trench Line is a
 // published map. Not the training ground: a 12 x 12 sandbox with no mission.
 const BUILT_IN = [['trenchline', 'Миссия 1: Trench Line']];
@@ -91,6 +92,20 @@ async function main() {
     version: 0,        // bumped on every change, for the 3D marks layer
   };
 
+  // In the hub a map never saved as a draft lives only in this browser (user decisions 2026-10-15), so replacing
+  // it (Новая карта, a draft opened) asks first, unless it is still a blank new map. True: the user keeps it.
+  function keepUnsaved(model, saved, question) {
+    if (!ed.hub || saved || isBlank(model)) return false;
+    return !confirm(question);
+  }
+  function isBlank(model) {
+    try {
+      return layoutKey(model) === BLANK_LAYOUT;
+    } catch {
+      return false; // a draft from an older editor, before fitMap has brought it up to date
+    }
+  }
+
   // The map to start from: ?draft= or ?src= (the game's pencil while you try a draft) opens one of your hub
   // drafts; ?map= (the game's pencil, run on its own) a mission of the game's or a map of this browser's; else
   // the draft in this browser; else a new one. A published map never opens here, so it can't be copied: it is
@@ -103,12 +118,15 @@ async function main() {
   const ownDraft = (id) => !!id && !!ed.hub?.maps.some((x) => x.id === id && x.status === 'draft');
   let refused = ''; // why the map asked for didn't open
   if (params.get('draft') || src) {
-    if (ownDraft(fromHub)) {
+    if (!ownDraft(fromHub)) {
+      refused = params.get('draft') && !src ? NOT_YOUR_DRAFT : ONLY_PLAYED;
+    } else if (draft?.model && draft.hubId !== fromHub
+      && keepUnsaved(draft.model, ownDraft(draft.hubId), `В этом браузере есть несохранённая карта «${draft.model.name || 'Без названия'}», она пропадёт. Открыть черновик?`)) {
+      // stays on the map in this browser (opened below)
+    } else {
       ed.model = fromMapJson(await hub.load(fromHub));
       ed.hubId = fromHub;
       ed.hubState = 'saved';
-    } else {
-      refused = params.get('draft') && !src ? NOT_YOUR_DRAFT : ONLY_PLAYED;
     }
   } else if (wanted && hubLink && !wanted.startsWith(LOCAL)) {
     refused = ONLY_PLAYED;
@@ -426,7 +444,9 @@ async function main() {
     const drafts = ed.hub.maps.filter((x) => x.status === 'draft');
     const published = ed.hub.maps.filter((x) => x.status === 'published');
     const rows = [
-      item('Новая карта', () => replaceModel(newModel())),
+      item('Новая карта', () => {
+        if (!keepUnsaved(ed.model, !!ed.hubId, 'Эта карта не сохранена и пропадёт. Начать новую?')) replaceModel(newModel());
+      }),
       item('Сохранить черновик', () => saveToHub({ thumb: true }), ed.hubId ? 'в хабе' : 'ещё нет'),
       el('hr'),
       el('div', 'eyebrow', 'Мои черновики'),
@@ -434,6 +454,7 @@ async function main() {
     if (!drafts.length) rows.push(el('div', 'empty', 'Черновиков пока нет. «Сохранить черновик» сохранит карту в хабе, видимой только вам.'));
     for (const d of drafts) {
       const b = item(d.name, async () => {
+        if (keepUnsaved(ed.model, !!ed.hubId, `Эта карта не сохранена и пропадёт. Открыть черновик «${d.name}»?`)) return;
         try {
           replaceModel(fromMapJson(await hub.load(d.id)), null, d.id);
         } catch (err) {
@@ -464,8 +485,8 @@ async function main() {
       rows.push(el('hr'), el('div', 'eyebrow', 'Опубликованные (не меняются)'));
       for (const p of published) rows.push(item(p.name, () => { location.href = hubMapPage(p.id); }, 'страница'));
     }
-    // No «Начать с миссии» here: the game's missions are published maps in the hub, and those aren't copied.
-    rows.push(el('hr'), item('Загрузить файл карты…', () => $('importFile').click(), '.json'), item('Выгрузить эту карту', exportJson, '.json'));
+    // No «Начать с миссии» and no map files here (user decisions 2026-10-15): a map gets into the hub only by being
+    // made in this editor, and the game's missions are published maps there, which aren't copied.
     menu.replaceChildren(...rows);
     menu.hidden = false;
     $('mapsBtn').setAttribute('aria-expanded', 'true');
