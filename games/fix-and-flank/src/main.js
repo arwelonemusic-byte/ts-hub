@@ -15,7 +15,13 @@ async function loadJson(path) {
 }
 
 // A map by its ?map= name: a file in data/maps, or one made in the editor and saved in this browser.
-async function loadMapJson(name) {
+// ?src=<url> instead: a map JSON on this site (the hub's maps, /api/games/fix-and-flank/maps/<id>).
+async function loadMapJson(name, src) {
+  if (src) {
+    const url = new URL(src, location.href);
+    if (url.origin !== location.origin) throw new Error('Maps load from this site only');
+    return loadJson(url.href);
+  }
   if (!name.startsWith(LOCAL)) return loadJson(`data/maps/${encodeURIComponent(name)}.json`);
   const json = loadMap(name.slice(LOCAL.length));
   if (!json) throw new Error(`Map "${name.slice(LOCAL.length)}" is not saved in this browser`);
@@ -26,7 +32,7 @@ async function main() {
   const params = new URLSearchParams(location.search);
   const mapName = params.get('map') ?? DEFAULT_MAP;
   const seed = Number(params.get('seed') ?? DEFAULT_SEED);
-  const [balance, mapJson] = await Promise.all([loadJson('data/balance.json'), loadMapJson(mapName)]);
+  const [balance, mapJson] = await Promise.all([loadJson('data/balance.json'), loadMapJson(mapName, params.get('src'))]);
   const state = createState({ balance, map: parseMap(mapJson, balance), seed });
   window.app = startApp(state, { reveal: params.get('reveal') === '1' }); // exposed for debugging in the console
 }

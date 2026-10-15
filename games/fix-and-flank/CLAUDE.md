@@ -213,8 +213,8 @@ Later, out of scope for now: vehicles, drones, indirect fire, multiple squads, c
 - Keep UI text plain and in the vocabulary of infantry tactics (fireteam, base of fire, contact, bounding, suppress, flank, assault). No filler, no flowery language.
 - After each milestone, summarize what works, what is stubbed, and what you would test next.
 - Run: `npm start` (http://localhost:8080, editor at /editor.html); `npm test` (all tests plus the 200-seed balance test); `npm run balance -- 200 201` for another seed block.
-- Git: `main` is current work; `main-3wu53y` is the handoff state, restored from `../fix_and_flank.bundle` (the `origin` remote); nothing is pushed.
-- Line endings are LF (`core.autocrlf=input`). On Windows, write files with LF; in Python use `newline=''`.
+- **This folder is `games/fix-and-flank` in the TS Hub repo** (moved with its history on 2026-10-15; the hub repo is public). The hub serves it as it is at `/games/fix-and-flank/play`, `/editor` and `/preview` (`web/src/app/games/fix-and-flank/[...path]`, members of the Discord only for play and editor) and lists maps and records around it (see the hub's `CLAUDE.md`, «Мини-игры»). Keep every URL in the pages relative. `?src=<url>` loads a map JSON from the same site (the hub's maps); `preview.html` shows a map turning in 3D (BLUFOR's start and the objective, no OPFOR; `?still=1` for a still).
+- Line endings are LF (`.gitattributes` here pins them, since the hub checks out with CRLF on Windows). In Python use `newline=''`.
 - Debug hooks: `window.app` (game) and `window.editor` (`ed`, `cam`, `world`, `renderMap`). Use them in console checks; frames don't run in a hidden tab.
 - 3D scenery: build from the cached unit shapes in world3d.js (`box/cone/cyl/blob/rock` via `shape()`, `Mesher` typed arrays). The editor rebuilds the board on every edit (~12 ms at 18x14); per-call three.js geometries made it ~220 ms.
 - Marks painted through `frame.paint` (hexmap.js) lie on the ground but draw over everything (no depth test); the hex grid stays in the ground shader.
