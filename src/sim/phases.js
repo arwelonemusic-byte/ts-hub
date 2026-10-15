@@ -88,6 +88,7 @@ function enterPhase(state, rng, events) {
   if (phase.recoverFirst) recoverFirst(state, phase.side, events);
   const waiting = state.units.some((u) => canActivate(state, u));
   start.idle = !waiting && !phase.automatic;
+  if (waiting && phase.side === state.map.mission?.attacker) state.attackerCouldAct = true; // see mission.js: a stalled attack
   return waiting;
 }
 
@@ -97,10 +98,11 @@ function enterPhase(state, rng, events) {
 export function advance(state, rng, events) {
   if (state.result || state.units.some((u) => canActivate(state, u))) return;
   const phases = state.balance.turn.phases;
-  // Nobody able to act: the clock still runs to a mission's last turn (which
-  // ends it); without a mission, stop after two empty turns.
-  const turnsLeft = state.map.mission ? state.map.mission.turns - state.turn + 1 : 2;
-  for (let i = 0; i < phases.length * Math.max(2, turnsLeft); i++) {
+  // Nobody able to act: the clock runs on, and the rally rolls may bring
+  // someone back. A mission ends within turn.stalemateTurns such turns (the
+  // attack has stalled, turnEndResult); without a mission, the clock stops after two.
+  const idleTurns = state.map.mission ? state.balance.turn.stalemateTurns + 1 : 2;
+  for (let i = 0; i < phases.length * idleTurns; i++) {
     if (state.phase + 1 < phases.length) {
       state.phase += 1;
     } else {

@@ -4,8 +4,7 @@
   "mission": {
     "attacker": "BLUFOR",
     "defender": "OPFOR",
-    "turns": 12,
-    "brief": "Take and hold the trench at 6,3 within 12 turns. One OPFOR fireteam is dug in there, parapets facing south. Fix it from the wall, flank it up the sunken track on the east, assault from the side."
+    "brief": "Take and hold the trench at 6,3. One OPFOR fireteam is dug in there, parapets facing south. Fix it from the wall, flank it up the sunken track on the east, assault from the side."
   },
   "width": 14,
   "height": 16,

@@ -55,6 +55,20 @@ function stepToward(state, u, goal, fast) {
 const objectiveOf = (state) => H(state.map.objective);
 const enemyAt = (state, h) => state.units.find((u) => u.side === 'OPFOR' && u.status !== 'eliminated'
   && same(u.pos, h) && state.contacts.BLUFOR[u.id]?.level === 'spotted');
+const alive = (state, team) => state.units.some((u) => u.side === 'BLUFOR' && u.team === team && u.status !== 'eliminated');
+
+// With no turn limit nothing makes a plan finish by itself, so every plan ends
+// the same way: a team next to the objective that sees nobody on it walks in
+// (anyone there would be spotted from next door), one further off closes in.
+function finish(s, u, obj) {
+  if (u.kind !== 'team' || enemyAt(s, obj)) return null;
+  const next = neighbors(u.pos).some((n) => same(n, obj));
+  if (next) {
+    const a = { type: 'move', unit: u.id, to: obj };
+    return validateAction(s, a).ok ? a : null;
+  }
+  return stepToward(s, u, obj, false);
+}
 
 // Follows its route; remembers the furthest waypoint reached.
 function router(routes) {
@@ -80,7 +94,7 @@ function plan(state, wants) {
 
 // Frontal assault: everybody rushes straight at the objective (fast moves
 // along its route) and assaults as soon as it is next to it. No base of
-// fire: nobody stops to fire.
+// fire: nobody stops to fire. At the end of its route a team closes in.
 export function frontalAssault(drills) {
   const route = router(drills.frontal);
   return (state) => {
@@ -90,7 +104,7 @@ export function frontalAssault(drills) {
       if (phase === 'movement') {
         if (u.kind === 'team' && enemyAt(s, obj) && validateAction(s, { type: 'move', unit: u.id, to: obj }).ok) return { type: 'move', unit: u.id, to: obj };
         const r = route(s, u);
-        return r.next ? stepToward(s, u, r.next, true) : null;
+        return r.next ? stepToward(s, u, r.next, true) : finish(s, u, obj);
       }
       return null;
     });
@@ -102,9 +116,10 @@ export function frontalAssault(drills) {
 // maneuver element goes round the flank by the concealed route without
 // firing, careful moves once it is close, the SL with it; in position, it
 // assaults in the firefight, after the base of fire has fired, once the
-// enemy is suppressed or pinned (or in the last `lastTurns` turns + 1).
+// enemy is suppressed or pinned, or once there is no base of fire left to
+// pin it. Without the maneuver element, the base of fire closes in itself.
 export function fixAndFlank(drills) {
-  const { baseOfFire, maneuver, leaderWith, routes, closeIn = 6, lastTurns = 1 } = drills.fixAndFlank;
+  const { baseOfFire, maneuver, leaderWith, routes, closeIn = 6 } = drills.fixAndFlank;
   const bases = [].concat(baseOfFire); // one team or several
   const route = router(routes);
   return (state) => {
@@ -119,7 +134,9 @@ export function fixAndFlank(drills) {
       }
       const r = route(s, u);
       if (phase === 'movement') {
-        if (!r.next) return null;
+        const base = bases.includes(u.team);
+        if (base && !alive(s, maneuver)) return finish(s, u, obj); // the base of fire alone closes in
+        if (!r.next) return base ? null : finish(s, u, obj); // in position: the base of fire stays and fires
         const far = (distanceField(s.map, s.balance, obj).get(key(u.pos)) ?? Infinity) > closeIn;
         return stepToward(s, u, r.next, far || bases.includes(u.team));
       }
@@ -129,9 +146,9 @@ export function fixAndFlank(drills) {
     if (phase === 'firefight') {
       const m = state.units.find((u) => u.side === 'BLUFOR' && u.team === maneuver && u.status !== 'eliminated');
       const target = enemyAt(state, obj);
-      const lastChance = state.map.mission && state.turn >= state.map.mission.turns - lastTurns;
-      // Assault when the base of fire has the enemy down (it fires first and a hit pins), or when time runs out.
-      if (m && !isSuppressed(m) && target && route(state, m).atEnd && (isSuppressed(target) || lastChance)) {
+      // Assault when the base of fire has the enemy down (it fires first and a hit pins), or when there is none left.
+      const noBase = !bases.some((b) => alive(state, b));
+      if (m && !isSuppressed(m) && target && route(state, m).atEnd && (isSuppressed(target) || noBase)) {
         const a = { type: 'fire', unit: m.id, target: obj };
         if (validateAction(projectOrders(state, orders), a).ok) orders.push(a);
       }

@@ -22,6 +22,8 @@ import { updateContacts } from './spotting.js';
 //     reload,             side's turns until it can fire again (a type with fireEveryTurns, the HMG)
 //   }],
 //   contacts: { [side]: { [enemyId]: { level: 'spotted' | 'suspected', pos, turn } } }
+//   attackerCouldAct,     a mission's attacker had a unit able to act in this turn so far
+//   stalledTurns,         turns in a row in which it had none (mission.js: the attack stalls)
 //   result: null, or { winner, why } once the mission is over (see mission.js)
 // }
 //
@@ -54,6 +56,8 @@ export function createState({ balance, map, seed }) {
     map,
     units,
     contacts: Object.fromEntries((balance.turn.sides).map((side) => [side, {}])),
+    attackerCouldAct: true,
+    stalledTurns: 0,
     result: null,
   };
   updateContacts(state, []);

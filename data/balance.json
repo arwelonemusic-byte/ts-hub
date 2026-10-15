@@ -4,6 +4,7 @@
   },
   "turn": {
     "sides": ["BLUFOR", "OPFOR"],
+    "stalemateTurns": 3,
     "phases": [
       { "name": "movement", "side": "BLUFOR", "actions": ["move", "fastMove"] },
       { "name": "firefight", "side": "BLUFOR", "actions": ["fire"] },
