@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { corners, SIDES } from '../src/sim/hex.js';
+import { corners, distance, SIDES } from '../src/sim/hex.js';
 import { parseMap, sideFeature, terrainName } from '../src/sim/map.js';
 import { createState } from '../src/sim/state.js';
 import {
@@ -104,17 +104,43 @@ test('resizing keeps what fits and moves the forces onto the map', () => {
   assert.deepEqual([m.width, m.height], [30, 6], 'sizes are kept within limits');
 });
 
-test('random maps are the same for the same seed, varied, and keep the forces out of the water', () => {
-  const a = randomize(newModel(), 7);
-  const b = randomize(newModel(), 7);
-  assert.deepEqual(a.terrain, b.terrain);
+test('a random map is the same for the same seed, and replaces everything on the map but its name and size', () => {
+  const messy = newModel({ name: 'Mine' });
+  paint(messy, [H(1, 1)], 'trench');
+  messy.edges[edgeOf(H(2, 2), 'E')] = 'wall';
+  toggleParapet(messy, H(3, 3), 'NE');
+  toggleEnemy(messy, H(4, 4));
+  messy.start = H(6, 6);
+  messy.brief = 'Hold the farm.';
+  assert.deepEqual(randomize(messy, 7), randomize(newModel({ name: 'Mine' }), 7));
+  assert.equal(messy.brief, '', 'the briefing is written from the new map');
+});
+
+test('random maps are varied, ready to play, with hexsides, and the sides at opposite ends', () => {
   const kinds = new Set();
-  for (let seed = 1; seed <= 20; seed++) {
-    const m = randomize(newModel(), seed);
-    m.terrain.forEach((t) => kinds.add(t));
-    assert.deepEqual(problems(m, balance), [], `seed ${seed}`);
+  const features = { hedge: 0, wall: 0, parapet: 0 };
+  for (const [width, height] of [[14, 16], [8, 8], [24, 8], [30, 30]]) {
+    for (let seed = 1; seed <= 15; seed++) {
+      const m = randomize(newModel({ width, height }), seed);
+      const at = `${width}x${height} seed ${seed}`;
+      m.terrain.forEach((t) => kinds.add(t));
+      assert.deepEqual(problems(m, balance), [], at);
+      assert.deepEqual(m.enemies, [m.objective], `${at}: one OPFOR team, on the objective`);
+      assert.ok(distance(m.start, m.objective) >= Math.max(width, height) / 2, `${at}: far apart`);
+      const g = graph(width, height);
+      for (const [k, f] of Object.entries(m.edges)) {
+        features[f]++;
+        const e = g.edges.get(k);
+        assert.equal(e.owners.length, 2, `${at}: not on the board's edge`);
+        assert.ok(e.owners.every((o) => terrainName(m, o.hex) !== 'water'), `${at}: not by water`);
+      }
+      features.parapet += m.parapets.length;
+    }
   }
   for (const t of ['open', 'woods', 'scrub', 'water', 'road', 'building']) assert.ok(kinds.has(t), `${t} turns up`);
+  for (const [f, n] of Object.entries(features)) assert.ok(n > 0, `${f}s turn up`);
+  const wide = randomize(newModel({ width: 24, height: 8 }), 3);
+  assert.ok(Math.abs(wide.start.col - wide.objective.col) > Math.abs(wide.start.row - wide.objective.row), 'a wide map is fought left to right');
 });
 
 test('enemy teams toggle, up to four, and the one on the objective moves with it', () => {

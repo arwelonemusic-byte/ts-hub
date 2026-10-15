@@ -47,7 +47,7 @@
     .tool { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 10px; font: 500 13px/20px var(--sans); text-align: left; }
     .tool svg { width: 18px; height: 18px; flex: none; }
     .tool kbd { margin-left: auto; }
-    .row2 .btn { width: 100%; }
+    .row2 .btn, .btn.block { width: 100%; }
     .col1 { display: grid; gap: 6px; }
     #brief {
       width: 100%; min-height: 84px; resize: vertical; padding: 10px 12px; background: var(--inset); border: 1px solid var(--line);
@@ -114,16 +114,13 @@
         <div class="eyebrow">Map</div>
         <div class="field">Width <span class="stepper" data-field="width"><button data-step="-1" aria-label="Narrower">−</button><input type="number" id="width"><button data-step="1" aria-label="Wider">+</button></span></div>
         <div class="field">Height <span class="stepper" data-field="height"><button data-step="-1" aria-label="Shorter">−</button><input type="number" id="height"><button data-step="1" aria-label="Taller">+</button></span></div>
+        <button class="btn block" id="randomize" title="A whole new random map (R): terrain, hedges and walls, the BLUFOR start and an OPFOR team on the objective. Everything on the map now goes; Ctrl+Z brings it back."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>Randomize</button>
       </section>
 
       <section>
         <div class="eyebrow">Terrain</div>
         <div class="palette" id="palette"></div>
         <div class="field">Brush <div class="seg wide" id="brush"><button data-brush="1">1 hex</button><button data-brush="2">7 hexes</button></div></div>
-        <div class="row2">
-          <button class="btn" id="randomize" title="Random terrain (R); walls, hedges and forces stay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>Randomize</button>
-          <button class="btn" id="fill" title="Fill the whole map with the selected terrain">Fill map</button>
-        </div>
       </section>
 
       <section>

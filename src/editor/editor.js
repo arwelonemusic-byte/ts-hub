@@ -265,12 +265,7 @@ async function main() {
 
   $('randomize').onclick = () => {
     edit((m) => randomize(m, 1 + Math.floor(Math.random() * 1e9)));
-    toast('New random terrain. Ctrl+Z brings the old one back.');
-  };
-  $('fill').onclick = () => {
-    const all = [];
-    for (let row = 0; row < ed.model.height; row++) for (let col = 0; col < ed.model.width; col++) all.push({ col, row });
-    edit((m) => paint(m, all, ed.terrain));
+    toast('New random map. Ctrl+Z brings the old one back.');
   };
   $('undo').onclick = undo;
   $('redo').onclick = redo;

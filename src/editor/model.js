@@ -14,7 +14,7 @@
 //   enemies: [{ col, row }, ...],      // OPFOR fireteams
 // }
 
-import { SIDES, corners, neighborOn } from '../sim/hex.js';
+import { SIDES, corners, mapBounds, neighborOn, sidesFacing } from '../sim/hex.js';
 import { createRng } from '../sim/rng.js';
 
 export const TERRAINS = ['open', 'road', 'scrub', 'woods', 'rubble', 'building', 'trench', 'water'];
@@ -25,7 +25,8 @@ export const SIZE = { min: 6, max: 30, width: 14, height: 16 };
 export const ENEMY_TEAMS = ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA'];
 const DEPLOY = ['E', 'W', 'NE', 'NW', 'SE', 'SW']; // where BRAVO starts beside ALPHA, in order of preference
 
-// The random map: smooth noise fields, a stream or a pond, a road, farms.
+// The random map: smooth noise fields, a stream or a pond, a road, farms,
+// hedgerows and yard walls, and the two sides at opposite ends.
 const GEN = {
   cell: 3.2,          // hexes per noise cell: the size of woods and scrub patches
   woods: 0.6,         // noise above this: woods
@@ -34,11 +35,21 @@ const GEN = {
   stream: 0.5,        // chance of a stream down the map (else maybe a pond)
   pond: 0.7,          // chance of a pond when there is no stream
   pondSize: [3, 7],
-  meander: 0.28,      // chance a stream or road shifts a column at each row
+  meander: 0.28,      // chance a stream or road drifts sideways at a row instead of going straight on
   road: 0.75,
   farms: [1, 2],      // farm clusters: a building and one or two more beside it
   ruin: 0.5,          // chance a farm has a ruin next to it
+  hedgerows: 1 / 30,  // field boundaries per hex of map
+  hedgeLen: [2, 5],   // hex edges per field boundary
+  fieldWall: 0.2,     // chance a field boundary is a stone wall, not a hedge
+  yardWalls: [1, 2],  // walls per farm, along its buildings
+  yardWallLen: [1, 3],
+  band: 0.2,          // each side starts in this share of the map at its end
+  sideways: 1.5,      // a map this much wider than tall (in world size) is fought left to right
+  cover: ['building', 'rubble', 'woods', 'scrub'], // where OPFOR would rather hold the objective
+  parapet: 0.6,       // chance OPFOR's position (outside a building) has parapets toward BLUFOR
 };
+const between = (rng, [lo, hi]) => lo + rng.int(hi - lo + 1);
 
 const same = (a, b) => a && b && a.col === b.col && a.row === b.row;
 export const inside = (m, h) => !!h && h.col >= 0 && h.row >= 0 && h.col < m.width && h.row < m.height;
@@ -240,11 +251,16 @@ function noise(seed, cell) {
   };
 }
 
-// Random terrain, the same for the same seed: woods and scrub in patches, a
-// stream or a pond, a farm track, farms. Walls, hedges and the forces stay;
-// the hexes the forces stand on are never water.
+// A whole new random map of the same size, the same for the same seed: woods
+// and scrub in patches, a stream or a pond, a farm track, farms, hedgerows
+// and yard walls; BLUFOR starts at one end, and one OPFOR team holds the
+// objective at the other. Everything on the map before goes, the briefing
+// too (it is written from the new map); the name stays.
 export function randomize(m, seed) {
   const rng = createRng(seed);
+  m.edges = {};
+  m.parapets = [];
+  m.brief = '';
   const wood = noise(seed, GEN.cell);
   const spots = noise(seed + 1, GEN.cell / 2);
   const all = [];
@@ -256,17 +272,29 @@ export function randomize(m, seed) {
     const n = wood(h);
     set(h, n > GEN.woods ? 'woods' : n > GEN.scrub || spots(h) > GEN.scatter ? 'scrub' : 'open');
   }
+  // A line of hexes from one end row to the other, each beside the last
+  // (ahead: the two sides toward the next row). Taking them in turn goes
+  // straight on; now and then it takes the same one again and drifts a column.
+  const lane = (from, ahead, lo, hi) => {
+    const out = [from];
+    let lean = rng.int(2);
+    for (let h = from; ;) {
+      if (!rng.chance(GEN.meander)) lean = 1 - lean;
+      let next = neighborOn(h, ahead[lean]);
+      if (next.col < lo || next.col > hi) next = neighborOn(h, ahead[1 - lean]);
+      if (!inside(m, next)) return out;
+      out.push(next);
+      h = next;
+    }
+  };
   // Water: a stream down one side, or a pond.
   const third = Math.max(1, Math.floor(m.width / 3));
   if (rng.chance(GEN.stream)) {
-    let col = rng.chance(0.5) ? rng.int(third) : m.width - 1 - rng.int(third);
-    for (let row = 0; row < m.height; row++) {
-      set({ col, row }, 'water');
-      if (rng.chance(GEN.meander)) col = Math.max(0, Math.min(m.width - 1, col + (rng.chance(0.5) ? 1 : -1)));
-    }
+    const col = rng.chance(0.5) ? rng.int(third) : m.width - 1 - rng.int(third);
+    for (const h of lane({ col, row: 0 }, ['SW', 'SE'], 0, m.width - 1)) set(h, 'water');
   } else if (rng.chance(GEN.pond)) {
     let h = { col: rng.int(m.width), row: rng.int(m.height) };
-    const n = GEN.pondSize[0] + rng.int(GEN.pondSize[1] - GEN.pondSize[0] + 1);
+    const n = between(rng, GEN.pondSize);
     for (let i = 0; i < n; i++) {
       set(h, 'water');
       const next = neighborOn(h, SIDES[rng.int(6)]);
@@ -276,20 +304,21 @@ export function randomize(m, seed) {
   // A farm track from the bottom edge to the top, crossing water at a ford.
   const roadCols = [];
   if (rng.chance(GEN.road)) {
-    let col = third + rng.int(Math.max(1, m.width - 2 * third));
-    for (let row = m.height - 1; row >= 0; row--) {
-      set({ col, row }, 'road');
-      roadCols.push({ col, row });
-      if (rng.chance(GEN.meander)) col = Math.max(1, Math.min(m.width - 2, col + (rng.chance(0.5) ? 1 : -1)));
+    const col = third + rng.int(Math.max(1, m.width - 2 * third));
+    for (const h of lane({ col, row: m.height - 1 }, ['NW', 'NE'], 1, m.width - 2)) {
+      set(h, 'road');
+      roadCols.push(h);
     }
   }
   // Farms, beside the track when there is one.
-  const farms = GEN.farms[0] + rng.int(GEN.farms[1] - GEN.farms[0] + 1);
+  const yards = [];
+  const farms = between(rng, GEN.farms);
   for (let f = 0; f < farms; f++) {
     const near = roadCols.length ? roadCols[rng.int(roadCols.length)] : all[rng.int(all.length)];
     const yard = neighborOn(near, SIDES[rng.int(6)]);
-    if (!inside(m, yard)) continue;
+    if (!inside(m, yard) || terrainAt(m, yard) === 'road') continue;
     set(yard, 'building');
+    yards.push(yard);
     const more = 1 + rng.int(2);
     for (let i = 0; i < more; i++) {
       const b = neighborOn(yard, SIDES[rng.int(6)]);
@@ -300,12 +329,79 @@ export function randomize(m, seed) {
       if (inside(m, r) && terrainAt(m, r) !== 'road') set(r, 'rubble');
     }
   }
-  // Nobody starts in the water.
-  for (const h of [m.start, m.objective, ...m.enemies]) {
-    if (inside(m, h) && terrainAt(m, h) === 'water') set(h, 'open');
-  }
-  const bravo = DEPLOY.map((s) => neighborOn(m.start, s)).find((h) => inside(m, h));
+
+  // The two ends: bottom (BLUFOR) and top (OPFOR), or on a map much wider
+  // than tall, left and right either way round. depth: 0 at BLUFOR's edge, 1 at OPFOR's.
+  const bounds = mapBounds(m.width, m.height);
+  const sideways = bounds.maxX - bounds.minX > (bounds.maxY - bounds.minY) * GEN.sideways;
+  const fromLeft = sideways && rng.chance(0.5);
+  const depth = (h) => {
+    if (!sideways) return (m.height - 1 - h.row) / (m.height - 1);
+    return fromLeft ? h.col / (m.width - 1) : (m.width - 1 - h.col) / (m.width - 1);
+  };
+  const pickFrom = (hexes) => hexes[rng.int(hexes.length)];
+  // BLUFOR's start: any dry hex near its edge, with dry ground beside it for BRAVO.
+  const near = all.filter((h) => depth(h) <= GEN.band);
+  const dryNear = near.filter((h) => terrainAt(m, h) !== 'water');
+  m.start = { ...pickFrom(dryNear.length ? dryNear : near) };
+  if (terrainAt(m, m.start) === 'water') set(m.start, 'open');
+  const bravo = DEPLOY.map((side) => neighborOn(m.start, side)).find((h) => inside(m, h));
   if (bravo && terrainAt(m, bravo) === 'water') set(bravo, 'open');
+  // The objective near the far end but off the board's edge (so it can be
+  // flanked either way), on cover when there is some; one OPFOR team holds it.
+  const onEdge = (h) => h.col === 0 || h.row === 0 || h.col === m.width - 1 || h.row === m.height - 1;
+  const far = all.filter((h) => depth(h) >= 1 - GEN.band);
+  const holdable = far.filter((h) => !onEdge(h) && !['water', 'road'].includes(terrainAt(m, h)));
+  const covered = holdable.filter((h) => GEN.cover.includes(terrainAt(m, h)));
+  m.objective = { ...pickFrom(covered.length ? covered : holdable.length ? holdable : far) };
+  if (terrainAt(m, m.objective) === 'water') set(m.objective, 'open');
+  m.enemies = [{ ...m.objective }];
+
+  // Hexsides along the hex edges, never on the board's edge or by water.
+  const g = graph(m.width, m.height);
+  const free = (e, also) => e.owners.length === 2 && !m.edges[e.key]
+    && e.owners.every((o) => terrainAt(m, o.hex) !== 'water') && also(e.owners.map((o) => terrainAt(m, o.hex)));
+  // A run of `len` edges from a corner, heading one way (a hedgerow) or wandering (heading null).
+  const run = (from, len, feature, heading, also) => {
+    let v = from;
+    let prev = null;
+    for (let i = 0; i < len; i++) {
+      const options = [...v.next].filter(([n, k]) => n !== prev && free(g.edges.get(k), also));
+      if (!options.length) return;
+      const score = ([n]) => {
+        const w = g.vertices.get(n);
+        return heading ? (w.x - v.x) * Math.cos(heading) + (w.y - v.y) * Math.sin(heading) : 0;
+      };
+      const [n, k] = heading ? options.reduce((a, b) => (score(b) > score(a) ? b : a)) : pickFrom(options);
+      m.edges[k] = feature;
+      prev = v.key;
+      v = g.vertices.get(n);
+    }
+  };
+  const cornerOf = (h) => {
+    const pts = corners(h);
+    return g.vertices.get(vkey(pts[rng.int(6)]));
+  };
+  // Field boundaries: hedgerows (now and then a stone wall) between fields
+  // and along the track, not in the woods, where they would not show.
+  const FIELD = ['open', 'scrub', 'road'];
+  const fields = all.filter((h) => ['open', 'scrub'].includes(terrainAt(m, h)));
+  const hedgerows = Math.round(m.width * m.height * GEN.hedgerows);
+  for (let i = 0; fields.length && i < hedgerows; i++) {
+    const feature = rng.chance(GEN.fieldWall) ? 'wall' : 'hedge';
+    const across = (ts) => ts.every((t) => FIELD.includes(t)) && !ts.every((t) => t === 'road');
+    run(cornerOf(pickFrom(fields)), between(rng, GEN.hedgeLen), feature, rng.next() * 2 * Math.PI, across);
+  }
+  // Yard walls along the farms' buildings.
+  for (const yard of yards) {
+    const walls = between(rng, GEN.yardWalls);
+    const yardSide = (ts) => ts.includes('building') && !ts.every((t) => t === 'building');
+    for (let i = 0; i < walls; i++) run(cornerOf(yard), between(rng, GEN.yardWallLen), 'wall', null, yardSide);
+  }
+  // OPFOR's position: parapets on the side(s) facing BLUFOR's start, unless it holds a building.
+  if (terrainAt(m, m.objective) !== 'building' && rng.chance(GEN.parapet)) {
+    for (const side of sidesFacing(m.objective, m.start)) m.parapets.push(`${m.objective.col},${m.objective.row},${side}`);
+  }
   return m;
 }
 
