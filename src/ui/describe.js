@@ -82,6 +82,34 @@ export function firePreview(state, u, h, sol = fireSolution(state, u, h)) {
     + ` ${pct(odds.anyHit)} at least one hit, ${pct(odds.pin)} to pin. Casualties on ${sol.cover.casualtyOn}+ (${describeCoverShort(sol)}), expected ${odds.expectedCasualties.toFixed(2)}.`;
 }
 
+// The same preview as figures, for the hex card. Null when the unit cannot fire there.
+export function fireFigures(state, u, h, sol = fireSolution(state, u, h)) {
+  if (!sol.ok) return null;
+  const t = sol.aimed ? state.units[sol.target] : null;
+  const odds = fireOdds({
+    dice: sol.dice, tn: sol.tn, casualtyOn: sol.cover.casualtyOn,
+    pinAt: pinAt(state.balance, t ? t.status : 'ok'), soldiers: t ? t.soldiers.length : state.balance.unit.roles.length,
+  });
+  return {
+    target: t ? unitName(t) : null, dice: sol.dice, tn: sol.tn, mods: modText(state.balance.fire, sol),
+    casualtyOn: sol.cover.casualtyOn, cover: describeCoverShort(sol),
+    anyHit: pct(odds.anyHit), pin: pct(odds.pin), expected: odds.expectedCasualties.toFixed(2),
+  };
+}
+
+// The assault preview as figures, for the hex card. Null when the unit cannot assault there.
+export function assaultFigures(state, u, h) {
+  const sol = assaultSolution(state, u, h);
+  if (!sol.ok) return null;
+  const d = state.units[sol.defender];
+  const o = assaultOdds(sol);
+  return {
+    defender: unitName(d), status: d.status, dice: sol.attackDice, tn: sol.attackTn,
+    defendDice: sol.defendDice, defendTn: sol.defendTn, take: pct(o.take), wiped: o.attackerDestroyed >= 0.005 ? pct(o.attackerDestroyed) : null,
+    losses: o.expectedAttackerLosses.toFixed(2), kills: o.expectedDefenderLosses.toFixed(2),
+  };
+}
+
 function describeCoverShort(sol) {
   return sol.cover.source === 'hexside' ? `${sol.cover.feature} facing the shooter` : sol.cover.terrain;
 }

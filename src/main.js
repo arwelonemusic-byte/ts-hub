@@ -2,6 +2,7 @@
 
 import { parseMap } from './sim/map.js';
 import { createState } from './sim/state.js';
+import { LOCAL, loadMap } from './editor/store.js';
 import { startApp } from './ui/app.js';
 
 const DEFAULT_MAP = 'trenchline';
@@ -13,14 +14,19 @@ async function loadJson(path) {
   return res.json();
 }
 
+// A map by its ?map= name: a file in data/maps, or one made in the editor and saved in this browser.
+async function loadMapJson(name) {
+  if (!name.startsWith(LOCAL)) return loadJson(`data/maps/${encodeURIComponent(name)}.json`);
+  const json = loadMap(name.slice(LOCAL.length));
+  if (!json) throw new Error(`Map "${name.slice(LOCAL.length)}" is not saved in this browser`);
+  return json;
+}
+
 async function main() {
   const params = new URLSearchParams(location.search);
   const mapName = params.get('map') ?? DEFAULT_MAP;
   const seed = Number(params.get('seed') ?? DEFAULT_SEED);
-  const [balance, mapJson] = await Promise.all([
-    loadJson('data/balance.json'),
-    loadJson(`data/maps/${encodeURIComponent(mapName)}.json`),
-  ]);
+  const [balance, mapJson] = await Promise.all([loadJson('data/balance.json'), loadMapJson(mapName)]);
   const state = createState({ balance, map: parseMap(mapJson, balance), seed });
   window.app = startApp(state, { reveal: params.get('reveal') === '1' }); // exposed for debugging in the console
 }

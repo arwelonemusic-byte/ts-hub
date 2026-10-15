@@ -1,15 +1,15 @@
-// Canvas drawing of the hex map and counters. Reads state, never changes it.
+// Canvas drawing of the marks over the map (moves, fire zones, paths, lines
+// of fire, suspected contacts, the objective) and of the counters and bangs.
+// The 3D view (world3d.js) draws the marks onto the canvas it lays over the
+// ground, and each counter and bang onto a texture. Reads state, never changes it.
 
 import { toScreen } from './camera.js';
-import { SIDES, center, corners, neighbors } from '../sim/hex.js';
-import { inBounds, terrainName } from '../sim/map.js';
+import { center, corners } from '../sim/hex.js';
 
 const FONT = "'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue', sans-serif";
 
 export const COLORS = {
-  // A printed map board: pale terrain, ink linework.
-  background: '#d9d5c4',
-  hexEdge: 'rgba(21, 24, 26, 0.22)',
+  // Terrain swatches (the hex card, the editor's palette).
   terrain: {
     open: '#c4cb98',
     road: '#d6cdb0',
@@ -19,15 +19,6 @@ export const COLORS = {
     building: '#ada291',
     trench: '#b8a173',
     water: '#9fc2d4',
-  },
-  detail: {
-    woods: '#55733f',
-    scrub: '#6f8a4a',
-    rubble: '#6e665a',
-    building: '#6b6052',
-    buildingEdge: '#15181a',
-    trench: '#4a3a22',
-    road: '#a8996f',
   },
   // Counters and markers after the "Fireteam Counters" design: NATO frames,
   // ink outlines, amber suppressed and dark red pinned badges.
@@ -51,7 +42,6 @@ export const COLORS = {
   hostileFireInk: '#8e1b12',
   move: '#2e7d32',
   fast: '#c8650f',
-  hover: 'rgba(21, 24, 26, 0.55)',
   shade: 'rgba(21, 24, 26, 0.42)',
   suspect: '#8e1b12',
   fire: '#1f3f8f',
@@ -59,24 +49,7 @@ export const COLORS = {
   assault: '#ff5a3d',
   plan: '#15181a',
   objective: '#8e1b12',
-  hexside: {
-    wall: { color: '#5e574c', width: 0.13, dash: null, inset: 0 },
-    hedge: { color: '#36522a', width: 0.16, dash: [0.12, 0.08], inset: 0 },
-    parapet: { color: '#4a3a22', width: 0.14, dash: null, inset: 0.12 },
-  },
 };
-
-export function fitCanvas(canvas) {
-  const dpr = window.devicePixelRatio || 1;
-  const { clientWidth: w, clientHeight: h } = canvas;
-  if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
-  }
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  return { ctx, width: w, height: h };
-}
 
 function hexPath(ctx, cam, h, inset = 0) {
   const c = center(h);
@@ -86,131 +59,20 @@ function hexPath(ctx, cam, h, inset = 0) {
   ctx.closePath();
 }
 
-// Deterministic speckle so textures look the same every frame.
-function speckle(col, row, i) {
-  let h = (col * 374761393 + row * 668265263 + i * 2147483647) >>> 0;
-  h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
-  return (h ^ (h >>> 16)) / 4294967296;
-}
-
-function drawTerrainDetail(ctx, cam, h, terrain, map) {
-  const c = toScreen(cam, center(h).x, center(h).y);
-  const s = cam.scale;
-  const dot = (x, y, r, color) => {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  };
-  const scatter = (n, r, color) => {
-    for (let i = 0; i < n; i++) {
-      const a = speckle(h.col, h.row, i) * Math.PI * 2;
-      const d = Math.sqrt(speckle(h.col, h.row, i + 17)) * 0.62 * s;
-      dot(c.x + Math.cos(a) * d, c.y + Math.sin(a) * d, r, color);
-    }
-  };
-  switch (terrain) {
-    case 'woods': scatter(9, s * 0.16, COLORS.detail.woods); break;
-    case 'scrub': scatter(7, s * 0.07, COLORS.detail.scrub); break;
-    case 'rubble': scatter(10, s * 0.05, COLORS.detail.rubble); break;
-    case 'building':
-      ctx.fillStyle = COLORS.detail.building;
-      ctx.fillRect(c.x - s * 0.45, c.y - s * 0.35, s * 0.9, s * 0.7);
-      ctx.strokeStyle = COLORS.detail.buildingEdge;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(c.x - s * 0.45, c.y - s * 0.35, s * 0.9, s * 0.7);
-      break;
-    case 'trench': {
-      ctx.strokeStyle = COLORS.detail.trench;
-      ctx.lineWidth = Math.max(2, s * 0.08);
-      ctx.beginPath();
-      for (let i = 0; i <= 6; i++) {
-        const x = c.x - s * 0.6 + (i * s * 1.2) / 6;
-        const y = c.y + (i % 2 ? -1 : 1) * s * 0.15;
-        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-      }
-      ctx.stroke();
-      break;
-    }
-    case 'road': {
-      // Join the center to each neighboring road hex, so the road reads as one line.
-      ctx.strokeStyle = COLORS.detail.road;
-      ctx.lineWidth = s * 0.24;
-      ctx.lineCap = 'round';
-      for (const n of neighbors(h)) {
-        if (!inBounds(map, n) || terrainName(map, n) !== 'road') continue;
-        const m = center(n);
-        const e = toScreen(cam, (center(h).x + m.x) / 2, (center(h).y + m.y) / 2);
-        ctx.beginPath();
-        ctx.moveTo(c.x, c.y);
-        ctx.lineTo(e.x, e.y);
-        ctx.stroke();
-      }
-      ctx.lineCap = 'butt';
-      break;
-    }
-    default:
-      break;
-  }
-}
-
-export function drawMap(ctx, cam, map, width, height, objective) {
-  ctx.fillStyle = COLORS.background;
-  ctx.fillRect(0, 0, width, height);
-  for (let row = 0; row < map.height; row++) {
-    for (let col = 0; col < map.width; col++) {
-      const h = { col, row };
-      const t = terrainName(map, h);
-      hexPath(ctx, cam, h);
-      ctx.fillStyle = COLORS.terrain[t];
-      ctx.fill();
-      drawTerrainDetail(ctx, cam, h, t, map);
-      hexPath(ctx, cam, h);
-      ctx.strokeStyle = COLORS.hexEdge;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-  }
-  drawHexsides(ctx, cam, map);
-  if (objective) {
-    const c = toScreen(cam, center(objective).x, center(objective).y);
-    ctx.strokeStyle = COLORS.objective;
-    ctx.lineWidth = 2;
-    hexPath(ctx, cam, objective, 0.08);
-    ctx.setLineDash([6, 4]);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = COLORS.objective;
-    ctx.font = `700 ${Math.round(cam.scale * 0.34)}px ${FONT}`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText('OBJ', c.x, c.y - cam.scale * 0.6);
-  }
-}
-
-// Walls and hedges on the edge between hexes; parapets just inside their hex.
-function drawHexsides(ctx, cam, map) {
-  for (const [k, sides] of Object.entries(map.sides)) {
-    const [col, row] = k.split(',').map(Number);
-    const h = { col, row };
-    const c = center(h);
-    const pts = corners(h);
-    for (const [side, feature] of Object.entries(sides)) {
-      const style = COLORS.hexside[feature];
-      const i = SIDES.indexOf(side);
-      const [p, q] = [pts[i], pts[(i + 1) % 6]].map((pt) => ({ x: pt.x + (c.x - pt.x) * style.inset, y: pt.y + (c.y - pt.y) * style.inset }));
-      const a = toScreen(cam, p.x, p.y);
-      const b = toScreen(cam, q.x, q.y);
-      ctx.strokeStyle = style.color;
-      ctx.lineWidth = Math.max(2, style.width * cam.scale);
-      ctx.setLineDash(style.dash ? style.dash.map((d) => d * cam.scale) : []);
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(b.x, b.y);
-      ctx.stroke();
-    }
-  }
+// The objective: a dashed outline inside its hex, labelled OBJ.
+export function drawObjective(ctx, cam, objective, color = COLORS.objective) {
+  const c = toScreen(cam, center(objective).x, center(objective).y);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  hexPath(ctx, cam, objective, 0.08);
+  ctx.setLineDash([6, 4]);
+  ctx.stroke();
   ctx.setLineDash([]);
+  ctx.fillStyle = color;
+  ctx.font = `700 ${Math.round(cam.scale * 0.34)}px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('OBJ', c.x, c.y - cam.scale * 0.6);
 }
 
 // Suspected contacts: a dashed red outline with a question mark, at hex centers.

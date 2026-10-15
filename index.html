@@ -4,221 +4,109 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fix and Flank</title>
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="assets/icons/ts-mark.svg">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
-  <style>
-    :root {
-      --paper: #e8e5da;
-      --sheet: #f6f4ee;
-      --board: #d9d5c4;
-      --ink: #15181a;
-      --ink-2: #33362f;
-      --muted: #5a5d55;
-      --rule: #bdb8a8;
-      --amber: #f2b33d;
-      --red: #8e1b12;
-      --navy: #1f3f8f;
-      --display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif;
-      --text: 'Barlow', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-      font-size: clamp(14px, 0.45vw + 8.5px, 18px);
-    }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; height: 100%; }
-    body {
-      display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100vh;
-      background: var(--paper); color: var(--ink); font: 400 1rem/1.35 var(--text);
-    }
-    button { font: inherit; color: inherit; }
-
-    /* Header: mission, phase track, turn */
-    header {
-      display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: end; gap: 1.5rem;
-      padding: 0.55rem 1.25rem 0.6rem; border-bottom: 2px solid var(--ink);
-    }
-    .kicker { font: 600 0.72rem/1 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
-    #mission { margin: 0.2rem 0 0; font: 700 1.75rem/1 var(--display); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #phases { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(5.5rem, auto); border: 2px solid var(--ink); }
-    #phases span {
-      padding: 0.35rem 0.8rem; font: 600 1rem/1 var(--display); letter-spacing: 0.04em; text-transform: uppercase;
-      text-align: center; background: var(--sheet); color: var(--muted);
-    }
-    #phases span + span { border-left: 2px solid var(--ink); }
-    #phases span.done { background: var(--paper); color: #8a8678; }
-    #phases span.now { background: var(--ink); color: var(--sheet); }
-    #phases span.enemy.now { background: var(--red); }
-    .turnbox { text-align: right; }
-    #turn { font: 700 1.75rem/1 var(--display); white-space: nowrap; }
-    #turn small { font-size: 1rem; color: var(--muted); font-weight: 600; }
-    #contacts { margin-top: 0.15rem; font: 600 0.85rem/1 var(--display); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
-
-    /* Map and panel */
-    main { display: grid; grid-template-columns: minmax(0, 1fr) clamp(340px, 29vw, 500px); min-height: 0; }
-    .boardwrap { position: relative; min-width: 0; min-height: 0; }
-    #board { width: 100%; height: 100%; display: block; background: var(--board); touch-action: none; cursor: crosshair; }
-
-    /* Dice tray: over the map, bottom center, while a roll plays */
-    #dice {
-      position: absolute; left: 50%; bottom: 1.25rem; transform: translateX(-50%);
-      min-width: min(26rem, 92%); max-width: 92%; padding: 0.75rem 1rem 0.8rem;
-      background: var(--sheet); border: 2px solid var(--ink); box-shadow: 0 6px 0 rgba(21, 24, 26, 0.18);
-      display: flex; flex-direction: column; gap: 0.45rem; pointer-events: none;
-    }
-    #dice[hidden] { display: none; }
-    .dice-title { font: 700 1.15rem/1.1 var(--display); letter-spacing: 0.04em; text-transform: uppercase; }
-    .dice-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
-    .dice-label { min-width: 9.5rem; font: 600 0.85rem/1.1 var(--display); letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
-    .dice-note { font-size: 0.9rem; color: var(--muted); font-style: italic; }
-    .die {
-      display: inline-grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
-      width: 2.3rem; height: 2.3rem; padding: 0.28rem; gap: 0.08rem;
-      background: #fff; border: 2px solid var(--ink); border-radius: 0.35rem; transition: transform 60ms linear;
-    }
-    .die i { display: block; border-radius: 50%; }
-    .die i.on { background: var(--ink); }
-    .die.hit { background: var(--ink); }
-    .die.hit i.on { background: #fff; }
-    .die.miss { opacity: 0.45; }
-    .dice-result { min-height: 1.3em; font-size: 0.95rem; color: var(--ink-2); }
-    #dice.settled .dice-result { font-weight: 600; color: var(--ink); }
-    aside {
-      display: flex; flex-direction: column; gap: 1rem; min-height: 0; overflow-y: auto;
-      padding: 1rem 1.1rem 1.25rem; background: var(--sheet); border-left: 2px solid var(--ink);
-    }
-    aside > * { flex-shrink: 0; }
-    h2 { margin: 0 0 0.45rem; font: 600 0.75rem/1 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
-    #phaseName { margin: 0; font: 700 1.9rem/1 var(--display); letter-spacing: 0.03em; text-transform: uppercase; }
-    #active { margin-top: 0.35rem; color: var(--ink-2); }
-    .won #phaseName { color: var(--navy); }
-    .lost #phaseName { color: var(--red); }
-
-    /* Roster cards */
-    #units { display: flex; flex-direction: column; border-top: 1px solid var(--rule); }
-    .unit {
-      display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.35rem 0.8rem; align-items: center;
-      width: 100%; padding: 0.6rem 0.45rem; text-align: left; cursor: pointer;
-      background: transparent; border: 0; border-bottom: 1px solid var(--rule);
-    }
-    .unit:hover:not(:disabled) { background: #ece9df; }
-    .unit:disabled { cursor: default; }
-    .unit.selected { background: var(--ink); color: var(--sheet); }
-    .unit.selected .order, .unit.selected .roles { color: #d8d4c8; }
-    .unit.idle .chip, .unit.idle .name { opacity: 0.55; }
-    .chip { width: 3.1rem; height: 2.4rem; display: block; }
-    .name { font: 700 1.35rem/1 var(--display); letter-spacing: 0.05em; }
-    .roles { display: flex; flex-wrap: wrap; gap: 0.15rem 0.6rem; margin-top: 0.25rem; font: 600 0.8rem/1.2 var(--display); letter-spacing: 0.05em; color: var(--muted); }
-    .roles i { display: inline-block; width: 0.5rem; height: 0.5rem; margin-right: 0.2rem; border-radius: 50%; border: 1.5px solid currentColor; vertical-align: 0.05rem; }
-    .roles i.on { background: currentColor; }
-    .roles .lost { text-decoration: line-through; opacity: 0.6; }
-    .tag {
-      padding: 0.2rem 0.45rem; font: 600 0.75rem/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase;
-      border: 1.5px solid currentColor; white-space: nowrap;
-    }
-    .tag.suppressed { background: var(--amber); color: var(--ink); border-color: var(--ink); }
-    .tag.pinned { background: var(--red); color: #fff; border-color: var(--red); }
-    .tag.eliminated { background: #4a4d46; color: var(--sheet); border-color: #4a4d46; }
-    .order { grid-column: 2 / 4; font-size: 0.9rem; color: var(--ink-2); }
-    .order:empty { display: none; }
-    .order.bad { color: var(--red); font-weight: 600; }
-
-    /* Preview and message */
-    .preview { min-height: 4.2rem; padding: 0.7rem 0.8rem; background: var(--paper); border: 1px solid var(--rule); }
-    #message { margin-top: 0.4rem; color: var(--red); font-weight: 600; }
-    #message:empty { display: none; }
-
-    /* Buttons */
-    .row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
-    .btn {
-      min-height: 2.75rem; padding: 0.55rem 0.4rem; font: 600 0.95rem/1.1 var(--display); letter-spacing: 0.05em; text-transform: uppercase;
-      background: var(--sheet); border: 2px solid var(--ink); cursor: pointer;
-    }
-    .btn:hover:not(:disabled) { background: #e2ded1; }
-    .btn:disabled { opacity: 0.4; cursor: default; }
-    .btn.on { background: var(--ink); color: var(--sheet); }
-    #commit {
-      padding: 0.8rem; font: 700 1.3rem/1 var(--display); letter-spacing: 0.12em;
-      background: var(--ink); color: var(--sheet); border-color: var(--ink);
-    }
-    #commit:hover:not(:disabled) { background: #2d3134; }
-    .btn:focus-visible, .unit:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
-
-    /* Log and help */
-    #log { max-height: 16rem; overflow-y: auto; font-size: 0.88rem; color: var(--ink-2); border-top: 1px solid var(--rule); }
-    #log p { margin: 0; padding: 0.22rem 0; border-bottom: 1px solid #e3dfd3; }
-    #log p.head { padding-top: 0.55rem; font: 600 0.82rem/1.2 var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 0; }
-    #log p.over { font-weight: 600; color: var(--navy); }
-    #log p.brief { font-style: italic; }
-    #log b { font: 600 0.75rem/1 var(--display); color: var(--muted); margin-right: 0.35rem; }
-    details { border-top: 1px solid var(--rule); padding-top: 0.6rem; font-size: 0.9rem; color: var(--ink-2); }
-    summary { cursor: pointer; font: 600 0.8rem/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-    details p { margin: 0.5rem 0 0; }
-    kbd { font: 600 0.8rem/1 var(--display); padding: 0.05rem 0.3rem; border: 1px solid var(--ink-2); border-bottom-width: 2px; }
-
-    footer {
-      padding: 0.35rem 1.25rem; border-top: 2px solid var(--ink); background: var(--paper);
-      font: 500 0.95rem/1.3 var(--display); letter-spacing: 0.02em; color: var(--ink-2);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-
-    @media (max-width: 900px) {
-      header { grid-template-columns: 1fr auto; }
-      #phases { grid-column: 1 / -1; grid-row: 2; }
-      main { grid-template-columns: 1fr; grid-template-rows: minmax(60vh, 1fr) auto; overflow-y: auto; }
-      .dice-label { min-width: 0; width: 100%; }
-      aside { border-left: 0; border-top: 2px solid var(--ink); overflow: visible; }
-    }
-  </style>
+  <link rel="stylesheet" href="assets/ui.css">
 </head>
 <body>
-  <header>
-    <div>
-      <div class="kicker">BLUFOR · 1st Squad</div>
-      <h1 id="mission">Fix and Flank</h1>
+  <header class="bar">
+    <div class="brand">
+      <img src="assets/icons/ts-mark.svg" alt="">
+      <span class="app">Fix and Flank</span>
+      <span class="sep"></span>
+      <h1 id="mission">Loading…</h1>
     </div>
-    <div id="phases" aria-label="Phases of the turn"></div>
-    <div class="turnbox">
-      <div id="turn">Turn 1</div>
-      <div id="contacts">No contact</div>
+    <nav id="phases" aria-label="Phases of the turn"></nav>
+    <div class="right">
+      <span id="contacts" class="chip">No contact</span>
+      <div class="turnbox"><span class="eyebrow">Turn</span><span id="turn">1</span></div>
+      <a class="iconbtn" id="editBtn" href="editor.html" title="Edit this map in the map editor" aria-label="Map editor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+      </a>
+      <button class="iconbtn" id="helpBtn" title="How to play (F1)" aria-label="How to play">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+      </button>
     </div>
   </header>
-  <main>
-    <div class="boardwrap">
-      <canvas id="board" aria-label="Map"></canvas>
-      <div id="dice" hidden aria-live="polite"></div>
-    </div>
-    <aside>
-      <section id="phaseCard">
-        <h2>Orders</h2>
-        <p id="phaseName">Movement</p>
-        <div id="active"></div>
-      </section>
-      <section>
-        <h2>Squad</h2>
+
+  <main class="stage" id="stage">
+    <canvas id="board" aria-label="Map"></canvas>
+
+    <aside class="panel thin" id="phaseCard">
+      <div class="phasehead">
+        <div class="eyebrow" id="phaseKicker">Orders</div>
+        <h2 id="phaseName">Movement</h2>
+        <p id="active"></p>
+      </div>
+      <div class="progress" aria-hidden="true"><i id="progress"></i></div>
+      <section class="section">
+        <div class="eyebrow">Squad · BLUFOR</div>
         <div id="units"></div>
       </section>
-      <section class="preview" aria-live="polite">
-        <div id="preview"></div>
-        <div id="message"></div>
+      <section class="section">
+        <div class="eyebrow">Mission</div>
+        <div class="brief" id="objective"></div>
       </section>
-      <section class="row">
-        <button class="btn" id="hold" title="H">Hold</button>
-        <button class="btn" id="clear">Clear all</button>
-        <button class="btn" id="view" title="V">Line of sight</button>
-      </section>
-      <button class="btn" id="commit" title="Space">Commit orders</button>
-      <section>
-        <h2>Log</h2>
-        <div id="log"></div>
-      </section>
-      <details>
-        <summary>How to play</summary>
-        <p><b>Each turn:</b> Movement (move your units; a unit that moves cannot fire this turn), Firefight (units that did not move fire), Rally (automatic: suppressed and pinned units roll to recover, sure with the SL in their hex, otherwise the roll must beat the distance to him), Enemy action.</p>
-        <p><b>Orders:</b> click a unit, then a hex. Movement: green moves 1 hex, orange fast moves 2 (exposed), a red ring next to your team assaults the enemy in it. Firefight: any hex in the shaded area; a blue ring is a spotted enemy (aimed fire), a red ring next to you an assault, anything else is suppressive fire. Point at a hex to see the dice and odds first. OPFOR teams may split their fire between two of your units (dice divided), but not with one of yours next to them. A new order replaces the old one; orders run in the order given; units without an order hold.</p>
-        <p><b>Counters:</b> blue box BLUFOR, red diamond OPFOR, letter = team, dots below = soldiers left. Amber badge, one chevron: suppressed (cannot move). Dark red badge, two chevrons, hatched: pinned (cannot move or fire). "!": exposed (fast moved). "?": suspected enemy position. OPFOR shows only once spotted.</p>
-        <p><b>Keys:</b> <kbd>Space</kbd> commit · <kbd>Tab</kbd> next unit · <kbd>Esc</kbd> or right click deselect · <kbd>H</kbd> hold · <kbd>V</kbd> line of sight · drag to pan · wheel to zoom · <kbd>Home</kbd> fit the map.</p>
-      </details>
     </aside>
+
+    <div class="hud" id="hud" aria-label="Map controls">
+      <button id="zoomIn" title="Zoom in (wheel)" aria-label="Zoom in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button id="zoomOut" title="Zoom out (wheel)" aria-label="Zoom out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+      <button id="fitBtn" title="Fit the map (Home)" aria-label="Fit the map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      <button id="turnLeft" title="Turn the view (Q)" aria-label="Turn left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+      <button id="turnRight" title="Turn the view (E)" aria-label="Turn right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button>
+    </div>
+
+    <section class="panel" id="logPanel">
+      <button class="loghead" id="logHead" aria-expanded="true">
+        <span class="eyebrow">Combat log</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div id="log" class="thin"></div>
+    </section>
+
+    <div id="hovercard" hidden></div>
+
+    <div class="dock">
+      <div id="dice" hidden aria-live="polite"></div>
+      <div class="hint" id="hint" aria-live="polite"><i class="dot"></i><div><span id="preview"></span> <span id="message"></span></div></div>
+      <div class="actions" id="actions">
+        <button class="btn" id="hold" title="Take back the selected unit's order (H)">Hold <kbd>H</kbd></button>
+        <button class="btn" id="clear" title="Take back every order">Clear all</button>
+        <button class="btn" id="view" title="Shade what the selected unit cannot see (V)">Line of sight <kbd>V</kbd></button>
+        <span class="sep"></span>
+        <button class="btn primary" id="commit" title="Carry out the orders (Space)"><span id="commitLabel">Commit orders</span> <kbd>Space</kbd></button>
+      </div>
+    </div>
   </main>
-  <footer id="status">Loading…</footer>
+
+  <div id="modal" hidden></div>
+  <div id="status" role="alert"></div>
+
+  <template id="helpTpl">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <header>
+        <div><div class="eyebrow">Fix and Flank</div><h2 id="helpTitle">How to play</h2></div>
+        <button class="iconbtn" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </header>
+      <div class="body">
+        <p><b>Each turn:</b> Movement (move your units; a unit that moves cannot fire this turn), Firefight (units that did not move fire), Rally (automatic: suppressed and pinned units roll to recover, sure with the SL in their hex, otherwise the roll must beat the distance to him), Enemy action.</p>
+        <p><b>Orders:</b> click a unit, then a hex. Movement: green moves 1 hex, orange fast moves 2 (exposed), a red ring next to your team assaults the enemy in it. Firefight: any hex in the shaded area; a blue ring is a spotted enemy (aimed fire), a red ring next to you an assault, anything else is suppressive fire. Point at a hex to see what it is and, with a unit selected, the dice and odds of the order. OPFOR teams may split their fire between two of your units (dice divided), but not with one of yours next to them. A new order replaces the old one; orders run in the order given; units without an order hold.</p>
+        <p><b>Counters:</b> blue box BLUFOR, red diamond OPFOR, letter = team, dots below = soldiers left. Amber badge, one chevron: suppressed (cannot move). Dark red badge, two chevrons, hatched: pinned (cannot move or fire). "!": exposed (fast moved). "?": suspected enemy position. OPFOR shows only once spotted. The figures under each counter show it too: one per soldier, crouched when suppressed, prone when pinned.</p>
+        <div class="keys">
+          <kbd>Space</kbd><span>Commit the orders</span>
+          <kbd>Tab</kbd><span>Next unit</span>
+          <kbd>Esc</kbd><span>Deselect (or right click)</span>
+          <kbd>H</kbd><span>Hold: take back the selected unit's order</span>
+          <kbd>V</kbd><span>Line of sight of the selected unit</span>
+          <kbd>Home</kbd><span>Fit the map · drag to pan · wheel to zoom</span>
+          <kbd>Q</kbd><span>Turn the view (also <kbd>E</kbd>, or drag with the right button)</span>
+        </div>
+      </div>
+      <footer><button class="btn primary" data-close style="min-width: 0">Back to the map</button></footer>
+    </div>
+  </template>
+
   <script type="module" src="src/main.js"></script>
 </body>
 </html>
