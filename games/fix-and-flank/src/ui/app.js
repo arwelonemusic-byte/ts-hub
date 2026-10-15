@@ -967,7 +967,7 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
 
   $('helpBtn').onclick = showHelp;
 
-  // ---- dialogs: briefing, help, debrief ----
+  // ---- dialogs: help, debrief ----
 
   function openModal(dialog) {
     const m = $('modal');
@@ -1019,21 +1019,6 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
     return f;
   };
 
-  function showBriefing() {
-    const s = app.state;
-    const m = s.map.mission;
-    const squad = s.units.filter((u) => u.side === PLAYER_SIDE);
-    const body = [];
-    if (s.map.description) body.push(el('p', '', s.map.description));
-    if (m?.brief) body.push(el('div', 'callout', m.brief));
-    body.push(facts([
-      ['Объект', s.map.objective ? s.map.objective.join(',') : 'Нет'],
-      ['Победа', m ? 'Удержать его к концу хода' : 'Полигон: без конца'],
-      ['Отделение', `${count(squad.length, 'подразделение', 'подразделения', 'подразделений')} · ${menText(squad.reduce((n, u) => n + u.soldiers.length, 0))}`],
-    ]));
-    openModal(dialog('Брифинг', s.map.name, body, [['Как играть', false, showHelp], ['Начать', true, closeModal]]));
-  }
-
   function showHelp() {
     openModal($('helpTpl').content.firstElementChild.cloneNode(true));
   }
@@ -1079,6 +1064,6 @@ export function startApp(initialState, { reveal = false, recorder = null, replay
   renderHover();
   enemyTurn(0);
   requestAnimationFrame(frame);
-  if (!app.replay) showBriefing();
+  // No briefing dialog at the start (user decision 2026-10-15): the objective and the brief are in the panel.
   return app;
 }
