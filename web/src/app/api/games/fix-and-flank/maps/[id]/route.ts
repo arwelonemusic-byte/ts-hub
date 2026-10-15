@@ -1,6 +1,7 @@
 import { getFixAndFlankData } from "@/lib/data";
 import { answer, asMember, badRequest, jsonBody } from "@/lib/fix-and-flank/api";
 import { deleteDraft, saveDraft } from "@/lib/fix-and-flank/maps";
+import { makeT } from "@/lib/i18n";
 import { playerIdOf } from "@/lib/players";
 import { getViewer } from "@/lib/viewer";
 
@@ -10,7 +11,7 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/games/fix-and-f
   const viewer = await getViewer();
   const playerId = viewer ? await playerIdOf(viewer) : null;
   const map = await getFixAndFlankData().getMapJson(id, playerId);
-  if (!map) return Response.json({ error: "No such map." }, { status: 404 });
+  if (!map) return Response.json({ error: makeT("ru")("fnf.err.mapNotFound") }, { status: 404 });
   return Response.json(map, { headers: { "Cache-Control": "no-cache" } });
 }
 

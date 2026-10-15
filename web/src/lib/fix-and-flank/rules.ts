@@ -3,6 +3,9 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { GAME_DIR } from "./files";
+import { format, makeT } from "@/lib/i18n";
+
+const t = makeT("ru"); // the game reads these, and the game is Russian only
 
 /**
  * The game's own rules, on the server: a map is checked and cleaned by the same code the editor and the game run
@@ -88,11 +91,11 @@ export async function replayRun(mapJson: unknown, seed: number, commitsInput: un
   try {
     const map = r.parseMap(mapJson as MapJson, r.balance);
     const { state, used } = r.playRun({ balance: r.balance, map, seed, commits: read.commits });
-    if (!state.result) return { error: "The run doesn't end where it says it does." };
-    if (used !== read.commits.length) return { error: "The run has orders after the game ended." };
+    if (!state.result) return { error: t("fnf.err.runNoEnd") };
+    if (used !== read.commits.length) return { error: t("fnf.err.runAfterEnd") };
     return { result: state.result.winner === "BLUFOR" ? "won" : "lost", turns: state.turn, commits: read.commits };
   } catch (err) {
-    return { error: `The run can't be played: ${(err as Error).message}` };
+    return { error: format(t("fnf.err.runBroken"), { why: (err as Error).message }) };
   }
 }
 
@@ -106,11 +109,11 @@ export const NAME_MAX = 40;
 export async function cleanMap(input: unknown, name: string, { publish = false } = {}): Promise<{ json: MapJson } | { error: string }> {
   const r = await gameRules();
   const title = name.trim();
-  if (!title) return { error: "Give the map a name." };
-  if (title.length > NAME_MAX) return { error: `The name is longer than ${NAME_MAX} characters.` };
-  if (!input || typeof input !== "object") return { error: "No map was sent." };
+  if (!title) return { error: t("fnf.err.noName") };
+  if (title.length > NAME_MAX) return { error: format(t("fnf.err.longName"), { max: NAME_MAX }) };
+  if (!input || typeof input !== "object") return { error: t("fnf.err.noMap") };
   const json = input as MapJson;
-  if (json.width !== r.SIZE.width || json.height !== r.SIZE.height) return { error: `Maps are ${r.SIZE.width} x ${r.SIZE.height} hexes.` };
+  if (json.width !== r.SIZE.width || json.height !== r.SIZE.height) return { error: format(t("fnf.err.size"), { w: r.SIZE.width, h: r.SIZE.height }) };
   try {
     r.parseMap(json, r.balance);
     const model = r.fromMapJson(json);
@@ -121,6 +124,6 @@ export async function cleanMap(input: unknown, name: string, { publish = false }
     }
     return { json: r.toMapJson(model, r.balance) };
   } catch (err) {
-    return { error: `Not a map the game can read: ${(err as Error).message}` };
+    return { error: format(t("fnf.err.unreadable"), { why: (err as Error).message }) };
   }
 }

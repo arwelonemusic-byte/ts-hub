@@ -331,7 +331,8 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   **Comments** on a map (`lib/fix-and-flank/actions.ts`, user request 2026-10-15): the hub's own `fnf_comments`, written
   with the event page's `CommentForm` (it takes its server action and hidden fields as props), members only, on a
   published map, 2000 characters at most, newest first. «Удалить» for the author or an admin sets `deleted_at`.
-  Not done yet: the game's UI in Russian, an admin's way to take a map down (`hidden_at` is there).
+  The game and its editor are in Russian (`games/fix-and-flank/src/text.js`); the API's messages to them are `fnf.err.*`
+  keys in `lib/i18n.ts`, fixed to RU. Not done yet: an admin's way to take a map down (`hidden_at` is there).
 
 ## Decided (2026-10-09)
 

@@ -2,6 +2,9 @@ import { randomInt } from "node:crypto";
 import { getDb } from "@/lib/db";
 import type { Outcome } from "./maps";
 import { gameVersion, replayRun } from "./rules";
+import { makeT } from "@/lib/i18n";
+
+const t = makeT("ru"); // the game reads these, and the game is Russian only
 
 /**
  * Runs (fnf_runs): a member playing a published map, recorded. The hub hands out the seed when the run starts, so the
@@ -37,11 +40,11 @@ export interface RunReplay {
 
 /** A new run on a published map: its id and seed. */
 export async function startRun(playerId: string, mapId: unknown): Promise<Outcome<{ id: string; seed: number }>> {
-  if (typeof mapId !== "string" || !mapId) return { error: "Which map?", status: 400 };
+  if (typeof mapId !== "string" || !mapId) return { error: t("fnf.err.whichMap"), status: 400 };
   const db = await getDb();
   const [map] = await db.query(`SELECT published_at FROM fnf_maps WHERE id = $1 AND hidden_at IS NULL`, [mapId]);
-  if (!map) return { error: "No such map.", status: 404 };
-  if (!map.published_at) return { error: "Only published maps are recorded; a draft is a playtest.", status: 409 };
+  if (!map) return { error: t("fnf.err.mapNotFound"), status: 404 };
+  if (!map.published_at) return { error: t("fnf.err.draftRun"), status: 409 };
   const seed = randomInt(1, SEED_MAX);
   const [row] = await db.query(
     `INSERT INTO fnf_runs (map_id, player_id, seed, game_version) VALUES ($1, $2, $3, $4) RETURNING id`,
@@ -52,14 +55,14 @@ export async function startRun(playerId: string, mapId: unknown): Promise<Outcom
 
 /** The end of a run: its orders played through here; the result stored and how it compares. */
 export async function finishRun(runId: string, playerId: string, commits: unknown): Promise<Outcome<RunEnd>> {
-  if (!/^\d+$/.test(runId)) return { error: "No such run.", status: 404 };
+  if (!/^\d+$/.test(runId)) return { error: t("fnf.err.runNotFound"), status: 404 };
   const db = await getDb();
   const [run] = await db.query(
     `SELECT r.player_id, r.map_id, r.seed, r.result, m.json FROM fnf_runs r JOIN fnf_maps m ON m.id = r.map_id WHERE r.id = $1`,
     [runId],
   );
-  if (!run || String(run.player_id) !== String(playerId)) return { error: "No such run of yours.", status: 404 };
-  if (run.result) return { error: "This run is recorded already.", status: 409 };
+  if (!run || String(run.player_id) !== String(playerId)) return { error: t("fnf.err.notYourRun"), status: 404 };
+  if (run.result) return { error: t("fnf.err.runDone"), status: 409 };
   const json = typeof run.json === "string" ? JSON.parse(run.json) : run.json;
   const end = await replayRun(json, Number(run.seed), commits);
   if ("error" in end) return { error: end.error, status: 400 };
@@ -72,7 +75,7 @@ export async function finishRun(runId: string, playerId: string, commits: unknow
     `UPDATE fnf_runs SET orders = $2::jsonb, result = $3, turns = $4, finished_at = NOW() WHERE id = $1 AND result IS NULL RETURNING id`,
     [runId, JSON.stringify(end.commits), end.result, end.turns],
   );
-  if (!rows.length) return { error: "This run is recorded already.", status: 409 };
+  if (!rows.length) return { error: t("fnf.err.runDone"), status: 409 };
   const won = end.result === "won";
   const beats = (v: unknown) => v === null || v === undefined || end.turns < Number(v);
   return { ok: { result: end.result, turns: end.turns, record: won && beats(best?.any), personalBest: won && beats(best?.mine) } };

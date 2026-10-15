@@ -1,7 +1,10 @@
 import { randomBytes } from "node:crypto";
 import { getDb } from "@/lib/db";
 import { removeUpload, saveUpload } from "@/lib/uploads";
+import { makeT } from "@/lib/i18n";
 import { cleanMap } from "./rules";
+
+const t = makeT("ru"); // the game reads these, and the game is Russian only
 
 /**
  * Members' maps in the hub (fnf_maps), written by the game's editor through /api/games/fix-and-flank/maps.
@@ -43,7 +46,7 @@ function thumbBytes(thumb: unknown): Uint8Array | null | "bad" {
 
 async function storeThumb(id: string, thumb: unknown, old: string | null): Promise<Outcome<string | null>> {
   const bytes = thumbBytes(thumb);
-  if (bytes === "bad") return { error: "The map's picture isn't a JPEG under 600 KB.", status: 400 };
+  if (bytes === "bad") return { error: t("fnf.err.thumb"), status: 400 };
   if (!bytes) return { ok: old };
   const url = await saveUpload("fnf", id, bytes, "jpg");
   if (old && old !== url && old.startsWith("/uploads/")) await removeUpload(old);
@@ -88,15 +91,15 @@ export async function createDraft(playerId: string, input: MapInput): Promise<Ou
     );
     if (rows.length) return { ok: { id } };
   }
-  return { error: "Could not find a free id for the map. Try again.", status: 500 };
+  return { error: t("fnf.err.noId"), status: 500 };
 }
 
 /** The author's draft, or why not. */
 async function ownDraft(id: string, playerId: string): Promise<Outcome<{ thumbUrl: string | null }>> {
   const db = await getDb();
   const [row] = await db.query(`SELECT author_id, published_at, thumb_url FROM fnf_maps WHERE id = $1 AND hidden_at IS NULL`, [id]);
-  if (!row || String(row.author_id) !== String(playerId)) return { error: "No such draft of yours.", status: 404 };
-  if (row.published_at) return { error: "This map is published: it can't be changed any more.", status: 409 };
+  if (!row || String(row.author_id) !== String(playerId)) return { error: t("fnf.err.noDraft"), status: 404 };
+  if (row.published_at) return { error: t("fnf.err.locked"), status: 409 };
   return { ok: { thumbUrl: row.thumb_url } };
 }
 
@@ -129,7 +132,7 @@ export async function publishMap(id: string, playerId: string, input: MapInput):
      WHERE id = $1 AND author_id = $2 AND published_at IS NULL RETURNING id`,
     [id, playerId, clean.json.name, JSON.stringify(clean.json), thumb.ok],
   );
-  return rows.length ? { ok: { id } } : { error: "This map is published already.", status: 409 };
+  return rows.length ? { ok: { id } } : { error: t("fnf.err.published"), status: 409 };
 }
 
 export async function deleteDraft(id: string, playerId: string): Promise<Outcome<{ id: string }>> {
