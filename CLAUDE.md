@@ -347,7 +347,11 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   («Оставить комментарий (необязательно)»): `POST /api/games/fix-and-flank/maps/<id>/comments {body}`, the same rules
   (`addMapComment` in `lib/fix-and-flank/comments.ts`, shared with the page's server action).
   The game and its editor are in Russian (`games/fix-and-flank/src/text.js`); the API's messages to them are `fnf.err.*`
-  keys in `lib/i18n.ts`, fixed to RU. Not done yet: an admin's way to take a map down (`hidden_at` is there).
+  keys in `lib/i18n.ts`, fixed to RU.
+  **Taking a map down** (user request 2026-10-15): an admin's «…» on a published map's page has «Удалить карту»
+  (`takeDownMap` in `lib/fix-and-flank/actions.ts`, after a confirm): it sets `hidden_at`, so the map leaves the lists,
+  its page, the game and «Повтор», and deletes its picture file; runs and comments stay in the database, and putting
+  it back is by hand (`hidden_at = NULL`). A taken-down map still counts for the duplicate check on publishing.
 
 ## Decided (2026-10-09)
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppHeader } from "@/components/AppHeader";
+import { MapAdminMenu } from "@/components/fix-and-flank/MapAdminMenu";
 import { LeaderboardPanel, MapCommentsPanel } from "@/components/fix-and-flank/MapPanels";
 import { buttonClass, ButtonLink, Eyebrow, Icon, StatusChip } from "@/components/ui";
 import { getFixAndFlankData } from "@/lib/data";
@@ -69,27 +70,33 @@ export default async function MapPage({ params }: PageProps<"/games/fix-and-flan
                   <StatBox label={t("fnf.record")} value={map.record === null ? "—" : plural(locale, "fnf.turns", map.record)} />
                 </div>
               )}
-              {draft ? (
-                <a href={gameUrl("editor", { draft: map.id })} className={buttonClass("secondary", "m")}>
-                  <Icon name="pencil" />
-                  {t("fnf.continue")}
-                </a>
-              ) : canPlay ? (
-                <a href={playUrl(map.id)} className={buttonClass("primary", "m")}>
-                  <Icon name="play" />
-                  {t("fnf.play")}
-                </a>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {!viewer && (
-                    <ButtonLink href="/api/auth/login" variant="primary">
+              <div className="flex items-start gap-2">
+                <div className="flex min-w-0 flex-1 flex-col">
+                  {draft ? (
+                    <a href={gameUrl("editor", { draft: map.id })} className={buttonClass("secondary", "m")}>
+                      <Icon name="pencil" />
+                      {t("fnf.continue")}
+                    </a>
+                  ) : canPlay ? (
+                    <a href={playUrl(map.id)} className={buttonClass("primary", "m")}>
                       <Icon name="play" />
-                      {t("fnf.login")}
-                    </ButtonLink>
+                      {t("fnf.play")}
+                    </a>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      {!viewer && (
+                        <ButtonLink href="/api/auth/login" variant="primary">
+                          <Icon name="play" />
+                          {t("fnf.login")}
+                        </ButtonLink>
+                      )}
+                      <p className="type-body-s text-fg-secondary">{t("fnf.membersOnly")}</p>
+                    </div>
                   )}
-                  <p className="type-body-s text-fg-secondary">{t("fnf.membersOnly")}</p>
                 </div>
-              )}
+                {/* Admins can take a published map down (a blank one published by mistake, a hate symbol). */}
+                {viewer?.isAdmin && !draft && <MapAdminMenu mapId={map.id} name={map.name} locale={locale} />}
+              </div>
             </div>
           </div>
         </div>

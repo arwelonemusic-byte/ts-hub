@@ -1,11 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { playerIdOf } from "@/lib/players";
+import { removeUpload } from "@/lib/uploads";
 import { getViewer } from "@/lib/viewer";
 import { addMapComment } from "./comments";
-import { mapPageUrl } from "./game";
+import { FNF_HOME, mapPageUrl } from "./game";
 
 /**
  * «Комментарии» on a Fix & Flank map (user request 2026-10-15): the hub's own (fnf_comments), not a Discord thread.
@@ -38,4 +40,25 @@ export async function deleteMapComment(commentId: string): Promise<{ ok: true } 
   if (!row) return { error: "forbidden" };
   revalidatePath(mapPageUrl(String(row.map_id)));
   return { ok: true };
+}
+
+/**
+ * An admin's «Удалить карту» on a published map's page (user request 2026-10-15: a blank map published by mistake,
+ * a hate symbol drawn in terrain). The map is taken down (hidden_at), as the hub does with admins' other removals:
+ * gone from the lists, its page, the game and «Повтор»; its runs and comments stay in the database. Its picture file
+ * is deleted, since that is what would show the symbol. Then the game's page.
+ */
+export async function takeDownMap(form: FormData): Promise<void> {
+  const mapId = String(form.get("map") ?? "");
+  const viewer = await getViewer();
+  if (!viewer?.isAdmin || !mapId) return;
+  const db = await getDb();
+  const [old] = await db.query(`SELECT thumb_url FROM fnf_maps WHERE id = $1 AND published_at IS NOT NULL AND hidden_at IS NULL`, [mapId]);
+  if (!old) return;
+  await db.query(`UPDATE fnf_maps SET hidden_at = NOW(), thumb_url = NULL WHERE id = $1`, [mapId]);
+  const thumb = (old.thumb_url as string | null) ?? null;
+  if (thumb?.startsWith("/uploads/")) await removeUpload(thumb); // not the game's own pictures (Trench Line's)
+  revalidatePath(FNF_HOME);
+  revalidatePath(mapPageUrl(mapId));
+  redirect(FNF_HOME);
 }
