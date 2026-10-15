@@ -160,7 +160,7 @@ Before committing, the UI tells the player what will happen, for example:
 
 ### Missions
 
-A map may carry a `mission` (attacker, defender, brief), an `objective` hex and `drills` (scripted plans for the balance test). There is no turn limit (user decision 2026-10-15): turns are counted and the fight goes on until a side wins. The attacker wins by holding the objective with a fireteam at the end of a turn, or by eliminating every defending fireteam; the defender wins by eliminating every attacking fireteam, or when the attack has stalled (no attacking unit able to act for `turn.stalemateTurns` turns in a row). Mission 1 is `data/maps/trenchline.json` (the default); `?map=training` loads the sandbox map, which never ends.
+A map may carry a `mission` (attacker, defender, brief), which needs an `objective` hex on the map (parseMap refuses it without one), and `drills` (scripted plans for the balance test). There is no turn limit (user decision 2026-10-15): turns are counted and the fight goes on until a side wins. The attacker wins by holding the objective with a fireteam at the end of a turn, or by eliminating every defending fireteam; the defender wins by eliminating every attacking fireteam, or when the attack has stalled (no attacking unit able to act for `turn.stalemateTurns` turns in a row). Mission 1 is `data/maps/trenchline.json` (the default); `?map=training` loads the sandbox map, which never ends.
 
 ### Dice on screen
 

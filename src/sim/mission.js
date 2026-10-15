@@ -1,6 +1,7 @@
 // Mission end. A map may carry a mission:
 //   "mission": { "attacker": "BLUFOR", "defender": "OPFOR", "brief": "..." }
-// and an "objective" hex. There is no turn limit: turns are counted, the
+// and an "objective" hex, which a mission cannot be without (parseMap refuses
+// it). There is no turn limit: turns are counted, the
 // fight goes on until one side wins. The attacker wins by holding the
 // objective with a fireteam at the end of a turn, or by eliminating every
 // defending fireteam. The defender wins by eliminating every attacking
@@ -28,8 +29,8 @@ export function eliminationResult(state) {
 export function turnEndResult(state) {
   const m = state.map.mission;
   if (!m) return null;
-  const obj = state.map.objective && { col: state.map.objective[0], row: state.map.objective[1] };
-  const holder = obj && teams(state, m.attacker).find((u) => same(u.pos, obj));
+  const obj = { col: state.map.objective[0], row: state.map.objective[1] };
+  const holder = teams(state, m.attacker).find((u) => same(u.pos, obj));
   if (holder) return { winner: m.attacker, why: `${m.attacker} ${holder.team} holds the objective` };
   state.stalledTurns = state.attackerCouldAct ? 0 : state.stalledTurns + 1;
   state.attackerCouldAct = false;

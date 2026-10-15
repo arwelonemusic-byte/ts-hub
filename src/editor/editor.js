@@ -11,8 +11,8 @@ import { center, corners, hexAt, neighbors, SIDES } from '../sim/hex.js';
 import { parseMap } from '../sim/map.js';
 import { unitType } from '../sim/state.js';
 import {
-  ENEMY_TEAMS, SIZE, TERRAINS, clone, isAutoBrief, defaultBrief, deployment, drawEdges, edgePath, eraseEdge, fromMapJson, graph,
-  inside, moveObjective, nearestEdge, nearestVertex, newModel, paint, problems, randomize, resize, terrainAt, toggleEnemy,
+  ENEMY_TEAMS, TERRAINS, clone, deployment, drawEdges, edgePath, eraseEdge, fitSize, fromMapJson, graph,
+  inside, moveObjective, nearestEdge, nearestVertex, newModel, paint, problems, randomize, terrainAt, toggleEnemy,
   toggleParapet, toMapJson,
 } from './model.js';
 import { LOCAL, deleteMap, listMaps, loadDraft, loadMap, saveDraft, saveMap } from './store.js';
@@ -28,7 +28,7 @@ const SAVE_DELAY_MS = 400;
 const ARROW_PAN_PX = 140;                   // an arrow key pans the view this far
 const ARROWS = { ArrowLeft: [ARROW_PAN_PX, 0], ArrowRight: [-ARROW_PAN_PX, 0], ArrowUp: [0, ARROW_PAN_PX], ArrowDown: [0, -ARROW_PAN_PX] };
 const TOAST_MS = 2600;
-const BUILT_IN = [['trenchline', 'Mission 1: Trench Line'], ['training', 'Training ground']];
+const BUILT_IN = [['trenchline', 'Mission 1: Trench Line']]; // not the training ground: a 12 x 12 sandbox with no mission
 const TERRAIN_KEYS = '12345678';
 const TOOL_KEYS = { w: 'wall', h: 'hedge', p: 'parapet', x: 'erase', b: 'start', o: 'objective', f: 'enemy' };
 const INK = {
@@ -88,9 +88,10 @@ async function main() {
     params.delete('map');
     history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}`);
   } else if (draft?.model) {
-    ed.model = draft.model;
-    delete ed.model.turns; // drafts saved while maps still had a turn limit
-    if (isAutoBrief(ed.model.brief)) ed.model.brief = ''; // the editor's own brief, kept as fixed text
+    // A draft from when maps had other sizes, a turn limit or a briefing of their own.
+    ed.model = fitSize(draft.model);
+    delete ed.model.turns;
+    delete ed.model.brief;
     ed.id = draft.id ?? null;
   } else {
     ed.model = newModel();
@@ -238,30 +239,11 @@ async function main() {
     };
   }
 
-  // Width and height: steppers with a number field.
-  const limits = { width: [SIZE.min, SIZE.max], height: [SIZE.min, SIZE.max] };
-  function setNumber(field, value) {
-    const [lo, hi] = limits[field];
-    const v = Math.max(lo, Math.min(hi, Math.round(value)));
-    if (!Number.isFinite(v)) return;
-    edit((m) => resize(m, field === 'width' ? v : m.width, field === 'height' ? v : m.height), { refit: true });
-    renderPanel();
-  }
-  for (const s of document.querySelectorAll('.stepper')) {
-    const field = s.dataset.field;
-    for (const b of s.querySelectorAll('button')) b.onclick = () => setNumber(field, ed.model[field] + Number(b.dataset.step));
-    const input = s.querySelector('input');
-    input.min = limits[field][0];
-    input.max = limits[field][1];
-    input.onchange = () => setNumber(field, Number(input.value));
-  }
-
   $('mapName').oninput = () => {
     ed.model.name = $('mapName').value;
     document.title = `${ed.model.name || 'Untitled'} · Map editor · Fix and Flank`;
     saveSoon();
   };
-  $('brief').onchange = () => edit((m) => { m.brief = $('brief').value.trim(); });
 
   $('randomize').onclick = () => {
     edit((m) => randomize(m, 1 + Math.floor(Math.random() * 1e9)));
@@ -286,10 +268,7 @@ async function main() {
     for (const b of document.querySelectorAll('.tile')) b.classList.toggle('on', ed.tool === 'terrain' && b.dataset.terrain === ed.terrain);
     for (const b of document.querySelectorAll('.tool')) b.classList.toggle('on', b.dataset.tool === ed.tool);
     for (const b of document.querySelectorAll('#brush button')) b.classList.toggle('on', Number(b.dataset.brush) === ed.brush);
-    for (const f of ['width', 'height']) if (document.activeElement !== $(f)) $(f).value = m[f];
     if (document.activeElement !== $('mapName')) $('mapName').value = m.name;
-    if (document.activeElement !== $('brief')) $('brief').value = m.brief;
-    $('brief').placeholder = defaultBrief(m);
     $('undo').disabled = !ed.undo.length;
     $('redo').disabled = !ed.redo.length;
     $('help').textContent = HELP[ed.tool]();
@@ -327,7 +306,7 @@ async function main() {
     ];
     if (!mine.length) rows.push(el('div', 'empty', 'Nothing saved yet. Play or Save puts the map here.'));
     for (const s of mine) {
-      const b = item(s.name, () => replaceModel(fromMapJson(loadMap(s.id)), s.id), s.size);
+      const b = item(s.name, () => replaceModel(fromMapJson(loadMap(s.id)), s.id));
       const del = el('span', 'del', '×');
       del.title = 'Delete from My maps';
       del.onclick = (e) => {

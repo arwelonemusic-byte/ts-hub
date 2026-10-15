@@ -14,6 +14,14 @@ test('training map parses: 12 x 12 hexes, a BLUFOR squad with an HMG and a dug-i
   assert.equal(terrainName(map, H(...opfor.pos)), 'trench');
 });
 
+test('a mission cannot be without an objective hex on the map', () => {
+  const base = { width: 2, height: 1, legend: LEGEND, rows: ['..'], mission: { attacker: 'BLUFOR', defender: 'OPFOR' } };
+  assert.throws(() => parseMap(base, balance), /mission needs an objective/);
+  assert.throws(() => parseMap({ ...base, objective: [2, 0] }, balance), /mission needs an objective/);
+  assert.deepEqual(parseMap({ ...base, objective: [1, 0] }, balance).objective, [1, 0]);
+  assert.equal(parseMap({ ...base, mission: null }, balance).objective, null, 'a sandbox map needs none');
+});
+
 test('terrain lookups come from the balance table', () => {
   const map = makeMap(['.T~n']);
   assert.equal(terrainName(map, H(1, 0)), 'woods');

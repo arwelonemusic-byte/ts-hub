@@ -26,11 +26,11 @@ function write(key, value) {
   }
 }
 
-// [{ id, name, size, saved }], newest first.
+// [{ id, name, saved }], newest first.
 export function listMaps() {
   const lib = read(LIBRARY) ?? {};
   return Object.entries(lib)
-    .map(([id, { json, saved }]) => ({ id, name: json.name, size: `${json.width} x ${json.height}`, saved }))
+    .map(([id, { json, saved }]) => ({ id, name: json.name, saved }))
     .sort((a, b) => b.saved - a.saved);
 }
 

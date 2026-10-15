@@ -27,6 +27,11 @@ export function parseMap(json, balance) {
       terrain.push(legend[c]);
     });
   });
+  if (mission) {
+    const [col, row] = Array.isArray(objective) ? objective : [];
+    const onMap = Number.isInteger(col) && Number.isInteger(row) && col >= 0 && row >= 0 && col < width && row < height;
+    if (!onMap) throw new Error(`A mission needs an objective hex on the map, got ${JSON.stringify(objective)}`);
+  }
   const map = { name, description, width, height, terrain: Object.freeze(terrain), units: Object.freeze(units.map((u) => Object.freeze({ ...u }))), objective, mission: mission ? Object.freeze({ ...mission }) : null, sides: {} };
 
   // sides: "col,row" -> { SIDE: feature }

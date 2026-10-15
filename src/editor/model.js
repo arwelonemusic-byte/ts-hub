@@ -3,9 +3,12 @@
 // it. No DOM: editor.js draws it and takes input. toMapJson turns it into the
 // format of data/maps/*.json, which parseMap reads; fromMapJson reads one back.
 //
+// Every map made here is SIZE (14 x 16) for now, and its mission is always to
+// take and hold the objective (missionBrief): no size or briefing to set.
+//
 // model = {
-//   name, description, brief,          // brief: '' = written from the map (defaultBrief)
-//   width, height,
+//   name, description,
+//   width, height,                     // SIZE
 //   terrain: ['open', ...],            // row-major, width x height
 //   edges: { edgeKey: 'wall' | 'hedge' }, // on the edge between two hexes (or the board's edge)
 //   parapets: ['col,row,SIDE', ...],   // just inside one hex, facing out of that side
@@ -14,14 +17,14 @@
 //   enemies: [{ col, row }, ...],      // OPFOR fireteams
 // }
 
-import { SIDES, corners, mapBounds, neighborOn, sidesFacing } from '../sim/hex.js';
+import { SIDES, corners, neighborOn, sidesFacing } from '../sim/hex.js';
 import { createRng } from '../sim/rng.js';
 
 export const TERRAINS = ['open', 'road', 'scrub', 'woods', 'rubble', 'building', 'trench', 'water'];
 export const LEGEND = { '.': 'open', '=': 'road', ':': 'scrub', T: 'woods', '%': 'rubble', B: 'building', n: 'trench', '~': 'water' };
 const CHAR = Object.fromEntries(Object.entries(LEGEND).map(([c, t]) => [t, c]));
 export const EDGE_FEATURES = ['wall', 'hedge'];
-export const SIZE = { min: 6, max: 30, width: 14, height: 16 };
+export const SIZE = { width: 14, height: 16 }; // every map, for now (user decision 2026-10-15)
 export const ENEMY_TEAMS = ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA'];
 const DEPLOY = ['E', 'W', 'NE', 'NW', 'SE', 'SW']; // where BRAVO starts beside ALPHA, in order of preference
 
@@ -45,7 +48,6 @@ const GEN = {
   yardWalls: [1, 2],  // walls per farm, along its buildings
   yardWallLen: [1, 3],
   band: 0.2,          // each side starts in this share of the map at its end
-  sideways: 1.5,      // a map this much wider than tall (in world size) is fought left to right
   cover: ['building', 'rubble', 'woods', 'scrub'], // where OPFOR would rather hold the objective
   parapet: 0.6,       // chance OPFOR's position (outside a building) has parapets toward BLUFOR
 };
@@ -55,12 +57,12 @@ const same = (a, b) => a && b && a.col === b.col && a.row === b.row;
 export const inside = (m, h) => !!h && h.col >= 0 && h.row >= 0 && h.col < m.width && h.row < m.height;
 export const terrainAt = (m, h) => m.terrain[h.row * m.width + h.col];
 
-export function newModel({ width = SIZE.width, height = SIZE.height, name = 'New map' } = {}) {
+export function newModel({ name = 'New map' } = {}) {
+  const { width, height } = SIZE;
   const mid = Math.floor(width / 2);
   return {
     name,
     description: '',
-    brief: '',
     width,
     height,
     terrain: new Array(width * height).fill('open'),
@@ -203,12 +205,13 @@ export function paint(m, hexes, terrain) {
   return changed;
 }
 
-// A new size: the hexes that fit keep their terrain (new ones are grass);
-// walls, hedges, parapets and enemies off the map go; the start and the
-// objective move onto it.
-export function resize(m, width, height) {
-  const w = Math.max(SIZE.min, Math.min(SIZE.max, width));
-  const h = Math.max(SIZE.min, Math.min(SIZE.max, height));
+// A map of another size (saved before maps were all SIZE, or imported) made
+// SIZE: the hexes that fit keep their terrain (new ones are grass); walls,
+// hedges, parapets and enemies off the map go; the start and the objective
+// move onto it.
+export function fitSize(m) {
+  const { width: w, height: h } = SIZE;
+  if (m.width === w && m.height === h) return m;
   const terrain = new Array(w * h).fill('open');
   for (let row = 0; row < Math.min(h, m.height); row++) {
     for (let col = 0; col < Math.min(w, m.width); col++) terrain[row * w + col] = m.terrain[row * m.width + col];
@@ -251,16 +254,14 @@ function noise(seed, cell) {
   };
 }
 
-// A whole new random map of the same size, the same for the same seed: woods
-// and scrub in patches, a stream or a pond, a farm track, farms, hedgerows
-// and yard walls; BLUFOR starts at one end, and one OPFOR team holds the
-// objective at the other. Everything on the map before goes, the briefing
-// too (it is written from the new map); the name stays.
+// A whole new random map, the same for the same seed: woods and scrub in
+// patches, a stream or a pond, a farm track, farms, hedgerows and yard walls;
+// BLUFOR starts at the bottom, and one OPFOR team holds the objective near
+// the top. Everything on the map before goes; the name stays.
 export function randomize(m, seed) {
   const rng = createRng(seed);
   m.edges = {};
   m.parapets = [];
-  m.brief = '';
   const wood = noise(seed, GEN.cell);
   const spots = noise(seed + 1, GEN.cell / 2);
   const all = [];
@@ -330,15 +331,8 @@ export function randomize(m, seed) {
     }
   }
 
-  // The two ends: bottom (BLUFOR) and top (OPFOR), or on a map much wider
-  // than tall, left and right either way round. depth: 0 at BLUFOR's edge, 1 at OPFOR's.
-  const bounds = mapBounds(m.width, m.height);
-  const sideways = bounds.maxX - bounds.minX > (bounds.maxY - bounds.minY) * GEN.sideways;
-  const fromLeft = sideways && rng.chance(0.5);
-  const depth = (h) => {
-    if (!sideways) return (m.height - 1 - h.row) / (m.height - 1);
-    return fromLeft ? h.col / (m.width - 1) : (m.width - 1 - h.col) / (m.width - 1);
-  };
+  // The two ends: BLUFOR's is the bottom, OPFOR's the top. depth: 0 on the bottom row, 1 on the top one.
+  const depth = (h) => (m.height - 1 - h.row) / (m.height - 1);
   const pickFrom = (hexes) => hexes[rng.int(hexes.length)];
   // BLUFOR's start: any dry hex near its edge, with dry ground beside it for BRAVO.
   const near = all.filter((h) => depth(h) <= GEN.band);
@@ -436,17 +430,18 @@ export function moveObjective(m, hex) {
   m.objective = { col: hex.col, row: hex.row };
 }
 
-export function defaultBrief(m) {
+// The briefing of every map made here: the mission is always to take and
+// hold the objective (user decision 2026-10-15).
+export function missionBrief(m) {
   const n = m.enemies.length;
-  const o = m.objective ? `${m.objective.col},${m.objective.row}` : '?';
-  return `Take and hold the objective at ${o}. ${n === 1 ? 'One OPFOR fireteam defends' : `${n} OPFOR fireteams defend`} the area.`;
+  return `Take and hold the objective at ${m.objective.col},${m.objective.row}. ${n === 1 ? 'One OPFOR fireteam defends' : `${n} OPFOR fireteams defend`} the area.`;
 }
 
-// A brief the editor wrote itself (defaultBrief), also as it read while maps
+// A brief the editor wrote itself (missionBrief), also as it read while maps
 // had a turn limit ("... at 5,1 within 12 turns. ...").
 const AUTO_BRIEF = /^Take and hold the objective at \d+,\d+(?: within \d+ turns)?\. (?:One OPFOR fireteam defends|\d+ OPFOR fireteams defend) the area\.$/;
 
-export const isAutoBrief = (text) => AUTO_BRIEF.test(text ?? '');
+const isAutoBrief = (text) => AUTO_BRIEF.test(text ?? '');
 
 // A map saved while there was a turn limit: the limit goes, and so does
 // "within N turns" from a brief the editor wrote, also one saved again later
@@ -509,30 +504,30 @@ export function toMapJson(m, balance) {
   return {
     name: m.name || 'Untitled',
     description: m.description,
-    mission: { attacker: 'BLUFOR', defender: 'OPFOR', brief: m.brief || defaultBrief(m) },
+    mission: { attacker: 'BLUFOR', defender: 'OPFOR', brief: missionBrief(m) },
     width: m.width,
     height: m.height,
     legend: LEGEND,
     rows,
-    objective: inside(m, m.objective) ? [m.objective.col, m.objective.row] : null,
+    objective: [m.objective.col, m.objective.row], // a mission cannot be without one
     hexsides: [...groups.values()],
     units,
   };
 }
 
-// A map in the data/maps format, as a model. The editor's squad is ALPHA,
-// BRAVO and the SL: other BLUFOR units (the HMG) are left out, and the start
-// is where ALPHA stood.
+// A map in the data/maps format, as a model, made SIZE if it is not. The
+// editor's squad is ALPHA, BRAVO and the SL: other BLUFOR units (the HMG) are
+// left out, and the start is where ALPHA stood. The briefing is not kept
+// (missionBrief writes it); a map without an objective gets one under its
+// first OPFOR team.
 export function fromMapJson(json) {
-  const width = json.width;
-  const height = json.height;
   const legend = json.legend ?? LEGEND;
   const terrain = [];
   for (const r of json.rows) for (const c of r) terrain.push(legend[c] ?? 'open');
-  const m = newModel({ width, height, name: json.name ?? 'Untitled' });
+  const m = newModel({ name: json.name ?? 'Untitled' });
   m.description = json.description ?? '';
-  const brief = json.mission?.brief ?? '';
-  m.brief = isAutoBrief(brief) ? '' : brief; // the editor's own brief is written again from the map
+  m.width = json.width;
+  m.height = json.height;
   m.terrain = terrain;
   for (const entry of json.hexsides ?? []) {
     const hex = { col: entry.hex[0], row: entry.hex[1] };
@@ -551,5 +546,6 @@ export function fromMapJson(json) {
   if (blufor.length) m.start = pos(blufor[0]);
   m.enemies = (json.units ?? []).filter((u) => u.side === 'OPFOR' && (u.kind ?? 'team') === 'team').slice(0, ENEMY_TEAMS.length).map(pos);
   if (json.objective) m.objective = { col: json.objective[0], row: json.objective[1] };
-  return m;
+  else if (m.enemies.length) m.objective = { ...m.enemies[0] };
+  return fitSize(m);
 }

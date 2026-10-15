@@ -4,8 +4,8 @@ import { corners, distance, SIDES } from '../src/sim/hex.js';
 import { parseMap, sideFeature, terrainName } from '../src/sim/map.js';
 import { createState } from '../src/sim/state.js';
 import {
-  clone, deployment, drawEdges, edgeKey, edgePath, eraseEdge, fromMapJson, graph, moveObjective, nearestVertex,
-  newModel, paint, problems, randomize, resize, toggleEnemy, toggleParapet, toMapJson, upgradeMapJson,
+  SIZE, clone, deployment, drawEdges, edgeKey, edgePath, eraseEdge, fitSize, fromMapJson, graph, moveObjective,
+  nearestVertex, newModel, paint, problems, randomize, toggleEnemy, toggleParapet, toMapJson, upgradeMapJson,
 } from '../src/editor/model.js';
 import { H, balance, loadJson } from './helpers.js';
 
@@ -15,8 +15,9 @@ const edgeOf = (hex, side) => {
   return edgeKey(pts[i], pts[(i + 1) % 6]);
 };
 
-test('a new map is all grass, ready to play, and parses as a mission', () => {
+test('a new map is 14 x 16, all grass, ready to play, and parses as a mission', () => {
   const m = newModel();
+  assert.deepEqual([m.width, m.height], [14, 16]);
   assert.ok(m.terrain.every((t) => t === 'open'));
   assert.deepEqual(problems(m, balance), []);
   const map = parseMap(toMapJson(m, balance), balance);
@@ -28,7 +29,7 @@ test('a new map is all grass, ready to play, and parses as a mission', () => {
 });
 
 test('the squad deploys round the start: BRAVO beside ALPHA and the SL, on open ground', () => {
-  const m = newModel({ width: 8, height: 8 });
+  const m = newModel();
   m.start = H(3, 6);
   assert.deepEqual(deployment(m, balance), { ALPHA: H(3, 6), BRAVO: H(4, 6), SL: H(3, 6) });
   paint(m, [H(4, 6)], 'water');
@@ -39,7 +40,7 @@ test('the squad deploys round the start: BRAVO beside ALPHA and the SL, on open 
 });
 
 test('walls and hedges follow hex edges from corner to corner, and drawing them again takes them off', () => {
-  const m = newModel({ width: 6, height: 6 });
+  const m = newModel();
   const g = graph(m.width, m.height);
   const [a, b] = [corners(H(2, 2))[3], corners(H(3, 2))[1]].map((p) => nearestVertex(g, p, 0.1).key);
   const path = edgePath(g, a, b);
@@ -53,7 +54,7 @@ test('walls and hedges follow hex edges from corner to corner, and drawing them 
 });
 
 test('parapets belong to one hex side; erasing an edge clears all it holds', () => {
-  const m = newModel({ width: 6, height: 6 });
+  const m = newModel();
   toggleParapet(m, H(2, 2), 'SE');
   const map = parseMap(toMapJson(m, balance), balance);
   assert.equal(sideFeature(map, H(2, 2), 'SE'), 'parapet');
@@ -66,12 +67,11 @@ test('parapets belong to one hex side; erasing an edge clears all it holds', () 
 });
 
 test('a map survives the trip to the file format and back', () => {
-  const m = newModel({ width: 9, height: 7, name: 'Round trip' });
+  const m = newModel({ name: 'Round trip' });
   randomize(m, 42);
   m.edges[edgeOf(H(1, 1), 'E')] = 'wall';
   m.edges[edgeOf(H(4, 3), 'SW')] = 'hedge';
   toggleParapet(m, H(5, 2), 'SW');
-  m.brief = 'Hold the farm.';
   const back = fromMapJson(toMapJson(m, balance));
   assert.deepEqual(back, m);
 });
@@ -87,21 +87,26 @@ test('Trench Line opens in the editor and saves to the same terrain, hexsides an
   assert.deepEqual(b.units.filter((u) => u.side === 'OPFOR').map((u) => u.pos), [[6, 3]]);
 });
 
-test('resizing keeps what fits and moves the forces onto the map', () => {
-  const m = newModel({ width: 10, height: 10 });
-  paint(m, [H(1, 1), H(8, 8)], 'woods');
-  m.edges[edgeOf(H(8, 8), 'E')] = 'wall';
+test('a map of another size is made 14 x 16: what fits stays, the forces move onto the map', () => {
+  const m = Object.assign(newModel(), { width: 20, height: 20, terrain: new Array(400).fill('open') });
+  m.terrain[1 * 20 + 1] = 'woods';
+  m.terrain[18 * 20 + 18] = 'woods';
+  m.edges[edgeOf(H(18, 18), 'E')] = 'wall';
   m.edges[edgeOf(H(1, 1), 'E')] = 'hedge';
-  m.start = H(9, 9);
-  toggleEnemy(m, H(8, 8));
-  resize(m, 6, 6);
-  assert.equal(m.terrain.length, 36);
-  assert.equal(terrainName({ width: 6, terrain: m.terrain }, H(1, 1)), 'woods');
+  m.start = H(19, 19);
+  toggleEnemy(m, H(18, 18));
+  fitSize(m);
+  assert.deepEqual([m.width, m.height, m.terrain.length], [SIZE.width, SIZE.height, SIZE.width * SIZE.height]);
+  assert.equal(terrainName(m, H(1, 1)), 'woods');
+  assert.equal(m.terrain.filter((t) => t === 'woods').length, 1, 'the woods at 18,18 were cut off');
   assert.deepEqual(Object.values(m.edges), ['hedge'], 'the wall was off the new map');
-  assert.deepEqual(m.start, H(5, 5));
-  assert.equal(m.enemies.length, 1, 'the team at 8,8 is gone, the one at the objective stays');
-  resize(m, 100, 2);
-  assert.deepEqual([m.width, m.height], [30, 6], 'sizes are kept within limits');
+  assert.deepEqual(m.start, H(13, 15));
+  assert.equal(m.enemies.length, 1, 'the team at 18,18 is gone, the one at the objective stays');
+  // The training ground (12 x 12) opens at 14 x 16, the new hexes grass.
+  const training = fromMapJson(loadJson('data/maps/training.json'));
+  assert.deepEqual([training.width, training.height], [14, 16]);
+  assert.equal(terrainName(training, H(13, 15)), 'open');
+  assert.deepEqual(problems(training, balance), []);
 });
 
 test('a random map is the same for the same seed, and replaces everything on the map but its name and size', () => {
@@ -111,36 +116,31 @@ test('a random map is the same for the same seed, and replaces everything on the
   toggleParapet(messy, H(3, 3), 'NE');
   toggleEnemy(messy, H(4, 4));
   messy.start = H(6, 6);
-  messy.brief = 'Hold the farm.';
   assert.deepEqual(randomize(messy, 7), randomize(newModel({ name: 'Mine' }), 7));
-  assert.equal(messy.brief, '', 'the briefing is written from the new map');
 });
 
-test('random maps are varied, ready to play, with hexsides, and the sides at opposite ends', () => {
+test('random maps are varied, ready to play, with hexsides, BLUFOR at the bottom and OPFOR near the top', () => {
   const kinds = new Set();
   const features = { hedge: 0, wall: 0, parapet: 0 };
-  for (const [width, height] of [[14, 16], [8, 8], [24, 8], [30, 30]]) {
-    for (let seed = 1; seed <= 15; seed++) {
-      const m = randomize(newModel({ width, height }), seed);
-      const at = `${width}x${height} seed ${seed}`;
-      m.terrain.forEach((t) => kinds.add(t));
-      assert.deepEqual(problems(m, balance), [], at);
-      assert.deepEqual(m.enemies, [m.objective], `${at}: one OPFOR team, on the objective`);
-      assert.ok(distance(m.start, m.objective) >= Math.max(width, height) / 2, `${at}: far apart`);
-      const g = graph(width, height);
-      for (const [k, f] of Object.entries(m.edges)) {
-        features[f]++;
-        const e = g.edges.get(k);
-        assert.equal(e.owners.length, 2, `${at}: not on the board's edge`);
-        assert.ok(e.owners.every((o) => terrainName(m, o.hex) !== 'water'), `${at}: not by water`);
-      }
-      features.parapet += m.parapets.length;
+  const g = graph(SIZE.width, SIZE.height);
+  for (let seed = 1; seed <= 60; seed++) {
+    const m = randomize(newModel(), seed);
+    const at = `seed ${seed}`;
+    m.terrain.forEach((t) => kinds.add(t));
+    assert.deepEqual(problems(m, balance), [], at);
+    assert.deepEqual(m.enemies, [m.objective], `${at}: one OPFOR team, on the objective`);
+    assert.ok(m.start.row >= 12 && m.objective.row <= 3, `${at}: BLUFOR at the bottom, the objective near the top`);
+    assert.ok(distance(m.start, m.objective) >= SIZE.height / 2, `${at}: far apart`);
+    for (const [k, f] of Object.entries(m.edges)) {
+      features[f]++;
+      const e = g.edges.get(k);
+      assert.equal(e.owners.length, 2, `${at}: not on the board's edge`);
+      assert.ok(e.owners.every((o) => terrainName(m, o.hex) !== 'water'), `${at}: not by water`);
     }
+    features.parapet += m.parapets.length;
   }
   for (const t of ['open', 'woods', 'scrub', 'water', 'road', 'building']) assert.ok(kinds.has(t), `${t} turns up`);
   for (const [f, n] of Object.entries(features)) assert.ok(n > 0, `${f}s turn up`);
-  const wide = randomize(newModel({ width: 24, height: 8 }), 3);
-  assert.ok(Math.abs(wide.start.col - wide.objective.col) > Math.abs(wide.start.row - wide.objective.row), 'a wide map is fought left to right');
 });
 
 test('enemy teams toggle, up to four, and the one on the objective moves with it', () => {
@@ -165,13 +165,22 @@ test('maps saved while there was a turn limit lose it, and the brief the editor 
   const up = upgradeMapJson(old);
   assert.equal(up.mission.turns, undefined);
   assert.equal(up.mission.brief, 'Take and hold the objective at 5,1. 2 OPFOR fireteams defend the area.');
-  assert.equal(fromMapJson(old).brief, '', 'opened in the editor, the brief is written again from the map');
   const own = { ...old, mission: { ...old.mission, brief: 'Hold the farm for 12 turns.' } };
   assert.equal(upgradeMapJson(own).mission.brief, 'Hold the farm for 12 turns.', 'a brief someone wrote is kept');
-  assert.equal(fromMapJson(own).brief, 'Hold the farm for 12 turns.');
   const current = toMapJson(newModel(), balance);
   assert.equal(upgradeMapJson(current), current, 'a current map is left alone');
   // Opened and saved again in between: no turns any more, the old words still in the brief.
   const resaved = { ...current, mission: { ...current.mission, brief: 'Take and hold the objective at 5,1 within 12 turns. 2 OPFOR fireteams defend the area.' } };
   assert.equal(upgradeMapJson(resaved).mission.brief, 'Take and hold the objective at 5,1. 2 OPFOR fireteams defend the area.');
+});
+
+test('every map from the editor has one mission, take and hold the objective, and always an objective', () => {
+  const json = loadJson('data/maps/trenchline.json');
+  const out = toMapJson(fromMapJson(json), balance);
+  assert.equal(out.mission.brief, 'Take and hold the objective at 6,3. One OPFOR fireteam defends the area.', 'Trench Line\'s own brief is not kept');
+  assert.deepEqual(out.objective, [6, 3]);
+  const m = fromMapJson({ ...json, objective: null });
+  assert.deepEqual(m.objective, H(6, 3), 'a map without one gets it under its first OPFOR team');
+  m.enemies.push(H(2, 2));
+  assert.equal(toMapJson(m, balance).mission.brief, 'Take and hold the objective at 6,3. 2 OPFOR fireteams defend the area.');
 });
