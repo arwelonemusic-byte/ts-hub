@@ -6,7 +6,7 @@
 import { cache } from "react";
 import { getDb } from "../db";
 import { missionPlans } from "../plans";
-import type { Award, HubEvent, LeaderboardEntry, PastEvent, PlanRef, Slot, UpcomingEvent } from "../types";
+import type { Award, BingoResult, HubEvent, LeaderboardEntry, PastEvent, PlanRef, Slot, UpcomingEvent } from "../types";
 import type { HubData } from "./index";
 import { loadMarkersLayer, loadMissions, missionMap } from "./missions";
 
@@ -19,6 +19,8 @@ interface GameStats {
   leaderboards: { aiKills: LeaderboardEntry[]; deaths: LeaderboardEntry[]; knockouts?: LeaderboardEntry[]; shots?: LeaderboardEntry[] };
   awards: Award[];
   friendlyFire: PastEvent["friendlyFireIncidents"];
+  /** Games finished in the hub since TS Bingo records into the replay (2026-10-20); absent before. */
+  bingo?: BingoResult | null;
 }
 
 interface EventRow {
@@ -150,6 +152,7 @@ const loadGames = cache(async (): Promise<HubEvent[]> => {
       friendlyFireIncidents: stats.friendlyFire,
       awards: stats.awards,
       leaderboards: stats.leaderboards,
+      bingo: stats.bingo ?? null,
       attendance: players.map((a) => ({ playerName: a.player_name, attended: a.attended })),
     };
   });

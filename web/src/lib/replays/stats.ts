@@ -1,4 +1,5 @@
-import type { Award, AwardKind, LeaderboardEntry } from "../types";
+import type { Award, AwardKind, BingoResult, LeaderboardEntry } from "../types";
+import { toBingo } from "./bingo";
 
 /*
  * Op stats from TS Replay recordings — a port of ts-ops-planner tools/replay-stats (replay_stats.py
@@ -265,6 +266,8 @@ export interface GameResult {
     leaderboards: { aiKills: LeaderboardEntry[]; deaths: LeaderboardEntry[]; knockouts: LeaderboardEntry[]; shots: LeaderboardEntry[] };
     awards: Award[];
     friendlyFire: { shooter: string; victim: string }[];
+    /** TS Bingo (lib/replays/bingo.ts): hub-only, the Python report has no bingo. */
+    bingo: BingoResult | null;
   };
   /** Sum of the recordings' op time, ms (for the preview). */
   durationMs: number;
@@ -389,6 +392,7 @@ export function toGameResult(replays: Replay[]): GameResult {
       leaderboards: { aiKills: ranked(aiKills), deaths: ranked(deaths), knockouts: ranked(incaps), shots: ranked(shots) },
       awards,
       friendlyFire: teamKills.map((k) => ({ shooter: k.killer, victim: k.victim ?? "союзный ИИ" })),
+      bingo: toBingo(replays.filter((r) => list.some((s) => s.code === r.code))),
     },
   };
 }

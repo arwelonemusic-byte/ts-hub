@@ -232,6 +232,17 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   `finished_at` (migration 007). A played game's «Пересчитать» redoes it with other recordings. Recordings are read
   from the production planner even in dev (`PLANNER_REPLAYS_URL` overrides). Not handled: join-less players and GM
   exclusions (the Python tool's `--label` / `--exclude`).
+- **«Бинго»** (user decisions 2026-10-20): who completed a line on their TS Bingo card (the Workbench addon «TS Bingo»:
+  a 5×5 card of 24 clichés and a free centre, crossed by the players themselves). The mod writes into the TS Replay
+  recording (it depends on TS Replay): `bingo_card {playerId, playerGuid}` once per player per loaded world, and
+  `bingo {playerId, playerGuid, line, marked, cells}` once per completed line (0-4 rows, 5-9 columns, 10/11 diagonals;
+  a line counts once, uncrossing doesn't take it back; `cells` is the whole card, "" in the centre). No names: they
+  come from the recording's `player_join`, by account, else by playerId. «Игра окончена» stores the result in
+  `events.stats.bingo` (`lib/replays/bingo.ts`; null = no bingo events, the box is hidden; trainings have no stats).
+  The box (`components/event/BingoPanel.tsx`, design A) sits above «Ачивки»: «Линию собрали N из M», then a row per
+  winner, earliest first («Первым · 20:27»), with a thumbnail of their card; a row opens the whole card
+  (`BingoCard.tsx`: the mod's card art, cells placed from ts-bingo/tools/make_layout.mjs, a marker through each line).
+  Nobody got a line: «9 карточек, ни одной линии».
 - **Played games before the hub** (Sep 2026 on) come from `db/seed/played-events.json`: `py data/events/build_past_events.py <reports>`
   builds it from the replay-stats reports in ts-wrapped (numbers, roster, rankings, achievements) plus its `OPS` table
   (mission, scheduled time, plan, PL; one row per op), and `npm run db:seed -- --update` loads it (never over a game

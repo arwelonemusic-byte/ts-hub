@@ -137,6 +137,30 @@ export interface LeaderboardEntry {
   value: number;
 }
 
+/**
+ * A player who completed a line on their TS Bingo card (the mod's `bingo` replay events). `lines`, `cells` and
+ * `marked` are the card of their latest line: a server restart mid-op deals new cards.
+ */
+export interface BingoWinner {
+  playerName: string;
+  /** Their first line. */
+  at: ISODate;
+  /** Lines over the whole op. */
+  count: number;
+  /** In the order they were made: 0-4 rows, 5-9 columns, 10 the diagonal from top left, 11 the other one. */
+  lines: number[];
+  /** The card's 25 texts row by row; the free centre is "". */
+  cells: string[];
+  /** Marked cells, bit i = cell i, the free centre included. */
+  marked: number;
+}
+
+/** TS Bingo in a game: how many had a card, and who got a line (earliest first). */
+export interface BingoResult {
+  players: number;
+  winners: BingoWinner[];
+}
+
 export interface FriendlyFireIncident {
   shooter: string;
   victim: string;
@@ -185,6 +209,8 @@ export interface PastEvent extends EventBase {
   awards: Award[];
   /** knockouts and shots: games finished or back-filled since 2026-10-13. */
   leaderboards?: { aiKills: LeaderboardEntry[]; deaths: LeaderboardEntry[]; knockouts?: LeaderboardEntry[]; shots?: LeaderboardEntry[] };
+  /** null when the recordings have no TS Bingo events (games before 2026-10-20, or the mod wasn't running). */
+  bingo: BingoResult | null;
   attendance: AttendanceEntry[];
 }
 

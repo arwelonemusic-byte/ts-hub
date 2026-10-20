@@ -29,6 +29,7 @@ import { LiveRefresh } from "@/components/event/LiveRefresh";
 import { JumpLink } from "@/components/event/Jump";
 import { EventAdminMenu } from "@/components/schedule/Schedule";
 import { FinishGameButton } from "@/components/event/FinishGameDialog";
+import { BingoPanel } from "@/components/event/BingoPanel";
 import { AnnounceButton } from "@/components/event/AnnounceButton";
 import { announcement } from "@/lib/discord/post";
 import { getComments, type Comments } from "@/lib/discord/comments";
@@ -337,6 +338,7 @@ function Played({
         }
         aside={
           <>
+            {!training && ev.bingo && <BingoPanel bingo={ev.bingo} locale={locale} />}
             {!training && ev.awards.length > 0 && <AwardsPanel awards={ev.awards} t={t} />}
             <MissionPanel mission={ev.mission} history={history} locale={locale} t={t} played />
           </>
