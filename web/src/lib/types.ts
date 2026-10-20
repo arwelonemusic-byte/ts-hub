@@ -43,6 +43,8 @@ export interface Mission {
   scenarioId?: string;
   briefing?: Briefing;
   tags: string[];
+  /** When it was added to the hub (seeded or saved in the editor). */
+  addedAt: ISODate;
   /** Mission markers (`Markers.layer`) imported into the planner. */
   hasMarkersLayer: boolean;
   /** false = a simple op that needs no plan, so no Markers.layer either. */

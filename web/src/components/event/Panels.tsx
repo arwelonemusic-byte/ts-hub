@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Fragment, type ReactNode } from "react";
-import { number, shortDate } from "@/lib/format";
+import { longDate, number, shortDate } from "@/lib/format";
 import { plural, type Locale, type T } from "@/lib/i18n";
 import { squadsOf } from "@/lib/squads";
 import { planOpenHref, TRAINING_URL } from "@/lib/links";
@@ -537,6 +537,9 @@ export function MissionPanel({
           <>
             {ids}
             {planning}
+            <Fact label={t("mission.added")}>
+              <span className="text-fg">{longDate(mission.addedAt, locale)}</span>
+            </Fact>
           </>
         ) : (
           <>

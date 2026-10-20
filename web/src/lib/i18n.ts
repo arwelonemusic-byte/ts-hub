@@ -393,6 +393,7 @@ const RU: Dict = {
   "mission.times.many": "{n} раз",
   "mission.times.other": "{n} раза",
   "mission.planning": "Для плана",
+  "mission.added": "Добавлена",
   "mission.markersReady": "Markers.layer подгружен",
   "mission.markersMissing": "Markers.layer пока нет",
   "mission.noPlanning": "Не требуется",

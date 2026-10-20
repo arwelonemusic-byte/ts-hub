@@ -19,6 +19,7 @@ interface MissionRow {
   no_slotting: boolean;
   archived: boolean;
   training: boolean;
+  created_at: Date | string;
 }
 
 /** The whole catalogue, once per request. Authors show their current member name when they're members. */
@@ -28,7 +29,7 @@ export const loadMissions = cache(async (): Promise<Mission[]> => {
     db.query(
       `SELECT id, name, map_key, map_label, cover_url, workshop_url, addon_guid, scenario_id, briefing, tags,
               markers_layer IS NOT NULL AS has_markers_layer, planning, no_slotting,
-              archived_at IS NOT NULL AS archived, training
+              archived_at IS NOT NULL AS archived, training, created_at
        FROM missions ORDER BY name`,
     ) as Promise<MissionRow[]>,
     db.query(
@@ -73,6 +74,7 @@ export const loadMissions = cache(async (): Promise<Mission[]> => {
     ...(m.scenario_id ? { scenarioId: m.scenario_id } : {}),
     ...(m.briefing ? { briefing: m.briefing } : {}),
     tags: m.tags,
+    addedAt: new Date(m.created_at).toISOString(),
     hasMarkersLayer: m.has_markers_layer,
     ...(m.planning ? {} : { planning: false }),
     ...(squadsOf.has(m.id) ? { squads: squadsOf.get(m.id) } : {}),
