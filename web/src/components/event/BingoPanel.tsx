@@ -55,7 +55,7 @@ export function BingoPanel({ bingo, locale }: { bingo: BingoResult; locale: Loca
                     <span className="shrink-0 rounded-xs bg-accent-subtle px-1.5 type-caption-strong text-fg-accent">{plural(locale, "bingo.lines", w.count)}</span>
                   )}
                 </span>
-                <span className="line-clamp-2 type-caption text-fg-secondary">{lineTexts(w, w.lines[0])}</span>
+                <span className="line-clamp-3 type-caption text-fg-secondary">{lineTexts(w, w.lines[0])}</span>
               </span>
             </button>
           ))}
