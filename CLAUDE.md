@@ -239,10 +239,10 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   a line counts once, uncrossing doesn't take it back; `cells` is the whole card, "" in the centre). No names: they
   come from the recording's `player_join`, by account, else by playerId. «Игра окончена» stores the result in
   `events.stats.bingo` (`lib/replays/bingo.ts`; null = no bingo events, the box is hidden; trainings have no stats).
-  The box (`components/event/BingoPanel.tsx`, design A) sits above «Ачивки»: «Линию собрали N из M», then a row per
-  winner, earliest first («Первым · 20:27»), with a thumbnail of their card; a row opens the whole card
-  (`BingoCard.tsx`: the mod's card art, cells placed from ts-bingo/tools/make_layout.mjs, a marker through each line).
-  Nobody got a line: «9 карточек, ни одной линии».
+  The box (`components/event/BingoPanel.tsx`, design A) sits above «Ачивки»: the title «Бинго 3» (the number of
+  winners in the secondary colour, no subtitle; user request 2026-10-21), then a row per winner, earliest first
+  (no time or «Первым» on it, user request 2026-10-21), with a thumbnail of their card; a row opens the whole card (`BingoCard.tsx`: the mod's card art,
+  cells placed from ts-bingo/tools/make_layout.mjs, a marker through each line). Nobody got a line: «Бинго 0».
 - **Played games before the hub** (Sep 2026 on) come from `db/seed/played-events.json`: `py data/events/build_past_events.py <reports>`
   builds it from the replay-stats reports in ts-wrapped (numbers, roster, rankings, achievements) plus its `OPS` table
   (mission, scheduled time, plan, PL; one row per op), and `npm run db:seed -- --update` loads it (never over a game

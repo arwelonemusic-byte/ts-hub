@@ -1,8 +1,6 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState } from "react";
-import { time } from "@/lib/format";
 import { makeT, plural, type Locale, type T } from "@/lib/i18n";
 import type { BingoResult, BingoWinner } from "@/lib/types";
 import { DialogShell } from "../mission/editor/DialogShell";
@@ -31,23 +29,16 @@ export function BingoPanel({ bingo, locale }: { bingo: BingoResult; locale: Loca
   const t = useMemo(() => makeT(locale), [locale]);
   const [open, setOpen] = useState<BingoWinner | null>(null);
   const { winners } = bingo;
-  const players = Math.max(bingo.players, winners.length);
   return (
     <section className="flex flex-col gap-4 rounded-xl bg-inset p-6">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h2 className="type-heading-m text-fg">{t("bingo.title")}</h2>
-          <p className="type-caption text-fg-secondary">
-            {winners.length ? t("bingo.summary", { n: winners.length, m: players }) : plural(locale, "bingo.none", players)}
-          </p>
-        </div>
-        <div className="relative mt-0.5 h-[42px] w-24 shrink-0 -rotate-6">
-          <Image src="/illustrations/bingo/sticker.png" alt="" fill sizes="96px" className="object-contain" />
-        </div>
-      </div>
+      {/* «Бинго 3»: the title and how many got a line (user request 2026-10-21). */}
+      <h2 className="flex items-baseline gap-2 type-heading-m">
+        <span className="text-fg">{t("bingo.title")}</span>
+        <span className="text-fg-secondary">{winners.length}</span>
+      </h2>
       {winners.length > 0 && (
         <div className="flex flex-col gap-2">
-          {winners.map((w, i) => (
+          {winners.map((w) => (
             <button
               key={w.playerName}
               type="button"
@@ -56,10 +47,8 @@ export function BingoPanel({ bingo, locale }: { bingo: BingoResult; locale: Loca
               className="flex items-start gap-3 rounded-lg bg-page p-3 text-left ring-1 ring-transparent transition-shadow hover:ring-line-strong focus-visible:ring-line-accent focus-visible:outline-none"
             >
               <BingoCard card={w} size="mini" />
+              {/* No time or «Первым» on the rows (user request 2026-10-21); they stay earliest first. */}
               <span className="flex min-w-0 flex-col gap-0.5">
-                <span className={`type-eyebrow ${i === 0 ? "text-fg-accent" : "text-fg-tertiary"}`}>
-                  {i === 0 ? `${t("bingo.first")} · ${time(w.at)}` : time(w.at)}
-                </span>
                 <span className="flex min-w-0 items-center gap-1.5">
                   <span className="truncate type-label-m text-fg">{w.playerName}</span>
                   {w.count > 1 && (
