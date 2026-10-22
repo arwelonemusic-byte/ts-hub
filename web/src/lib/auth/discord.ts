@@ -96,7 +96,14 @@ export function avatarUrl(userId: string, avatar: string | null): string | null 
  * A member's current roles and nickname via the bot token (no user OAuth), so a Discord role given after
  * login counts without logging in again. null = no bot token, or Discord didn't answer.
  */
-export async function fetchGuildMemberByBot(userId: string): Promise<{ roles: string[]; nick: string | null } | "NOT_IN_GUILD" | null> {
+export interface BotMember {
+  roles: string[];
+  nick: string | null;
+  /** The account behind the membership (filled in by «Добавить участника»; the login path has its own user call). */
+  user: { username: string; globalName: string | null; avatar: string | null } | null;
+}
+
+export async function fetchGuildMemberByBot(userId: string): Promise<BotMember | "NOT_IN_GUILD" | null> {
   const token = process.env.DISCORD_BOT_TOKEN;
   if (!token) return null;
   try {
@@ -108,7 +115,12 @@ export async function fetchGuildMemberByBot(userId: string): Promise<{ roles: st
     if (res.status === 404) return "NOT_IN_GUILD";
     if (!res.ok) return null;
     const d = await res.json();
-    return { roles: d.roles ?? [], nick: d.nick ?? null };
+    const u = d.user;
+    return {
+      roles: d.roles ?? [],
+      nick: d.nick ?? null,
+      user: u?.username ? { username: u.username, globalName: u.global_name ?? null, avatar: u.avatar ?? null } : null,
+    };
   } catch {
     return null;
   }
