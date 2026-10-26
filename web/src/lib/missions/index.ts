@@ -1,8 +1,11 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { discordRoleNames } from "../auth/discord";
 import { getDb } from "../db";
 import { MAPS } from "../maps";
 import type { Mission } from "../types";
 import type { Viewer } from "../viewer";
+import type { SlotRoleRules } from "./slotRoles";
 
 /*
  * Who may change the catalogue (user decision 2026-10-09): admins add, edit, archive and delete any
@@ -17,6 +20,8 @@ export interface EditorOptions {
   members: { discordId: string; name: string }[];
   tags: string[];
   roles: string[];
+  /** Fill in the roles of slots read from an addon folder (slotRoles.ts). */
+  roleRules: SlotRoleRules;
   maps: { key: string; label: string }[];
 }
 
@@ -28,19 +33,39 @@ const roleKey = (r: string) => r.toLowerCase().replace(/[\s_-]+/g, "");
 
 export async function editorOptions(): Promise<EditorOptions> {
   const db = await getDb();
-  const [members, tagRows, roles] = await Promise.all([
+  const [members, tagRows, roles, roleRules] = await Promise.all([
     db.query("SELECT discord_id, display_name FROM players WHERE discord_id IS NOT NULL ORDER BY lower(display_name)") as Promise<
       { discord_id: string; display_name: string }[]
     >,
     db.query("SELECT DISTINCT unnest(tags) AS tag FROM missions ORDER BY 1") as Promise<{ tag: string }[]>,
     slotRoles(),
+    slotRoleRules(),
   ]);
   return {
     members: members.map((m) => ({ discordId: m.discord_id, name: m.display_name })),
     tags: tagRows.map((t) => t.tag),
     roles,
+    roleRules,
     maps: [...MAPS].sort((a, b) => a.label.localeCompare(b.label)),
   };
+}
+
+const SLOT_ROLES_FILE = path.resolve(/* turbopackIgnore: true */ process.cwd(), "..", "data", "catalogue", "slot-roles.json");
+
+/**
+ * The user's fixed slot-name rules ("always" in data/catalogue/slot-roles.json, user decision 2026-10-26: not the
+ * case-by-case "decided" answers). Read on every call, so an edit to the file counts at once; none if it's missing.
+ */
+async function slotRoleRules(): Promise<SlotRoleRules> {
+  try {
+    const always = JSON.parse(await readFile(SLOT_ROLES_FILE, "utf8")).always ?? {};
+    return Object.fromEntries(
+      Object.entries(always).filter((e): e is [string, string[]] => Array.isArray(e[1]) && e[1].every((n) => typeof n === "string")),
+    );
+  } catch (e) {
+    console.error(`[missions] no slot role rules from ${SLOT_ROLES_FILE}:`, e);
+    return {};
+  }
 }
 
 /** Required roles a slot can have: the templates' and the Discord role map's, in the bot files' order. */

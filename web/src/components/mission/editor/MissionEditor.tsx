@@ -5,8 +5,11 @@ import { useMemo, useState } from "react";
 import { makeT, type Locale } from "@/lib/i18n";
 import type { EditorOptions } from "@/lib/missions";
 import { saveMission } from "@/lib/missions/actions";
+import { keepRequiredRoles, type FolderImport } from "@/lib/missions/addonFolder";
 import { checkDraft, ERROR_STEP, normalizeDraft, type DraftError, type DraftStep, type MissionDraft, type WorkshopInfo } from "@/lib/missions/draft";
+import { prefillRequiredRoles } from "@/lib/missions/slotRoles";
 import { buttonClass } from "../../ui";
+import { AddonFolder, SlotsFound } from "./AddonFolder";
 import { BriefingStep } from "./BriefingStep";
 import { DialogShell } from "./DialogShell";
 import { SquadsEditor } from "./SquadsEditor";
@@ -64,6 +67,17 @@ export function MissionEditor({
   const set = (patch: Partial<MissionDraft>) => {
     setDraft((d) => ({ ...d, ...patch }));
     setError(null);
+  };
+  // The addon folder (step 2 or 3) also fills the slot template when the mission has seated squads (TS Mission
+  // Builder's advanced squads). The addon has no Discord roles: the user's fixed rules fill those they cover, and
+  // roles already picked stay on the same slots. `step`: where it was picked (step 3 takes only the slots, so step 2
+  // says nothing about it).
+  const [folder, setFolder] = useState<{ res: FolderImport; step: DraftStep; open: number } | null>(null);
+  const onFolder = (step: DraftStep) => (res: FolderImport) => {
+    const squads = res.squads && keepRequiredRoles(prefillRequiredRoles(res.squads.squads, options.roleRules, options.roles), draft.squads);
+    // Slots left without a role, for the import's line.
+    setFolder({ res, step, open: squads ? squads.reduce((n, sq) => n + sq.slots.filter((s) => !s.requiredRole).length, 0) : 0 });
+    if (squads) set({ squads });
   };
 
   const problem: DraftError | null = useMemo(
@@ -169,12 +183,25 @@ export function MissionEditor({
           t={t}
         />
       )}
-      {step === "briefing" && <BriefingStep draft={draft} set={set} hadLayer={!!editing?.hasMarkersLayer} t={t} />}
+      {step === "briefing" && (
+        <BriefingStep
+          draft={draft}
+          set={set}
+          hadLayer={!!editing?.hasMarkersLayer}
+          imported={folder?.step === "briefing" ? folder : null}
+          onImport={onFolder("briefing")}
+          locale={locale}
+          t={t}
+        />
+      )}
       {step === "slots" &&
         (draft.training ? (
           <p className="rounded-xl bg-inset p-4 type-body-m text-fg-secondary">{t("editor.slots.training")}</p>
         ) : (
           <div className="flex flex-col gap-5">
+            <AddonFolder scenarioId={draft.scenarioId} text={t("editor.folder.slotsText")} onImport={onFolder("slots")} t={t}>
+              {folder && <SlotsFound imported={folder.res} open={folder.open} locale={locale} t={t} />}
+            </AddonFolder>
             <SquadsEditor squads={draft.squads} setSquads={(squads) => set({ squads })} roles={options.roles} mode="mission" locale={locale} t={t} />
             {editing && draft.squads.length > 0 && <p className="type-caption text-fg-tertiary">{t("editor.slots.editNote")}</p>}
           </div>

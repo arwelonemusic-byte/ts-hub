@@ -96,7 +96,16 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
      (`lib/missions/addonFolder.ts`, in the browser, nothing uploaded): the journal config (`SCR_JournalSetupConfig`)
      gives the sections, and the scenario's world gives `<world>_Layers/Markers.layer`. «Миссия без плана» needs no layer.
   3. **Slots** — squads and slots with their Discord role. No squads = played without slotting (`no_slotting`).
-     Editing the template doesn't touch games already scheduled (they keep their copy).
+     Editing the template doesn't touch games already scheduled (they keep their copy). A mission made with TS Mission
+     Builder's advanced squad mode (2026-10-26) carries its seats: the addon folder, picked on step 2 or on this step
+     (which takes only the slots), fills the squads (`parseSquads`; user request 2026-10-26). They're on the faction
+     manager in the scenario's world, usually `default.layer`: each `SCR_GroupPreset` with `m_aTS_Slots` is a squad,
+     each `TS_SlotDef`'s `m_sName` a slot (fireteam prefix included), and preset N's callsign is the faction's Nth
+     `m_aSquadNames` entry (1'1, or names like Krahujec-1). Presets without seats are skipped. The addon has no Discord
+     roles: the "always" rules of `slot-roles.json` fill the ones they cover (`lib/missions/slotRoles.ts`, user decision
+     2026-10-26: not the "decided" answers; spaces don't count for a whole name, so "Machinegunner" matches), the rest
+     stay «Любой» for the author, and the import's line says how many. Roles already picked in the dialog stay on
+     slots with the same squad and name. The server reads the file on each dialog open (`editorOptions`).
 
   A new mission goes step by step; an edit can jump between steps and save from any. Saving (`saveMission`) fetches the
   Workshop image again for a new mission or on «Обновить из Workshop», and stores it in the uploads folder

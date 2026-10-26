@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent, type ReactNode } from "react";
-import type { T } from "@/lib/i18n";
-import { importAddonFolder, type FolderImport } from "@/lib/missions/addonFolder";
+import { useRef, useState, type ChangeEvent } from "react";
+import type { Locale, T } from "@/lib/i18n";
+import type { FolderImport } from "@/lib/missions/addonFolder";
 import type { MissionDraft } from "@/lib/missions/draft";
-import { buttonClass, Icon } from "../../ui";
+import { buttonClass } from "../../ui";
+import { AddonFolder, Found, SlotsFound } from "./AddonFolder";
 import { Check, Field, move, TextArea, TextInput, ToolButton } from "./fields";
 
 /** The headings the catalogue's briefings use, offered for a new section. */
@@ -14,37 +15,38 @@ const kb = (chars: number) => `${(chars / 1024).toFixed(1)} КБ`;
 
 /**
  * Step 2: the briefing and the Markers.layer. The author either points the dialog at the addon's
- * folder (the browser reads Briefing.conf and the scenario world's Markers.layer) or types and
- * uploads them; either way the form below is what gets saved.
+ * folder (the browser reads Briefing.conf, the scenario world's Markers.layer and its squads, which
+ * `onImport` puts in the slot template) or types and uploads them; either way the form below is what
+ * gets saved.
  */
 export function BriefingStep({
   draft,
   set,
   hadLayer,
+  imported,
+  onImport,
+  locale,
   t,
 }: {
   draft: MissionDraft;
   set: (patch: Partial<MissionDraft>) => void;
   /** The mission already has a Markers.layer (editing). */
   hadLayer: boolean;
+  /** The last folder picked on this step, and its slots left without a role. */
+  imported: { res: FolderImport; open: number } | null;
+  onImport: (res: FolderImport) => void;
+  locale: Locale;
   t: T;
 }) {
-  const folderRef = useRef<HTMLInputElement>(null);
   const layerRef = useRef<HTMLInputElement>(null);
-  const [imported, setImported] = useState<FolderImport | null>(null);
-  const [reading, setReading] = useState(false);
   const [layerName, setLayerName] = useState<string | null>(null);
+  const res = imported?.res;
   const sections = draft.briefing.sections;
   const setSections = (next: MissionDraft["briefing"]["sections"]) => set({ briefing: { ...draft.briefing, sections: next } });
   const setSide = (side: "for" | "against", v: string) => set({ briefing: { ...draft.briefing, sides: { ...draft.briefing.sides, [side]: v } } });
 
-  const onFolder = async (e: ChangeEvent<HTMLInputElement>) => {
-    const files = [...(e.target.files ?? [])];
-    e.target.value = "";
-    if (!files.length) return;
-    setReading(true);
-    const res = await importAddonFolder(files, draft.scenarioId).finally(() => setReading(false));
-    setImported(res);
+  const onFolder = (res: FolderImport) => {
+    onImport(res);
     const patch: Partial<MissionDraft> = {};
     if (res.briefing) patch.briefing = { ...draft.briefing, sections: res.briefing.sections };
     if (res.layer) {
@@ -67,44 +69,24 @@ export function BriefingStep({
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="flex flex-col gap-3 rounded-xl border border-dashed border-line-strong p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <h3 className="type-label-m text-fg">{t("editor.folder.title")}</h3>
-            <p className="type-body-s text-fg-secondary">{t("editor.folder.text")}</p>
-          </div>
-          <button type="button" onClick={() => folderRef.current?.click()} disabled={reading} className={buttonClass("secondary", "m")}>
-            {reading ? t("editor.folder.reading") : t("editor.folder.pick")}
-          </button>
-          <input
-            ref={folderRef}
-            type="file"
-            className="hidden"
-            onChange={onFolder}
-            // Folder picking isn't in React's input typings.
-            {...({ webkitdirectory: "", directory: "" } as object)}
-          />
-        </div>
-        {imported && (
-          <ul className="flex flex-col gap-1.5 border-t border-line pt-3 type-body-s">
-            <Found ok={!!imported.briefing} t={t}>
-              {imported.briefing
-                ? t("editor.folder.briefing", { n: imported.briefing.sections.length, path: imported.briefing.path })
-                : t("editor.folder.noBriefing")}
+      <AddonFolder scenarioId={draft.scenarioId} text={t("editor.folder.text")} onImport={onFolder} t={t}>
+        {res && (
+          <>
+            <Found ok={!!res.briefing} t={t}>
+              {res.briefing ? t("editor.folder.briefing", { n: res.briefing.sections.length, path: res.briefing.path }) : t("editor.folder.noBriefing")}
             </Found>
-            <Found ok={!!imported.layer} t={t}>
-              {imported.layer
-                ? t("editor.folder.layer", { path: imported.layer.path })
-                : imported.layerCandidates > 1
-                  ? t("editor.folder.layers", { n: imported.layerCandidates })
+            <Found ok={!!res.layer} t={t}>
+              {res.layer
+                ? t("editor.folder.layer", { path: res.layer.path })
+                : res.layerCandidates > 1
+                  ? t("editor.folder.layers", { n: res.layerCandidates })
                   : t("editor.folder.noLayer")}
             </Found>
-            {!imported.scenarioFound && (
-              <li className="type-caption text-fg-tertiary">{t("editor.folder.noScenario", { root: imported.root })}</li>
-            )}
-          </ul>
+            <SlotsFound imported={res} open={imported?.open ?? 0} locale={locale} t={t} />
+            {!res.scenarioFound && <li className="type-caption text-fg-tertiary">{t("editor.folder.noScenario", { root: res.root })}</li>}
+          </>
         )}
-      </section>
+      </AddonFolder>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("briefing.for")}>
@@ -186,14 +168,5 @@ export function BriefingStep({
       </section>
       )}
     </div>
-  );
-}
-
-function Found({ ok, children, t }: { ok: boolean; children: ReactNode; t: T }) {
-  return (
-    <li className={`flex items-start gap-2 ${ok ? "text-fg-label" : "text-fg-tertiary"}`}>
-      {ok ? <Icon name="check-circle" className="mt-0.5" /> : <span className="w-4 shrink-0 text-center" aria-label={t("editor.folder.missing")}>–</span>}
-      <span className="min-w-0 break-words">{children}</span>
-    </li>
   );
 }
