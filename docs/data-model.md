@@ -29,7 +29,8 @@ erDiagram
 - past: players joined · replay(s) (several if the server restarted) · plan used · stats
 
 **Mission** — Workshop URL · cover image · briefing · author(s) (multiple?) · tags ·
-events it was part of · times played · `Markers.layer` (needed for planning)
+events it was part of · times played · `Markers.layer` (needed for planning) · members' comments (feedback on the
+mission itself, `mission_comments`, migration 014)
 
 ## Facts that shaped the cardinalities
 

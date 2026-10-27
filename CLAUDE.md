@@ -114,6 +114,13 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   cancelled games with it. Archived missions leave the
   catalogue and the schedule dialog, and their page shows «В архиве». Every hub save sets `missions.hub_edited_at`
   (migration 005), and `db:seed --update` leaves those missions alone.
+- **Mission «Комментарии»** (`components/mission/MissionComments.tsx`, `lib/missions/comments.ts`; user request
+  2026-10-27): players' feedback on the mission itself (bugs, balance, what to fix), last in the page's main column.
+  The hub's own `mission_comments` (migration 014), never posted to Discord, unlike a game's «Комментарии» (its
+  thread). Everyone reads them; members of the Discord write (2000 characters at most), the box on top and the
+  comments newest first; a mission author's comment says «автор миссии» (`authorIds`). «Удалить» for its writer or an
+  admin sets `deleted_at`; deleting the mission takes its comments with it (ON DELETE CASCADE). Same box and rows as a
+  Fix & Flank map's comments (`components/event/CommentForm.tsx`, `CommentList.tsx`, `DeleteCommentButton.tsx`).
 - **Missions own their slot template.** Each game copies it, and the author or an admin can grow it later (adding
   squads to an old mission). Fireteams are plain text in the slot name ("BLUE - Grenadier"). `requiredRole` is a
   Discord role, and Discord stays the source of truth for roles. Which slot name needs which role is in

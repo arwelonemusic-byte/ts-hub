@@ -5,6 +5,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { BriefingPanel, isOwnPlan, MissionPanel, PlanRow } from "@/components/event/Panels";
 import { DeletePlanButton } from "@/components/event/DeletePlanButton";
 import { MissionMenu } from "@/components/mission/MissionActions";
+import { MissionComments } from "@/components/mission/MissionComments";
 import { MissionSlotsPanel } from "@/components/mission/MissionSlotsPanel";
 import { ScheduleButton } from "@/components/schedule/Schedule";
 import { buttonClass, ButtonLink, Cover, Eyebrow, Icon, StatusChip } from "@/components/ui";
@@ -26,9 +27,11 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
   if (!mission) notFound();
   const canEdit = canEditMission(viewer, mission);
   const isAdmin = !!viewer?.isAdmin;
-  const [games, history, options, draft, hasGames] = await Promise.all([
-    data.listMissionEvents(mission.id, new Date()),
+  const now = new Date();
+  const [games, history, comments, options, draft, hasGames] = await Promise.all([
+    data.listMissionEvents(mission.id, now),
     data.getMissionHistory(mission.id),
+    data.listMissionComments(mission.id),
     canEdit ? editorOptions() : null,
     canEdit ? loadMissionDraft(mission.id) : null,
     isAdmin ? missionHasGames(mission.id) : true,
@@ -57,6 +60,7 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
             <Games games={games} locale={locale} t={t} />
             {/* Trainings have no plans. */}
             {!mission.training && <Plans missionId={mission.id} history={history} viewerId={viewer?.discordId} isAdmin={isAdmin} t={t} />}
+            <MissionComments mission={mission} comments={comments} viewer={viewer} now={now} locale={locale} t={t} />
           </div>
           <aside className="flex shrink-0 flex-col gap-4 lg:w-[360px]">
             <MissionPanel mission={mission} history={history} locale={locale} t={t} onMissionPage />

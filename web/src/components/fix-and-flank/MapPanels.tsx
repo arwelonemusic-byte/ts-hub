@@ -1,14 +1,13 @@
 import Image from "next/image";
-import { Avatar } from "@/components/event/Avatar";
 import { CommentForm } from "@/components/event/CommentForm";
+import { CommentList } from "@/components/event/CommentList";
 import { buttonClass, Icon } from "@/components/ui";
-import { postMapComment } from "@/lib/fix-and-flank/actions";
+import { deleteMapComment, postMapComment } from "@/lib/fix-and-flank/actions";
 import { FNF_COMMENT_MAX, gameUrl } from "@/lib/fix-and-flank/game";
 import { shortDay, time } from "@/lib/format";
 import type { FnfComment, FnfRun } from "@/lib/fix-and-flank/types";
 import { format, plural, type Locale, type T } from "@/lib/i18n";
 import type { Viewer } from "@/lib/viewer";
-import { DeleteCommentButton } from "./DeleteCommentButton";
 
 const MEDALS = ["gold", "silver", "bronze"];
 
@@ -132,27 +131,14 @@ export function MapCommentsPanel({
         </div>
       )}
       {comments.length ? (
-        <ol className="flex flex-col">
-          {comments.map((c) => (
-            <li key={c.id} className="flex gap-3 border-t border-line py-3">
-              <Avatar name={c.author} src={c.avatar} size={32} />
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="flex items-baseline gap-2">
-                  <span className="type-label-s text-fg">{c.author}</span>
-                  <span className="type-caption text-fg-tertiary">
-                    {shortDay(c.createdAt, now, locale)}, {time(c.createdAt)}
-                  </span>
-                  {(c.authorId === viewerId || viewer?.isAdmin) && (
-                    <span className="ml-auto">
-                      <DeleteCommentButton id={c.id} labels={deleteLabels} />
-                    </span>
-                  )}
-                </span>
-                <p className="whitespace-pre-line break-words type-body-s text-fg-body">{c.body}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <CommentList
+          comments={comments}
+          canDelete={(c) => c.authorId === viewerId || !!viewer?.isAdmin}
+          remove={deleteMapComment}
+          labels={deleteLabels}
+          now={now}
+          locale={locale}
+        />
       ) : (
         <p className="type-body-s text-fg-secondary">{t("fnf.comments.empty")}</p>
       )}

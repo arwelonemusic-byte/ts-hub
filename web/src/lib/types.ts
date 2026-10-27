@@ -242,6 +242,17 @@ export interface MissionHistory {
   plans: PlanRef[];
 }
 
+/** A member's comment on a mission's page: feedback on the mission itself (migration 014), the hub's own. */
+export interface MissionComment {
+  id: string;
+  /** Its writer's Discord id: they (or an admin) can take it down, and a mission author's comment is marked. */
+  discordId: string | null;
+  author: string;
+  avatar: string | null;
+  body: string;
+  createdAt: ISODate;
+}
+
 /** A usual weekly slot with nothing scheduled in it yet. */
 export interface OpenSlot {
   status: "open";

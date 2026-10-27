@@ -1,4 +1,4 @@
-import type { HubEvent, Mission, MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
+import type { HubEvent, Mission, MissionComment, MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { fixAndFlankData, type FixAndFlankData } from "./fixAndFlank";
 import { gamesData } from "./games";
 
@@ -30,6 +30,8 @@ export interface HubData {
   listMissionEvents(missionId: string, now: Date): Promise<HubEvent[]>;
   /** How often a mission was played and the plans drawn for it. */
   getMissionHistory(missionId: string): Promise<MissionHistory>;
+  /** Members' feedback on the mission page, newest first. */
+  listMissionComments(missionId: string): Promise<MissionComment[]>;
 }
 
 export function getHubData(): HubData {

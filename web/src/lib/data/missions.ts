@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { getDb } from "../db";
 import type { MissionDraft } from "../missions/draft";
-import type { Mission, MissionSquad } from "../types";
+import type { Mission, MissionComment, MissionSquad } from "../types";
 
 interface MissionRow {
   id: string;
@@ -91,6 +91,24 @@ export async function loadMarkersLayer(id: string): Promise<string | null> {
   const db = await getDb();
   const [row] = await db.query("SELECT markers_layer FROM missions WHERE id = $1", [id]);
   return (row?.markers_layer as string | null) ?? null;
+}
+
+/** «Комментарии» on the mission's page, newest first, without the ones taken down. */
+export async function loadMissionComments(missionId: string): Promise<MissionComment[]> {
+  const db = await getDb();
+  const rows = await db.query(
+    `SELECT c.id, p.discord_id, p.display_name, p.avatar_url, c.body, c.created_at FROM mission_comments c JOIN players p ON p.id = c.player_id
+     WHERE c.mission_id = $1 AND c.deleted_at IS NULL ORDER BY c.created_at DESC`,
+    [missionId],
+  );
+  return rows.map((c) => ({
+    id: String(c.id),
+    discordId: (c.discord_id as string | null) ?? null,
+    author: String(c.display_name),
+    avatar: (c.avatar_url as string | null) ?? null,
+    body: String(c.body),
+    createdAt: new Date(c.created_at as string).toISOString(),
+  }));
 }
 
 /** The mission as the edit dialog starts from: authors with their Discord ids, the layer left as is. */

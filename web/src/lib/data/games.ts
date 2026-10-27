@@ -8,7 +8,7 @@ import { getDb } from "../db";
 import { missionPlans } from "../plans";
 import type { Award, BingoResult, HubEvent, LeaderboardEntry, PastEvent, PlanRef, Slot, UpcomingEvent } from "../types";
 import type { HubData } from "./index";
-import { loadMarkersLayer, loadMissions, missionMap } from "./missions";
+import { loadMarkersLayer, loadMissionComments, loadMissions, missionMap } from "./missions";
 
 /** A scheduled game stays listed this long after its start, so it doesn't vanish while it's being played. */
 const GAME_MS = 4 * 3600_000;
@@ -239,5 +239,8 @@ export const gamesData: HubData = {
       timesPlayed: games.filter((e) => isPast(e) && e.mission.id === missionId).length,
       plans: await missionPlans(missionId, gamePlans(games, missionId)),
     };
+  },
+  async listMissionComments(missionId) {
+    return loadMissionComments(missionId);
   },
 };

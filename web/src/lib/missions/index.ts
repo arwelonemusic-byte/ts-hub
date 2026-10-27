@@ -15,6 +15,9 @@ export const canAddMission = (v: Viewer | null) => !!v && (v.isAdmin || v.isMiss
 export const canEditMission = (v: Viewer | null, m: Pick<Mission, "authorIds">) =>
   !!v && (v.isAdmin || (v.isMissionMaker && m.authorIds.includes(v.discordId)));
 
+/** The longest comment on a mission's page (comments.ts), as a map's. */
+export const MISSION_COMMENT_MAX = 2000;
+
 /** What the add/edit dialog offers: members to pick authors from, the catalogue's tags, slot roles, maps. */
 export interface EditorOptions {
   members: { discordId: string; name: string }[];
