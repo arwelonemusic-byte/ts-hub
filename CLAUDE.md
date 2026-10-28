@@ -80,10 +80,14 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   mission's slot template (`Mission.squads`). A mission without one is played without slotting, and its games use
   «Я приду!» instead. The hub doesn't show Workshop dependencies or update dates (user decision).
 - **Missions list** (`app/missions`) follows Figma frame 52:1362: a filter rail (search, map and author dropdowns, tag
-  chips; a mission must carry every selected tag) and mission-only cards (cover, title, map, author; no game details).
-  Filters live in the URL (`?q=&map=&author=&tag=`) via `history.replaceState`; logic is in `lib/catalog.ts`. No sort
-  control (user decision): scheduled soonest first, then most recently played, then never played. The subtitle is the
-  catalogue's size («41 миссия в каталоге»). Archived missions are left out; admins open them at `?archive=1`.
+  chips; a mission must carry every selected tag; «Сортировка» last) and mission-only cards (cover, title, map, author;
+  no game details). Filters and the sort live in the URL (`?q=&map=&author=&tag=&sort=`) via `history.replaceState`;
+  logic is in `lib/catalog.ts`. `MissionCatalog` starts from `useSearchParams()`, not the server's render: Back brings
+  the page back as first rendered, before the filters changed. Sorts (user request 2026-10-28): «Сначала новые» (`missions.created_at`; the default,
+  left out of the URL; the seeded catalogue shares one `created_at`, so it falls back to A–Z), «А–Я» / «Я–А» (Russian
+  `localeCompare`), «Недавно сыгранные» (the last played game; scheduled games don't count, so a mission never played
+  yet goes to the end with the others never played, A–Z). «Сбросить» clears the filters and keeps the sort. The
+  subtitle is the catalogue's size («41 миссия в каталоге»). Archived missions are left out; admins open them at `?archive=1`.
 - **Mission CRUD** (`lib/missions/`, user decisions 2026-10-09): admins add, edit, archive and delete any mission;
   @mission officer members add missions and edit the ones they're a listed author of (a mission maker can't take
   themselves off the authors). One dialog (`components/mission/editor/`) in three steps:

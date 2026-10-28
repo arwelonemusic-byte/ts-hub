@@ -1,17 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { catalogSearch, catalogTags, filterCatalog, type CatalogMission, type CatalogQuery } from "@/lib/catalog";
+import {
+  CATALOG_SORTS,
+  catalogSearch,
+  catalogTags,
+  filterCatalog,
+  parseCatalogQuery,
+  type CatalogMission,
+  type CatalogQuery,
+  type CatalogSort,
+} from "@/lib/catalog";
 import { makeT, type Locale } from "@/lib/i18n";
 import { buttonClass, Cover, Icon } from "../ui";
 
-const EMPTY: CatalogQuery = { q: "", map: "", author: "", tags: [] };
+/** «Сбросить» clears the filters and keeps the sort. */
+const EMPTY: Omit<CatalogQuery, "sort"> = { q: "", map: "", author: "", tags: [] };
 
 /** Figma "Missions · List" (node 52:1362): filter rail on the left, mission cards on the right. */
-export function MissionCatalog({ missions, initial, locale }: { missions: CatalogMission[]; initial: CatalogQuery; locale: Locale }) {
+export function MissionCatalog({ missions, locale }: { missions: CatalogMission[]; locale: Locale }) {
   const t = makeT(locale);
-  const [query, setQuery] = useState(initial);
+  // Read from the URL, not from the server's render: Back brings the page back as first rendered, before the filters
+  // and the sort changed it, while the URL (kept up to date below) has them.
+  const params = useSearchParams();
+  const [query, setQuery] = useState(() => parseCatalogQuery(Object.fromEntries([...params.keys()].map((k) => [k, params.getAll(k)]))));
   const update = (patch: Partial<CatalogQuery>) => {
     const next = { ...query, ...patch };
     setQuery(next);
@@ -94,6 +108,15 @@ export function MissionCatalog({ missions, initial, locale }: { missions: Catalo
             })}
           </div>
         </fieldset>
+        <Field label={t("catalog.sort")}>
+          <Select value={query.sort} onChange={(sort) => update({ sort: sort as CatalogSort })}>
+            {CATALOG_SORTS.map((s) => (
+              <option key={s} value={s}>
+                {t(`catalog.sort.${s}`)}
+              </option>
+            ))}
+          </Select>
+        </Field>
       </aside>
 
       <section aria-label={t("nav.missions")} className="flex min-w-0 flex-1 flex-col gap-4">

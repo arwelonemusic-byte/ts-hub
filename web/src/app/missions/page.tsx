@@ -3,7 +3,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { AddMissionButton } from "@/components/mission/MissionActions";
 import { MissionCatalog } from "@/components/mission/MissionCatalog";
 import { Icon } from "@/components/ui";
-import { parseCatalogQuery, toCatalog } from "@/lib/catalog";
+import { toCatalog } from "@/lib/catalog";
 import { getHubData } from "@/lib/data";
 import { plural } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
@@ -11,15 +11,13 @@ import { canAddMission, editorOptions } from "@/lib/missions";
 import { getViewer } from "@/lib/viewer";
 
 /**
- * Figma "Missions · List" (node 52:1362). Filters live in the URL so a filtered list can be shared.
+ * Figma "Missions · List" (node 52:1362). Filters and the sort live in the URL so a filtered list can be shared.
  * Archived missions stay out of it; admins see them on their own at ?archive=1.
  */
 export default async function MissionsPage({ searchParams }: PageProps<"/missions">) {
-  const now = new Date();
   const data = getHubData();
-  const [all, upcoming, past, { locale, t }, sp, viewer] = await Promise.all([
+  const [all, past, { locale, t }, sp, viewer] = await Promise.all([
     data.listMissions(),
-    data.listUpcoming(now),
     data.listPast(),
     getT(),
     searchParams,
@@ -78,7 +76,7 @@ export default async function MissionsPage({ searchParams }: PageProps<"/mission
               />
             )}
           </div>
-          <MissionCatalog missions={toCatalog(missions, upcoming, past)} initial={parseCatalogQuery(sp)} locale={locale} />
+          <MissionCatalog missions={toCatalog(missions, past)} locale={locale} />
         </div>
       </main>
     </>
