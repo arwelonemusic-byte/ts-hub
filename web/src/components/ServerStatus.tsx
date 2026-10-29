@@ -22,9 +22,10 @@ const EVERY_MS = 30_000;
 
 /*
  * AppHeader renders on every page, so this remounts on each navigation: the last answer and whether the card
- * was open live here, outside React, so moving between pages neither blinks the pill nor folds the card.
+ * was open live here, outside React, so moving between pages neither blinks the pill nor folds the card. Before
+ * the first answer it says «Сервер отдыхает» (user request 2026-10-29), so the pill is there as the page loads.
  */
-let lastUp: boolean | null = null;
+let lastUp = false;
 let lastOpen = false;
 
 /**
@@ -33,7 +34,7 @@ let lastOpen = false;
  * Asks /api/server-status every 30 s while the tab is visible.
  */
 export function ServerStatus({ info, labels, mods }: { info: ServerInfo; labels: ServerStatusLabels; mods?: ModDownloadLabels }) {
-  const [up, setUp] = useState<boolean | null>(lastUp);
+  const [up, setUp] = useState(lastUp);
   const [open, setOpenState] = useState(lastOpen);
   const [modDialog, setModDialog] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -89,8 +90,6 @@ export function ServerStatus({ info, labels, mods }: { info: ServerInfo; labels:
     };
   }, [open]);
 
-  // Nothing until the first answer, so a stopped server never flashes «запущен».
-  if (up === null) return null;
   const status = up ? labels.up : labels.down;
   const rows = [
     [labels.name, info.name],
