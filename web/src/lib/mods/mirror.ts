@@ -21,15 +21,27 @@ export const SERVER_EXE = SERVER_DIR ? path.join(SERVER_DIR, process.platform ==
 /** «Скачать мод» shows only where there's a server to download with. */
 export const modsEnabled = () => !!SERVER_EXE && existsSync(SERVER_EXE);
 
-/** The base game: every addon depends on it, and nobody downloads it. */
-const BASE_GAME = "58D0FB3206B6F859";
-
 export interface MirrorAddon {
   guid: string;
   /** `<Name>_<GUID>`, the folder's name in the archive and in the game's addons folder. */
   folder: string;
   name: string;
   version: string | null;
+  /**
+   * Every file its `meta` lists is downloaded and on disk at its size. A download cut short (cancelled, crashed)
+   * leaves the folder with the new version in `meta`, a 0-byte addon.gproj and part of data.pak: not complete, and
+   * the next run resumes it.
+   */
+  complete: boolean;
+}
+
+/** Where the box stands with an addon against the Workshop's latest version; `partial`: a download cut short. */
+export type AddonState = "current" | "stale" | "partial" | "missing";
+
+export function addonState(addon: MirrorAddon | null, latest: string | null): AddonState {
+  if (!addon) return "missing";
+  if (!addon.complete) return "partial";
+  return !latest || addon.version === latest ? "current" : "stale";
 }
 
 export interface MirrorFile {
@@ -51,51 +63,38 @@ async function folderOf(guid: string): Promise<string | null> {
   return names.find((n) => n.toUpperCase().endsWith(suffix)) ?? null;
 }
 
-/** The addon as the box has it, or null when it isn't there (a folder without addon.gproj is a broken download). */
+interface MetaFile {
+  name?: string;
+  size?: number;
+  isDownloaded?: boolean;
+}
+
+/** The addon as the box has it, or null when there's no folder for it. */
 export async function readAddon(guid: string): Promise<MirrorAddon | null> {
   const folder = await folderOf(guid);
-  if (!folder || !existsSync(path.join(ADDONS_DIR, folder, "addon.gproj"))) return null;
+  if (!folder) return null;
   let name = folder.slice(0, -guid.length - 1);
   let version: string | null = null;
+  let complete = false;
   try {
     // `meta` is written by the server with a BOM.
     const meta = JSON.parse((await readFile(path.join(ADDONS_DIR, folder, "meta"), "utf8")).replace(/^\uFEFF/, ""));
     name = meta?.meta?.name || name;
-    version = meta?.meta?.versions?.[0]?.version ?? null;
+    const current = meta?.meta?.versions?.[0];
+    version = current?.version ?? null;
+    const files: MetaFile[] = current?.package?.files ?? [];
+    complete = files.length > 0;
+    for (const f of files) {
+      if (!f.isDownloaded || !f.name) complete = false;
+      else {
+        const s = await stat(path.join(ADDONS_DIR, folder, f.name)).catch(() => null);
+        if (!s || s.size !== f.size) complete = false;
+      }
+    }
   } catch {
-    // No readable meta: the folder name stands in for the name, and the version is unknown (so it counts as outdated).
+    // No readable meta: name from the folder, version unknown, not complete (the server downloads it again).
   }
-  return { guid, folder, name, version };
-}
-
-/**
- * The addon's dependencies from its addon.gproj. That's the authoritative list: the server-written `meta` has an
- * empty one (only the game client fills it).
- */
-async function gprojDependencies(folder: string): Promise<string[]> {
-  try {
-    const text = await readFile(path.join(ADDONS_DIR, folder, "addon.gproj"), "utf8");
-    const block = text.match(/Dependencies\s*\{([^}]*)\}/)?.[1] ?? "";
-    return [...block.matchAll(/"([0-9A-Fa-f]{16})"/g)].map((m) => m[1].toUpperCase()).filter((g) => g !== BASE_GAME);
-  } catch {
-    return [];
-  }
-}
-
-/** The addon and its whole dependency tree, breadth first; `null` for one the box doesn't have. */
-export async function addonTree(guid: string): Promise<{ guid: string; addon: MirrorAddon | null }[]> {
-  const order: { guid: string; addon: MirrorAddon | null }[] = [];
-  const seen = new Set<string>();
-  const queue = [guid];
-  while (queue.length) {
-    const g = queue.shift()!;
-    if (seen.has(g)) continue;
-    seen.add(g);
-    const addon = await readAddon(g);
-    order.push({ guid: g, addon });
-    if (addon) queue.push(...(await gprojDependencies(addon.folder)));
-  }
-  return order;
+  return { guid, folder, name, version, complete };
 }
 
 /** Every file in the addon's folder. */

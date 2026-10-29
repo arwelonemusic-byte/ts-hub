@@ -10,6 +10,11 @@ import { ADDONS_DIR, MODS_DIR, SERVER_EXE } from "./mirror";
  * left alone and an outdated one is delta-patched in place. We wait for "Required addons are ready to use." and kill
  * it before it loads a world. It's private and bound to loopback ports apart from the live game server's (2001/17777),
  * and it's killed by its own pid only: never by name, which would take the live server down with it.
+ *
+ * Like a real server it fetches every dependency of what it hosts, and there's no option to skip one. A dependency
+ * the member doesn't want becomes a placeholder in a throwaway `-addonsDir` (tested 2026-10-29): a folder with an
+ * addon.gproj and a `meta` that names the latest version and lists no files counts as installed, so the server
+ * skips it and its own dependencies, and it wins over an older copy in the download folder, which stays untouched.
  */
 const PORT = 2101;
 const A2S_PORT = 17877;
@@ -47,6 +52,19 @@ export interface DownloadEvents {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/** Waits `ms`, or less when `signal` aborts. */
+export function pause(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    const done = () => {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", done);
+      resolve();
+    };
+    const timer = setTimeout(done, ms);
+    signal.addEventListener("abort", done, { once: true });
+  });
+}
+
 async function newestConsoleLog(profile: string): Promise<string | null> {
   const logs = path.join(profile, "logs");
   let dirs: string[];
@@ -82,12 +100,33 @@ function kill(child: ChildProcess) {
   }
 }
 
-/** Runs the server for `guids` (latest versions); `on` hears what it's downloading. */
-export async function downloadAddons(guids: string[], on: DownloadEvents): Promise<DownloadResult> {
+/** A dependency to skip: a fake installed copy at the Workshop's latest version. */
+export interface Placeholder {
+  guid: string;
+  name: string;
+  version: string;
+}
+
+async function writePlaceholder(dir: string, p: Placeholder) {
+  const folder = path.join(dir, `${p.name.replace(/[^\w-]+/g, "") || "Addon"}_${p.guid}`);
+  await mkdir(folder, { recursive: true });
+  const version = { version: p.version, gameVersion: "", changelog: "", corrupted: false, dependencies: [], scenarios: [], env: 7 };
+  const meta = { meta: { id: p.guid, name: p.name, type: 1, versions: [{ ...version, package: { totalSize: 0, files: [] } }], selectedRev: 0 } };
+  await writeFile(path.join(folder, "meta"), JSON.stringify(meta));
+  await writeFile(path.join(folder, "addon.gproj"), `GameProject {\n GUID "${p.guid}"\n TITLE ${JSON.stringify(p.name)}\n}\n`);
+}
+
+/**
+ * Runs the server for `guids` (latest versions) without `skip`; `on` hears what it's downloading. Aborting `signal`
+ * kills it: what it got so far stays (the download folder and HUB_MODS_DIR/tmp) and the next run resumes it.
+ */
+export async function downloadAddons(guids: string[], skip: Placeholder[], on: DownloadEvents, signal: AbortSignal): Promise<DownloadResult> {
   const run = path.join(MODS_DIR, "run", String(Date.now()));
   const profile = path.join(run, "profile");
   await mkdir(profile, { recursive: true });
   await mkdir(ADDONS_DIR, { recursive: true });
+  const stubs = path.join(run, "placeholders");
+  for (const p of skip) await writePlaceholder(stubs, p);
   const config = path.join(run, "config.json");
   await writeFile(
     config,
@@ -116,7 +155,8 @@ export async function downloadAddons(guids: string[], on: DownloadEvents): Promi
       2,
     ),
   );
-  const args = ["-config", config, "-profile", profile, "-addonDownloadDir", MODS_DIR, "-addonTempDir", path.join(run, "tmp")];
+  const args = ["-config", config, "-profile", profile, "-addonDownloadDir", MODS_DIR, "-addonTempDir", path.join(MODS_DIR, "tmp")];
+  if (skip.length) args.push("-addonsDir", stubs);
   args.push("-maxFPS", "10", "-noThrow", "-disableCrashReporter");
 
   let spawnError: string | null = null;
@@ -134,7 +174,11 @@ export async function downloadAddons(guids: string[], on: DownloadEvents): Promi
   const t0 = Date.now();
   try {
     while (Date.now() - t0 < TIMEOUT_MS) {
-      await sleep(1000);
+      await pause(1000, signal);
+      if (signal.aborted) {
+        result = { ok: false, detail: "cancelled", retry: false };
+        break;
+      }
       if (spawnError) {
         result = { ok: false, detail: spawnError, retry: false };
         break;
