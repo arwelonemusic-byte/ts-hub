@@ -289,6 +289,23 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   answer even on the box). The hub asks at most every 20 s, and the pill polls every 30 s while the tab is visible. The
   password comes from `GAME_SERVER_PASSWORD` (not in this public repo; unset = no «Пароль» row). `GAME_SERVER_A2S=host:port`
   points the check at a stand-in.
+- **«Скачать мод»** (POC, user request 2026-10-29; `lib/mods/`, `components/mods/ModDownloadDialog.tsx`): a button in
+  the server card, shown where `REFORGER_SERVER_DIR` holds an Arma Reforger Server (dev on Windows: Steam's library;
+  not set up on the box yet). A member pastes one Workshop link; the hub reads the Workshop page (`fetchWorkshopAsset`:
+  the latest version of the mod and of each dependency) and, if its copy (`HUB_MODS_DIR/addons/<Name>_<GUID>/`, never
+  the live server's folder) has them all at those versions, serves them as they are. Otherwise it runs the dedicated
+  server headless, like the download-addon skill (`lib/mods/download.ts`: private config on loopback 2101/17877, killed by
+  its own pid once the log says "Required addons are ready to use.", never by name, which would kill the live server),
+  and the dialog shows the log's progress (addon, %, MB, speed). A run that fails because Bohemia's API didn't answer
+  (SSL connect errors, every other start from a dev PC on 2026-10-29) is run again, 3 times at most; a mod or dependency
+  gone from the Workshop fails at once with the log's reason. Ready = a list of the mod and its dependency tree (from
+  addon.gproj) with sizes; unticked dependencies stay out of the zip (`?skip=`). The zip (`lib/mods/zip.ts`) is
+  stored, streamed from disk with every CRC known up front (cached in `crc.json`), so it has a Content-Length, and zip64
+  past 4 GB; to unpack into `%USERPROFILE%\Documents\My Games\ArmaReforger\addons`. The files are the bytes the game
+  installs itself (checked 2026-10-29: only `meta`, `ServerData.json` and the client's preview images differ). One
+  job at a time; the server waits until no zip is being sent and no zip starts while it runs (`busy`); at most 3 zips at
+  once, each at most `HUB_MODS_RATE_MBIT` (200). POC limits: jobs live in memory (a ready one is reused for 10 min),
+  the folder only grows, members only (`viewer.inGuild`) but anyone of them can make the box download any mod.
 - **Briefings are sections** (`Briefing.sections`, plus optional `sides` for За кого / Против кого), as authors write
   them in the catalogue. A section body is plain text: blank lines split paragraphs, "- " lines are list items, and
   list items under «Задачи» get the numbered badges.

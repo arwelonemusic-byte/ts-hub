@@ -1,19 +1,60 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ENABLED_LOCALES } from "@/lib/i18n";
+import { ENABLED_LOCALES, type T } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
 import { FNF_HOME } from "@/lib/fix-and-flank/game";
 import { BUILDER_URL, PLANNER_URL, TRAINING_URL } from "@/lib/links";
+import { modsEnabled } from "@/lib/mods/mirror";
 import { SERVER_INFO } from "@/lib/server-status";
 import { getViewer } from "@/lib/viewer";
 import { LanguageToggle } from "./LanguageToggle";
 import { NavDropdown } from "./NavDropdown";
 import { NavMenu, type NavItem } from "./NavMenu";
+import type { ModDownloadLabels } from "./mods/ModDownloadDialog";
 import { ServerStatus } from "./ServerStatus";
 import { buttonClass, Icon } from "./ui";
 
 /** The Discord's @srv role: the only ones besides hub admins who see «Мини-игры» in the nav for now. */
 const GAMES_PREVIEW_ROLE_ID = "633772282745061457";
+
+/** «Скачать мод» in the server card (components/mods/ModDownloadDialog.tsx). */
+const modLabels = (t: T): ModDownloadLabels => ({
+  open: t("mods.open"),
+  title: t("mods.title"),
+  intro: t("mods.intro"),
+  link: t("mods.link"),
+  linkPlaceholder: t("mods.linkPlaceholder"),
+  prepare: t("mods.prepare"),
+  close: t("mods.close"),
+  badLink: t("mods.badLink"),
+  requestFailed: t("mods.requestFailed"),
+  checking: t("mods.phase.checking"),
+  queued: t("mods.phase.queued"),
+  waiting: t("mods.phase.waiting"),
+  downloading: t("mods.phase.downloading"),
+  preparing: t("mods.phase.preparing"),
+  notFound: t("mods.error.notFound"),
+  unreachable: t("mods.error.unreachable"),
+  downloadFailed: t("mods.error.downloadFailed"),
+  missing: t("mods.error.missing"),
+  dependency: t("mods.dependency"),
+  notOnServer: t("mods.notOnServer"),
+  skipHint: t("mods.skipHint"),
+  download: t("mods.download"),
+  unpack: t("mods.unpack"),
+  unpackHint: t("mods.unpackHint"),
+  busyUpdating: t("mods.busy.updating"),
+  busyFull: t("mods.busy.full"),
+  sizeKb: t("mods.size.kb"),
+  sizeMb: t("mods.size.mb"),
+  sizeGb: t("mods.size.gb"),
+  progressMb: t("mods.progressMb"),
+  speedKb: t("mods.speed.kb"),
+  speedMb: t("mods.speed.mb"),
+  doneList: t("mods.doneList"),
+  copyHint: t("mission.copyHint"),
+  copied: t("mission.copied"),
+});
 
 /** Figma "App header" (8:180): brand · centred nav · account. */
 export async function AppHeader({ active }: { active: "events" | "missions" | "games" | "players" }) {
@@ -101,6 +142,7 @@ export async function AppHeader({ active }: { active: "events" | "missions" | "g
             copyHint: t("mission.copyHint"),
             copied: t("mission.copied"),
           }}
+          mods={modsEnabled() ? modLabels(t) : undefined}
         />
       )}
     </header>

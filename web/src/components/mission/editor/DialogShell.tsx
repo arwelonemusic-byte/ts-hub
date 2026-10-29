@@ -3,7 +3,7 @@
 import { useEffect, type ReactNode } from "react";
 
 /**
- * The editing dialogs' frame (mission dialog, a game's slots): a fixed header and footer around a
+ * The editing dialogs' frame (mission dialog, a game's slots, «Скачать мод»): a fixed header and footer around a
  * body that scrolls. Escape or a click outside closes it, unless `busy` (saving).
  */
 export function DialogShell({
@@ -11,6 +11,7 @@ export function DialogShell({
   head,
   footer,
   busy = false,
+  width = "max-w-3xl",
   onClose,
   children,
 }: {
@@ -19,6 +20,8 @@ export function DialogShell({
   head?: ReactNode;
   footer: ReactNode;
   busy?: boolean;
+  /** The dialog's max-width class. */
+  width?: string;
   onClose: () => void;
   children: ReactNode;
 }) {
@@ -29,7 +32,7 @@ export function DialogShell({
   }, [onClose, busy]);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onMouseDown={(e) => e.target === e.currentTarget && !busy && onClose()}>
-      <div role="dialog" aria-modal="true" aria-label={title} className="flex max-h-[92vh] w-full max-w-3xl flex-col rounded-xl bg-surface shadow-floating ring-1 ring-line-strong">
+      <div role="dialog" aria-modal="true" aria-label={title} className={`flex max-h-[92vh] w-full ${width} flex-col rounded-xl bg-surface shadow-floating ring-1 ring-line-strong`}>
         <header className="flex flex-col gap-4 border-b border-line px-6 pt-6 pb-4">
           <h2 className="type-heading-m text-fg">{title}</h2>
           {head}

@@ -29,16 +29,23 @@ export const workshopPage = (guid: string) => `${WORKSHOP}${guid}`;
 
 interface Dep {
   asset: { id: string; name: string };
+  version?: string;
+  totalFileSize?: number;
   dependencies?: Dep[];
 }
 
 export interface WorkshopAsset {
   guid: string;
+  /** The addon's name as published; `title` drops "Operation" for missions. */
+  name: string;
   title: string;
+  /** The latest version and its size in bytes (the mod downloader compares the box's copy with it). */
+  version: string | null;
+  size: number | null;
   coverUrl: string | null;
   scenarios: { id: string; name: string }[];
-  /** Every dependency, nested ones included. */
-  dependencies: { id: string; name: string }[];
+  /** Every dependency, nested ones included, at its latest version. */
+  dependencies: { id: string; name: string; version: string | null; size: number | null }[];
   terrain: string[];
 }
 
@@ -56,6 +63,8 @@ export async function fetchWorkshopAsset(guid: string): Promise<WorkshopAsset | 
   let asset: {
     id?: string;
     name?: string;
+    currentVersionNumber?: string;
+    currentVersionSize?: number;
     previews?: { url?: string }[];
     scenarios?: { gameId?: string; name?: string }[];
     dependencies?: Dep[];
@@ -67,19 +76,24 @@ export async function fetchWorkshopAsset(guid: string): Promise<WorkshopAsset | 
   }
   if (!asset?.id || !asset.name) return "notFound";
 
-  const deps = new Map<string, string>();
+  const deps = new Map<string, WorkshopAsset["dependencies"][number]>();
   const walk = (list?: Dep[]) => {
     for (const d of list ?? []) {
-      if (d.asset?.id && !deps.has(d.asset.id)) deps.set(d.asset.id, d.asset.name);
+      if (d.asset?.id && !deps.has(d.asset.id)) {
+        deps.set(d.asset.id, { id: d.asset.id, name: d.asset.name, version: d.version ?? null, size: d.totalFileSize ?? null });
+      }
       walk(d.dependencies);
     }
   };
   walk(asset.dependencies);
-  const dependencies = [...deps].map(([id, name]) => ({ id, name }));
+  const dependencies = [...deps.values()];
   const cover = asset.previews?.[0]?.url ?? null;
   return {
     guid: asset.id.toUpperCase(),
+    name: asset.name,
     title: missionTitle(asset.name),
+    version: asset.currentVersionNumber ?? null,
+    size: asset.currentVersionSize ?? null,
     coverUrl: cover && onCdn(cover) ? cover : null,
     scenarios: (asset.scenarios ?? []).filter((s) => s.gameId).map((s) => ({ id: s.gameId!, name: s.name ?? s.gameId! })),
     dependencies,

@@ -3,7 +3,8 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { ServerInfo } from "@/lib/server-status";
 import { CopyValue } from "./event/CopyValue";
-import { Icon } from "./ui";
+import { ModDownloadDialog, type ModDownloadLabels } from "./mods/ModDownloadDialog";
+import { buttonClass, Icon } from "./ui";
 
 export interface ServerStatusLabels {
   up: string;
@@ -28,11 +29,13 @@ let lastOpen = false;
 
 /**
  * The game server's status in the bottom-right corner: a pill (grey or green dot, «Сервер запущен / отдыхает»)
- * that opens into a card with how to join. Asks /api/server-status every 30 s while the tab is visible.
+ * that opens into a card with how to join, and «Скачать мод» when the box can download mods (`mods`).
+ * Asks /api/server-status every 30 s while the tab is visible.
  */
-export function ServerStatus({ info, labels }: { info: ServerInfo; labels: ServerStatusLabels }) {
+export function ServerStatus({ info, labels, mods }: { info: ServerInfo; labels: ServerStatusLabels; mods?: ModDownloadLabels }) {
   const [up, setUp] = useState<boolean | null>(lastUp);
   const [open, setOpenState] = useState(lastOpen);
+  const [modDialog, setModDialog] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const setOpen = (o: boolean) => {
     lastOpen = o;
@@ -125,6 +128,18 @@ export function ServerStatus({ info, labels }: { info: ServerInfo; labels: Serve
               </Fragment>
             ))}
           </dl>
+          {mods && (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                setModDialog(true);
+              }}
+              className={`${buttonClass("secondary", "s")} w-full`}
+            >
+              {mods.open}
+            </button>
+          )}
         </section>
       ) : (
         <button
@@ -137,6 +152,7 @@ export function ServerStatus({ info, labels }: { info: ServerInfo; labels: Serve
           {status}
         </button>
       )}
+      {modDialog && mods && <ModDownloadDialog labels={mods} onClose={() => setModDialog(false)} />}
     </div>
   );
 }
