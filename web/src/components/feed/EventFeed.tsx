@@ -5,11 +5,13 @@ import type { FeedItem, FeedMeta, FeedMonth } from "@/lib/feed";
 import { skipOpenSlot } from "@/lib/events/actions";
 import { dayRange, eventDay, monthYear, time } from "@/lib/format";
 import { makeT, plural, type Locale, type T } from "@/lib/i18n";
+import { RETRO } from "@/lib/retro";
 import { addMonths, daysInMonth, monthOf, monthStart, mskDayKey, mskParts, weekStart, type MonthKey } from "@/lib/schedule";
 import { fieldsFor, ScheduleDialog, type MissionOption, type ScheduleInitial } from "../schedule/Schedule";
 import { buttonClass } from "../ui";
 import { FeedCalendar } from "./Calendar";
 import { FeedRow, WeekHeader } from "./Cards";
+import { RetroBanner } from "./RetroBanner";
 
 /** App header (60px) + 24px: the line that counts as "the top of the feed". */
 const TOP = 84;
@@ -339,12 +341,14 @@ export function EventFeed({
         ))}
         {last < meta.last && <Edge edgeRef={bottomRef} loading={busy === "next"} failed={failed === "next"} onRetry={retryNext} t={t} />}
       </div>
-      <aside className="sticky top-[84px] hidden w-[300px] shrink-0 flex-col gap-3 lg:flex">
+      {/* Scrolls on its own when banner + calendar are taller than the window, so the calendar's last rows stay reachable. */}
+      <aside className="sticky top-[84px] hidden max-h-[calc(100dvh-84px)] w-[300px] shrink-0 flex-col gap-3 overflow-y-auto pb-6 [scrollbar-width:none] lg:flex">
         {missions && (
           <button type="button" onClick={() => setScheduling({})} className={`${buttonClass("primary", "m")} w-full`}>
             {t("schedule.button")}
           </button>
         )}
+        {RETRO && <RetroBanner retro={RETRO} locale={locale} t={t} />}
         <FeedCalendar
           month={calMonth}
           itemsByDay={itemsByDay}

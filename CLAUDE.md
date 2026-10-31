@@ -67,7 +67,10 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   anchoring is switched off and the offset is corrected by hand). The calendar follows the row at the top of
   the feed and jumps by day or month. The URL's `?date=` tracks that row, so reload and Back return to it.
   Months are sections and weeks are clipped to their month, so a jump always has a clean start. Open slots
-  are shown up to the end of next month (`lib/feed.ts`).
+  are shown up to the end of next month (`lib/feed.ts`). Above the calendar sits the latest monthly retrospective
+  (`RETRO` in `lib/retro.ts`: the deck's URL at retro.tacticalshift.ru, its month, cover numbers and a photo in
+  `public/retro/`, a 9:10 portrait crop at 600×667); point it at each new deck, or set it to null to hide the
+  banner. Banner + calendar are taller than a laptop window, so the sticky aside scrolls on its own when it doesn't fit.
 - **Event details** (`app/events/[id]`) follows Figma frames 20:1337 (upcoming) and 20:1990 (played). The sections live in
   `components/event/`. Write actions send signed-out users to log in; taking a slot stays disabled for signed-in users
   until there's a data source to write to. The plan panel works (see Plans). The played page's stat row and «Ачивки»
