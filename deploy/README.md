@@ -18,6 +18,13 @@ Caddy got the certificate, the Discord redirect is in place).
 `@emnapi/*`, optional WASM fallbacks), and `npm ci` then refuses to run. Regenerate it with the box's npm:
 `npx npm@10.8.2 install --package-lock-only` in `web/`, and commit.
 
+**Postgres restarts itself (since 2026-11-09).** A game server left running for 16 hours made the planner's replay
+writes (each one rewrites the recording's whole `events` array) eat all 32 GB; the kernel killed one backend and
+systemd's default `OOMPolicy=stop` then shut the whole cluster down, with no restart: the hub, planner, portal and bots
+were down for 8 hours. `/etc/systemd/system/postgresql@14-main.service.d/override.conf` now sets `OOMPolicy=continue`
+(Postgres recovers from a killed backend by itself) and `Restart=on-failure`. A hub full of 500s with
+`ECONNREFUSED 127.0.0.1:5432` in `journalctl -u ts-hub` = Postgres is down: `systemctl status postgresql@14-main`.
+
 ## One-time setup
 
 0. **Prerequisites.**
@@ -62,3 +69,22 @@ Caddy got the certificate, the Discord redirect is in place).
 Re-running `npm run db:seed` later adds missions that aren't in the database yet and refreshes players; it leaves
 existing missions alone unless given `-- --update`, and even then skips missions saved in the hub: the hub is
 their source of truth.
+
+## Redirect from tacticalshift.ru
+
+**Status (2026-11-12):** live. The domain owner moved the records, the block is in `/etc/caddy/Caddyfile` (the file
+before it: `/etc/caddy/Caddyfile.bak-2026-11-12`) and Caddy got both certificates. Steps 3 and 4 below are left.
+
+`tacticalshift.ru` is the community's old GitHub Pages site (`www` is a CNAME to it). The redirect sends every path on
+both to the hub's home page; the old pages (/newbie, /how_to, /freemasonry) have no counterpart in the hub.
+
+1. **Domain owner, at reg.ru:** deletes the `@` records that point at GitHub (four A, `185.199.108–111.153`, and four
+   AAAA, `2606:50c0:8000–8003::153`) and adds A `@` → `91.206.15.125`. `www` and `hub` stay as they are.
+2. **On the box,** once `nslookup tacticalshift.ru ns1.reg.ru` shows only `91.206.15.125`, from `/opt/ts-web/ts-hub`:
+   ```sh
+   cat deploy/Caddyfile.apex >> /etc/caddy/Caddyfile && caddy validate --config /etc/caddy/Caddyfile && systemctl reload caddy
+   ```
+   Caddy gets the certificate within minutes. Check: `curl -sI https://tacticalshift.ru` → 302 to the hub.
+3. **The old site's repo** removes its custom domain (Settings → Pages), only after step 1: while the DNS still points
+   at GitHub, a domain no repo claims can be taken by anyone's GitHub Pages site.
+4. **Later:** `temporary` → `permanent` in the block, once the redirect is here to stay.
