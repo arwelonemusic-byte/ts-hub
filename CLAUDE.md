@@ -340,7 +340,11 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
     push made with it (only the key's SHA-256 is stored there, `plans.lineage`), and the hub shows the newest version
     (`GET <planner>/api/plans?lineage=`). No version history (user decision): a push supersedes the previous one. The
     author continues it from its row («Редактировать»). An admin's «Удалить план» on a drawn plan only hides it
-    from the mission page (`plans.hidden_at`, migration 006; the row stays). A played game's plan has no delete. Hub plans are the `plans` table (`lib/plans/store.ts`); its
+    from the mission page (`plans.hidden_at`, migration 006; the row stays). A played game's plan has no delete.
+    An admin's «Добавить план» (`addMissionPlan`, `components/mission/AddMissionPlan.tsx`; user request 2026-11-18)
+    adds a plan drawn elsewhere: a code, checked in the planner like «Прикрепить план» and refused if the page already
+    lists it, and the member who drew it, picked from `players`. It becomes a hub plan of theirs with the code as its
+    seed, dated the day it's added (the planner keeps no date per code), so the author continues it with «Редактировать». Hub plans are the `plans` table (`lib/plans/store.ts`); its
     `event_id` columns are from the earlier design and no longer written.
 
   Every «open in the planner» goes through `app/plan/open`, which only puts a key in the link for the plan's author;

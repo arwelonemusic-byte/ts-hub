@@ -8,18 +8,21 @@ import { playerIdOf } from "../players";
 import { getViewer } from "../viewer";
 import { canAttachPlan, canDetachPlan } from "./index";
 import { fetchPlan } from "./planner";
-import { getPlanRecord, hidePlanRecord } from "./store";
+import { getPlanRecord, hidePlanRecord, insertPlanRecord, newPlanRecord } from "./store";
 
 export type AttachState = { error: "invalid" | "notFound" | "wrongMap" | "forbidden" | "taken"; code?: string } | null;
+
+/** The code alone, or the "/syncplan ABCDEF" line the planner copies after a push. */
+const planCode = (v: FormDataEntryValue | null) => String(v ?? "").trim().replace(/^\/?syncplan\s+/i, "").toUpperCase();
+const CODE = /^[A-Z0-9]{6}$/;
 
 /** «Прикрепить план»: a planner code becomes the game's plan (or replaces the one the viewer attached). */
 export async function attachPlan(_prev: AttachState, form: FormData): Promise<AttachState> {
   const [viewer, ev] = await Promise.all([getViewer(), getHubData().getEvent(String(form.get("event") ?? ""), new Date())]);
   if (!viewer || !ev || ev.status !== "upcoming" || !canAttachPlan(viewer, ev)) return { error: "forbidden" };
 
-  // The code alone, or the "/syncplan ABCDEF" line the planner copies after a push.
-  const code = String(form.get("code") ?? "").trim().replace(/^\/?syncplan\s+/i, "").toUpperCase();
-  if (!/^[A-Z0-9]{6}$/.test(code)) return { error: "invalid", code };
+  const code = planCode(form.get("code"));
+  if (!CODE.test(code)) return { error: "invalid", code };
   const plan = await fetchPlan(code);
   if (!plan) return { error: "notFound", code };
   // Pushes made since the hub hand-off say which map they were drawn on.
@@ -54,6 +57,54 @@ export async function detachPlan(form: FormData): Promise<void> {
   );
   refreshAnnouncement(ev.id);
   revalidatePath(`/events/${ev.id}`);
+}
+
+export type AddPlanState = {
+  error: "invalid" | "notFound" | "wrongMap" | "forbidden" | "noAuthor" | "duplicate";
+  code?: string;
+  author?: string;
+} | null;
+
+/**
+ * «Добавить план» (admin) on a mission page: a plan drawn outside the hub, by code, credited to the member who drew
+ * it (user request 2026-11-18). It becomes a hub plan of theirs with the code as its seed, dated the day it's added
+ * (the planner keeps no date for a code), so the author continues it from its row like one they started here.
+ */
+export async function addMissionPlan(_prev: AddPlanState, form: FormData): Promise<AddPlanState> {
+  const code = planCode(form.get("code"));
+  const author = String(form.get("author") ?? "");
+  const [viewer, mission] = await Promise.all([getViewer(), getHubData().getMission(String(form.get("mission") ?? ""))]);
+  if (!viewer?.isAdmin || !mission || mission.training) return { error: "forbidden", code, author };
+  if (!CODE.test(code)) return { error: "invalid", code, author };
+
+  const db = await getDb();
+  const [member] = /^\d+$/.test(author)
+    ? ((await db.query("SELECT discord_id, display_name FROM players WHERE id = $1 AND discord_id IS NOT NULL", [author])) as {
+        discord_id: string;
+        display_name: string;
+      }[])
+    : [];
+  if (!member) return { error: "noAuthor", code, author };
+
+  const plan = await fetchPlan(code);
+  if (!plan) return { error: "notFound", code, author };
+  if (plan.mapKey && plan.mapKey !== mission.mapKey) return { error: "wrongMap", code, author };
+  // The page lists each code once (a played game's plan, the newest push of a hub plan), so a second row would never show.
+  const { plans } = await getHubData().getMissionHistory(mission.id);
+  if (plans.some((p) => p.code === code)) return { error: "duplicate", code, author };
+
+  await insertPlanRecord(
+    newPlanRecord({
+      missionId: mission.id,
+      eventId: null,
+      eventStartsAt: null,
+      authorId: member.discord_id,
+      authorName: member.display_name,
+      seed: { code, author: member.display_name, createdAt: new Date().toISOString() },
+    }),
+  );
+  revalidatePath(`/missions/${mission.id}`);
+  return null;
 }
 
 /**

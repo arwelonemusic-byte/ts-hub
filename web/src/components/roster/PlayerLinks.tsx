@@ -7,16 +7,13 @@ import { shortDate } from "@/lib/format";
 import { makeT, plural, type Locale } from "@/lib/i18n";
 import { linkPlayerNames, unlinkPlayerName } from "@/lib/roster/actions";
 import type { InGameName } from "@/lib/roster/links";
-import { isSure, type MemberLite, type Suggestion } from "@/lib/roster/match";
+import { findMember, isSure, memberLabel, type MemberLite, type Suggestion } from "@/lib/roster/match";
 import { TextInput } from "../mission/editor/fields";
 import { buttonClass } from "../ui";
 
 type Filter = "todo" | "linked" | "all";
 
 const GHOST = "h-8 rounded-md px-2.5 type-label-s text-fg-secondary hover:bg-raised hover:text-fg disabled:opacity-50";
-
-/** How a member reads in the picker: the nickname, and the username when it differs (nicknames can repeat). */
-const memberLabel = (m: MemberLite) => (m.username && m.username !== m.name ? `${m.name} (@${m.username})` : m.name);
 
 function Avatar({ m }: { m: MemberLite }) {
   const [broken, setBroken] = useState(false);
@@ -74,10 +71,7 @@ export function PlayerLinks({ names, members, locale }: { names: InGameName[]; m
   const link = (pairs: { name: string; memberId: string }[]) => run(() => linkPlayerNames(pairs));
 
   const choose = (name: string) => {
-    const typed = pick.trim();
-    const exact = members.find((m) => memberLabel(m) === typed);
-    const byName = members.filter((m) => m.name.toLowerCase() === typed.toLowerCase());
-    const m = exact ?? (byName.length === 1 ? byName[0] : undefined);
+    const m = findMember(members, pick);
     if (!m) return setError(t("players.noMember"));
     link([{ name, memberId: m.id }]);
   };

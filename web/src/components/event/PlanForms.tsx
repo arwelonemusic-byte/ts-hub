@@ -19,7 +19,7 @@ function errorText(state: AttachState, errors: AttachErrors): string | null {
 }
 
 /** What the planner puts on the clipboard after a push is "/syncplan ABCDEF"; keep just the code. */
-const codeOnly = (text: string) =>
+export const codeOnly = (text: string) =>
   text
     .replace(/^\s*\/?syncplan\s*/i, "")
     .replace(/[^A-Za-z0-9]/g, "")

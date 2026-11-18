@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { BriefingPanel, isOwnPlan, MissionPanel, PlanRow } from "@/components/event/Panels";
 import { DeletePlanButton } from "@/components/event/DeletePlanButton";
+import { AddMissionPlan } from "@/components/mission/AddMissionPlan";
 import { MissionMenu } from "@/components/mission/MissionActions";
 import { MissionComments } from "@/components/mission/MissionComments";
 import { MissionSlotsPanel } from "@/components/mission/MissionSlotsPanel";
@@ -16,6 +17,8 @@ import { getT } from "@/lib/i18n-server";
 import { loadMissionDraft } from "@/lib/data/missions";
 import { replayUrl, workshopUrl } from "@/lib/links";
 import { canEditMission, editorOptions, missionHasGames } from "@/lib/missions";
+import { memberOptions } from "@/lib/players";
+import type { MemberLite } from "@/lib/roster/match";
 import type { HubEvent, Mission, MissionHistory, PastEvent, UpcomingEvent } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
 
@@ -28,13 +31,15 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
   const canEdit = canEditMission(viewer, mission);
   const isAdmin = !!viewer?.isAdmin;
   const now = new Date();
-  const [games, history, comments, options, draft, hasGames] = await Promise.all([
+  const [games, history, comments, options, draft, hasGames, members] = await Promise.all([
     data.listMissionEvents(mission.id, now),
     data.getMissionHistory(mission.id),
     data.listMissionComments(mission.id),
     canEdit ? editorOptions() : null,
     canEdit ? loadMissionDraft(mission.id) : null,
     isAdmin ? missionHasGames(mission.id) : true,
+    // «Добавить план» picks the author from these.
+    isAdmin && !mission.training ? memberOptions() : null,
   ]);
   const menu =
     viewer && (canEdit || isAdmin) ? (
@@ -59,7 +64,9 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
             {mission.briefing && <BriefingPanel b={mission.briefing} t={t} />}
             <Games games={games} locale={locale} t={t} />
             {/* Trainings have no plans. */}
-            {!mission.training && <Plans missionId={mission.id} history={history} viewerId={viewer?.discordId} isAdmin={isAdmin} t={t} />}
+            {!mission.training && (
+              <Plans missionId={mission.id} history={history} viewerId={viewer?.discordId} isAdmin={isAdmin} members={members} locale={locale} t={t} />
+            )}
             <MissionComments mission={mission} comments={comments} viewer={viewer} now={now} locale={locale} t={t} />
           </div>
           <aside className="flex shrink-0 flex-col gap-4 lg:w-[360px]">
@@ -269,12 +276,30 @@ function PlayedRow({ ev, locale, t }: { ev: PastEvent; locale: Locale; t: T }) {
 
 /**
  * Everyone's plans for the mission, the ones drawn for its games included. The viewer continues their own from
- * here; an admin can delete a drawn plan (a played game's plan stays: it's what the game used).
+ * here; an admin can delete a drawn plan (a played game's plan stays: it's what the game used) and add one drawn
+ * elsewhere, by code, for the member who drew it (`members`, admins only).
  */
-function Plans({ missionId, history, viewerId, isAdmin, t }: { missionId: string; history: MissionHistory; viewerId?: string; isAdmin: boolean; t: T }) {
+function Plans({
+  missionId,
+  history,
+  viewerId,
+  isAdmin,
+  members,
+  locale,
+  t,
+}: {
+  missionId: string;
+  history: MissionHistory;
+  viewerId?: string;
+  isAdmin: boolean;
+  members: MemberLite[] | null;
+  locale: Locale;
+  t: T;
+}) {
+  const title = <h2 className="type-heading-m text-fg">{t("missionPage.plans")}</h2>;
   return (
     <section className="flex flex-col gap-4 rounded-xl bg-surface p-6">
-      <h2 className="type-heading-m text-fg">{t("missionPage.plans")}</h2>
+      {members ? <AddMissionPlan missionId={missionId} members={members} title={title} locale={locale} /> : title}
       {history.plans.length ? (
         <div className="flex flex-col gap-2.5">
           {history.plans.map((p) => (

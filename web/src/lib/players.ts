@@ -1,4 +1,5 @@
 import { getDb } from "./db";
+import type { MemberLite } from "./roster/match";
 import type { Viewer } from "./viewer";
 
 /**
@@ -15,6 +16,15 @@ export async function upsertPlayer(p: { discordId: string; name: string; usernam
     [p.discordId, p.name, p.username ?? null, p.avatar],
   );
   return String(row.id);
+}
+
+/** Every member who can be credited with something (a plan): has a Discord account, by nickname. */
+export async function memberOptions(): Promise<MemberLite[]> {
+  const db = await getDb();
+  const rows = (await db.query(
+    "SELECT id, display_name, username, avatar_url FROM players WHERE discord_id IS NOT NULL ORDER BY lower(display_name)",
+  )) as { id: string | number; display_name: string; username: string | null; avatar_url: string | null }[];
+  return rows.map((m) => ({ id: String(m.id), name: m.display_name, username: m.username, avatar: m.avatar_url }));
 }
 
 /** The viewer's players row id; null for a dev stand-in who isn't a member. */

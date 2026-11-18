@@ -17,6 +17,16 @@ export interface MemberLite {
   avatar: string | null;
 }
 
+/** How a member reads in a picker: the nickname, and the username when it differs (nicknames can repeat). */
+export const memberLabel = (m: MemberLite) => (m.username && m.username !== m.name ? `${m.name} (@${m.username})` : m.name);
+
+/** The member a picker's typed text names: a label as the list shows it, else a nickname only one member has. */
+export function findMember(members: MemberLite[], typed: string): MemberLite | undefined {
+  const s = typed.trim();
+  const byName = members.filter((m) => m.name.toLowerCase() === s.toLowerCase());
+  return members.find((m) => memberLabel(m) === s) ?? (byName.length === 1 ? byName[0] : undefined);
+}
+
 export type MatchReason = "account" | "exact" | "similar";
 
 export interface Suggestion {
