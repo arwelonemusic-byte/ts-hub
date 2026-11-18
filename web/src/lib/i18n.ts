@@ -121,7 +121,11 @@ const RU: Dict = {
   "auth.login": "Войти",
   "auth.logout": "Выйти",
   "auth.notConfigured": "Вход на этом сервере ещё не настроен.",
-  "auth.notInGuild": "Войдите через тот аккаунт Discord, с которым вы состоите на сервере Tactical Shift.",
+  "auth.notInGuild":
+    "Войти могут только участники Discord-сервера Tactical Shift. Если вы уже с нами, войдите через тот аккаунт Discord, с которым вы на сервере.",
+  "auth.joinDiscord": "Вступить в Discord",
+  "nav.discord": "Tactical Shift",
+  "nav.discordTitle": "Discord-сервер Tactical Shift",
   "auth.failed": "Не удалось войти. Попробуйте ещё раз.",
   "auth.devHint": "Заглушка для разработки, а не настоящий вход",
 

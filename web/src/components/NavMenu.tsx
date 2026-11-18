@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Icon } from "./ui";
+import { buttonClass, Icon } from "./ui";
 
 export interface NavItem {
   key: string;
@@ -18,7 +18,16 @@ export interface NavItem {
  * The header nav below xl, where the centred row doesn't fit: a menu button that drops a panel under the
  * header with the same links, the same hairline before the other TS apps and the same new-tab icon.
  */
-export function NavMenu({ items, labels }: { items: NavItem[]; labels: { open: string; close: string } }) {
+export function NavMenu({
+  items,
+  labels,
+  discord,
+}: {
+  items: NavItem[];
+  labels: { open: string; close: string };
+  /** Signed out: the Discord button, here on phones only (from sm up it sits in the header beside «Войти»). */
+  discord?: { href: string; label: string; title: string };
+}) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
 
@@ -86,6 +95,22 @@ export function NavMenu({ items, labels }: { items: NavItem[]; labels: { open: s
               </Link>
             ),
           ])}
+          {discord && (
+            <div className="sm:hidden">
+              <div aria-hidden className="mx-3.5 my-2 h-px bg-line-strong" />
+              <a
+                href={discord.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                title={discord.title}
+                onClick={() => setOpen(false)}
+                className={`${buttonClass("discord", "m")} mb-2 w-full`}
+              >
+                <Icon name="discord" />
+                {discord.label}
+              </a>
+            </div>
+          )}
         </nav>
       )}
     </div>

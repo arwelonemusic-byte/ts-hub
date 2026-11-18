@@ -1,8 +1,10 @@
 import { AppHeader } from "@/components/AppHeader";
 import { EventFeed } from "@/components/feed/EventFeed";
+import { Icon } from "@/components/ui";
 import { getHubData } from "@/lib/data";
 import { getFeedMeta, getFeedMonths } from "@/lib/feed";
 import { getT } from "@/lib/i18n-server";
+import { DISCORD_INVITE_URL } from "@/lib/links";
 import { isDayKey, monthOf } from "@/lib/schedule";
 import { getViewer } from "@/lib/viewer";
 
@@ -42,7 +44,20 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
       <AppHeader active="events" />
       <main className="mx-auto flex w-full max-w-[1280px] flex-col gap-8 px-4 pb-16 pt-10 md:px-8">
         {notice && (
-          <div className="rounded-lg border border-line-danger bg-danger-subtle px-4 py-3 type-body-m text-fg-body">{t(notice)}</div>
+          <div className="flex flex-col gap-2 rounded-lg border border-line-danger bg-danger-subtle px-4 py-3 type-body-m text-fg-body sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+            <span>{t(notice)}</span>
+            {auth === "not_in_guild" && (
+              <a
+                href={DISCORD_INVITE_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex w-fit shrink-0 items-center gap-1 type-label-m text-fg-accent hover:underline"
+              >
+                {t("auth.joinDiscord")}
+                <Icon name="external-accent" />
+              </a>
+            )}
+          </div>
         )}
         <div className="flex flex-col gap-2">
           <h1 className="type-display-page text-fg">{t("events.title")}</h1>

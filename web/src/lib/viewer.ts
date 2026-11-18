@@ -43,6 +43,8 @@ const ADMIN_IDS = list(process.env.HUB_ADMIN_IDS);
  */
 export const DEV_VIEWER = process.env.NODE_ENV !== "production" && !discordConfigured();
 export const DEV_VIEWER_COOKIE = "ts_hub_dev_viewer";
+/** The cookie's value for "nobody signed in" (`/api/dev/viewer?out`). */
+export const DEV_SIGNED_OUT = "-";
 /** Comma-separated role names for the stand-in (`/api/dev/viewer?name=…&roles=SL,Rifleman`). */
 export const DEV_ROLES_COOKIE = "ts_hub_dev_roles";
 /** A plain member's roles, when the dev link doesn't say. */
@@ -53,6 +55,7 @@ const DEV_ADMINS = new Set(["Galaxy"]);
 async function devViewer(): Promise<Viewer | null> {
   const jar = await cookies();
   const raw = jar.get(DEV_VIEWER_COOKIE)?.value;
+  if (raw === DEV_SIGNED_OUT) return null;
   const rolesRaw = jar.get(DEV_ROLES_COOKIE)?.value;
   const roles = rolesRaw ? list(decodeURIComponent(rolesRaw)) : DEV_DEFAULT_ROLES;
   let name = DEV_DEFAULT;

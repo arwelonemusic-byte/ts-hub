@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ENABLED_LOCALES, type T } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
 import { FNF_HOME } from "@/lib/fix-and-flank/game";
-import { BUILDER_URL, PLANNER_URL, TRAINING_URL } from "@/lib/links";
+import { BUILDER_URL, DISCORD_INVITE_URL, PLANNER_URL, TRAINING_URL } from "@/lib/links";
 import { modsEnabled } from "@/lib/mods/mirror";
 import { SERVER_INFO } from "@/lib/server-status";
 import { getViewer } from "@/lib/viewer";
@@ -135,12 +135,32 @@ export async function AppHeader({ active }: { active: "events" | "missions" | "g
             )}
           </form>
         ) : (
-          <a href="/api/auth/login" className={buttonClass("secondary", "m")}>
-            <Icon name="user-login" />
-            {t("auth.login")}
-          </a>
+          <>
+            {/* Signed out: the way into the Discord (only its members can log in), as TS Mission Builder has it.
+                Phones have no room for it beside «Войти»: there it's at the bottom of the menu (NavMenu). */}
+            <div className="hidden sm:flex">
+              <a
+                href={DISCORD_INVITE_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+                title={t("nav.discordTitle")}
+                className={buttonClass("discord", "m")}
+              >
+                <Icon name="discord" />
+                {t("nav.discord")}
+              </a>
+            </div>
+            <a href="/api/auth/login" className={buttonClass("secondary", "m")}>
+              <Icon name="user-login" />
+              {t("auth.login")}
+            </a>
+          </>
         )}
-        <NavMenu items={nav} labels={{ open: t("nav.menu"), close: t("nav.menuClose") }} />
+        <NavMenu
+          items={nav}
+          labels={{ open: t("nav.menu"), close: t("nav.menuClose") }}
+          discord={viewer ? undefined : { href: DISCORD_INVITE_URL, label: t("nav.discord"), title: t("nav.discordTitle") }}
+        />
       </div>
       {/* Members of the Discord: the game server's status, fixed to the bottom-right corner of every page. */}
       {viewer?.inGuild && (

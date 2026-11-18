@@ -74,7 +74,7 @@ export function Eyebrow({ children, className = "text-fg-tertiary" }: { children
  */
 export type IconName =
   | "arrow-right" | "arrow-right-dark" | "arrow-right-ff" | "calendar" | "check-circle" | "chevron-down" | "chevron-left" | "close"
-  | "chevron-left-nav" | "chevron-right-nav" | "copy" | "external" | "external-ff" | "external-trailing"
+  | "chevron-left-nav" | "chevron-right-nav" | "copy" | "discord" | "external" | "external-ff" | "external-trailing"
   | "external-dark" | "external-accent" | "map-pin" | "map-pin-muted" | "menu" | "pencil" | "plan-pending" | "play" | "play-light" | "search" | "user"
   | "user-login" | "user-muted" | "users-muted";
 
@@ -92,7 +92,7 @@ export function ProgressBar({ value, max, tone = "accent" }: { value: number; ma
   );
 }
 
-type ButtonVariant = "primary" | "secondary" | "outline" | "danger";
+type ButtonVariant = "primary" | "secondary" | "outline" | "danger" | "discord";
 type ButtonSize = "m" | "s" | "xs";
 
 /** Figma "Button": M = 44px, S = 32px, XS = 24px (inline "Take"). */
@@ -102,6 +102,8 @@ export function buttonClass(variant: ButtonVariant = "secondary", size: ButtonSi
     secondary: "bg-raised text-fg hover:bg-raised-hover",
     outline: "border border-line-accent text-fg-accent hover:bg-accent-subtle",
     danger: "bg-danger text-fg-on-accent hover:brightness-110",
+    // The Discord server's button, as TS Mission Builder has it (Discord's own colour and logo).
+    discord: "bg-discord text-fg hover:bg-discord-hover",
   }[variant];
   const sz = {
     m: "h-11 gap-2 rounded-lg px-4 type-label-s",

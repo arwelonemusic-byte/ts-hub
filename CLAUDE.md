@@ -351,7 +351,12 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
 - **Auth:** Discord OAuth ported from the Training Portal, plus an OAuth `state` cookie. The login is shared with the
   Training Portal (`docs/shared-login.md`): one HS256 JWT cookie, `ts_auth`, on the parent domain in production
   (`AUTH_COOKIE_DOMAIN`) and signed with `TS_AUTH_SECRET`, the same value in both apps; `lib/auth/session.ts` must stay in
-  step with the portal's. Roles are refreshed with the bot token every 10 minutes per member (`lib/viewer.ts`). Without the env vars, login redirects back with a "not configured" notice. Steam is planned.
+  step with the portal's. Roles are refreshed with the bot token every 10 minutes per member (`lib/viewer.ts`). Without the env vars, login redirects back with a "not configured" notice. Someone not on the Discord server gets no
+  session and nothing stored: back to /events with a notice and «Вступить в Discord», the server's permanent invite
+  (`DISCORD_INVITE_URL` in `lib/links.ts`, the one TS Mission Builder links to; user request 2026-11-18). Signed-out
+  visitors also get TS Mission Builder's Discord button («Tactical Shift», `buttonClass("discord")`, Discord's own
+  `--ts-discord` colour, not a Figma variable) beside «Войти», and at the bottom of the menu on phones, where the header
+  has no room (`NavMenu`'s `discord`). `/api/dev/viewer?out` shows the dev pages signed out. Steam is planned.
   Env template: `web/.env.example`. Pages ask `getViewer()` (`lib/viewer.ts`) who is looking. On a dev machine
   without OAuth configured it returns a stand-in from `data/players` (Galaxy, an admin, by default; switch with
   `/api/dev/viewer?name=<display name or Discord username>[&roles=SL,Rifleman]`, roles default to Rifleman; display names

@@ -1,6 +1,8 @@
 const PLANNER = process.env.NEXT_PUBLIC_PLANNER_URL ?? "https://planner.tacticalshift.ru";
 
 export const TRAINING_URL = "https://training.tacticalshift.ru";
+/** The Discord's permanent invite (to #общий-чат), the same one TS Mission Builder links to. */
+export const DISCORD_INVITE_URL = "https://discord.gg/M3yAhHGxrd";
 export const BUILDER_URL = "https://builder.tacticalshift.ru";
 export const PLANNER_URL = PLANNER;
 

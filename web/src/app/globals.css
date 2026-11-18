@@ -32,6 +32,9 @@
   --ts-red-400-a14: #e25a5524;
   --ts-blue-400: #5996dc;
   --ts-brand-red: #e13446;
+  /* Discord's own brand colour, not a Figma variable: the Discord button, as in TS Mission Builder. */
+  --ts-discord: #5865f2;
+  --ts-discord-hover: #6b77f5;
 
   /* Color — semantic */
   --ts-color-bg-page: var(--ts-neutral-950);
@@ -111,6 +114,8 @@
   --color-success: var(--ts-color-bg-success);
   /* Trainings (Mission.training): the friendly blue, so they stand apart from the yellow ops. */
   --color-training: var(--ts-blue-400);
+  --color-discord: var(--ts-discord);
+  --color-discord-hover: var(--ts-discord-hover);
 
   --color-line: var(--ts-color-border-default);
   --color-line-strong: var(--ts-color-border-strong);
