@@ -676,6 +676,18 @@ const RU: Dict = {
   "server.port": "Порт",
   "server.collapse": "Свернуть",
 
+  // «Не качаются моды?»: the strip under the header and its page (app/help/mods, lib/mods-help.ts).
+  "modsHelp.banner": "Не качаются моды?",
+  "modsHelp.bannerCta": "Жми сюда",
+  "modsHelp.title": "Не качаются моды?",
+  "modsHelp.intro": "Если игра не скачивает моды, сделайте три шага в Windows.",
+  "modsHelp.step1": "Запустите PowerShell от имени администратора",
+  "modsHelp.step1Hint": "Пуск → наберите «PowerShell» → «Запуск от имени администратора».",
+  "modsHelp.step2": "Вставьте команду",
+  "modsHelp.step2Hint": "Команда добавляет одну строку в файл hosts и сбрасывает кэш DNS.",
+  "modsHelp.step3": "Нажмите Enter",
+  "modsHelp.copy": "Скопировать команду",
+
   // «Скачать мод» in the server card (components/mods/ModDownloadDialog.tsx, lib/mods/).
   "mods.open": "Скачать мод",
   "mods.title": "Скачать мод",

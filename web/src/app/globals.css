@@ -206,6 +206,17 @@
   }
 }
 
+/*
+ * The sticky top of every page (AppHeader): the 60px header, plus the 36px «Не качаются моды?» strip while it's
+ * shown. Sticky asides and the sections a jump scrolls to sit below it.
+ */
+:root {
+  --app-top: 60px;
+}
+:root:has([data-mods-help]) {
+  --app-top: 96px;
+}
+
 /* «Занять слот» and the hero's plan box flash the section they scroll to (components/event/Jump.tsx). */
 @theme {
   --animate-attention: attention 1s ease-out;

@@ -2,18 +2,15 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { copyText } from "@/lib/clipboard";
 
 /** Icon-only "copy" button (Figma: briefing header). Shows a short confirmation after copying. */
 export function CopyButton({ text, label, copiedLabel }: { text: string; label: string; copiedLabel: string }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard blocked (insecure context / permissions) — nothing useful to do.
-    }
+    if (!(await copyText(text))) return;
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   };
   return (
     <button

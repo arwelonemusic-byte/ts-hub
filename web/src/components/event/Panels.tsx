@@ -142,7 +142,7 @@ function briefingText(b: Briefing, t: T): string {
 export function BriefingPanel({ b, t }: { b: Briefing; t: T }) {
   return (
     // id: the Discord announcement's «Полный брифинг» links here (lib/discord/template.ts).
-    <section id="briefing" className="flex scroll-mt-24 flex-col gap-7 rounded-xl bg-surface p-6 md:p-8 lg:scroll-mt-[72px]">
+    <section id="briefing" className="flex scroll-mt-[calc(var(--app-top)+36px)] flex-col gap-7 rounded-xl bg-surface p-6 md:p-8 lg:scroll-mt-[calc(var(--app-top)+12px)]">
       <div className="flex items-baseline justify-between">
         <h2 className="type-heading-l text-fg">{t("briefing.title")}</h2>
         <CopyButton text={briefingText(b, t)} label={t("briefing.copy")} copiedLabel={t("briefing.copied")} />
@@ -271,7 +271,7 @@ export function PlanPanel({
   };
   return (
     // The hero's plan box jumps here (components/event/Jump.tsx), like «Занять слот» to the slots.
-    <section id="plan" className="flex scroll-mt-24 flex-col gap-4 rounded-xl bg-surface p-6 lg:scroll-mt-[72px]">
+    <section id="plan" className="flex scroll-mt-[calc(var(--app-top)+36px)] flex-col gap-4 rounded-xl bg-surface p-6 lg:scroll-mt-[calc(var(--app-top)+12px)]">
       <div className="flex items-center justify-between">
         <h2 className="type-heading-m text-fg">{t("plan.title")}</h2>
         <Tag>{attached ? t("plan.attachedTag") : t("plan.noneTag")}</Tag>
@@ -401,8 +401,8 @@ export function SlotsPanel({ ev, viewer, players, t }: { ev: UpcomingEvent; view
   };
 
   return (
-    // «Занять слот» jumps here; on desktop the columns then start just under the 60px header.
-    <section id="slots" className="flex scroll-mt-24 flex-col gap-6 rounded-xl bg-inset p-5 lg:scroll-mt-[72px]">
+    // «Занять слот» jumps here; on desktop the columns then start just under the sticky header.
+    <section id="slots" className="flex scroll-mt-[calc(var(--app-top)+36px)] flex-col gap-6 rounded-xl bg-inset p-5 lg:scroll-mt-[calc(var(--app-top)+12px)]">
       <div className="flex items-baseline justify-between">
         <h2 className="type-heading-xs text-fg">{t("slots.title")}</h2>
         <span className="type-caption text-fg-secondary">{t("slots.taken", { taken, max: slots.length })}</span>
@@ -678,7 +678,7 @@ function Board({
 export function RsvpPanel({ ev, viewer, locale, t }: { ev: UpcomingEvent; viewer: Viewer | null; locale: Locale; t: T }) {
   return (
     // «Я приду!» and links to #slots land here, as on a slotted game.
-    <section id="slots" className="flex scroll-mt-24 flex-col gap-4 rounded-xl bg-inset p-5 lg:scroll-mt-[72px]">
+    <section id="slots" className="flex scroll-mt-[calc(var(--app-top)+36px)] flex-col gap-4 rounded-xl bg-inset p-5 lg:scroll-mt-[calc(var(--app-top)+12px)]">
       <div className="flex items-baseline justify-between">
         <h2 className="type-heading-xs text-fg">{t("rsvp.title")}</h2>
         <span className="type-caption text-fg-secondary">{plural(locale, "rsvp.count", ev.rsvps.length)}</span>

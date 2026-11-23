@@ -4,6 +4,7 @@ import { ENABLED_LOCALES, type T } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
 import { FNF_HOME } from "@/lib/fix-and-flank/game";
 import { BUILDER_URL, DISCORD_INVITE_URL, PLANNER_URL, TRAINING_URL } from "@/lib/links";
+import { MODS_HELP_COMMAND, MODS_HELP_PATH } from "@/lib/mods-help";
 import { modsEnabled } from "@/lib/mods/mirror";
 import { SERVER_INFO } from "@/lib/server-status";
 import { getViewer } from "@/lib/viewer";
@@ -71,8 +72,17 @@ const modLabels = (t: T): ModDownloadLabels => ({
   copied: t("mission.copied"),
 });
 
-/** Figma "App header" (8:180): brand · centred nav · account. */
-export async function AppHeader({ active }: { active: "events" | "missions" | "games" | "players" }) {
+/**
+ * Figma "App header" (8:180): brand · centred nav · account. Below it, on every page but its own, the
+ * «Не качаются моды?» strip (lib/mods-help.ts); it scrolls away with the page, the header stays.
+ */
+export async function AppHeader({
+  active,
+  modsHelp = true,
+}: {
+  active?: "events" | "missions" | "games" | "players";
+  modsHelp?: boolean;
+}) {
   const [{ locale, t }, viewer] = await Promise.all([getT(), getViewer()]);
   // «Мини-игры» is a menu: one game for now (user request 2026-10-15). Shown only to admins and @srv until it opens
   // to everyone (user decision 2026-10-15); its pages themselves are open to members.
@@ -89,97 +99,109 @@ export async function AppHeader({ active }: { active: "events" | "missions" | "g
     { key: "builder", href: BUILDER_URL, external: true },
   ].map((n) => ({ ...n, label: t(`nav.${n.key}`), active: n.key === active }));
   return (
-    <header className="sticky top-0 z-20 grid h-15 grid-cols-[1fr_auto] items-center border-b border-line bg-surface px-4 py-2 shadow-floating md:px-6 xl:grid-cols-[1fr_auto_1fr]">
-      <Link href="/events" className="flex items-center gap-2.5 justify-self-start">
-        <Image src="/icons/ts-mark.svg" alt="" width={31} height={24} priority />
-        <span className="type-heading-xxs text-fg">Tactical Shift</span>
-      </Link>
-      <nav className="hidden items-center gap-1 xl:flex">
-        {nav.map((n, i) => [
-          // A hairline between the hub's own sections and the other TS apps.
-          n.external && !nav[i - 1]?.external && <span key="divider" aria-hidden className="mx-2 h-5 w-px bg-line-strong" />,
-          n.children ? (
-            <NavDropdown key={n.key} item={n} />
-          ) : (
-            <Link
-              key={n.key}
-              href={n.href}
-              {...(n.external ? { target: "_blank", rel: "noreferrer" } : {})}
-              aria-current={n.active ? "page" : undefined}
-              className={`flex h-11 items-center gap-1.5 rounded-lg px-3.5 type-label-s ${
-                n.active ? "bg-raised text-fg" : "text-fg-secondary hover:text-fg"
-              }`}
-            >
-              {n.label}
-              {/* The other TS apps open in a new tab; the icon (62% white) matches the nav's text. */}
-              {n.external && <Icon name="external-ff" />}
-            </Link>
-          ),
-        ])}
-      </nav>
-      <div className="flex items-center gap-3 justify-self-end">
-        {ENABLED_LOCALES.length > 1 && <LanguageToggle locale={locale} />}
-        {viewer ? (
-          <form action="/api/auth/logout" method="post" className="flex items-center gap-2">
-            {viewer.avatar && <Image src={viewer.avatar} alt="" width={28} height={28} className="rounded-full" />}
-            <span className="hidden type-label-s text-fg sm:inline">{viewer.name}</span>
-            {viewer.dev ? (
-              // Not a real login: lib/viewer.ts. Switch with /api/dev/viewer?name=…
-              <span title={t("auth.devHint")} className="rounded-md px-2 py-1 type-caption text-fg-tertiary">
-                dev
-              </span>
+    // The header and the strip under it stick together; their height is --app-top (globals.css).
+    <div className="sticky top-0 z-20 shadow-floating">
+      <header className="relative grid h-15 grid-cols-[1fr_auto] items-center border-b border-line bg-surface px-4 py-2 md:px-6 xl:grid-cols-[1fr_auto_1fr]">
+        <Link href="/events" className="flex items-center gap-2.5 justify-self-start">
+          <Image src="/icons/ts-mark.svg" alt="" width={31} height={24} priority />
+          <span className="type-heading-xxs text-fg">Tactical Shift</span>
+        </Link>
+        <nav className="hidden items-center gap-1 xl:flex">
+          {nav.map((n, i) => [
+            // A hairline between the hub's own sections and the other TS apps.
+            n.external && !nav[i - 1]?.external && <span key="divider" aria-hidden className="mx-2 h-5 w-px bg-line-strong" />,
+            n.children ? (
+              <NavDropdown key={n.key} item={n} />
             ) : (
-              <button type="submit" className="rounded-md px-2 py-1 type-caption text-fg-tertiary hover:text-fg">
-                {t("auth.logout")}
-              </button>
-            )}
-          </form>
-        ) : (
-          <>
-            {/* Signed out: the way into the Discord (only its members can log in), as TS Mission Builder has it.
-                Phones have no room for it beside «Войти»: there it's at the bottom of the menu (NavMenu). */}
-            <div className="hidden sm:flex">
-              <a
-                href={DISCORD_INVITE_URL}
-                target="_blank"
-                rel="noreferrer noopener"
-                title={t("nav.discordTitle")}
-                className={buttonClass("discord", "m")}
+              <Link
+                key={n.key}
+                href={n.href}
+                {...(n.external ? { target: "_blank", rel: "noreferrer" } : {})}
+                aria-current={n.active ? "page" : undefined}
+                className={`flex h-11 items-center gap-1.5 rounded-lg px-3.5 type-label-s ${
+                  n.active ? "bg-raised text-fg" : "text-fg-secondary hover:text-fg"
+                }`}
               >
-                <Icon name="discord" />
-                {t("nav.discord")}
+                {n.label}
+                {/* The other TS apps open in a new tab; the icon (62% white) matches the nav's text. */}
+                {n.external && <Icon name="external-ff" />}
+              </Link>
+            ),
+          ])}
+        </nav>
+        <div className="flex items-center gap-3 justify-self-end">
+          {ENABLED_LOCALES.length > 1 && <LanguageToggle locale={locale} />}
+          {viewer ? (
+            <form action="/api/auth/logout" method="post" className="flex items-center gap-2">
+              {viewer.avatar && <Image src={viewer.avatar} alt="" width={28} height={28} className="rounded-full" />}
+              <span className="hidden type-label-s text-fg sm:inline">{viewer.name}</span>
+              {viewer.dev ? (
+                // Not a real login: lib/viewer.ts. Switch with /api/dev/viewer?name=…
+                <span title={t("auth.devHint")} className="rounded-md px-2 py-1 type-caption text-fg-tertiary">
+                  dev
+                </span>
+              ) : (
+                <button type="submit" className="rounded-md px-2 py-1 type-caption text-fg-tertiary hover:text-fg">
+                  {t("auth.logout")}
+                </button>
+              )}
+            </form>
+          ) : (
+            <>
+              {/* Signed out: the way into the Discord (only its members can log in), as TS Mission Builder has it.
+                  Phones have no room for it beside «Войти»: there it's at the bottom of the menu (NavMenu). */}
+              <div className="hidden sm:flex">
+                <a
+                  href={DISCORD_INVITE_URL}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  title={t("nav.discordTitle")}
+                  className={buttonClass("discord", "m")}
+                >
+                  <Icon name="discord" />
+                  {t("nav.discord")}
+                </a>
+              </div>
+              <a href="/api/auth/login" className={buttonClass("secondary", "m")}>
+                <Icon name="user-login" />
+                {t("auth.login")}
               </a>
-            </div>
-            <a href="/api/auth/login" className={buttonClass("secondary", "m")}>
-              <Icon name="user-login" />
-              {t("auth.login")}
-            </a>
-          </>
+            </>
+          )}
+          <NavMenu
+            items={nav}
+            labels={{ open: t("nav.menu"), close: t("nav.menuClose") }}
+            discord={viewer ? undefined : { href: DISCORD_INVITE_URL, label: t("nav.discord"), title: t("nav.discordTitle") }}
+          />
+        </div>
+        {/* Members of the Discord: the game server's status, fixed to the bottom-right corner of every page. */}
+        {viewer?.inGuild && (
+          <ServerStatus
+            info={SERVER_INFO}
+            labels={{
+              up: t("server.up"),
+              down: t("server.down"),
+              name: t("server.name"),
+              password: t("server.password"),
+              ip: t("server.ip"),
+              port: t("server.port"),
+              collapse: t("server.collapse"),
+              copyHint: t("mission.copyHint"),
+              copied: t("mission.copied"),
+            }}
+            mods={modsEnabled() ? modLabels(t) : undefined}
+          />
         )}
-        <NavMenu
-          items={nav}
-          labels={{ open: t("nav.menu"), close: t("nav.menuClose") }}
-          discord={viewer ? undefined : { href: DISCORD_INVITE_URL, label: t("nav.discord"), title: t("nav.discordTitle") }}
-        />
-      </div>
-      {/* Members of the Discord: the game server's status, fixed to the bottom-right corner of every page. */}
-      {viewer?.inGuild && (
-        <ServerStatus
-          info={SERVER_INFO}
-          labels={{
-            up: t("server.up"),
-            down: t("server.down"),
-            name: t("server.name"),
-            password: t("server.password"),
-            ip: t("server.ip"),
-            port: t("server.port"),
-            collapse: t("server.collapse"),
-            copyHint: t("mission.copyHint"),
-            copied: t("mission.copied"),
-          }}
-          mods={modsEnabled() ? modLabels(t) : undefined}
-        />
+      </header>
+      {modsHelp && MODS_HELP_COMMAND && (
+        // One line, 36px, so --app-top can count it. The accent tint is see-through: the page colour goes under it.
+        <Link href={MODS_HELP_PATH} data-mods-help className="group block h-9 border-b border-line bg-page">
+          <span className="flex h-full items-center justify-center gap-1.5 bg-accent-subtle px-4 whitespace-nowrap type-label-s text-fg">
+            {t("modsHelp.banner")}
+            <span className="text-fg-accent underline-offset-2 group-hover:underline">{t("modsHelp.bannerCta")}</span>
+          </span>
+        </Link>
       )}
-    </header>
+    </div>
   );
 }

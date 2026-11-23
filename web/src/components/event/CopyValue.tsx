@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { copyText } from "@/lib/clipboard";
 
 /**
  * A value that copies itself to the clipboard on click. Long values (scenario IDs) are
@@ -10,23 +11,7 @@ import { useState } from "react";
 export function CopyValue({ value, text = value, hint, copiedLabel }: { value: string; text?: string; hint: string; copiedLabel: string }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
-    let ok = false;
-    try {
-      await navigator.clipboard.writeText(text);
-      ok = true;
-    } catch {
-      // No async clipboard (plain-http host, permissions): fall back to a hidden textarea.
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      ta.setAttribute("readonly", "");
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.select();
-      ok = document.execCommand("copy");
-      ta.remove();
-    }
-    if (!ok) return;
+    if (!(await copyText(text))) return;
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };

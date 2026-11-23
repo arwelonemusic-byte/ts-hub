@@ -13,8 +13,8 @@ import { FeedCalendar } from "./Calendar";
 import { FeedRow, WeekHeader } from "./Cards";
 import { RetroBanner } from "./RetroBanner";
 
-/** App header (60px) + 24px: the line that counts as "the top of the feed". */
-const TOP = 84;
+/** The sticky top (--app-top in globals.css: the header, and the strip under it) + 24px: "the top of the feed". */
+const feedTop = () => (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--app-top")) || 60) + 24;
 const DAY_MS = 86_400_000;
 /** Start loading a neighbouring month this far before its edge scrolls into view. */
 const PRELOAD_MARGIN = "800px 0px";
@@ -239,8 +239,9 @@ export function EventFeed({
       const rows = feedRef.current?.querySelectorAll<HTMLElement>("[data-feed-date]");
       if (!rows?.length) return;
       const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      const top = feedTop();
       // A row counts as "at the top" once less than a sliver of the one above it is left.
-      const hit = atBottom ? rows[rows.length - 1] : ([...rows].find((r) => r.getBoundingClientRect().bottom > TOP + 24) ?? rows[rows.length - 1]);
+      const hit = atBottom ? rows[rows.length - 1] : ([...rows].find((r) => r.getBoundingClientRect().bottom > top + 24) ?? rows[rows.length - 1]);
       const day = hit.dataset.feedDate!;
       setActiveDay(day);
       if (!lock.current) setCalMonth(day.slice(0, 7));
@@ -311,9 +312,9 @@ export function EventFeed({
       <div ref={feedRef} className="flex min-w-0 flex-1 flex-col gap-10">
         {first > meta.first && <Edge edgeRef={topRef} loading={busy === "prev"} failed={failed === "prev"} onRetry={retryPrev} t={t} />}
         {months.map((m) => (
-          <section key={m.month} data-month-section={m.month} className="flex scroll-mt-[84px] flex-col gap-10">
+          <section key={m.month} data-month-section={m.month} className="flex scroll-mt-[calc(var(--app-top)+24px)] flex-col gap-10">
             {m.items.length === 0 ? (
-              <div data-feed-date={`${m.month}-01`} className="flex scroll-mt-[84px] flex-col gap-3">
+              <div data-feed-date={`${m.month}-01`} className="flex scroll-mt-[calc(var(--app-top)+24px)] flex-col gap-3">
                 <WeekHeader title={monthYear(monthStart(m.month).toISOString(), locale)} label="" />
                 <p className="type-body-s text-fg-tertiary">{t("feed.emptyMonth")}</p>
               </div>
@@ -322,7 +323,7 @@ export function EventFeed({
                 <div key={w.key} className="flex flex-col gap-3">
                   <WeekHeader title={w.title} label={w.label} />
                   {w.items.map((it) => (
-                    <div key={itemKey(it)} data-feed-date={mskDayKey(it.startsAt)} className="scroll-mt-[84px]">
+                    <div key={itemKey(it)} data-feed-date={mskDayKey(it.startsAt)} className="scroll-mt-[calc(var(--app-top)+24px)]">
                       <FeedRow
                         item={it}
                         nextId={meta.nextId}
@@ -342,7 +343,7 @@ export function EventFeed({
         {last < meta.last && <Edge edgeRef={bottomRef} loading={busy === "next"} failed={failed === "next"} onRetry={retryNext} t={t} />}
       </div>
       {/* Scrolls on its own when banner + calendar are taller than the window, so the calendar's last rows stay reachable. */}
-      <aside className="sticky top-[84px] hidden max-h-[calc(100dvh-84px)] w-[300px] shrink-0 flex-col gap-3 overflow-y-auto pb-6 [scrollbar-width:none] lg:flex">
+      <aside className="sticky top-[calc(var(--app-top)+24px)] hidden max-h-[calc(100dvh-var(--app-top)-24px)] w-[300px] shrink-0 flex-col gap-3 overflow-y-auto pb-6 [scrollbar-width:none] lg:flex">
         {missions && (
           <button type="button" onClick={() => setScheduling({})} className={`${buttonClass("primary", "m")} w-full`}>
             {t("schedule.button")}

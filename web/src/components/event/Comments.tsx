@@ -243,7 +243,7 @@ export function CommentsPanel({
   }
 
   return (
-    <section id="comments" className="flex scroll-mt-24 flex-col gap-5 rounded-xl bg-surface p-6 lg:scroll-mt-[72px]">
+    <section id="comments" className="flex scroll-mt-[calc(var(--app-top)+36px)] flex-col gap-5 rounded-xl bg-surface p-6 lg:scroll-mt-[calc(var(--app-top)+12px)]">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-baseline gap-2">
           <h2 className="type-heading-m text-fg">{t("comments.title")}</h2>
