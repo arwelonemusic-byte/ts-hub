@@ -684,9 +684,20 @@ const RU: Dict = {
   "modsHelp.step1": "Запустите PowerShell от имени администратора",
   "modsHelp.step1Hint": "Пуск → наберите «PowerShell» → «Запуск от имени администратора».",
   "modsHelp.step2": "Вставьте команду",
+  "modsHelp.step2Any": "Вставьте команду, любую на выбор",
+  "modsHelp.variant": "Вариант {n}",
   "modsHelp.step2Hint": "Команда добавляет одну строку в файл hosts и сбрасывает кэш DNS.",
   "modsHelp.step3": "Нажмите Enter",
-  "modsHelp.copy": "Скопировать команду",
+  "modsHelp.copy": "Скопировать",
+  "modsHelp.manual.title": "Или вручную, через Блокнот",
+  "modsHelp.manual.intro": "Если хотите, то же самое можно сделать без PowerShell.",
+  "modsHelp.manual.step1": "Откройте файл hosts в Блокноте от имени администратора",
+  "modsHelp.manual.step1Hint":
+    "Пуск → наберите «Блокнот» → «Запуск от имени администратора». В Блокноте: Файл → Открыть, и вставьте в поле «Имя файла» путь:",
+  "modsHelp.manual.step2": "Добавьте в конец файла, с новой строки, эту строку и сохраните файл",
+  "modsHelp.manual.step2Any": "Добавьте в конец файла, с новой строки, одну из этих строк и сохраните файл",
+  "modsHelp.manual.step3": "Перезагрузите ПК или сбросьте кэш DNS",
+  "modsHelp.manual.step3Hint": "Чтобы не перезагружать: откройте командную строку от имени администратора и введите",
 
   // «Скачать мод» in the server card (components/mods/ModDownloadDialog.tsx, lib/mods/).
   "mods.open": "Скачать мод",

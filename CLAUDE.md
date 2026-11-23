@@ -316,11 +316,14 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   server waits until no zip is being sent and no zip starts while it runs (`busy`); at most 3 zips at once, each at
   most `HUB_MODS_RATE_MBIT` (200). POC limits: jobs live in memory (a finished one is kept 30 min; the dialog picks the
   member's job up after a reload), the folder only grows, any member can make the box download any mod.
-- **«Не качаются моды?»** (user request 2026-11-23; `lib/mods-help.ts`): a strip under the header on every page
-  («Не качаются моды? Жми сюда», rendered by AppHeader, so it scrolls away while the header stays) links to
-  `/help/mods`, open to everyone: run PowerShell as admin, paste the command (a copy button), press Enter. The command
-  adds a hosts line for ar-gcp-cdn.bistudio.com, starting with a line break so it can't join a last line that has none. A page rather than a dialog so the link can go in Discord. Setting
-  `MODS_HELP_COMMAND` to null hides the strip and 404s the page.
+- **«Не качаются моды?»** (user requests 2026-11-23, 2026-11-24; `lib/mods-help.ts`): a strip under the header on
+  every page («Не качаются моды? Жми сюда», rendered by AppHeader and stuck to it, since the feed scrolls past the top
+  on load; the sticky top's height is `--app-top` in globals.css, which the feed and the jump targets use) links to
+  `/help/mods`, open to everyone. It points ar-gcp-cdn.bistudio.com at one of `MODS_HELP_IPS` (the addresses the
+  community passes around, either works) in the hosts file, two ways: run PowerShell as admin, paste one of the
+  commands (copy buttons), press Enter; or by hand: the hosts file in an admin Notepad, a line added, then a reboot or
+  `ipconfig /flushdns`. The commands start the entry with a line break so it can't join a last line that has none. A
+  page rather than a dialog so the link can go in Discord. An empty `MODS_HELP_IPS` hides the strip and 404s the page.
 - **Briefings are sections** (`Briefing.sections`, plus optional `sides` for За кого / Против кого), as authors write
   them in the catalogue. A section body is plain text: blank lines split paragraphs, "- " lines are list items, and
   list items under «Задачи» get the numbered badges.

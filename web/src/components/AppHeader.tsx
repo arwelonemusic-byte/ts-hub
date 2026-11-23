@@ -4,7 +4,7 @@ import { ENABLED_LOCALES, type T } from "@/lib/i18n";
 import { getT } from "@/lib/i18n-server";
 import { FNF_HOME } from "@/lib/fix-and-flank/game";
 import { BUILDER_URL, DISCORD_INVITE_URL, PLANNER_URL, TRAINING_URL } from "@/lib/links";
-import { MODS_HELP_COMMAND, MODS_HELP_PATH } from "@/lib/mods-help";
+import { MODS_HELP_PATH, modsHelpShown } from "@/lib/mods-help";
 import { modsEnabled } from "@/lib/mods/mirror";
 import { SERVER_INFO } from "@/lib/server-status";
 import { getViewer } from "@/lib/viewer";
@@ -74,7 +74,7 @@ const modLabels = (t: T): ModDownloadLabels => ({
 
 /**
  * Figma "App header" (8:180): brand · centred nav · account. Below it, on every page but its own, the
- * «Не качаются моды?» strip (lib/mods-help.ts); it scrolls away with the page, the header stays.
+ * «Не качаются моды?» strip (lib/mods-help.ts), stuck to the header.
  */
 export async function AppHeader({
   active,
@@ -193,7 +193,7 @@ export async function AppHeader({
           />
         )}
       </header>
-      {modsHelp && MODS_HELP_COMMAND && (
+      {modsHelp && modsHelpShown && (
         // One line, 36px, so --app-top can count it. The accent tint is see-through: the page colour goes under it.
         <Link href={MODS_HELP_PATH} data-mods-help className="group block h-9 border-b border-line bg-page">
           <span className="flex h-full items-center justify-center gap-1.5 bg-accent-subtle px-4 whitespace-nowrap type-label-s text-fg">
