@@ -671,7 +671,6 @@ const RU: Dict = {
   "server.up": "Сервер запущен",
   "server.down": "Сервер отдыхает",
   "server.name": "Сервер",
-  "server.password": "Пароль",
   "server.ip": "IP",
   "server.port": "Порт",
   "server.collapse": "Свернуть",

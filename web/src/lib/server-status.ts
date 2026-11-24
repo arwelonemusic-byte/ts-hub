@@ -11,15 +11,12 @@ const [A2S_HOST, A2S_PORT] = (process.env.GAME_SERVER_A2S ?? `${IP}:17777`).spli
 /** How to join, shown to members only. */
 export interface ServerInfo {
   name: string;
-  /** In the env (GAME_SERVER_PASSWORD), not in this public repo; unset = the card leaves the row out. */
-  password: string | null;
   ip: string;
   port: number;
 }
 
 export const SERVER_INFO: ServerInfo = {
-  name: "[RU] Tactical Shift COOP",
-  password: process.env.GAME_SERVER_PASSWORD || null,
+  name: "[RU] Tactical Events PvE | tacticalshift.ru",
   ip: IP,
   port: 2001,
 };

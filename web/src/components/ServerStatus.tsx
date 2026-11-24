@@ -10,7 +10,6 @@ export interface ServerStatusLabels {
   up: string;
   down: string;
   name: string;
-  password: string;
   ip: string;
   port: string;
   collapse: string;
@@ -93,17 +92,16 @@ export function ServerStatus({ info, labels, mods }: { info: ServerInfo; labels:
   const status = up ? labels.up : labels.down;
   const rows = [
     [labels.name, info.name],
-    [labels.password, info.password],
     [labels.ip, info.ip],
     [labels.port, String(info.port)],
-  ].filter((r): r is [string, string] => !!r[1]);
+  ];
 
   return (
     <div ref={root} className="fixed right-4 bottom-4 z-40 md:right-6 md:bottom-6">
-      {open ? (
         <section
           aria-label={status}
-          className="flex w-[min(20rem,calc(100vw-2rem))] flex-col gap-3 rounded-xl bg-surface p-4 shadow-floating ring-1 ring-line-strong"
+          inert={!open}
+          className={`absolute right-0 bottom-0 flex w-max max-w-[calc(100vw-2rem)] origin-bottom-right flex-col gap-3 rounded-xl bg-surface p-4 shadow-floating ring-1 ring-line-strong motion-safe:transition-[scale,opacity] ease-[cubic-bezier(.25,1,.5,1)] ${open ? "scale-100 opacity-100 duration-250" : "pointer-events-none scale-x-50 scale-y-25 opacity-0 duration-180"}`}
         >
           <div className="flex items-center gap-2.5">
             <Dot up={up} />
@@ -140,17 +138,16 @@ export function ServerStatus({ info, labels, mods }: { info: ServerInfo; labels:
             </button>
           )}
         </section>
-      ) : (
         <button
           type="button"
           onClick={() => setOpen(true)}
-          aria-expanded={false}
-          className="flex h-9 items-center gap-2 rounded-full bg-surface pr-3.5 pl-3 shadow-floating ring-1 ring-line-strong type-label-s text-fg hover:bg-raised"
+          aria-expanded={open}
+          inert={open}
+          className={`flex h-9 items-center gap-2 rounded-full bg-surface pr-3.5 pl-3 shadow-floating ring-1 ring-line-strong type-label-s text-fg hover:bg-raised motion-safe:transition-opacity duration-150 ${open ? "pointer-events-none opacity-0" : "opacity-100"}`}
         >
           <Dot up={up} />
           {status}
         </button>
-      )}
       {modDialog && mods && <ModDownloadDialog labels={mods} onClose={() => setModDialog(false)} />}
     </div>
   );

@@ -286,12 +286,11 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   («Игра окончена»; its page and mission page still reach it). Usual Tue/Sun slots with nothing scheduled are open slots in the feed.
 - **Game server pill** (`components/ServerStatus.tsx`, user request 2026-10-12): members of the Discord (signed in,
   `viewer.inGuild`) see a pill in the bottom-right corner of every page (AppHeader renders it): a green dot and «Сервер
-  запущен», or a grey one and «Сервер отдыхает». It opens into a card with the server's name, password, IP and port,
+  запущен», or a grey one and «Сервер отдыхает». It opens into a card with the server's name, IP and port,
   each click-to-copy. `/api/server-status` (members only) sends the Steam query A2S_INFO to the game server's public
   address 91.206.15.125:17777, like the Discord bot does (the game binds A2S to the public IP, so 127.0.0.1 doesn't
-  answer even on the box). The hub asks at most every 20 s, and the pill polls every 30 s while the tab is visible. The
-  password comes from `GAME_SERVER_PASSWORD` (not in this public repo; unset = no «Пароль» row). `GAME_SERVER_A2S=host:port`
-  points the check at a stand-in.
+  answer even on the box). The hub asks at most every 20 s, and the pill polls every 30 s while the tab is visible.
+  `GAME_SERVER_A2S=host:port` points the check at a stand-in.
 - **«Скачать мод»** (POC, user requests 2026-10-29; `lib/mods/`, `components/mods/ModDownloadDialog.tsx`): a button in
   the server card, shown where `REFORGER_SERVER_DIR` holds an Arma Reforger Server (dev on Windows: Steam's library;
   on the box its own install in `/opt/ts-mods/server`, mods in `/var/lib/ts-hub/mods`). A member pastes one Workshop

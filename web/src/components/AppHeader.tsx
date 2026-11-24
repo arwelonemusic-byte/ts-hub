@@ -182,7 +182,6 @@ export async function AppHeader({
               up: t("server.up"),
               down: t("server.down"),
               name: t("server.name"),
-              password: t("server.password"),
               ip: t("server.ip"),
               port: t("server.port"),
               collapse: t("server.collapse"),
