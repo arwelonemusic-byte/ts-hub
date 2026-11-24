@@ -101,7 +101,7 @@ export function ServerStatus({ info, labels, mods }: { info: ServerInfo; labels:
         <section
           aria-label={status}
           inert={!open}
-          className={`absolute right-0 bottom-0 flex w-max max-w-[calc(100vw-2rem)] origin-bottom-right flex-col gap-3 rounded-xl bg-surface p-4 shadow-floating ring-1 ring-line-strong motion-safe:transition-[scale,opacity] ease-[cubic-bezier(.25,1,.5,1)] ${open ? "scale-100 opacity-100 duration-250" : "pointer-events-none scale-x-50 scale-y-25 opacity-0 duration-180"}`}
+          className={`absolute right-0 bottom-0 flex w-[21rem] max-w-[calc(100vw-2rem)] origin-bottom-right flex-col gap-3 rounded-xl bg-surface p-4 shadow-floating ring-1 ring-line-strong motion-safe:transition-[scale,opacity] ease-[cubic-bezier(.25,1,.5,1)] ${open ? "scale-100 opacity-100 duration-250" : "pointer-events-none scale-x-50 scale-y-25 opacity-0 duration-180"}`}
         >
           <div className="flex items-center gap-2.5">
             <Dot up={up} />
