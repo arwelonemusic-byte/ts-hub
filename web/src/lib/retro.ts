@@ -7,11 +7,14 @@ import type { MonthKey } from "./schedule";
  */
 export type Retro = { url: string; month: MonthKey; image: string; games: number; hours: number; players: number };
 
-export const RETRO: Retro | null = {
-  url: "https://retro.tacticalshift.ru/october-2026/",
-  month: "2026-10",
-  image: "/retro/october-2026.jpg",
-  games: 14,
-  hours: 29,
-  players: 52,
-};
+export const RETRO: Retro | null = null;
+
+// Previous banner configuration to reuse for the November retrospective:
+// export const RETRO: Retro | null = {
+//   url: "https://retro.tacticalshift.ru/october-2026/",
+//   month: "2026-10",
+//   image: "/retro/october-2026.jpg",
+//   games: 14,
+//   hours: 29,
+//   players: 52,
+// };
