@@ -35,7 +35,7 @@ export type FeedItem =
       /** Planner link for the first replay, with the game's plan and layer. */
       replayHref: string | null;
     }
-  /** A usual Tue/Sun slot ahead of us with nothing scheduled. */
+  /** A regular weekly slot ahead of us with nothing scheduled. */
   | { kind: "open"; startsAt: ISODate };
 
 export interface FeedMonth {

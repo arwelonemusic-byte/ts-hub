@@ -65,7 +65,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
             {t("events.intro.a")}
             <strong className="font-medium text-fg">{t("events.intro.tue")}</strong>
             {t("events.intro.b")}
-            <strong className="font-medium text-fg">{t("events.intro.sun")}</strong>
+            <strong className="font-medium text-fg">{t("events.intro.sat")}</strong>
             {t("events.intro.c")}
           </p>
         </div>

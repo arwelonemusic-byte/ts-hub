@@ -49,7 +49,7 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
 - **Data access goes through `getHubData()`** (`web/src/lib/data/`). Pages never query the database directly, so the
   sources can change without touching the UI. Missions come from `missions.ts`, games from `games.ts` (one load of every
   game per request; there are a few dozen).
-- **Times are MSK** (fixed UTC+3). The usual ops are Tue 20:00 and Sun 19:00 (`lib/schedule.ts`), with muster 15 minutes before.
+- **Times are MSK** (fixed UTC+3). The usual ops are Tue 20:00 and Sat 19:00 (`lib/schedule.ts`), with muster 15 minutes before.
   Format with `lib/format.ts` (it pins `Europe/Moscow`).
 - **Russian only (since 2026-10-08).** All UI work is done in RU: copy, designs and new strings. New keys go
   into the RU dictionary in `lib/i18n.ts` only, and EN stays frozen as it is. Keep using `t()` keys rather than
@@ -283,7 +283,7 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   bot's #анонсы post: mission, time, and who took which slot (`"<groupId>/<role>"` → Discord display name as the bot shows
   it, or `{name, discordId}` for someone missing from the member list, who is then added as a player). The seed only adds
   scheduled games, never updates them. A game drops off the feed 4 hours after its start until it's finished
-  («Игра окончена»; its page and mission page still reach it). Usual Tue/Sun slots with nothing scheduled are open slots in the feed.
+  («Игра окончена»; its page and mission page still reach it). Usual Tue/Sat slots with nothing scheduled are open slots in the feed.
 - **Game server pill** (`components/ServerStatus.tsx`, user request 2026-10-12): members of the Discord (signed in,
   `viewer.inGuild`) see a pill in the bottom-right corner of every page (AppHeader renders it): a green dot and «Сервер
   запущен», or a grey one and «Сервер отдыхает». It opens into a card with the server's name, IP and port,

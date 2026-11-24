@@ -97,7 +97,7 @@ export interface EventBase {
   id: string;
   startsAt: ISODate;
   mission: Mission;
-  /** Outside the usual Tue 20:00 / Sun 19:00 slots. */
+  /** Outside the regular weekly slots. */
   extra: boolean;
   hostName?: string;
   platoonLeader?: string | null;

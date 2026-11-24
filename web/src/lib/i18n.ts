@@ -30,7 +30,7 @@ const EN: Dict = {
   "events.intro.b": " and ",
   "events.intro.c": ", Moscow time. Muster opens 15 minutes before.",
   "events.intro.tue": "Tuesday at 20:00",
-  "events.intro.sun": "Sunday at 19:00",
+  "events.intro.sat": "Saturday at 19:00",
   "events.msk": "MSK",
 
   "past.part": "Part {n}",
@@ -131,10 +131,10 @@ const RU: Dict = {
 
   "events.title": "Игры",
   "events.intro.a": "Игры проходят каждый ",
-  "events.intro.b": " и ",
+  "events.intro.b": " и каждую ",
   "events.intro.c": " по московскому времени.",
-  "events.intro.tue": "Вторник в 20:00",
-  "events.intro.sun": "Воскресенье в 19:00",
+  "events.intro.tue": "вторник в 20:00",
+  "events.intro.sat": "субботу в 19:00",
 
   "feed.week.this": "эта неделя",
   "feed.week.next": "следующая неделя",

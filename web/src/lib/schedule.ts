@@ -9,7 +9,7 @@ export const TIME_ZONE = "Europe/Moscow";
 /** Usual ops: weekday (0 = Sunday) + MSK start time. Muster opens 15 minutes before. */
 export const USUAL_SLOTS = [
   { weekday: 2, hour: 20, minute: 0 },
-  { weekday: 0, hour: 19, minute: 0 },
+  { weekday: 6, hour: 19, minute: 0 },
 ] as const;
 
 export const MUSTER_LEAD_MIN = 15;
@@ -32,8 +32,7 @@ export function weekStart(d: Date): Date {
   return mskDate(y, mo, day - back);
 }
 
-/** Usual slots from `from` onwards, covering `weeks` calendar weeks (incl. the current one). */
-/** One of the USUAL_SLOTS (Tue 20:00 / Sun 19:00 MSK); anything else is an extra op. */
+/** Whether the start time matches a regular weekly slot. */
 export function isUsualSlot(d: Date): boolean {
   const m = new Date(d.getTime() + MSK_OFFSET_MS);
   return USUAL_SLOTS.some((s) => m.getUTCDay() === s.weekday && m.getUTCHours() === s.hour && m.getUTCMinutes() === s.minute);
@@ -47,6 +46,7 @@ export function fromMskFields(day: string, hhmm: string): Date | null {
   return mskDate(Number(d[1]), Number(d[2]) - 1, Number(d[3]), Number(t[1]), Number(t[2]));
 }
 
+/** Usual slots from `from` onwards, covering `weeks` calendar weeks (incl. the current one). */
 export function usualSlotsFrom(from: Date, weeks: number): Date[] {
   const start = weekStart(from);
   const { y, mo, day } = mskParts(start);
