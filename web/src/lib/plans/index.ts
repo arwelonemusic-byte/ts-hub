@@ -57,9 +57,9 @@ export function canAttachPlan(viewer: Viewer | null, ev: UpcomingEvent): boolean
   return !ev.plan || (!!ev.plan.authorId && ev.plan.authorId === viewer.discordId);
 }
 
-/** Detaching someone's plan is for admins. */
+/** Detaching someone's plan is for event admins (and full admins). */
 export function canDetachPlan(viewer: Viewer | null, ev: UpcomingEvent): boolean {
-  return !!viewer?.isAdmin && !!ev.plan;
+  return !!viewer?.isEventAdmin && !!ev.plan;
 }
 
 /** «Нарисовать план» on a mission always starts a new plan; an existing one is continued from its row. */

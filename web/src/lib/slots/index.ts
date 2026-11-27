@@ -16,7 +16,7 @@ export function slottingOpen(ev: UpcomingEvent, now = new Date()): boolean {
 
 /** Why the viewer can't take this free slot, or null when they can. */
 export function takeBlock(viewer: Viewer, ev: UpcomingEvent, slot: Slot, now = new Date()): "closed" | "role" | null {
-  if (viewer.isAdmin) return null;
+  if (viewer.isEventAdmin) return null;
   if (!slottingOpen(ev, now)) return "closed";
   if (slot.requiredRole && !hasRole(viewer, slot.requiredRole)) return "role";
   return null;

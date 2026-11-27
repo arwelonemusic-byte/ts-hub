@@ -374,8 +374,13 @@ Change a token in Figma first, then mirror it here. Don't hardcode hex values or
   carry clan tags, so `?name=vonscheer` is easier than `[лампас]VonScheer`; a name that isn't a member's can browse but
   not write) so write flows can be tried;
   the header shows "dev" next to the name. Roles: `viewer.roles` (names via `DISCORD_ROLE_MAP`), `hasRole`,
-  `isMissionMaker` (@mission officer), `isAdmin` (`HUB_ADMIN_IDS` / `HUB_ADMIN_ROLES`).
-  Admins are the Discord user IDs in `HUB_ADMIN_IDS` (production: Galaxy) and/or the role names in `HUB_ADMIN_ROLES`.
+  `isMissionMaker` (@mission officer), `isAdmin` (`HUB_ADMIN_IDS` / `HUB_ADMIN_ROLES`), `isEventAdmin`
+  (`HUB_EVENT_ADMIN_IDS` / `HUB_EVENT_ADMIN_ROLES`, plus every full admin).
+  Full admins are the Discord user IDs in `HUB_ADMIN_IDS` (production: Galaxy) and/or the role names in
+  `HUB_ADMIN_ROLES`. Event admins can manage upcoming events (schedule, reschedule, cancel, skip usual slots, edit
+  event slots, assign/clear slots, bypass start-time slot/RSVP lock, announce in Discord, detach event plans, finish
+  scheduled games) and add external plans to mission pages, without full-admin catalog, roster, recompute, or
+  moderation powers (dev: `/api/dev/viewer?name=<user>&roles=event+admin`).
 - **«Мини-игры» → Fix & Flank** (user decisions 2026-10-15, sketches in the conversation). The
   header's «Мини-игры» is a menu (`NavDropdown`; a labelled group in `NavMenu`) with one game. For now only admins and the Discord's @srv role
   (`GAMES_PREVIEW_ROLE_ID` in `AppHeader`, checked against `viewer.roleIds`, the member's raw role ids, since @srv isn't

@@ -21,8 +21,8 @@ const AUTH_NOTICE: Record<string, string> = {
 export default async function EventsPage({ searchParams }: PageProps<"/events">) {
   const { auth, date } = await searchParams;
   const [{ locale, t }, meta, viewer] = await Promise.all([getT(), getFeedMeta(new Date()), getViewer()]);
-  // Admins schedule games from the feed: the missions for the dialog's picker.
-  const missions = viewer?.isAdmin
+  // Event admins (and full admins) schedule games from the feed: the missions for the dialog's picker.
+  const missions = viewer?.isEventAdmin
     ? (await getHubData().listMissions())
         .filter((m) => !m.archived)
         .map((m) => ({ id: m.id, name: m.name, mapLabel: m.mapLabel, coverUrl: m.coverUrl, training: !!m.training }))

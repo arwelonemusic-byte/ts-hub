@@ -64,7 +64,7 @@ export async function takeSlot(_prev: SlotState, form: FormData): Promise<SlotSt
 export async function leaveSlot(_prev: SlotState, form: FormData): Promise<SlotState> {
   const c = await context(form);
   if (!c) return { error: "forbidden" };
-  if (!c.viewer.isAdmin && !slottingOpen(c.ev)) return { error: "closed" };
+  if (!c.viewer.isEventAdmin && !slottingOpen(c.ev)) return { error: "closed" };
   const player = await playerIdOf(c.viewer);
   if (!player) return { error: "forbidden" };
   await (await getDb()).query(
@@ -79,7 +79,7 @@ export async function leaveSlot(_prev: SlotState, form: FormData): Promise<SlotS
 /** Admin «Посадить»: a member by display name into a free slot (out of their other slot), no role check. */
 export async function assignSlot(_prev: SlotState, form: FormData): Promise<SlotState> {
   const c = await context(form);
-  if (!c?.viewer.isAdmin) return { error: "forbidden" };
+  if (!c?.viewer.isEventAdmin) return { error: "forbidden" };
   const name = String(form.get("name") ?? "").trim();
   const db = await getDb();
   const rows = (await db.query("SELECT id FROM players WHERE display_name = $1", [name])) as { id: string }[];
@@ -94,7 +94,7 @@ export async function assignSlot(_prev: SlotState, form: FormData): Promise<Slot
 /** Admin «Освободить»: empty a slot. */
 export async function clearSlot(_prev: SlotState, form: FormData): Promise<SlotState> {
   const c = await context(form);
-  if (!c?.viewer.isAdmin) return { error: "forbidden" };
+  if (!c?.viewer.isEventAdmin) return { error: "forbidden" };
   await (await getDb()).query(
     "UPDATE event_slots SET player_id = NULL, player_name = NULL, taken_at = NULL WHERE event_id = $1 AND position = $2",
     [c.ev.id, c.position],
@@ -110,7 +110,7 @@ export type RsvpState = { error: "closed" | "forbidden" } | null;
 export async function comeToGame(_prev: RsvpState, form: FormData): Promise<RsvpState> {
   const c = await context(form);
   if (!c || c.ev.slots.length > 0) return { error: "forbidden" };
-  if (!c.viewer.isAdmin && !slottingOpen(c.ev)) return { error: "closed" };
+  if (!c.viewer.isEventAdmin && !slottingOpen(c.ev)) return { error: "closed" };
   const player = await playerIdOf(c.viewer);
   if (!player) return { error: "forbidden" };
   await (await getDb()).query("INSERT INTO event_rsvps (event_id, player_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", [c.ev.id, player]);
@@ -123,7 +123,7 @@ export async function comeToGame(_prev: RsvpState, form: FormData): Promise<Rsvp
 export async function skipGame(_prev: RsvpState, form: FormData): Promise<RsvpState> {
   const c = await context(form);
   if (!c) return { error: "forbidden" };
-  if (!c.viewer.isAdmin && !slottingOpen(c.ev)) return { error: "closed" };
+  if (!c.viewer.isEventAdmin && !slottingOpen(c.ev)) return { error: "closed" };
   const player = await playerIdOf(c.viewer);
   if (!player) return { error: "forbidden" };
   await (await getDb()).query("DELETE FROM event_rsvps WHERE event_id = $1 AND player_id = $2", [c.ev.id, player]);

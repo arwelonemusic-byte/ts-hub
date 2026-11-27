@@ -12,7 +12,10 @@ export interface Viewer {
   roles: string[];
   /** Every Discord role id as the bot last saw it, mapped or not; empty when it couldn't ask (or a dev stand-in). */
   roleIds: string[];
+  /** Full hub admin (`HUB_ADMIN_IDS` / `HUB_ADMIN_ROLES`). */
   isAdmin: boolean;
+  /** Event admin (`HUB_EVENT_ADMIN_IDS` / `HUB_EVENT_ADMIN_ROLES`, plus full admins): ops, slots, announcements, finishing, and adding mission plans. */
+  isEventAdmin: boolean;
   /** @mission officer: adds missions to the catalogue and edits their own. */
   isMissionMaker: boolean;
   /** Still on the Discord server: false once the bot finds they've left (the login cookie lives on for a week). */
@@ -31,9 +34,14 @@ export function hasRole(viewer: Viewer, role: string): boolean {
 const MISSION_MAKER_ROLE = "mission officer";
 
 const list = (v: string | undefined) => (v ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+const matchesAnyRole = (roles: string[], targets: string[]) =>
+  targets.length > 0 && roles.some((r) => targets.some((t) => roleKey(t) === roleKey(r)));
 /** Hub admins: Discord role names (via DISCORD_ROLE_MAP) and/or Discord user IDs. */
 const ADMIN_ROLES = list(process.env.HUB_ADMIN_ROLES);
 const ADMIN_IDS = list(process.env.HUB_ADMIN_IDS);
+/** Event admins (limited tier): Discord role names (via DISCORD_ROLE_MAP) and/or Discord user IDs. */
+const EVENT_ADMIN_ROLES = list(process.env.HUB_EVENT_ADMIN_ROLES);
+const EVENT_ADMIN_IDS = list(process.env.HUB_EVENT_ADMIN_IDS);
 
 /**
  * On a dev machine without Discord OAuth configured, pages act as if a player
@@ -51,6 +59,7 @@ export const DEV_ROLES_COOKIE = "ts_hub_dev_roles";
 const DEV_DEFAULT_ROLES = ["Rifleman"];
 const DEV_DEFAULT = "Galaxy";
 const DEV_ADMINS = new Set(["Galaxy"]);
+const DEV_EVENT_ADMIN_ROLE = "event admin";
 
 async function devViewer(): Promise<Viewer | null> {
   const jar = await cookies();
@@ -71,13 +80,20 @@ async function devViewer(): Promise<Viewer | null> {
     [name],
   );
   if (m) name = String(m.display_name);
+  const isAdmin = DEV_ADMINS.has(name);
+  const isEventAdmin =
+    isAdmin ||
+    (!!m?.discord_id && EVENT_ADMIN_IDS.includes(String(m.discord_id))) ||
+    matchesAnyRole(roles, EVENT_ADMIN_ROLES) ||
+    roles.some((r) => roleKey(r) === roleKey(DEV_EVENT_ADMIN_ROLE));
   return {
     discordId: m?.discord_id ?? `dev:${name}`,
     name,
     avatar: m?.avatar_url ?? null,
     roles,
     roleIds: [],
-    isAdmin: DEV_ADMINS.has(name),
+    isAdmin,
+    isEventAdmin,
     isMissionMaker: roles.some((r) => roleKey(r) === roleKey(MISSION_MAKER_ROLE)),
     inGuild: true,
     dev: true,
@@ -112,13 +128,16 @@ export async function getViewer(): Promise<Viewer | null> {
   const session = await getSession();
   if (session) {
     const { roles, roleIds, inGuild } = await currentRoles(session.userId, session.roles);
+    const isAdmin = ADMIN_IDS.includes(session.userId) || matchesAnyRole(roles, ADMIN_ROLES);
+    const isEventAdmin = isAdmin || EVENT_ADMIN_IDS.includes(session.userId) || matchesAnyRole(roles, EVENT_ADMIN_ROLES);
     return {
       discordId: session.userId,
       name: session.displayName,
       avatar: avatarUrl(session.userId, session.avatar),
       roles,
       roleIds,
-      isAdmin: ADMIN_IDS.includes(session.userId) || roles.some((r) => ADMIN_ROLES.includes(r)),
+      isAdmin,
+      isEventAdmin,
       isMissionMaker: roles.some((r) => roleKey(r) === roleKey(MISSION_MAKER_ROLE)),
       inGuild,
     };

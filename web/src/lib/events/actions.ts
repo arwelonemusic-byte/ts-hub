@@ -22,7 +22,7 @@ export type ScheduleState = { error: "forbidden" | "invalid" | "past" | "exists"
 /** «Запланировать»: a new game of `mission` at `date` `time` (MSK), with the mission's slot template. */
 export async function scheduleGame(_prev: ScheduleState, form: FormData): Promise<ScheduleState> {
   const viewer = await getViewer();
-  if (!viewer?.isAdmin) return { error: "forbidden" };
+  if (!viewer?.isEventAdmin) return { error: "forbidden" };
   const mission = await getHubData().getMission(String(form.get("mission") ?? ""));
   const startsAt = fromMskFields(String(form.get("date") ?? ""), String(form.get("time") ?? ""));
   if (!mission || mission.archived || !startsAt) return { error: "invalid" };
@@ -56,7 +56,7 @@ export async function scheduleGame(_prev: ScheduleState, form: FormData): Promis
 /** «Отменить» on an open usual slot: no game then, so the feed stops offering it. True when done. */
 export async function skipOpenSlot(startsAt: string): Promise<boolean> {
   const viewer = await getViewer();
-  if (!viewer?.isAdmin) return false;
+  if (!viewer?.isEventAdmin) return false;
   const at = new Date(startsAt);
   if (Number.isNaN(at.getTime()) || !isUsualSlot(at) || at.getTime() <= Date.now()) return false;
   const player = await playerIdOf(viewer);
@@ -71,7 +71,7 @@ export async function skipOpenSlot(startsAt: string): Promise<boolean> {
 /** «Изменить время»: same game, same mission and slots, a new start. */
 export async function rescheduleGame(_prev: ScheduleState, form: FormData): Promise<ScheduleState> {
   const viewer = await getViewer();
-  if (!viewer?.isAdmin) return { error: "forbidden" };
+  if (!viewer?.isEventAdmin) return { error: "forbidden" };
   const ev = await getHubData().getEvent(String(form.get("event") ?? ""), new Date());
   const startsAt = fromMskFields(String(form.get("date") ?? ""), String(form.get("time") ?? ""));
   if (!ev || ev.status !== "upcoming" || !startsAt) return { error: "invalid" };
@@ -90,7 +90,7 @@ export async function rescheduleGame(_prev: ScheduleState, form: FormData): Prom
 /** «Отменить игру»: the game leaves the feed; its row (and who had slotted) stays. */
 export async function cancelGame(form: FormData): Promise<void> {
   const viewer = await getViewer();
-  if (!viewer?.isAdmin) return;
+  if (!viewer?.isEventAdmin) return;
   const ev = await getHubData().getEvent(String(form.get("event") ?? ""), new Date());
   if (!ev || ev.status !== "upcoming") return;
   await (await getDb()).query("UPDATE events SET status = 'cancelled', updated_at = NOW() WHERE id = $1 AND status = 'scheduled'", [
@@ -113,7 +113,7 @@ export type GameSlotsState = { error: "forbidden" | "invalid" | "stale" | "group
  */
 export async function editGameSlots(eventId: string, input: EditableSquad[]): Promise<GameSlotsState> {
   const viewer = await getViewer();
-  if (!viewer?.isAdmin) return { error: "forbidden" };
+  if (!viewer?.isEventAdmin) return { error: "forbidden" };
   const db = await getDb();
   const [ev] = await db.query("SELECT status FROM events WHERE id = $1", [eventId]);
   if (!ev || ev.status !== "scheduled" || !Array.isArray(input)) return { error: "invalid" };

@@ -74,7 +74,7 @@ export async function addMissionPlan(_prev: AddPlanState, form: FormData): Promi
   const code = planCode(form.get("code"));
   const author = String(form.get("author") ?? "");
   const [viewer, mission] = await Promise.all([getViewer(), getHubData().getMission(String(form.get("mission") ?? ""))]);
-  if (!viewer?.isAdmin || !mission || mission.training) return { error: "forbidden", code, author };
+  if (!viewer?.isEventAdmin || !mission || mission.training) return { error: "forbidden", code, author };
   if (!CODE.test(code)) return { error: "invalid", code, author };
 
   const db = await getDb();

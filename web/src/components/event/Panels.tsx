@@ -367,7 +367,7 @@ export function SlotsPanel({ ev, viewer, players, t }: { ev: UpcomingEvent; view
       return (
         <>
           <span className={`min-w-0 truncate type-label-s ${mine ? "text-fg-accent" : "text-fg"}`}>{s.playerName}</span>
-          {mine && (viewer!.isAdmin || slottingOpen(ev)) && (
+          {mine && (viewer!.isEventAdmin || slottingOpen(ev)) && (
             <SlotButton kind="leave" eventId={ev.id} position={s.id} label={t("slots.leave")} errors={errors} />
           )}
         </>
@@ -431,7 +431,7 @@ export function SlotsPanel({ ev, viewer, players, t }: { ev: UpcomingEvent; view
                 <span className={`min-w-0 flex-1 truncate type-body-s ${s.playerName ? "text-fg-secondary" : "text-fg"}`}>{s.role}</span>
                 <div className="flex max-w-[62%] min-w-0 items-center justify-end gap-1.5">
                   {action(s)}
-                  {viewer?.isAdmin && (
+                  {viewer?.isEventAdmin && (
                     <SlotAdminMenu eventId={ev.id} position={s.id} role={s.role} taken={!!s.playerName} labels={menu} errors={errors} />
                   )}
                 </div>

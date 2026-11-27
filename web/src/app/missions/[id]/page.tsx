@@ -30,6 +30,7 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
   if (!mission) notFound();
   const canEdit = canEditMission(viewer, mission);
   const isAdmin = !!viewer?.isAdmin;
+  const isEventAdmin = !!viewer?.isEventAdmin;
   const now = new Date();
   const [games, history, comments, options, draft, hasGames, members] = await Promise.all([
     data.listMissionEvents(mission.id, now),
@@ -39,7 +40,7 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
     canEdit ? loadMissionDraft(mission.id) : null,
     isAdmin ? missionHasGames(mission.id) : true,
     // «Добавить план» picks the author from these.
-    isAdmin && !mission.training ? memberOptions() : null,
+    isEventAdmin && !mission.training ? memberOptions() : null,
   ]);
   const menu =
     viewer && (canEdit || isAdmin) ? (
@@ -58,7 +59,7 @@ export default async function MissionPage({ params }: PageProps<"/missions/[id]"
     <>
       <AppHeader active="missions" />
       <main className="flex flex-col items-center gap-6 px-4 pb-16 pt-6 md:px-8">
-        <Hero mission={mission} games={games} canSchedule={isAdmin && !mission.archived} menu={menu} locale={locale} t={t} />
+        <Hero mission={mission} games={games} canSchedule={isEventAdmin && !mission.archived} menu={menu} locale={locale} t={t} />
         <div className="flex w-full max-w-[1216px] flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex min-w-0 flex-1 flex-col gap-4">
             {mission.briefing && <BriefingPanel b={mission.briefing} t={t} />}

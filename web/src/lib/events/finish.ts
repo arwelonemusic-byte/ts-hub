@@ -27,12 +27,12 @@ export interface ReplayCandidate extends ReplayMatch {
   planCode: string | null;
 }
 
-/** A game the admin may finish (scheduled, started) or recompute (played). */
+/** A game the viewer may finish (scheduled, started: event admins) or recompute (played: full admins only). */
 async function finishable(
   eventId: string,
 ): Promise<{ id: string; missionId: string; status: string; startsAt: string; planCode: string | null; training: boolean } | FinishError> {
   const viewer = await getViewer();
-  if (!viewer?.isAdmin) return "forbidden";
+  if (!viewer?.isEventAdmin) return "forbidden";
   const [ev] = (await (await getDb()).query(
     "SELECT e.id, e.mission_id, e.status, e.starts_at, e.plan_code, m.training FROM events e JOIN missions m ON m.id = e.mission_id WHERE e.id = $1",
     [eventId],
@@ -45,6 +45,8 @@ async function finishable(
     training: boolean;
   }[];
   if (!ev || ev.status === "cancelled") return "invalid";
+  // Recomputing an already-played game replaces historical stats, attendance and replays: full admins only.
+  if (ev.status === "played" && !viewer.isAdmin) return "forbidden";
   const startsAt = new Date(ev.starts_at).toISOString();
   if (ev.status === "scheduled" && Date.parse(startsAt) > Date.now()) return "notYet";
   return { id: ev.id, missionId: ev.mission_id, status: ev.status, startsAt, planCode: ev.plan_code, training: ev.training };

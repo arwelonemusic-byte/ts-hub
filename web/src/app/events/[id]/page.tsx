@@ -48,12 +48,12 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
   const [history, players, version, roles, announced, comments] = await Promise.all([
     data.getMissionHistory(ev.mission.id),
     // Names for an admin's «Посадить» picker.
-    ev.status === "upcoming" && viewer?.isAdmin ? playerNames() : null,
+    ev.status === "upcoming" && viewer?.isEventAdmin ? playerNames() : null,
     ev.status === "upcoming" ? data.getEventVersion(ev.id) : null,
     // Required roles for slots an admin adds («Изменить слоты»).
-    ev.status === "upcoming" && viewer?.isAdmin ? slotRoles() : null,
+    ev.status === "upcoming" && viewer?.isEventAdmin ? slotRoles() : null,
     // Its Discord announcement («Анонс в Дискорд»), for an admin's link to it.
-    ev.status === "upcoming" && viewer?.isAdmin ? announcement(ev.id) : null,
+    ev.status === "upcoming" && viewer?.isEventAdmin ? announcement(ev.id) : null,
     // «Комментарии»: its Discord thread, for members only.
     viewer?.inGuild ? getComments(ev.id) : null,
   ]);
@@ -151,14 +151,14 @@ function Upcoming({
           )}
         </div>
         <div className="flex flex-wrap gap-2">
-          {viewer?.isAdmin && started ? (
+          {viewer?.isEventAdmin && started ? (
             <FinishGameButton eventId={ev.id} locale={locale} label={t("finish.button")} className={`${buttonClass("primary", "m")} flex-1`} />
           ) : rsvp ? (
             !viewer ? (
               <a href="/api/auth/login" className={`${buttonClass("primary", "m")} flex-1`}>
                 {t("rsvp.come")}
               </a>
-            ) : started && !viewer.isAdmin ? null : (
+            ) : started && !viewer.isEventAdmin ? null : (
               <RsvpButton
                 // A new button per kind: useActionState keeps the action it started with, so swapping kind in place
                 // would keep sending «Не приду».
@@ -170,7 +170,7 @@ function Upcoming({
                 className={buttonClass(coming ? "danger" : "primary", "m")}
               />
             )
-          ) : mySlot && (viewer!.isAdmin || slottingOpen(ev)) ? (
+          ) : mySlot && (viewer!.isEventAdmin || slottingOpen(ev)) ? (
             <LeaveSlotButton eventId={ev.id} label={t("event.leaveSlot")} className={buttonClass("danger", "m")} />
           ) : (
             <JumpLink target="slots" className={`${buttonClass("primary", "m")} flex-1`}>
@@ -184,7 +184,7 @@ function Upcoming({
               <Icon name="external-trailing" />
             </ButtonLink>
           )}
-          {viewer?.isAdmin &&
+          {viewer?.isEventAdmin &&
             (announced ? (
               <ButtonLink href={announced.url} external>
                 {t("announce.open")}
@@ -208,7 +208,7 @@ function Upcoming({
                 />
               )
             ))}
-          {viewer?.isAdmin && (
+          {viewer?.isEventAdmin && (
             <EventAdminMenu eventId={ev.id} startsAt={ev.startsAt} missionName={ev.mission.name} slots={ev.slots} roles={roles} locale={locale} />
           )}
         </div>
